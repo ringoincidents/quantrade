@@ -1,0 +1,19 @@
+{
+  "cash": 33333.33333333332,
+  "positions": [
+    {
+      "market": "KRW-USDE",
+      "entry_price": 1434.0,
+      "entry_date": "2026-07-29",
+      "expected_days": 7,
+      "amount_krw": 33333.333333333336
+    },
+    {
+      "market": "KRW-USDS",
+      "entry_price": 1449.0,
+      "entry_date": "2026-07-29",
+      "expected_days": 10,
+      "amount_krw": 33333.333333333336
+    }
+  ]
+}
