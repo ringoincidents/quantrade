@@ -290,7 +290,7 @@ if __name__ == "__main__":
     response = requests.post(
         "https://api.anthropic.com/v1/messages",
         headers={
-            "x-api-key": "본인의_API_키",
+            "x-api-key": "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",
             "anthropic-version": "2023-06-01",
             "content-type": "application/json"
         },
