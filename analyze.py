@@ -155,10 +155,21 @@ def get_current_price(asset_class, market):
 
 # ===== 메인 로직 =====
 def run():
-    portfolio = load_json(PORTFOLIO_FILE, {"cash": TOTAL_BUDGET, "positions": []})
-    history = load_json(HISTORY_FILE, {"trades": []})
-    today = datetime.now().strftime("%Y-%m-%d")
-    report = [f"📅 {today} 통합 포트폴리오 리포트", ""]
+        for pos in portfolio["positions"]:
+        entry_date = datetime.strptime(pos["entry_date"], "%Y-%m-%d")
+        days_held = (datetime.now() - entry_date).days
+        asset_class = pos.get("asset_class", "crypto")  # 없으면 코인으로 간주
+        strategy_type = pos.get("strategy_type", "스윙")  # 없으면 스윙으로 간주
+        price = get_current_price(asset_class, pos["market"])
+        ret = (price - pos["entry_price"]) / pos["entry_price"] * 100
+
+        if days_held >= pos["expected_days"]:
+            portfolio["cash"] += pos["amount_krw"] * (1 + ret/100)
+            history["trades"].append({**pos, "exit_date": today, "return_pct": ret, "strategy_type": strategy_type})
+            report.append(f"✅ 청산 [{strategy_type}] {pos['market']}: {ret:+.2f}% ({days_held}일)")
+        else:
+            report.append(f"📌 보유 [{strategy_type}] {pos['market']} ({days_held}/{pos['expected_days']}일) {ret:+.2f}%")
+            still_holding.append(pos)
 
     # 1. 만기 정리
     still_holding = []
