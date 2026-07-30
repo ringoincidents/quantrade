@@ -11,7 +11,6 @@ HISTORY_FILE = "trade_history.json"
 TOTAL_BUDGET = 100000
 MIN_CASH_RESERVE_RATIO = 0.2
 
-# 전략별 자금 배분 비중 (총합 1.0)
 STRATEGY_ALLOCATION = {"장기": 0.4, "스윙": 0.4, "단타": 0.2}
 MAX_POSITIONS_PER_STRATEGY = {"장기": 1, "스윙": 1, "단타": 1}
 
@@ -44,14 +43,18 @@ def calc_daily_returns(prices):
     return [(prices[i]-prices[i-1])/prices[i-1] for i in range(1, len(prices))]
 
 def estimate_holding_period(prices):
+    if len(prices) < 25:
+        return 7
     ma20_series = [calc_ma(prices[:i+1], 20) for i in range(19, len(prices))]
     lengths, cur = [], 1
     for i in range(1, len(ma20_series)):
         up_now = ma20_series[i] > ma20_series[i-1]
         up_prev = ma20_series[i-1] > ma20_series[i-2] if i > 1 else up_now
-        cur = cur+1 if up_now == up_prev else 1
-        if up_now != up_prev:
+        if up_now == up_prev:
+            cur += 1
+        else:
             lengths.append(cur)
+            cur = 1
     lengths.append(cur)
     avg = sum(lengths)/len(lengths) if lengths else 7
     return max(3, round(avg))
@@ -100,8 +103,7 @@ def scan_crypto(exclude, top_n=3):
             if score >= 3:
                 results.append({
                     "market": market, "asset_class": "crypto", "score": score,
-                    "rsi": rsi, "price": price, "returns": calc_daily_returns(closes),
-                    "raw_closes": closes
+                    "rsi": rsi, "price": price, "raw_closes": closes
                 })
         except Exception:
             continue
@@ -135,8 +137,7 @@ def scan_stocks(exclude, top_n=2):
             if score >= 2:
                 results.append({
                     "market": ticker, "asset_class": "stock", "score": score,
-                    "rsi": rsi, "price": price, "returns": calc_daily_returns(closes),
-                    "raw_closes": closes
+                    "rsi": rsi, "price": price, "raw_closes": closes
                 })
         except Exception:
             continue
@@ -145,7 +146,12 @@ def scan_stocks(exclude, top_n=2):
 
 # ===== 파일 입출력 =====
 def load_json(path, default):
-    return json.load(open(path)) if os.path.exists(path) else default
+    if os.path.exists(path):
+        try:
+            return json.load(open(path))
+        except Exception:
+            return default
+    return default
 
 def save_json(path, data):
     json.dump(data, open(path, "w"), indent=2, ensure_ascii=False)
@@ -155,40 +161,44 @@ def get_current_price(asset_class, market):
 
 # ===== 메인 로직 =====
 def run():
-        for pos in portfolio["positions"]:
-        entry_date = datetime.strptime(pos["entry_date"], "%Y-%m-%d")
-        days_held = (datetime.now() - entry_date).days
-        asset_class = pos.get("asset_class", "crypto")  # 없으면 코인으로 간주
-        strategy_type = pos.get("strategy_type", "스윙")  # 없으면 스윙으로 간주
-        price = get_current_price(asset_class, pos["market"])
-        ret = (price - pos["entry_price"]) / pos["entry_price"] * 100
+    portfolio = load_json(PORTFOLIO_FILE, {"cash": TOTAL_BUDGET, "positions": []})
+    history = load_json(HISTORY_FILE, {"trades": []})
+    today = datetime.now().strftime("%Y-%m-%d")
+    report = [f"📅 {today} 통합 포트폴리오 리포트", ""]
 
-        if days_held >= pos["expected_days"]:
-            portfolio["cash"] += pos["amount_krw"] * (1 + ret/100)
-            history["trades"].append({**pos, "exit_date": today, "return_pct": ret, "strategy_type": strategy_type})
-            report.append(f"✅ 청산 [{strategy_type}] {pos['market']}: {ret:+.2f}% ({days_held}일)")
-        else:
-            report.append(f"📌 보유 [{strategy_type}] {pos['market']} ({days_held}/{pos['expected_days']}일) {ret:+.2f}%")
-            still_holding.append(pos)
-
-    # 1. 만기 정리
     still_holding = []
     for pos in portfolio["positions"]:
-        entry_date = datetime.strptime(pos["entry_date"], "%Y-%m-%d")
-        days_held = (datetime.now() - entry_date).days
-        price = get_current_price(pos["asset_class"], pos["market"])
-        ret = (price - pos["entry_price"]) / pos["entry_price"] * 100
+        try:
+            # 안전장치: 예전 형식 데이터에도 기본값으로 대응
+            asset_class = pos.get("asset_class", "crypto")
+            strategy_type = pos.get("strategy_type", "스윙")
+            expected_days = pos.get("expected_days", 7)
+            entry_price = pos.get("entry_price")
+            amount_krw = pos.get("amount_krw", 0)
+            market = pos["market"]
 
-        if days_held >= pos["expected_days"]:
-            portfolio["cash"] += pos["amount_krw"] * (1 + ret/100)
-            history["trades"].append({**pos, "exit_date": today, "return_pct": ret})
-            report.append(f"✅ 청산 [{pos['strategy_type']}] {pos['market']}: {ret:+.2f}% ({days_held}일)")
-        else:
-            report.append(f"📌 보유 [{pos['strategy_type']}] {pos['market']} ({days_held}/{pos['expected_days']}일) {ret:+.2f}%")
+            entry_date = datetime.strptime(pos["entry_date"], "%Y-%m-%d")
+            days_held = (datetime.now() - entry_date).days
+            price = get_current_price(asset_class, market)
+            ret = (price - entry_price) / entry_price * 100
+
+            if days_held >= expected_days:
+                portfolio["cash"] += amount_krw * (1 + ret/100)
+                history["trades"].append({
+                    "market": market, "asset_class": asset_class,
+                    "strategy_type": strategy_type, "entry_date": pos["entry_date"],
+                    "exit_date": today, "return_pct": ret
+                })
+                report.append(f"✅ 청산 [{strategy_type}] {market}: {ret:+.2f}% ({days_held}일)")
+            else:
+                report.append(f"📌 보유 [{strategy_type}] {market} ({days_held}/{expected_days}일) {ret:+.2f}%")
+                still_holding.append(pos)
+        except Exception as e:
+            report.append(f"⚠️ {pos.get('market','?')} 처리 중 오류로 건너뜀: {e}")
             still_holding.append(pos)
+
     portfolio["positions"] = still_holding
 
-    # 전략별 성과 요약
     for strat in STRATEGY_ALLOCATION:
         trades = [t for t in history["trades"] if t.get("strategy_type") == strat]
         if trades:
@@ -196,10 +206,9 @@ def run():
             win = sum(1 for t in trades if t["return_pct"] > 0) / len(trades) * 100
             report.append(f"📈 [{strat}] 누적 n={len(trades)} 평균 {avg:+.2f}% 승률 {win:.0f}%")
 
-    # 2. 전략별 신규 진입
     held_by_strategy = {s: [] for s in STRATEGY_ALLOCATION}
     for p in portfolio["positions"]:
-        held_by_strategy[p["strategy_type"]].append(p["market"])
+        held_by_strategy[p.get("strategy_type", "스윙")].append(p["market"])
 
     min_cash = TOTAL_BUDGET * MIN_CASH_RESERVE_RATIO
     held_all = [p["market"] for p in portfolio["positions"]]
@@ -209,10 +218,8 @@ def run():
         stock_cands = scan_stocks(exclude=held_all, top_n=2)
         all_cands = crypto_cands + stock_cands
 
-        # 각 후보에 예상 보유기간→전략 태그 부여
         for c in all_cands:
-            closes = c["raw_closes"]
-            c["expected_days"] = estimate_holding_period(closes)
+            c["expected_days"] = estimate_holding_period(c["raw_closes"])
             c["strategy_type"] = classify_strategy(c["expected_days"])
 
         for strat, alloc_ratio in STRATEGY_ALLOCATION.items():
@@ -223,7 +230,9 @@ def run():
             strat_cands = [c for c in all_cands if c["strategy_type"] == strat][:slots_left]
 
             for c in strat_cands:
-                amount = round(strat_budget / len(strat_cands)) if strat_cands else 0
+                if not strat_cands:
+                    continue
+                amount = round(strat_budget / len(strat_cands))
                 if amount <= 0 or amount > portfolio["cash"] - min_cash:
                     continue
                 portfolio["positions"].append({
@@ -247,6 +256,11 @@ def send_telegram(msg):
                   data={"chat_id": TELEGRAM_CHAT_ID, "text": msg})
 
 if __name__ == "__main__":
-    result = run()
-    print(result)
-    send_telegram(result)
+    try:
+        result = run()
+        print(result)
+        send_telegram(result)
+    except Exception as e:
+        error_msg = f"❌ 실행 중 오류 발생: {e}"
+        print(error_msg)
+        send_telegram(error_msg)
