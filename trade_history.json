@@ -1,3 +1,12 @@
 {
-  "trades": []
+  "trades": [
+    {
+      "market": "KRW-USDS",
+      "asset_class": "crypto",
+      "strategy_type": "스윙",
+      "entry_date": "2026-07-29",
+      "exit_date": "2026-07-30",
+      "return_pct": -1.3802622498274673
+    }
+  ]
 }

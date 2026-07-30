@@ -1,19 +1,14 @@
 {
-  "cash": 30666.33333333332,
+  "cash": 59185.5792500575,
   "positions": [
     {
       "market": "KRW-USDE",
       "entry_price": 1434.0,
       "entry_date": "2026-07-29",
       "expected_days": 7,
-      "amount_krw": 33333.333333333336
-    },
-    {
-      "market": "KRW-USDS",
-      "entry_price": 1449.0,
-      "entry_date": "2026-07-29",
-      "expected_days": 10,
-      "amount_krw": 33333.333333333336
+      "amount_krw": 33333.333333333336,
+      "current_price": 1424.0,
+      "current_return": -0.697350069735007
     },
     {
       "market": "KRW-PUNDIX",
@@ -22,7 +17,18 @@
       "entry_price": 111.0,
       "entry_date": "2026-07-30",
       "expected_days": 6,
-      "amount_krw": 2667
+      "amount_krw": 2667,
+      "current_price": 110.0,
+      "current_return": -0.9009009009009009
+    },
+    {
+      "market": "KRW-PENGU",
+      "asset_class": "crypto",
+      "strategy_type": "스윙",
+      "entry_price": 8.27,
+      "entry_date": "2026-07-30",
+      "expected_days": 11,
+      "amount_krw": 4354
     }
   ]
 }
