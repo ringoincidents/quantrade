@@ -1,5 +1,5 @@
 {
-  "cash": 33333.33333333332,
+  "cash": 30666.33333333332,
   "positions": [
     {
       "market": "KRW-USDE",
@@ -14,6 +14,15 @@
       "entry_date": "2026-07-29",
       "expected_days": 10,
       "amount_krw": 33333.333333333336
+    },
+    {
+      "market": "KRW-PUNDIX",
+      "asset_class": "crypto",
+      "strategy_type": "단타",
+      "entry_price": 111.0,
+      "entry_date": "2026-07-30",
+      "expected_days": 6,
+      "amount_krw": 2667
     }
   ]
 }
