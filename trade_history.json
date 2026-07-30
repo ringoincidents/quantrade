@@ -7,6 +7,14 @@
       "entry_date": "2026-07-29",
       "exit_date": "2026-07-30",
       "return_pct": -1.3802622498274673
+    },
+    {
+      "market": "KRW-PUNDIX",
+      "asset_class": "crypto",
+      "strategy_type": "단타",
+      "entry_date": "2026-07-30",
+      "exit_date": "2026-07-30",
+      "return_pct": 0.0
     }
   ]
 }
