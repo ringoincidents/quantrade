@@ -264,3 +264,41 @@ if __name__ == "__main__":
         error_msg = f"❌ 실행 중 오류 발생: {e}"
         print(error_msg)
         send_telegram(error_msg)
+        
+        def get_ai_judgment(crypto_signals, stock_signals, news_summary):
+    prompt = f"""
+    다음은 오늘의 시장 데이터입니다:
+    
+    [코인 신호]
+    {crypto_signals}
+    
+    [주식 신호]
+    {stock_signals}
+    
+    [관련 뉴스 요약]
+    {news_summary}
+    
+    이 데이터를 종합해서 다음을 작성해줘:
+    1. 전체 시장 상황 요약 (3줄 이내)
+    2. 가장 유망한 후보 1-2개와 그 이유
+    3. 주의해야 할 리스크
+    4. 포트폴리오 비중 조정 제안 (장기/스윙/단타 비율)
+    
+    단, 확정적 예측이 아니라 참고용 분석이라는 점을 명시해줘.
+    """
+    
+    response = requests.post(
+        "https://api.anthropic.com/v1/messages",
+        headers={
+            "x-api-key": "본인의_API_키",
+            "anthropic-version": "2023-06-01",
+            "content-type": "application/json"
+        },
+        json={
+            "model": "claude-sonnet-4-6",
+            "max_tokens": 1000,
+            "messages": [{"role": "user", "content": prompt}]
+        }
+    )
+    return response.json()["content"][0]["text"]
+
