@@ -25,6 +25,6 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add portfolio.json trade_history.json pending_actions.json telegram_offset.json
+          git add portfolio.json trade_history.json pending_actions.json telegram_offset.json last_report.json
           git diff --quiet && git diff --staged --quiet || git commit -m "Poll update"
           git push
