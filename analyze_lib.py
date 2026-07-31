@@ -2,13 +2,24 @@ import requests
 import math
 import json
 import os
+import re
 import xml.etree.ElementTree as ET
+from datetime import datetime, timedelta
 
 EXCLUDE_MARKETS = {"KRW-USDT", "KRW-USDC", "KRW-USDE", "KRW-USDS", "KRW-DAI"}
 US_STOCKS = ["AAPL", "MSFT", "GOOGL", "NVDA", "AMZN"]
 POSITIVE_WORDS = ["surge", "rally", "gain", "bullish", "record", "growth", "beat", "strong"]
 NEGATIVE_WORDS = ["crash", "plunge", "bearish", "loss", "fall", "concern", "risk", "weak", "drop"]
 HARD_STOP_LOSS = {"단타": -5, "스윙": -10, "장기": -25}
+
+# 종합계획서 v3 §2 "거래비용/슬리피지가 백테스트 계산에서 빠져 있음" 대응.
+# 매수/매도 각각에 편도로 적용되는 가정치(%) — 왕복 시 두 번 적용됨.
+# 실측치 확보 전까지의 잠정 가정이며, 백테스트 결과 해석 시 이 가정에 의존한다는 점을 감안할 것.
+TRADING_COSTS = {
+    "crypto": {"fee_pct": 0.05, "slippage_pct": 0.1},   # 업비트 수수료 + 가정 슬리피지
+    "krx": {"fee_pct": 0.015, "slippage_pct": 0.1},     # 토스증권 온라인 수수료 + 가정 슬리피지
+    "stock": {"fee_pct": 0.25, "slippage_pct": 0.1},    # 해외주식 매매수수료 가정치 + 슬리피지
+}
 
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN", "")
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")
@@ -61,11 +72,43 @@ def classify_strategy(expected_days):
         return "스윙"
     return "장기"
 
+def entry_score(closes, volumes=None):
+    """스캔/백테스트가 공유하는 진입 판단 규칙. 라이브 스캔과 과거 시뮬레이션이
+    서로 다른 로직으로 갈라지지 않도록 여기서 한 곳에만 둔다."""
+    rsi = calc_rsi(closes)
+    upper, mid, lower = calc_bollinger(closes)
+    price = closes[-1]
+    score = 0
+    if 30 <= rsi <= 45:
+        score += 2
+    if price <= lower * 1.03:
+        score += 2
+    if volumes is not None:
+        avg_vol = sum(volumes[-5:]) / 5
+        if volumes[-1] > avg_vol * 1.3:
+            score += 1
+    return score, rsi
+
 
 def get_krw_candles(market, count=60):
-    data = requests.get("https://api.upbit.com/v1/candles/days", params={"market": market, "count": count}, timeout=10).json()
-    data.reverse()
-    return data
+    """일봉 조회. count<=200이면 단일 호출(기존 동작과 동일),
+    그보다 크면 `to` 파라미터로 과거 방향 페이지네이션한다(백테스트의 장기 히스토리 조회용)."""
+    all_candles = []
+    to_param = None
+    while len(all_candles) < count:
+        batch_size = min(200, count - len(all_candles))
+        params = {"market": market, "count": batch_size}
+        if to_param:
+            params["to"] = to_param
+        batch = requests.get("https://api.upbit.com/v1/candles/days", params=params, timeout=10).json()
+        if not batch:
+            break
+        all_candles.extend(batch)
+        to_param = batch[-1]["candle_date_time_utc"]
+        if len(batch) < batch_size:
+            break
+    all_candles.reverse()
+    return all_candles
 
 def get_all_krw_markets():
     data = requests.get("https://api.upbit.com/v1/market/all", timeout=10).json()
@@ -86,17 +129,8 @@ def scan_crypto(exclude, top_n=3):
             volumes = [c['candle_acc_trade_volume'] for c in candles]
             if len(closes) < 20:
                 continue
-            rsi = calc_rsi(closes)
-            upper, mid, lower = calc_bollinger(closes)
+            score, rsi = entry_score(closes, volumes)
             price = closes[-1]
-            avg_vol = sum(volumes[-5:]) / 5
-            score = 0
-            if 30 <= rsi <= 45:
-                score += 2
-            if price <= lower * 1.03:
-                score += 2
-            if volumes[-1] > avg_vol * 1.3:
-                score += 1
             if score >= 3:
                 results.append({"market": market, "asset_class": "crypto", "score": score, "rsi": rsi, "price": price, "raw_closes": closes})
         except Exception:
@@ -122,14 +156,8 @@ def scan_stocks(exclude, top_n=2):
             closes = get_us_closes(ticker, 30)
             if len(closes) < 20:
                 continue
-            rsi = calc_rsi(closes)
-            upper, mid, lower = calc_bollinger(closes)
+            score, rsi = entry_score(closes)
             price = closes[-1]
-            score = 0
-            if 30 <= rsi <= 45:
-                score += 2
-            if price <= lower * 1.03:
-                score += 2
             if score >= 2:
                 results.append({"market": ticker, "asset_class": "stock", "score": score, "rsi": rsi, "price": price, "raw_closes": closes})
         except Exception:
@@ -142,6 +170,29 @@ def get_krx_price(code):
     url = f"https://polling.finance.naver.com/api/realtime/domestic/stock/{code}"
     data = requests.get(url, timeout=10).json()
     return float(data["datas"][0]["closePrice"].replace(",", ""))
+
+def get_krx_candles(code, count=750):
+    """국내 주식 일봉 히스토리. 토스증권 API 연동 전까지는 네이버 금융 시세를
+    과거 데이터 소스로 사용한다(계획서 v3 §3.2). 응답이 순수 JSON이 아닌
+    JS 배열 리터럴이라 정규식으로 행만 추출한다."""
+    end = datetime.now()
+    start = end - timedelta(days=int(count * 1.6) + 30)  # 주말/휴장일 감안한 여유
+    params = {
+        "symbol": code, "requestType": 1,
+        "startTime": start.strftime("%Y%m%d"), "endTime": end.strftime("%Y%m%d"),
+        "timeframe": "day",
+    }
+    resp = requests.get("https://api.finance.naver.com/siseJson.naver", params=params, timeout=10)
+    rows = re.findall(
+        r"\['(\d{8})',\s*([\-\d.]+),\s*([\-\d.]+),\s*([\-\d.]+),\s*([\-\d.]+),\s*([\-\d.]+)",
+        resp.text,
+    )
+    candles = [
+        {"date": r[0], "open": float(r[1]), "high": float(r[2]), "low": float(r[3]),
+         "close": float(r[4]), "volume": float(r[5])}
+        for r in rows
+    ]
+    return candles[-count:]
 
 
 def get_news_sentiment(query):
