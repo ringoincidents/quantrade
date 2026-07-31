@@ -1,6 +1,6 @@
 {
   "date": "2026-07-31",
-  "market_summary": "전반적으로 약보합 혼조세, 일부 종목 단기 반등 흐름이나 신규 진입 후보군 모멘텀 부재로 관망 우세",
+  "market_summary": "전반적으로 보유 포지션은 혼조세이며 신규 후보군은 RSI 과매도 구간이나 뉴스 분위기 부정으로 신중한 접근이 필요한 상황",
   "positions": [
     {
       "market": "KRW-USDE",
@@ -15,15 +15,7 @@
       "asset_class": "crypto",
       "strategy_type": "스윙",
       "amount_krw": 4354,
-      "current_return": 5.320435308343425,
-      "conviction": false
-    },
-    {
-      "market": "KRW-FIL",
-      "asset_class": "crypto",
-      "strategy_type": "단타",
-      "amount_krw": 6278,
-      "current_return": 3.1344792719919106,
+      "current_return": 4.715840386940757,
       "conviction": false
     },
     {
@@ -41,16 +33,24 @@
       "amount_krw": 3202,
       "current_return": 0.0,
       "conviction": false
+    },
+    {
+      "market": "KRW-AHT",
+      "asset_class": "crypto",
+      "strategy_type": "단타",
+      "amount_krw": 5295,
+      "current_return": 0,
+      "conviction": false
     }
   ],
   "pending": [
     {
-      "id": "KRW-FIL_2026-07-31",
+      "id": "KRW-PUNDIX_2026-07-31",
       "type": "sell",
-      "market": "KRW-FIL",
-      "reasoning": "단타 전략으로 진입한 FIL이 +2.63% 수익을 달성했으며, 단타 특성상 목표 수익 구간에 도달한 것으로 판단한다. 시장 분위기가 중립적이고 추가 모멘텀이 불확실한 상황에서 수익을 실현하고 현금화하는 것이 합리적이다.",
+      "market": "KRW-PUNDIX",
+      "reasoning": "수익률 0%로 기회비용 발생 중이며 모멘텀 부재. 자금을 더 나은 후보로 재배치하는 것이 효율적",
       "status": "waiting"
     }
   ],
-  "cash": 48815.5792500575
+  "cash": 50001.709684840105
 }
