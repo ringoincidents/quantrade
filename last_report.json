@@ -1,6 +1,6 @@
 {
   "date": "2026-07-31",
-  "market_summary": "전반적으로 보유 포지션은 혼조세이며 신규 후보군은 RSI 과매도 구간이나 뉴스 분위기 부정으로 신중한 접근이 필요한 상황",
+  "market_summary": "전반적으로 시장 모멘텀이 약하고 신규 후보들도 RSI 과매도 구간이나 뉴스 부정으로 진입 매력 낮음",
   "positions": [
     {
       "market": "KRW-USDE",
@@ -33,14 +33,6 @@
       "amount_krw": 3202,
       "current_return": 0.0,
       "conviction": false
-    },
-    {
-      "market": "KRW-AHT",
-      "asset_class": "crypto",
-      "strategy_type": "단타",
-      "amount_krw": 5295,
-      "current_return": 0,
-      "conviction": false
     }
   ],
   "pending": [
@@ -52,5 +44,5 @@
       "status": "waiting"
     }
   ],
-  "cash": 50001.709684840105
+  "cash": 55296.709684840105
 }

@@ -1,5 +1,5 @@
 {
-  "cash": 50001.709684840105,
+  "cash": 55296.709684840105,
   "positions": [
     {
       "market": "KRW-USDE",
@@ -42,15 +42,6 @@
       "amount_krw": 3202,
       "current_price": 108.0,
       "current_return": 0.0
-    },
-    {
-      "market": "KRW-AHT",
-      "asset_class": "crypto",
-      "strategy_type": "단타",
-      "entry_price": 1.39,
-      "entry_date": "2026-07-31",
-      "expected_days": 6,
-      "amount_krw": 5295
     }
   ]
 }
