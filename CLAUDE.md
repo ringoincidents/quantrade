@@ -8,6 +8,14 @@ Quantrade is a personal quant portfolio bot ("분석, 추후엔 자동 거래" �
 
 There are no tests, no linter config, and no dependency manifest (`requirements.txt`) in this repo — the only third-party dependency is `requests`, installed inline in CI (`pip install requests`). When changing code, mirror that: keep dependencies minimal and don't introduce a build/test toolchain unless asked.
 
+## Project context
+
+- This is a personal AI investment-decision *assistant*, not an autotrader — every non-trivial trade is either auto-executed under tightly bounded safety rules or held for explicit human approval via Telegram. Do not blur that line.
+- The user is doing mandatory military service and only has PC access ~6-9am at a "cyber knowledge information room" (사이버지식정보방); the rest of the time they interact via the mobile Claude app. Code changes now happen through Claude Code. Keep this in mind for anything time-sensitive (e.g. don't assume same-day follow-up is possible outside that window).
+- The project is in a validation/trial phase running through December 2026 — this is a virtual simulation with no real trades yet. Expanding to real trading is only to be discussed after backtest validation, not implemented unprompted.
+- Asset coverage is actively transitioning from crypto (Upbit) to domestic Korean stocks via the Toss Securities API, because crypto exchange sites are blocked on the military network. Expect `analyze_lib.py`'s crypto-scanning code to be gradually replaced/supplemented by Toss-based stock scanning — when working here, check whether the crypto path is still the active one or already superseded.
+- Overall project direction/roadmap lives in a separate planning document outside this repo; ask the user for it if you need it rather than assuming.
+
 ## Running
 
 ```bash
@@ -59,3 +67,9 @@ Both GitHub Actions workflows commit these files back to the branch after runnin
 - User-facing strings (Telegram messages, report text, dashboard labels) and strategy-type values (`단타`/`스윙`/`장기`, `매수`/`매도`/`보유`/`비중조정`) are in Korean — keep new user-facing text and the JSON `action`/`strategy_type` vocabulary consistent with the existing Korean terms rather than switching to English.
 - Claude is prompted to return *only* raw JSON; `ask_claude_decision` defensively strips code fences and extracts the outermost `{...}` before parsing, and retries once on failure. Preserve this defensiveness if you touch the prompt or parsing.
 - Failures in price lookups, news fetches, or AI calls are caught and degrade gracefully (falling back to entry price, "뉴스 조회 실패", or an error message sent to Telegram) rather than crashing the workflow — the daily/poll Actions must keep running and committing state even when an external API is down.
+
+## Working principles
+
+- When you modify code, briefly explain *why* you changed it that way, not just what changed.
+- Never remove or weaken the safety guardrails (hard stop-loss thresholds, the approval requirements for long-term/stock/large-position trades) as a side effect of an unrelated change. If a guardrail genuinely needs to change, call it out explicitly and confirm with the user first.
+- Don't take this simulation toward real-money execution on your own initiative — that transition is a deliberate, separately-discussed decision gated on backtest results.
