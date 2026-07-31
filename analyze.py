@@ -6,6 +6,17 @@ HISTORY_FILE = "trade_history.json"
 PENDING_FILE = "pending_actions.json"
 TOTAL_BUDGET = 100000
 MIN_CASH_RESERVE_RATIO = 0.2
+LARGE_POSITION_THRESHOLD = 0.25  # 전체 자산의 25% 이상이면 승인 필요
+
+
+def needs_approval(pos, total_assets):
+    if pos.get("strategy_type") == "장기":
+        return True
+    if pos.get("asset_class") in ("stock", "krx"):
+        return True
+    if total_assets > 0 and (pos["amount_krw"] / total_assets) >= LARGE_POSITION_THRESHOLD:
+        return True
+    return False
 
 
 def run():
@@ -25,6 +36,8 @@ def run():
             pos["current_price"] = pos.get("entry_price", 0)
             pos["current_return"] = 0
             report.append(f"⚠️ {pos['market']} 가격 조회 실패: {e}")
+
+    total_assets = portfolio["cash"] + sum(p["amount_krw"] for p in portfolio["positions"])
 
     held_all = [p["market"] for p in portfolio["positions"]]
     crypto_cands = scan_crypto(exclude=held_all, top_n=3)
@@ -57,6 +70,7 @@ def run():
         strat = pos.get("strategy_type", "스윙")
         threshold = HARD_STOP_LOSS.get(strat, -10)
 
+        # 하드 손절은 조건 무관 항상 즉시 자동 실행
         if pos["current_return"] <= threshold:
             ret = pos["current_return"]
             portfolio["cash"] += pos["amount_krw"] * (1 + ret / 100)
@@ -72,17 +86,31 @@ def run():
         days_held = (datetime.now() - datetime.strptime(pos["entry_date"], "%Y-%m-%d")).days
 
         if decision and decision.get("action") == "매도":
-            action_id = f"{market}_{today}"
-            already_pending = any(a["id"] == action_id for a in pending["actions"])
-            if not already_pending:
-                pending["actions"].append({
-                    "id": action_id, "type": "sell", "market": market,
-                    "reasoning": decision.get("reasoning", "-"), "status": "waiting"
+            if needs_approval(pos, total_assets):
+                # 장기/주식/대형 비중 → 승인 대기
+                action_id = f"{market}_{today}"
+                already_pending = any(a["id"] == action_id for a in pending["actions"])
+                if not already_pending:
+                    pending["actions"].append({
+                        "id": action_id, "type": "sell", "market": market,
+                        "reasoning": decision.get("reasoning", "-"), "status": "waiting"
+                    })
+                    reason_tag = "장기전략" if strat == "장기" else ("주식" if pos.get("asset_class") in ("stock", "krx") else "대형비중")
+                    report.append(f"⏳ 매도 승인 대기 [{reason_tag}]: {market} ({pos['current_return']:+.2f}%)")
+                    report.append(f"   AI 이유: {decision.get('reasoning','-')}")
+                    report.append(f"   👉 승인 /approve {action_id} / 거절 /reject {action_id}")
+                still_holding.append(pos)
+            else:
+                # 단타/스윙(소형 비중, 코인) → 즉시 자동 매도
+                ret = pos["current_return"]
+                portfolio["cash"] += pos["amount_krw"] * (1 + ret / 100)
+                history["trades"].append({
+                    "market": market, "asset_class": pos.get("asset_class", "crypto"),
+                    "strategy_type": strat, "entry_date": pos["entry_date"],
+                    "exit_date": today, "return_pct": ret
                 })
-                report.append(f"⏳ 매도 승인 대기: {market} ({pos['current_return']:+.2f}%)")
-                report.append(f"   AI 이유: {decision.get('reasoning','-')}")
-                report.append(f"   👉 승인 /approve {action_id} / 거절 /reject {action_id}")
-            still_holding.append(pos)
+                report.append(f"✅ 자동 매도 [{strat}]: {market} ({ret:+.2f}%)")
+                report.append(f"   이유: {decision.get('reasoning','-')}")
         else:
             report.append(f"📌 보유 유지: {market} ({days_held}일) {pos['current_return']:+.2f}%")
             if decision:
@@ -102,24 +130,43 @@ def run():
             amount = min(amount, available)
             if amount <= 0:
                 continue
-            portfolio["positions"].append({
-                "market": c["market"], "asset_class": c["asset_class"],
-                "strategy_type": c["strategy_type"], "entry_price": c["price"],
-                "entry_date": today, "expected_days": c["expected_days"], "amount_krw": amount
-            })
-            portfolio["cash"] -= amount
-            available -= amount
-            report.append("")
-            report.append(f"🆕 매수: {c['market']} (비중 {weight_pct}%, {amount:,.0f}원)")
-            report.append(f"   이유: {decision.get('reasoning','-')}")
+
+            # 매수도 대형 비중이거나 주식이면 승인 필요
+            temp_pos = {"asset_class": c["asset_class"], "strategy_type": c["strategy_type"], "amount_krw": amount}
+            if needs_approval(temp_pos, total_assets):
+                action_id = f"BUY_{c['market']}_{today}"
+                already_pending = any(a["id"] == action_id for a in pending["actions"])
+                if not already_pending:
+                    pending["actions"].append({
+                        "id": action_id, "type": "buy", "market": c["market"],
+                        "amount_krw": amount, "entry_price": c["price"],
+                        "strategy_type": c["strategy_type"], "asset_class": c["asset_class"],
+                        "expected_days": c["expected_days"],
+                        "reasoning": decision.get("reasoning", "-"), "status": "waiting"
+                    })
+                    reason_tag = "장기전략" if c["strategy_type"] == "장기" else ("주식" if c["asset_class"] in ("stock", "krx") else "대형비중")
+                    report.append("")
+                    report.append(f"⏳ 매수 승인 대기 [{reason_tag}]: {c['market']} (비중 {weight_pct}%, {amount:,.0f}원)")
+                    report.append(f"   AI 이유: {decision.get('reasoning','-')}")
+                    report.append(f"   👉 승인 /approve {action_id} / 거절 /reject {action_id}")
+            else:
+                portfolio["positions"].append({
+                    "market": c["market"], "asset_class": c["asset_class"],
+                    "strategy_type": c["strategy_type"], "entry_price": c["price"],
+                    "entry_date": today, "expected_days": c["expected_days"], "amount_krw": amount
+                })
+                portfolio["cash"] -= amount
+                available -= amount
+                report.append("")
+                report.append(f"🆕 자동 매수 [{c['strategy_type']}]: {c['market']} (비중 {weight_pct}%, {amount:,.0f}원)")
+                report.append(f"   이유: {decision.get('reasoning','-')}")
 
     report.append("")
     report.append(f"💰 현금: {portfolio['cash']:,.0f}원 / 보유 {len(portfolio['positions'])}개")
     waiting_count = len([a for a in pending["actions"] if a["status"] == "waiting"])
     if waiting_count:
-        report.append(f"⏳ 승인 대기 중인 매도 {waiting_count}건")
+        report.append(f"⏳ 승인 대기 중 {waiting_count}건")
 
-    # 웹 대시보드용 리포트 저장
     last_report = {
         "date": today,
         "market_summary": ai_result.get("market_summary", ""),
