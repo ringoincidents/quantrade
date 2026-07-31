@@ -2,84 +2,85 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>내 포트폴리오 대시보드</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
-  body { font-family: -apple-system, sans-serif; background: #0f1115; color: #eee; padding: 16px; }
-  h2 { color: #7dd3fc; }
-  .card { background: #1a1d24; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
-  .pos { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #2a2d35; }
-  .pos.positive { color: #4ade80; }
-  .pos.negative { color: #f87171; }
-  .conviction { color: #facc15; }
-  #chart-container { max-width: 100%; }
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, sans-serif; background: #0f1115; color: #eee; padding: 12px; margin: 0; }
+  h2 { color: #7dd3fc; font-size: 20px; }
+  h3 { color: #a5b4fc; font-size: 15px; margin-bottom: 8px; }
+  .card { background: #1a1d24; border-radius: 12px; padding: 14px; margin-bottom: 14px; }
+  .pos { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #2a2d35; font-size: 14px; }
+  .pos:last-child { border-bottom: none; }
+  .positive { color: #4ade80; }
+  .negative { color: #f87171; }
+  .badge { font-size: 11px; padding: 2px 6px; border-radius: 6px; margin-left: 6px; }
+  .badge-conviction { background: #78350f; color: #facc15; }
+  .badge-strategy { background: #1e293b; color: #94a3b8; }
+  .pending-card { background: #292116; border: 1px solid #78350f; border-radius: 10px; padding: 12px; margin-bottom: 10px; }
+  .btn { padding: 8px 14px; border-radius: 8px; border: none; font-size: 13px; margin-right: 6px; margin-top: 8px; }
+  .btn-approve { background: #16a34a; color: white; }
+  .btn-reject { background: #dc2626; color: white; }
+  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 10px 18px; border-radius: 8px; font-size: 13px; display: none; }
+  #summary-text { font-size: 14px; line-height: 1.5; color: #cbd5e1; }
+  .cash-line { font-size: 16px; font-weight: bold; }
 </style>
 </head>
 <body>
-<h2>📊 내 포트폴리오 대시보드</h2>
+<h2>📊 내 포트폴리오</h2>
 
 <div class="card">
-  <div id="cash-summary">로딩 중...</div>
+  <div class="cash-line" id="cash-summary">로딩 중...</div>
 </div>
 
 <div class="card">
-  <h3>현재 보유 포지션</h3>
-  <div id="positions"></div>
+  <h3>🤖 최근 AI 시장 요약</h3>
+  <div id="summary-text"></div>
+</div>
+
+<div class="card" id="pending-section" style="display:none;">
+  <h3>⏳ 승인 대기 중인 매도</h3>
+  <div id="pending-list"></div>
 </div>
 
 <div class="card">
-  <h3>누적 성과 (전략별)</h3>
-  <div id="chart-container"><canvas id="strategyChart"></canvas></div>
+  <h3>보유 비중 (전체 자산 대비)</h3>
+  <canvas id="pieChart"></canvas>
 </div>
 
 <div class="card">
-  <h3>최근 거래 기록</h3>
-  <div id="history"></div>
+  <h3>종목별 현재 수익률</h3>
+  <div id="positions-list"></div>
 </div>
+
+<div class="card">
+  <h3>💎 확신 장기보유 종목</h3>
+  <div id="conviction-list"></div>
+</div>
+
+<div class="toast" id="toast"></div>
 
 <script>
-async function loadData() {
-  const portfolio = await (await fetch('portfolio.json?t=' + Date.now())).json();
-  const history = await (await fetch('trade_history.json?t=' + Date.now())).json();
-
-  document.getElementById('cash-summary').innerHTML =
-    `💰 현금: ${portfolio.cash.toLocaleString()}원 &nbsp;|&nbsp; 보유 종목: ${portfolio.positions.length}개`;
-
-  const posHtml = portfolio.positions.map(p => {
-    const ret = p.current_return || 0;
-    const cls = ret >= 0 ? 'positive' : 'negative';
-    const tag = p.conviction ? ' <span class="conviction">💎확신</span>' : '';
-    return `<div class="pos ${cls}">
-      <span>${p.market} (${p.strategy_type || '-'})${tag}</span>
-      <span>${ret.toFixed(2)}%</span>
-    </div>`;
-  }).join('') || '<p>보유 포지션 없음</p>';
-  document.getElementById('positions').innerHTML = posHtml;
-
-  const strategies = ['단타', '스윙', '장기'];
-  const avgReturns = strategies.map(s => {
-    const trades = history.trades.filter(t => t.strategy_type === s);
-    if (trades.length === 0) return 0;
-    return trades.reduce((sum, t) => sum + t.return_pct, 0) / trades.length;
-  });
-
-  new Chart(document.getElementById('strategyChart'), {
-    type: 'bar',
-    data: {
-      labels: strategies,
-      datasets: [{ label: '평균 수익률 (%)', data: avgReturns, backgroundColor: ['#f87171', '#7dd3fc', '#4ade80'] }]
-    },
-    options: { plugins: { legend: { labels: { color: '#eee' } } }, scales: { x: { ticks: { color: '#eee' } }, y: { ticks: { color: '#eee' } } } }
-  });
-
-  const recentTrades = history.trades.slice(-10).reverse();
-  const histHtml = recentTrades.map(t => {
-    const cls = t.return_pct >= 0 ? 'positive' : 'negative';
-    return `<div class="pos ${cls}"><span>${t.market} (${t.exit_date})</span><span>${t.return_pct.toFixed(2)}%</span></div>`;
-  }).join('') || '<p>거래 기록 없음</p>';
-  document.getElementById('history').innerHTML = histHtml;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(() => t.style.display = 'none', 2000);
 }
-loadData();
-</script>
-</body>
-</html>
+
+function copyCommand(cmd) {
+  navigator.clipboard.writeText(cmd).then(() => {
+    showToast('복사됨! 텔레그램에 붙여넣으세요 📋');
+  });
+}
+
+async function loadData() {
+  const bust = '?t=' + Date.now();
+  const portfolio = await (await fetch('portfolio.json' + bust)).json();
+  let lastReport = {};
+  try {
+    lastReport = await (await fetch('last_report.json' + bust)).json();
+  } catch(e) {}
+
+  const totalAssets = portfolio.cash + portfolio.positions.re
