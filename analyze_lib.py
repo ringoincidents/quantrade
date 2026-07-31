@@ -3,6 +3,7 @@ import math
 import json
 import os
 import re
+import time
 import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta
 
@@ -140,6 +141,8 @@ def get_krw_candles(market, count=60):
         to_param = batch[-1]["candle_date_time_utc"]
         if len(batch) < batch_size:
             break
+        if len(all_candles) < count:
+            time.sleep(0.12)  # 업비트 rate limit 배려 - 다중 페이지네이션(백테스트의 대량 히스토리 조회)에서만 발생
     all_candles.reverse()
     return all_candles
 

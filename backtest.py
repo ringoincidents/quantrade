@@ -16,13 +16,14 @@ AI 판단을 재현할 방법이 없다(비용·비결정성 문제). 이 엔진
 캘리브레이션이 도입되면 이 근사를 교체해야 한다.
 """
 import argparse
+import time
 from datetime import datetime
 
 from analyze_lib import (
     calc_rsi, calc_bollinger, calc_adx, is_golden_cross,
     estimate_holding_period, classify_strategy,
     HARD_STOP_LOSS, TRADING_COSTS, US_STOCKS,
-    get_krw_candles, get_us_candles, get_krx_candles, save_json,
+    get_krw_candles, get_us_candles, get_krx_candles, get_all_krw_markets, save_json,
 )
 
 # 종합계획서 v3 §4.3 — 결과가 나온 뒤 기준을 짜맞추는 것을 막기 위해 미리 박아둔
@@ -51,8 +52,21 @@ REGIME_THRESHOLD_PCT = 10   # 이 구간 수익률을 넘으면 상승장/하락
 MAX_HOLD_MULTIPLIER = 2     # 예상 보유기간의 2배를 넘기면 타임스탑
 TAKE_PROFIT_RSI = 70        # 보유 중 RSI 과열 구간 진입 시 익절(진입 게이트와는 별개)
 
-DEFAULT_CRYPTO_MARKETS = ["KRW-BTC", "KRW-ETH", "KRW-XRP"]
 DEFAULT_STOCK_TICKERS = US_STOCKS
+CRYPTO_UNIVERSE_CAP = 80    # scan_crypto가 보는 것과 동일한 상한(get_all_krw_markets()[:80])
+UPBIT_MARKET_SLEEP = 0.1    # 크립토 종목 사이 추가 유예(업비트 rate limit 배려)
+
+# 코스피/코스닥 시가총액 상위권 스냅샷(정적 목록). 토스 API로 실시간 시총 랭킹을
+# 가져올 수 있게 되면 동적 스캔으로 교체할 잠정 목록 — 상장폐지/합병 등으로 일부
+# 종목이 조회 실패할 수 있으나, 기존 try/except가 그런 종목을 조용히 건너뛴다.
+KRX_MARKET_CAP_TOP = [
+    "005930", "000660", "373220", "207940", "005380", "005490", "006400", "051910",
+    "035420", "000270", "105560", "055550", "012330", "035720", "068270", "028260",
+    "066570", "096770", "032830", "003550", "015760", "034730", "086790", "010130",
+    "009150", "042660", "196170", "000810", "316140", "024110",
+    "247540", "086520", "328130", "240810", "041510", "112040", "039030", "068760",
+]
+
 WARMUP = MA_LONG + 5        # 골든크로스(60일선)+ADX 계산에 필요한 최소 선행 데이터 길이
 
 
@@ -230,27 +244,39 @@ def run_instrument(market, asset_class, count):
 
 def main():
     parser = argparse.ArgumentParser(description="QuanTrade 백테스트 엔진 (Phase 1, 추세추종)")
-    parser.add_argument("--crypto", nargs="*", default=DEFAULT_CRYPTO_MARKETS)
+    parser.add_argument("--crypto", nargs="*", default=None,
+                         help=f"생략하면 scan_crypto와 동일하게 업비트 KRW마켓 최대 {CRYPTO_UNIVERSE_CAP}개를 동적으로 사용")
     parser.add_argument("--stocks", nargs="*", default=DEFAULT_STOCK_TICKERS)
-    parser.add_argument("--krx", nargs="*", default=[], help="예: --krx 005930 373220")
-    parser.add_argument("--count", type=int, default=750, help="일봉 개수(기본 약 3년치, 계획서 §4.2)")
+    parser.add_argument("--krx", nargs="*", default=None,
+                         help="생략하면 코스피/코스닥 시가총액 상위 스냅샷(KRX_MARKET_CAP_TOP)을 사용. 예: --krx 005930 373220")
+    parser.add_argument("--count", type=int, default=1500, help="KRX/미국주식 일봉 개수(기본 약 6년치)")
+    parser.add_argument("--crypto-count", type=int, default=5000,
+                         help="크립토 일봉 개수 - 상장 시점까지 최대한 확보하도록 넉넉히 잡고, 실제로는 페이지네이션이 상장일에서 자연히 멈춤")
     parser.add_argument("--out", default="backtest_report.json")
     args = parser.parse_args()
 
+    crypto_markets = args.crypto if args.crypto is not None else get_all_krw_markets()[:CRYPTO_UNIVERSE_CAP]
+    krx_tickers = args.krx if args.krx is not None else KRX_MARKET_CAP_TOP
+
     universe = (
-        [(m, "crypto") for m in args.crypto]
+        [(m, "crypto") for m in crypto_markets]
         + [(m, "stock") for m in args.stocks]
-        + [(m, "krx") for m in args.krx]
+        + [(m, "krx") for m in krx_tickers]
     )
+    print(f"유니버스: 크립토 {len(crypto_markets)} / 미국주식 {len(args.stocks)} / KRX {len(krx_tickers)}")
 
     all_trades, all_train, all_val, per_instrument = [], [], [], []
 
     for market, asset_class in universe:
+        count = args.crypto_count if asset_class == "crypto" else args.count
         try:
-            result = run_instrument(market, asset_class, args.count)
+            result = run_instrument(market, asset_class, count)
         except Exception as e:
             print(f"⚠️ {market} 데이터 조회/시뮬레이션 실패: {e}")
             continue
+        finally:
+            if asset_class == "crypto":
+                time.sleep(UPBIT_MARKET_SLEEP)  # 업비트 rate limit 배려(80개 마켓 연속 조회)
         if not result:
             continue
         per_instrument.append({
