@@ -25,13 +25,14 @@ export TELEGRAM_CHAT_ID=...    # chat to notify
 export CLAUDE_API_KEY=...      # Claude API key for trade decisions
 python analyze.py          # run one full daily analysis/trade cycle
 python check_updates.py    # poll Telegram for /approve /reject /keep /unkeep /status commands
+python backtest.py         # run the backtest engine against historical data (see below)
 ```
 
-Both scripts read and rewrite the JSON state files in the repo root, then (in CI) those files are committed back. There's no test suite to run — verify changes by running the script locally against the existing JSON state and inspecting the diff/output, or by mocking `requests` calls if testing logic in isolation.
+Both `analyze.py` and `check_updates.py` read and rewrite the JSON state files in the repo root, then (in CI) those files are committed back. There's no test suite to run — verify changes by running the script locally against the existing JSON state and inspecting the diff/output, or by mocking `requests` calls if testing logic in isolation.
 
 ## Architecture
 
-**`analyze_lib.py`** — all shared logic and I/O: technical indicators (MA, RSI, Bollinger bands), Upbit/stooq/Naver market data fetchers, crypto/stock candidate scanning (`scan_crypto`, `scan_stocks`), Google News RSS sentiment scoring, the Claude API call that turns holdings + candidates + news into a decision JSON (`ask_claude_decision`), Telegram sending, and generic `load_json`/`save_json` helpers. Constants here (`HARD_STOP_LOSS`, `EXCLUDE_MARKETS`, `US_STOCKS`, sentiment word lists) are the tunable knobs for strategy behavior.
+**`analyze_lib.py`** — all shared logic and I/O: technical indicators (MA, RSI, Bollinger bands), Upbit/stooq/Naver market data fetchers (including `get_krx_candles`, a Naver-based historical fetcher for Korean stocks used until the Toss Securities API is wired in), the shared entry-scoring rule (`entry_score`, used by both live scanning and the backtest engine so they can't drift apart), crypto/stock candidate scanning (`scan_crypto`, `scan_stocks`), Google News RSS sentiment scoring, the Claude API call that turns holdings + candidates + news into a decision JSON (`ask_claude_decision`), Telegram sending, and generic `load_json`/`save_json` helpers. Constants here (`HARD_STOP_LOSS`, `EXCLUDE_MARKETS`, `US_STOCKS`, `TRADING_COSTS`, sentiment word lists) are the tunable knobs for strategy behavior.
 
 **`analyze.py`** — the daily cycle (`run()`), driven by `daily.yml`:
 1. Price every held position, compute return %.
@@ -50,6 +51,8 @@ Both scripts read and rewrite the JSON state files in the repo root, then (in CI
 
 After any state change it also refreshes `last_report.json` (`refresh_last_report`) so the web dashboard reflects approvals immediately rather than waiting for the next daily run.
 
+**`backtest.py`** — Phase 1 backtest engine (계획서 v3 §5), run manually (CLI or `backtest.yml` workflow_dispatch), separate from the daily/poll cycle. Replays the same entry rule live scanning uses (`entry_score`) plus `HARD_STOP_LOSS` against historical daily candles for a configurable universe of crypto/stock/KRX markets. Since past Claude decisions can't be replayed (cost + non-determinism), sell-side is approximated with rule-based exits (hard stop-loss, RSI overbought, a time-stop at 2x the expected holding period) — a known simplification to revisit once Phase 2's AI-confidence calibration exists. Applies `TRADING_COSTS` (fee + slippage assumptions) on entry/exit, splits trades into a 70/30 train/validation set by date, and buckets results by market regime (상승장/하락장/횡보장, from trailing 60-day return) and by strategy type. Results are checked against the frozen success criteria from 계획서 v3 §4.3 (`SUCCESS_CRITERIA`: ≥30 trades, sharpe-like ratio, MDD) and written to `backtest_report.json` — per the plan, these thresholds are fixed on purpose and shouldn't be adjusted after the fact to fit results.
+
 **`index.html`** — static single-page dashboard (Chart.js via CDN) that fetches `portfolio.json` and `last_report.json` directly (cache-busted) and renders cash/positions/pending approvals/conviction holdings. It has no build step; it's served as-is (e.g. GitHub Pages) and only reads JSON, never writes it — approve/reject from the dashboard just copies the `/approve <id>` / `/reject <id>` command to the clipboard for the user to paste into Telegram.
 
 ## State files (all in repo root, treated as a database)
@@ -61,6 +64,8 @@ After any state change it also refreshes `last_report.json` (`refresh_last_repor
 - `telegram_offset.json` — last processed Telegram `update_id`, owned by `check_updates.py`.
 
 Both GitHub Actions workflows commit these files back to the branch after running (`git add ...; git commit; git push`), so the two workflows (`daily.yml` at 11:00 UTC, `poll.yml` every 15 min) can race on the same files — be aware of that when changing commit/push logic or file schemas, since a schema change must stay compatible with whatever the other workflow's last commit wrote.
+
+`backtest_report.json` (repo root, written by `backtest.py`/`backtest.yml`) is a separate output, not part of the daily/poll state and not read by `index.html` — it doesn't participate in the race above.
 
 ## Conventions specific to this repo
 
