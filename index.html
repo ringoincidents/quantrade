@@ -83,4 +83,62 @@ async function loadData() {
     lastReport = await (await fetch('last_report.json' + bust)).json();
   } catch(e) {}
 
-  const totalAssets = portfolio.cash + portfolio.positions.re
+  const totalAssets = portfolio.cash + portfolio.positions.reduce((s, p) => s + p.amount_krw, 0);
+  document.getElementById('cash-summary').innerHTML =
+    `💰 총자산 약 ${totalAssets.toLocaleString()}원 &nbsp;|&nbsp; 현금 ${portfolio.cash.toLocaleString()}원`;
+
+  document.getElementById('summary-text').textContent = lastReport.market_summary || '아직 데이터 없음';
+
+  // 승인 대기 섹션
+  const pending = lastReport.pending || [];
+  if (pending.length > 0) {
+    document.getElementById('pending-section').style.display = 'block';
+    document.getElementById('pending-list').innerHTML = pending.map(a => `
+      <div class="pending-card">
+        <div><b>${a.market}</b></div>
+        <div style="font-size:13px; color:#cbd5e1; margin-top:4px;">${a.reasoning}</div>
+        <button class="btn btn-approve" onclick="copyCommand('/approve ${a.id}')">승인 명령어 복사</button>
+        <button class="btn btn-reject" onclick="copyCommand('/reject ${a.id}')">거절 명령어 복사</button>
+      </div>
+    `).join('');
+  }
+
+  // 비중 파이차트 (현금 포함)
+  const nonConviction = portfolio.positions;
+  const pieLabels = ['현금', ...nonConviction.map(p => p.market)];
+  const pieData = [portfolio.cash, ...nonConviction.map(p => p.amount_krw)];
+  new Chart(document.getElementById('pieChart'), {
+    type: 'doughnut',
+    data: {
+      labels: pieLabels,
+      datasets: [{ data: pieData, backgroundColor: ['#475569', '#f87171', '#fb923c', '#facc15', '#4ade80', '#22d3ee', '#818cf8', '#e879f9'] }]
+    },
+    options: { plugins: { legend: { position: 'bottom', labels: { color: '#eee', font: { size: 11 } } } } }
+  });
+
+  // 종목별 수익률 리스트 (확신종목 제외)
+  const activePositions = portfolio.positions.filter(p => !p.conviction);
+  document.getElementById('positions-list').innerHTML = activePositions.map(p => {
+    const ret = p.current_return || 0;
+    const cls = ret >= 0 ? 'positive' : 'negative';
+    return `<div class="pos">
+      <span>${p.market} <span class="badge badge-strategy">${p.strategy_type || '-'}</span></span>
+      <span class="${cls}">${ret >= 0 ? '+' : ''}${ret.toFixed(2)}%</span>
+    </div>`;
+  }).join('') || '<p style="color:#64748b;">보유 종목 없음</p>';
+
+  // 확신종목 리스트
+  const convictionPositions = portfolio.positions.filter(p => p.conviction);
+  document.getElementById('conviction-list').innerHTML = convictionPositions.map(p => {
+    const ret = p.current_return || 0;
+    const cls = ret >= 0 ? 'positive' : 'negative';
+    return `<div class="pos">
+      <span>${p.market} <span class="badge badge-conviction">💎 확신</span></span>
+      <span class="${cls}">${ret >= 0 ? '+' : ''}${ret.toFixed(2)}%</span>
+    </div>`;
+  }).join('') || '<p style="color:#64748b;">지정된 확신종목 없음</p>';
+}
+loadData();
+</script>
+</body>
+</html>
