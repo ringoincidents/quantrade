@@ -234,12 +234,58 @@ def get_us_price(ticker):
 
 def get_us_candles(ticker, count=60):
     """get_us_closes와 별개로 OHLC 전체가 필요한 소비자(백테스트의 ADX 계산 등)용.
-    라이브 스캔(scan_stocks/get_us_price)은 계속 get_us_closes만 쓰므로 영향 없음."""
+    라이브 스캔(scan_stocks/get_us_price)은 계속 get_us_closes만 쓰므로 영향 없음.
+    get_us_closes와 동일하게 Yahoo 우선, stooq 폴백 순서를 따른다."""
+    errors = []
+    try:
+        return _get_us_candles_yahoo(ticker, count)
+    except Exception as e:
+        errors.append(f"yahoo: {e}")
+    try:
+        return _get_us_candles_stooq(ticker, count)
+    except Exception as e:
+        errors.append(f"stooq: {e}")
+    raise ValueError(f"{ticker} OHLC 조회 실패 - " + " / ".join(errors))
+
+
+def _get_us_candles_yahoo(ticker, count):
+    end = datetime.now()
+    start = end - timedelta(days=int(count * 1.6) + 30)
+    params = {"period1": int(start.timestamp()), "period2": int(end.timestamp()), "interval": "1d"}
+    resp = requests.get(
+        f"https://query1.finance.yahoo.com/v8/finance/chart/{ticker.upper()}",
+        params=params, timeout=10, headers=HTTP_HEADERS,
+    )
+    try:
+        data = resp.json()
+    except ValueError:
+        raise ValueError(f"JSON 아님 (status={resp.status_code}, body[:120]={resp.text[:120]!r})")
+    result = (data.get("chart") or {}).get("result")
+    if not result:
+        err = (data.get("chart") or {}).get("error")
+        raise ValueError(f"result 없음 (error={err}, status={resp.status_code})")
+    timestamps = result[0].get("timestamp") or []
+    quote = result[0]["indicators"]["quote"][0]
+    candles = []
+    for i, ts in enumerate(timestamps):
+        o, h, l, c = quote["open"][i], quote["high"][i], quote["low"][i], quote["close"][i]
+        if None in (o, h, l, c):
+            continue
+        candles.append({
+            "date": datetime.utcfromtimestamp(ts).strftime("%Y-%m-%d"),
+            "open": o, "high": h, "low": l, "close": c, "volume": quote["volume"][i] or 0,
+        })
+    if not candles:
+        raise ValueError("유효한 OHLC 없음")
+    return candles[-count:]
+
+
+def _get_us_candles_stooq(ticker, count):
     resp = requests.get(f"https://stooq.com/q/d/l/?s={ticker.lower()}.us&i=d", timeout=10, headers=HTTP_HEADERS)
     lines = resp.text.strip().split("\n")
     if not lines or not lines[0].lower().startswith("date,"):
         raise ValueError(
-            f"stooq가 CSV 대신 다른 응답을 줌 - 클라우드 IP 차단(봇 감지)일 가능성 "
+            f"CSV 대신 다른 응답 - 클라우드 IP 차단(봇 감지) 가능성 "
             f"(status={resp.status_code}, body[:120]={resp.text[:120]!r})"
         )
     candles = []
