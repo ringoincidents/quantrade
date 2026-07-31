@@ -12,7 +12,7 @@
       "type": "sell",
       "market": "KRW-PUNDIX",
       "reasoning": "수익률 0%로 기회비용 발생 중이며 모멘텀 부재. 자금을 더 나은 후보로 재배치하는 것이 효율적",
-      "status": "waiting"
+      "status": "approved"
     }
   ]
 }

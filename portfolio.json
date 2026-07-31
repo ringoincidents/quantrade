@@ -1,5 +1,5 @@
 {
-  "cash": 55296.709684840105,
+  "cash": 58498.709684840105,
   "positions": [
     {
       "market": "KRW-USDE",
@@ -31,17 +31,6 @@
       "amount_krw": 3557,
       "current_price": 205.0,
       "current_return": 1.4851485148514851
-    },
-    {
-      "market": "KRW-PUNDIX",
-      "asset_class": "crypto",
-      "strategy_type": "스윙",
-      "entry_price": 108.0,
-      "entry_date": "2026-07-31",
-      "expected_days": 11,
-      "amount_krw": 3202,
-      "current_price": 108.0,
-      "current_return": 0.0
     }
   ]
 }
