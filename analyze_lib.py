@@ -207,35 +207,47 @@ def ask_claude_decision(held_positions, candidates, news_by_market):
         f"[매매 판단 대상 보유 포지션]\n{holdings_text}\n\n"
         f"[사용자 확신 장기보유 종목 - 참고만]\n{conviction_text}\n\n"
         f"[신규 진입 후보]\n{candidates_text}\n\n"
-        "다음 JSON 형식으로만 답해줘. 다른 텍스트 없이 JSON만:\n\n"
+        "다음 JSON 형식으로만 답해줘. 매우 중요한 규칙:\n"
+        "- 다른 설명 텍스트 없이 순수 JSON만 출력\n"
+        "- 모든 문자열 값은 반드시 큰따옴표로 감싸고, 문자열 안에는 줄바꿈이나 큰따옴표를 절대 넣지 마\n"
+        "- reasoning은 한 줄로, 쉼표나 마침표로만 문장을 구분해\n\n"
         "{\n"
-        '  "market_summary": "전체 시장 상황 2-3문장 요약",\n'
+        '  "market_summary": "전체 시장 상황 한 줄 요약",\n'
         '  "decisions": [\n'
         "    {\n"
         '      "market": "종목코드",\n'
         '      "action": "매도 또는 매수 또는 보유 또는 비중조정",\n'
         '      "target_weight_pct": 0에서100사이숫자 또는 null,\n'
-        '      "reasoning": "구체적 이유 2-3문장"\n'
+        '      "reasoning": "한 줄로 된 이유"\n'
         "    }\n"
         "  ]\n"
         "}"
     )
 
-    try:
-        response = requests.post(
-            "https://api.anthropic.com/v1/messages",
-            headers={"x-api-key": CLAUDE_API_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json"},
-            json={"model": "claude-sonnet-4-6", "max_tokens": 1500, "messages": [{"role": "user", "content": prompt_text}]},
-            timeout=30
-        )
-        data = response.json()
-        if "content" not in data:
-            return {"market_summary": f"AI 응답 오류: {data}", "decisions": []}
-        raw_text = data["content"][0]["text"]
-        cleaned = raw_text.strip().replace("```json", "").replace("```", "").strip()
-        return json.loads(cleaned)
-    except Exception as e:
-        return {"market_summary": f"AI 판단 실패: {e}", "decisions": []}
+    for attempt in range(2):  # 실패하면 한 번 더 시도
+        try:
+            response = requests.post(
+                "https://api.anthropic.com/v1/messages",
+                headers={"x-api-key": CLAUDE_API_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json"},
+                json={"model": "claude-sonnet-4-6", "max_tokens": 1500, "messages": [{"role": "user", "content": prompt_text}]},
+                timeout=30
+            )
+            data = response.json()
+            if "content" not in data:
+                return {"market_summary": f"AI 응답 오류: {data}", "decisions": []}
+            raw_text = data["content"][0]["text"]
+            cleaned = raw_text.strip().replace("```json", "").replace("```", "").strip()
+            # 혹시 앞뒤에 다른 텍스트가 섞였으면 { } 부분만 추출
+            start = cleaned.find("{")
+            end = cleaned.rfind("}")
+            if start != -1 and end != -1:
+                cleaned = cleaned[start:end+1]
+            return json.loads(cleaned)
+        except Exception as e:
+            if attempt == 0:
+                continue  # 한 번 더 시도
+            return {"market_summary": f"AI 판단 실패: {e}", "decisions": []}
+    return {"market_summary": "AI 판단 실패: 재시도 초과", "decisions": []}
 
 
 def send_telegram(msg):
