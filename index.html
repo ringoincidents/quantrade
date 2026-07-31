@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>내 포트폴리오 대시보드</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  body { font-family: -apple-system, sans-serif; background: #0f1115; color: #eee; padding: 16px; }
+  h2 { color: #7dd3fc; }
+  .card { background: #1a1d24; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+  .pos { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #2a2d35; }
+  .pos.positive { color: #4ade80; }
+  .pos.negative { color: #f87171; }
+  .conviction { color: #facc15; }
+  #chart-container { max-width: 100%; }
+</style>
+</head>
+<body>
+<h2>📊 내 포트폴리오 대시보드</h2>
+
+<div class="card">
+  <div id="cash-summary">로딩 중...</div>
+</div>
+
+<div class="card">
+  <h3>현재 보유 포지션</h3>
+  <div id="positions"></div>
+</div>
+
+<div class="card">
+  <h3>누적 성과 (전략별)</h3>
+  <div id="chart-container"><canvas id="strategyChart"></canvas></div>
+</div>
+
+<div class="card">
+  <h3>최근 거래 기록</h3>
+  <div id="history"></div>
+</div>
+
+<script>
+async function loadData() {
+  const portfolio = await (await fetch('portfolio.json?t=' + Date.now())).json();
+  const history = await (await fetch('trade_history.json?t=' + Date.now())).json();
+
+  document.getElementById('cash-summary').innerHTML =
+    `💰 현금: ${portfolio.cash.toLocaleString()}원 &nbsp;|&nbsp; 보유 종목: ${portfolio.positions.length}개`;
+
+  const posHtml = portfolio.positions.map(p => {
+    const ret = p.current_return || 0;
+    const cls = ret >= 0 ? 'positive' : 'negative';
+    const tag = p.conviction ? ' <span class="conviction">💎확신</span>' : '';
+    return `<div class="pos ${cls}">
+      <span>${p.market} (${p.strategy_type || '-'})${tag}</span>
+      <span>${ret.toFixed(2)}%</span>
+    </div>`;
+  }).join('') || '<p>보유 포지션 없음</p>';
+  document.getElementById('positions').innerHTML = posHtml;
+
+  const strategies = ['단타', '스윙', '장기'];
+  const avgReturns = strategies.map(s => {
+    const trades = history.trades.filter(t => t.strategy_type === s);
+    if (trades.length === 0) return 0;
+    return trades.reduce((sum, t) => sum + t.return_pct, 0) / trades.length;
+  });
+
+  new Chart(document.getElementById('strategyChart'), {
+    type: 'bar',
+    data: {
+      labels: strategies,
+      datasets: [{ label: '평균 수익률 (%)', data: avgReturns, backgroundColor: ['#f87171', '#7dd3fc', '#4ade80'] }]
+    },
+    options: { plugins: { legend: { labels: { color: '#eee' } } }, scales: { x: { ticks: { color: '#eee' } }, y: { ticks: { color: '#eee' } } } }
+  });
+
+  const recentTrades = history.trades.slice(-10).reverse();
+  const histHtml = recentTrades.map(t => {
+    const cls = t.return_pct >= 0 ? 'positive' : 'negative';
+    return `<div class="pos ${cls}"><span>${t.market} (${t.exit_date})</span><span>${t.return_pct.toFixed(2)}%</span></div>`;
+  }).join('') || '<p>거래 기록 없음</p>';
+  document.getElementById('history').innerHTML = histHtml;
+}
+loadData();
+</script>
+</body>
+</html>
