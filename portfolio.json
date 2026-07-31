@@ -18,8 +18,8 @@
       "entry_date": "2026-07-30",
       "expected_days": 11,
       "amount_krw": 4354,
-      "current_price": 8.68,
-      "current_return": 4.957678355501816
+      "current_price": 8.71,
+      "current_return": 5.320435308343425
     },
     {
       "market": "KRW-FIL",
@@ -29,8 +29,8 @@
       "entry_date": "2026-07-30",
       "expected_days": 6,
       "amount_krw": 6278,
-      "current_price": 1023.0,
-      "current_return": 3.4378159757330633
+      "current_price": 1020.0,
+      "current_return": 3.1344792719919106
     },
     {
       "market": "KRW-WIF",
@@ -40,8 +40,8 @@
       "entry_date": "2026-07-31",
       "expected_days": 11,
       "amount_krw": 3557,
-      "current_price": 202.0,
-      "current_return": 0.0
+      "current_price": 205.0,
+      "current_return": 1.4851485148514851
     },
     {
       "market": "KRW-PUNDIX",
