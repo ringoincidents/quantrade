@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-31 11:39:28",
+  "generated_at": "2026-07-31 11:42:50",
   "universe": [
     "KRW-BTC(crypto)",
     "KRW-ETH(crypto)",
@@ -36,87 +36,99 @@
       "asset_class": "crypto",
       "candle_count": 750,
       "trade_count": 29
+    },
+    {
+      "market": "196170",
+      "asset_class": "krx",
+      "candle_count": 750,
+      "trade_count": 25
+    },
+    {
+      "market": "042660",
+      "asset_class": "krx",
+      "candle_count": 750,
+      "trade_count": 29
     }
   ],
   "overall": {
     "all": {
-      "trade_count": 77,
-      "win_rate_pct": 46.75,
-      "avg_return_pct": -0.62,
-      "sharpe_like": -0.061,
-      "mdd_pct": -78.82
+      "trade_count": 131,
+      "win_rate_pct": 48.85,
+      "avg_return_pct": 0.53,
+      "sharpe_like": 0.044,
+      "mdd_pct": -82.73
     },
     "train": {
-      "trade_count": 50,
-      "win_rate_pct": 50.0,
-      "avg_return_pct": -0.44,
-      "sharpe_like": -0.044,
-      "mdd_pct": -74.84
+      "trade_count": 85,
+      "win_rate_pct": 52.94,
+      "avg_return_pct": 1.61,
+      "sharpe_like": 0.132,
+      "mdd_pct": -80.13
     },
     "validation": {
-      "trade_count": 27,
-      "win_rate_pct": 40.74,
-      "avg_return_pct": -0.94,
-      "sharpe_like": -0.093,
-      "mdd_pct": -48.2
+      "trade_count": 46,
+      "win_rate_pct": 41.3,
+      "avg_return_pct": -1.48,
+      "sharpe_like": -0.133,
+      "mdd_pct": -75.0
     }
   },
   "by_regime": {
     "미분류": {
-      "trade_count": 3,
-      "win_rate_pct": 0.0,
-      "avg_return_pct": -4.04,
-      "sharpe_like": -1.367,
-      "mdd_pct": -11.77
+      "trade_count": 8,
+      "win_rate_pct": 25.0,
+      "avg_return_pct": -0.64,
+      "sharpe_like": -0.045,
+      "mdd_pct": -22.77
     },
     "횡보장": {
-      "trade_count": 22,
-      "win_rate_pct": 36.36,
-      "avg_return_pct": -3.54,
-      "sharpe_like": -0.39,
-      "mdd_pct": -69.66
+      "trade_count": 37,
+      "win_rate_pct": 40.54,
+      "avg_return_pct": -2.36,
+      "sharpe_like": -0.22,
+      "mdd_pct": -76.55
     },
     "상승장": {
-      "trade_count": 13,
-      "win_rate_pct": 46.15,
-      "avg_return_pct": -0.37,
-      "sharpe_like": -0.032,
+      "trade_count": 34,
+      "win_rate_pct": 50.0,
+      "avg_return_pct": 1.88,
+      "sharpe_like": 0.14,
       "mdd_pct": -46.0
     },
     "하락장": {
-      "trade_count": 39,
-      "win_rate_pct": 56.41,
-      "avg_return_pct": 1.21,
-      "sharpe_like": 0.12,
+      "trade_count": 52,
+      "win_rate_pct": 57.69,
+      "avg_return_pct": 1.88,
+      "sharpe_like": 0.173,
       "mdd_pct": -49.42
     }
   },
   "by_strategy_type": {
     "스윙": {
-      "trade_count": 73,
-      "win_rate_pct": 46.58,
-      "avg_return_pct": -0.49,
-      "sharpe_like": -0.049,
-      "mdd_pct": -74.27
+      "trade_count": 125,
+      "win_rate_pct": 48.8,
+      "avg_return_pct": 0.42,
+      "sharpe_like": 0.036,
+      "mdd_pct": -81.33
     },
     "장기": {
-      "trade_count": 3,
-      "win_rate_pct": 66.67,
-      "avg_return_pct": -1.4,
-      "sharpe_like": -0.096,
+      "trade_count": 4,
+      "win_rate_pct": 75.0,
+      "avg_return_pct": 7.74,
+      "sharpe_like": 0.382,
       "mdd_pct": -21.55
     },
     "단타": {
-      "trade_count": 1,
+      "trade_count": 2,
       "win_rate_pct": 0.0,
-      "avg_return_pct": -7.96,
-      "sharpe_like": 0.0,
-      "mdd_pct": -7.96
+      "avg_return_pct": -7.15,
+      "sharpe_like": -8.797,
+      "mdd_pct": -13.79
     }
   },
   "verdict": {
-    "all": "샤프 유사 지표 -0.061 - 규칙 재검토 필요 / MDD -78.82% - 리스크 규칙 재점검 필요",
-    "train": "샤프 유사 지표 -0.044 - 규칙 재검토 필요 / MDD -74.84% - 리스크 규칙 재점검 필요",
-    "validation": "표본 부족 (27건 < 최소 30건) - 판단 보류"
+    "all": "샤프 유사 지표 0.044 - 규칙 재검토 필요 / MDD -82.73% - 리스크 규칙 재점검 필요",
+    "train": "샤프 유사 지표 0.132 - 규칙 재검토 필요 / MDD -80.13% - 리스크 규칙 재점검 필요",
+    "validation": "샤프 유사 지표 -0.133 - 규칙 재검토 필요 / MDD -75.0% - 리스크 규칙 재점검 필요"
   }
 }
