@@ -139,10 +139,16 @@ def scan_crypto(exclude, top_n=3):
     return results[:top_n]
 
 
+HTTP_HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; quantrade-bot/1.0)"}
+
+
 def get_us_closes(ticker, count=60):
-    resp = requests.get(f"https://stooq.com/q/d/l/?s={ticker.lower()}.us&i=d", timeout=10)
+    resp = requests.get(f"https://stooq.com/q/d/l/?s={ticker.lower()}.us&i=d", timeout=10, headers=HTTP_HEADERS)
     lines = resp.text.strip().split("\n")[1:]
-    return [float(l.split(",")[4]) for l in lines if len(l.split(",")) >= 5][-count:]
+    closes = [float(l.split(",")[4]) for l in lines if len(l.split(",")) >= 5]
+    if not closes:
+        raise ValueError(f"stooq 응답에서 시세를 못 찾음 (status={resp.status_code}, body[:120]={resp.text[:120]!r})")
+    return closes[-count:]
 
 def get_us_price(ticker):
     return get_us_closes(ticker, 5)[-1]
@@ -182,11 +188,13 @@ def get_krx_candles(code, count=750):
         "startTime": start.strftime("%Y%m%d"), "endTime": end.strftime("%Y%m%d"),
         "timeframe": "day",
     }
-    resp = requests.get("https://api.finance.naver.com/siseJson.naver", params=params, timeout=10)
+    resp = requests.get("https://api.finance.naver.com/siseJson.naver", params=params, timeout=10, headers=HTTP_HEADERS)
     rows = re.findall(
         r"\['(\d{8})',\s*([\-\d.]+),\s*([\-\d.]+),\s*([\-\d.]+),\s*([\-\d.]+),\s*([\-\d.]+)",
         resp.text,
     )
+    if not rows:
+        raise ValueError(f"네이버 시세 응답에서 데이터를 못 찾음 (status={resp.status_code}, body[:120]={resp.text[:120]!r})")
     candles = [
         {"date": r[0], "open": float(r[1]), "high": float(r[2]), "low": float(r[3]),
          "close": float(r[4]), "volume": float(r[5])}
