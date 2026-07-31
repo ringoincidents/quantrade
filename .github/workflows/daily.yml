@@ -10,6 +10,10 @@ permissions:
 jobs:
   run:
     runs-on: ubuntu-latest
+    env:
+      TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      CLAUDE_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -17,10 +21,10 @@ jobs:
           python-version: '3.11'
       - run: pip install requests
       - run: python analyze.py
-      - name: Commit portfolio state
+      - name: Commit state
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add portfolio.json trade_history.json
-          git diff --quiet && git diff --staged --quiet || git commit -m "Update portfolio state"
+          git add portfolio.json trade_history.json pending_actions.json
+          git diff --quiet && git diff --staged --quiet || git commit -m "Daily update"
           git push
