@@ -73,4 +73,78 @@ def run():
 
         if decision and decision.get("action") == "매도":
             action_id = f"{market}_{today}"
-            already_pending = any(a["id"] == action_id for a in pending["actions
+            already_pending = any(a["id"] == action_id for a in pending["actions"])
+            if not already_pending:
+                pending["actions"].append({
+                    "id": action_id, "type": "sell", "market": market,
+                    "reasoning": decision.get("reasoning", "-"), "status": "waiting"
+                })
+                report.append(f"⏳ 매도 승인 대기: {market} ({pos['current_return']:+.2f}%)")
+                report.append(f"   AI 이유: {decision.get('reasoning','-')}")
+                report.append(f"   👉 승인 /approve {action_id} / 거절 /reject {action_id}")
+            still_holding.append(pos)
+        else:
+            report.append(f"📌 보유 유지: {market} ({days_held}일) {pos['current_return']:+.2f}%")
+            if decision:
+                report.append(f"   AI 코멘트: {decision.get('reasoning','-')}")
+            still_holding.append(pos)
+
+    portfolio["positions"] = still_holding
+
+    min_cash = TOTAL_BUDGET * MIN_CASH_RESERVE_RATIO
+    available = portfolio["cash"] - min_cash
+
+    for c in all_cands:
+        decision = decision_map.get(c["market"])
+        if decision and decision.get("action") in ("매수", "비중조정") and available > 0:
+            weight_pct = decision.get("target_weight_pct") or 20
+            amount = round(available * (weight_pct / 100))
+            amount = min(amount, available)
+            if amount <= 0:
+                continue
+            portfolio["positions"].append({
+                "market": c["market"], "asset_class": c["asset_class"],
+                "strategy_type": c["strategy_type"], "entry_price": c["price"],
+                "entry_date": today, "expected_days": c["expected_days"], "amount_krw": amount
+            })
+            portfolio["cash"] -= amount
+            available -= amount
+            report.append("")
+            report.append(f"🆕 매수: {c['market']} (비중 {weight_pct}%, {amount:,.0f}원)")
+            report.append(f"   이유: {decision.get('reasoning','-')}")
+
+    report.append("")
+    report.append(f"💰 현금: {portfolio['cash']:,.0f}원 / 보유 {len(portfolio['positions'])}개")
+    waiting_count = len([a for a in pending["actions"] if a["status"] == "waiting"])
+    if waiting_count:
+        report.append(f"⏳ 승인 대기 중인 매도 {waiting_count}건")
+
+    # 웹 대시보드용 리포트 저장
+    last_report = {
+        "date": today,
+        "market_summary": ai_result.get("market_summary", ""),
+        "positions": [
+            {
+                "market": p["market"], "asset_class": p.get("asset_class", "crypto"),
+                "strategy_type": p.get("strategy_type", "스윙"), "amount_krw": p["amount_krw"],
+                "current_return": p.get("current_return", 0), "conviction": p.get("conviction", False)
+            } for p in portfolio["positions"]
+        ],
+        "pending": [a for a in pending["actions"] if a["status"] == "waiting"],
+        "cash": portfolio["cash"]
+    }
+    save_json("last_report.json", last_report)
+
+    save_json(PORTFOLIO_FILE, portfolio)
+    save_json(HISTORY_FILE, history)
+    save_json(PENDING_FILE, pending)
+    return "\n".join(report)
+
+
+if __name__ == "__main__":
+    try:
+        result = run()
+        print(result)
+        send_telegram(result)
+    except Exception as e:
+        send_telegram(f"❌ 실행 오류: {e}")
