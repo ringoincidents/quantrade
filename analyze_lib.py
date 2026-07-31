@@ -143,11 +143,52 @@ HTTP_HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; quantrade-bot/1.0)"}
 
 
 def get_us_closes(ticker, count=60):
+    """미국주식 일봉 종가. stooq가 GitHub Actions IP에서 봇차단 JS 챌린지를 주는 것이
+    확인되어(phase-1 백테스트, backtest_report.json에 미국주식 결과가 아예 안 잡힘 —
+    CLAUDE.md 참고) Yahoo Finance 차트 API를 우선 시도하고, 실패하면 stooq로 폴백한다.
+    Yahoo도 언젠가 같은 이유로 막힐 수 있고 이 환경에서는 실제 네트워크 검증이
+    불가능했으므로, daily.yml/backtest.yml 실행 로그로 실제 동작을 확인할 것."""
+    errors = []
+    try:
+        return _get_us_closes_yahoo(ticker, count)
+    except Exception as e:
+        errors.append(f"yahoo: {e}")
+    try:
+        return _get_us_closes_stooq(ticker, count)
+    except Exception as e:
+        errors.append(f"stooq: {e}")
+    raise ValueError(f"{ticker} 시세 조회 실패 - " + " / ".join(errors))
+
+
+def _get_us_closes_yahoo(ticker, count):
+    end = datetime.now()
+    start = end - timedelta(days=int(count * 1.6) + 30)
+    params = {"period1": int(start.timestamp()), "period2": int(end.timestamp()), "interval": "1d"}
+    resp = requests.get(
+        f"https://query1.finance.yahoo.com/v8/finance/chart/{ticker.upper()}",
+        params=params, timeout=10, headers=HTTP_HEADERS,
+    )
+    try:
+        data = resp.json()
+    except ValueError:
+        raise ValueError(f"JSON 아님 (status={resp.status_code}, body[:120]={resp.text[:120]!r})")
+    result = (data.get("chart") or {}).get("result")
+    if not result:
+        err = (data.get("chart") or {}).get("error")
+        raise ValueError(f"result 없음 (error={err}, status={resp.status_code})")
+    closes_raw = result[0]["indicators"]["quote"][0]["close"]
+    closes = [c for c in closes_raw if c is not None]
+    if not closes:
+        raise ValueError("유효한 종가 없음")
+    return closes[-count:]
+
+
+def _get_us_closes_stooq(ticker, count):
     resp = requests.get(f"https://stooq.com/q/d/l/?s={ticker.lower()}.us&i=d", timeout=10, headers=HTTP_HEADERS)
     lines = resp.text.strip().split("\n")
     if not lines or not lines[0].lower().startswith("date,"):
         raise ValueError(
-            f"stooq가 CSV 대신 다른 응답을 줌 - 클라우드 IP 차단(봇 감지)일 가능성 "
+            f"CSV 대신 다른 응답 - 클라우드 IP 차단(봇 감지) 가능성 "
             f"(status={resp.status_code}, body[:120]={resp.text[:120]!r})"
         )
     closes = [float(l.split(",")[4]) for l in lines[1:] if len(l.split(",")) >= 5]
