@@ -1,5 +1,5 @@
 {
-  "cash": 58498.709684840105,
+  "cash": 52723.709684840105,
   "positions": [
     {
       "market": "KRW-USDE",
@@ -18,8 +18,8 @@
       "entry_date": "2026-07-30",
       "expected_days": 11,
       "amount_krw": 4354,
-      "current_price": 8.64,
-      "current_return": 4.4740024183796985
+      "current_price": 8.67,
+      "current_return": 4.836759371221286
     },
     {
       "market": "KRW-WIF",
@@ -29,8 +29,17 @@
       "entry_date": "2026-07-31",
       "expected_days": 11,
       "amount_krw": 3557,
-      "current_price": 205.0,
-      "current_return": 1.4851485148514851
+      "current_price": 204.0,
+      "current_return": 0.9900990099009901
+    },
+    {
+      "market": "KRW-LAYER",
+      "asset_class": "crypto",
+      "strategy_type": "스윙",
+      "entry_price": 88.8,
+      "entry_date": "2026-07-31",
+      "expected_days": 11,
+      "amount_krw": 5775
     }
   ]
 }

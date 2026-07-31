@@ -1,6 +1,6 @@
 {
   "date": "2026-07-31",
-  "market_summary": "보유 포지션은 PENGU와 WIF가 소폭 플러스, USDE는 소폭 마이너스이며 신규 후보 전반적으로 RSI 과매도권 진입 중이나 뉴스 분위기 부정적 우세로 신중한 접근 필요",
+  "market_summary": "전체적으로 크립토 시장은 중립 분위기이며 보유 포지션은 혼조세, 신규 후보들은 RSI 과매도 구간 진입 중",
   "positions": [
     {
       "market": "KRW-USDE",
@@ -15,7 +15,7 @@
       "asset_class": "crypto",
       "strategy_type": "스윙",
       "amount_krw": 4354,
-      "current_return": 4.4740024183796985,
+      "current_return": 4.836759371221286,
       "conviction": false
     },
     {
@@ -23,10 +23,18 @@
       "asset_class": "crypto",
       "strategy_type": "스윙",
       "amount_krw": 3557,
-      "current_return": 1.4851485148514851,
+      "current_return": 0.9900990099009901,
+      "conviction": false
+    },
+    {
+      "market": "KRW-LAYER",
+      "asset_class": "crypto",
+      "strategy_type": "스윙",
+      "amount_krw": 5775,
+      "current_return": 0,
       "conviction": false
     }
   ],
   "pending": [],
-  "cash": 58498.709684840105
+  "cash": 52723.709684840105
 }
