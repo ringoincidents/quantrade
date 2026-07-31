@@ -5,6 +5,7 @@ PORTFOLIO_FILE = "portfolio.json"
 HISTORY_FILE = "trade_history.json"
 PENDING_FILE = "pending_actions.json"
 OFFSET_FILE = "telegram_offset.json"
+LAST_REPORT_FILE = "last_report.json"
 
 
 def get_updates(offset):
@@ -63,6 +64,26 @@ def handle_unkeep(market, portfolio):
     return False
 
 
+def refresh_last_report(portfolio, pending):
+    """승인/거절/keep 처리 후 웹 대시보드용 last_report.json도 최신 상태로 갱신"""
+    last_report = load_json(LAST_REPORT_FILE, {})
+    last_report["pending"] = [a for a in pending["actions"] if a["status"] == "waiting"]
+    last_report["positions"] = []
+    for p in portfolio["positions"]:
+        try:
+            price = get_current_price(p.get("asset_class", "crypto"), p["market"])
+            ret = (price - p["entry_price"]) / p["entry_price"] * 100
+        except Exception:
+            ret = p.get("current_return", 0)
+        last_report["positions"].append({
+            "market": p["market"], "asset_class": p.get("asset_class", "crypto"),
+            "strategy_type": p.get("strategy_type", "스윙"), "amount_krw": p["amount_krw"],
+            "current_return": ret, "conviction": p.get("conviction", False)
+        })
+    last_report["cash"] = portfolio["cash"]
+    save_json(LAST_REPORT_FILE, last_report)
+
+
 def run():
     offset_data = load_json(OFFSET_FILE, {"last_update_id": 0})
     portfolio = load_json(PORTFOLIO_FILE, {"cash": 100000, "positions": []})
@@ -72,6 +93,7 @@ def run():
     updates = get_updates(offset_data["last_update_id"] + 1)
     if not updates.get("ok"):
         print("업데이트 조회 실패:", updates)
+        save_json(OFFSET_FILE, offset_data)
         return
 
     changed = False
@@ -105,6 +127,8 @@ def run():
         save_json(PORTFOLIO_FILE, portfolio)
         save_json(HISTORY_FILE, history)
         save_json(PENDING_FILE, pending)
+        refresh_last_report(portfolio, pending)
+
     save_json(OFFSET_FILE, offset_data)
 
 
