@@ -65,6 +65,39 @@ def estimate_holding_period(prices):
     avg = sum(lengths) / len(lengths) if lengths else 7
     return max(3, round(avg))
 
+def is_golden_cross(closes, short=20, long=60):
+    """단순이동평균 골든크로스 감지: 직전 봉까지는 short≤long이었다가
+    이번 봉에서 short>long으로 상향 돌파했는지."""
+    if len(closes) < long + 1:
+        return False
+    ma_short_now, ma_long_now = calc_ma(closes, short), calc_ma(closes, long)
+    ma_short_prev, ma_long_prev = calc_ma(closes[:-1], short), calc_ma(closes[:-1], long)
+    return ma_short_prev <= ma_long_prev and ma_short_now > ma_long_now
+
+def calc_adx(highs, lows, closes, period=14):
+    """추세 강도 근사치. calc_rsi와 동일하게 최근 period 구간을 단순평균해서
+    구하는 간이 버전이며(Wilder 재귀평활은 생략), 25 이상이면 '추세가 있다'는
+    게이트로만 쓴다 — 정밀한 ADX 값 자체가 목적이 아님."""
+    n = len(closes)
+    if n < period + 1:
+        return 0
+    plus_dms, minus_dms, trs = [], [], []
+    for i in range(n - period, n):
+        up_move = highs[i] - highs[i - 1]
+        down_move = lows[i - 1] - lows[i]
+        plus_dms.append(up_move if (up_move > down_move and up_move > 0) else 0.0)
+        minus_dms.append(down_move if (down_move > up_move and down_move > 0) else 0.0)
+        trs.append(max(highs[i] - lows[i], abs(highs[i] - closes[i - 1]), abs(lows[i] - closes[i - 1])))
+    avg_tr = sum(trs) / len(trs)
+    if avg_tr == 0:
+        return 0
+    plus_di = 100 * (sum(plus_dms) / len(plus_dms)) / avg_tr
+    minus_di = 100 * (sum(minus_dms) / len(minus_dms)) / avg_tr
+    denom = plus_di + minus_di
+    if denom == 0:
+        return 0
+    return 100 * abs(plus_di - minus_di) / denom
+
 def classify_strategy(expected_days):
     if expected_days <= 6:
         return "단타"
@@ -198,6 +231,27 @@ def _get_us_closes_stooq(ticker, count):
 
 def get_us_price(ticker):
     return get_us_closes(ticker, 5)[-1]
+
+def get_us_candles(ticker, count=60):
+    """get_us_closes와 별개로 OHLC 전체가 필요한 소비자(백테스트의 ADX 계산 등)용.
+    라이브 스캔(scan_stocks/get_us_price)은 계속 get_us_closes만 쓰므로 영향 없음."""
+    resp = requests.get(f"https://stooq.com/q/d/l/?s={ticker.lower()}.us&i=d", timeout=10, headers=HTTP_HEADERS)
+    lines = resp.text.strip().split("\n")
+    if not lines or not lines[0].lower().startswith("date,"):
+        raise ValueError(
+            f"stooq가 CSV 대신 다른 응답을 줌 - 클라우드 IP 차단(봇 감지)일 가능성 "
+            f"(status={resp.status_code}, body[:120]={resp.text[:120]!r})"
+        )
+    candles = []
+    for l in lines[1:]:
+        parts = l.split(",")
+        if len(parts) < 6:
+            continue
+        candles.append({"date": parts[0], "open": float(parts[1]), "high": float(parts[2]),
+                         "low": float(parts[3]), "close": float(parts[4]), "volume": float(parts[5])})
+    if not candles:
+        raise ValueError(f"stooq 응답에서 시세를 못 찾음 (status={resp.status_code}, body[:120]={resp.text[:120]!r})")
+    return candles[-count:]
 
 def scan_stocks(exclude, top_n=2):
     results = []
