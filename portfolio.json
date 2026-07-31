@@ -1,5 +1,5 @@
 {
-  "cash": 48815.5792500575,
+  "cash": 55296.709684840105,
   "positions": [
     {
       "market": "KRW-USDE",
@@ -20,17 +20,6 @@
       "amount_krw": 4354,
       "current_price": 8.71,
       "current_return": 5.320435308343425
-    },
-    {
-      "market": "KRW-FIL",
-      "asset_class": "crypto",
-      "strategy_type": "단타",
-      "entry_price": 989.0,
-      "entry_date": "2026-07-30",
-      "expected_days": 6,
-      "amount_krw": 6278,
-      "current_price": 1020.0,
-      "current_return": 3.1344792719919106
     },
     {
       "market": "KRW-WIF",
