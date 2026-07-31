@@ -17,23 +17,35 @@ def get_updates(offset):
 def handle_approve(action_id, portfolio, history, pending):
     for action in pending["actions"]:
         if action["id"] == action_id and action["status"] == "waiting":
-            market = action["market"]
-            pos = next((p for p in portfolio["positions"] if p["market"] == market), None)
-            if pos:
-                price = get_current_price(pos.get("asset_class", "crypto"), market)
-                ret = (price - pos["entry_price"]) / pos["entry_price"] * 100
-                portfolio["cash"] += pos["amount_krw"] * (1 + ret / 100)
-                portfolio["positions"] = [p for p in portfolio["positions"] if p["market"] != market]
-                history["trades"].append({
-                    "market": market, "asset_class": pos.get("asset_class", "crypto"),
-                    "strategy_type": pos.get("strategy_type", "스윙"),
-                    "entry_date": pos["entry_date"], "exit_date": datetime.now().strftime("%Y-%m-%d"),
-                    "return_pct": ret
+            if action["type"] == "sell":
+                market = action["market"]
+                pos = next((p for p in portfolio["positions"] if p["market"] == market), None)
+                if pos:
+                    price = get_current_price(pos.get("asset_class", "crypto"), market)
+                    ret = (price - pos["entry_price"]) / pos["entry_price"] * 100
+                    portfolio["cash"] += pos["amount_krw"] * (1 + ret / 100)
+                    portfolio["positions"] = [p for p in portfolio["positions"] if p["market"] != market]
+                    history["trades"].append({
+                        "market": market, "asset_class": pos.get("asset_class", "crypto"),
+                        "strategy_type": pos.get("strategy_type", "스윙"),
+                        "entry_date": pos["entry_date"], "exit_date": datetime.now().strftime("%Y-%m-%d"),
+                        "return_pct": ret
+                    })
+                    action["status"] = "approved"
+                    send_telegram(f"✅ 승인 완료: {market} 매도 처리됨 ({ret:+.2f}%)")
+            elif action["type"] == "buy":
+                portfolio["positions"].append({
+                    "market": action["market"], "asset_class": action["asset_class"],
+                    "strategy_type": action["strategy_type"], "entry_price": action["entry_price"],
+                    "entry_date": datetime.now().strftime("%Y-%m-%d"),
+                    "expected_days": action["expected_days"], "amount_krw": action["amount_krw"]
                 })
+                portfolio["cash"] -= action["amount_krw"]
                 action["status"] = "approved"
-                send_telegram(f"✅ 승인 완료: {market} 매도 처리됨 ({ret:+.2f}%)")
+                send_telegram(f"✅ 승인 완료: {action['market']} 매수 처리됨 ({action['amount_krw']:,.0f}원)")
             return True
     return False
+
 
 
 def handle_reject(action_id, pending):
