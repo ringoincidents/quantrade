@@ -1,0 +1,56 @@
+{
+  "date": "2026-07-31",
+  "market_summary": "AI 판단 실패: Unterminated string starting at: line 50 column 20 (char 1987)",
+  "positions": [
+    {
+      "market": "KRW-USDE",
+      "asset_class": "crypto",
+      "strategy_type": "스윙",
+      "amount_krw": 33333.333333333336,
+      "current_return": -0.41841004184100417,
+      "conviction": false
+    },
+    {
+      "market": "KRW-PENGU",
+      "asset_class": "crypto",
+      "strategy_type": "스윙",
+      "amount_krw": 4354,
+      "current_return": 4.957678355501816,
+      "conviction": false
+    },
+    {
+      "market": "KRW-FIL",
+      "asset_class": "crypto",
+      "strategy_type": "단타",
+      "amount_krw": 6278,
+      "current_return": 3.4378159757330633,
+      "conviction": false
+    },
+    {
+      "market": "KRW-WIF",
+      "asset_class": "crypto",
+      "strategy_type": "스윙",
+      "amount_krw": 3557,
+      "current_return": 0.0,
+      "conviction": false
+    },
+    {
+      "market": "KRW-PUNDIX",
+      "asset_class": "crypto",
+      "strategy_type": "스윙",
+      "amount_krw": 3202,
+      "current_return": 0.0,
+      "conviction": false
+    }
+  ],
+  "pending": [
+    {
+      "id": "KRW-FIL_2026-07-31",
+      "type": "sell",
+      "market": "KRW-FIL",
+      "reasoning": "단타 전략으로 진입한 FIL이 +2.63% 수익을 달성했으며, 단타 특성상 목표 수익 구간에 도달한 것으로 판단한다. 시장 분위기가 중립적이고 추가 모멘텀이 불확실한 상황에서 수익을 실현하고 현금화하는 것이 합리적이다.",
+      "status": "waiting"
+    }
+  ],
+  "cash": 48815.5792500575
+}
