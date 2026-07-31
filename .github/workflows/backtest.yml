@@ -3,11 +3,11 @@ on:
   workflow_dispatch:
     inputs:
       count:
-        description: '일봉 개수 (기본 약 3년치)'
+        description: 'KRX/미국주식 일봉 개수 (기본 약 6년치, 크립토는 --crypto-count로 별도 상장시점까지 조회)'
         required: false
-        default: '750'
+        default: '1500'
       krx:
-        description: 'KRX 종목코드 (공백 구분, 예: 005930 373220)'
+        description: 'KRX 종목코드 (공백 구분). 비워두면 KRX_MARKET_CAP_TOP 기본 유니버스 사용'
         required: false
         default: ''
 
@@ -17,6 +17,7 @@ permissions:
 jobs:
   run:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -27,7 +28,12 @@ jobs:
         env:
           COUNT: ${{ github.event.inputs.count }}
           KRX: ${{ github.event.inputs.krx }}
-        run: python backtest.py --count "$COUNT" --krx $KRX
+        run: |
+          if [ -n "$KRX" ]; then
+            python backtest.py --count "$COUNT" --krx $KRX
+          else
+            python backtest.py --count "$COUNT"
+          fi
       - name: Commit report
         run: |
           git config user.name "github-actions"
