@@ -144,8 +144,13 @@ HTTP_HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; quantrade-bot/1.0)"}
 
 def get_us_closes(ticker, count=60):
     resp = requests.get(f"https://stooq.com/q/d/l/?s={ticker.lower()}.us&i=d", timeout=10, headers=HTTP_HEADERS)
-    lines = resp.text.strip().split("\n")[1:]
-    closes = [float(l.split(",")[4]) for l in lines if len(l.split(",")) >= 5]
+    lines = resp.text.strip().split("\n")
+    if not lines or not lines[0].lower().startswith("date,"):
+        raise ValueError(
+            f"stooq가 CSV 대신 다른 응답을 줌 - 클라우드 IP 차단(봇 감지)일 가능성 "
+            f"(status={resp.status_code}, body[:120]={resp.text[:120]!r})"
+        )
+    closes = [float(l.split(",")[4]) for l in lines[1:] if len(l.split(",")) >= 5]
     if not closes:
         raise ValueError(f"stooq 응답에서 시세를 못 찾음 (status={resp.status_code}, body[:120]={resp.text[:120]!r})")
     return closes[-count:]
@@ -190,7 +195,7 @@ def get_krx_candles(code, count=750):
     }
     resp = requests.get("https://api.finance.naver.com/siseJson.naver", params=params, timeout=10, headers=HTTP_HEADERS)
     rows = re.findall(
-        r"\['(\d{8})',\s*([\-\d.]+),\s*([\-\d.]+),\s*([\-\d.]+),\s*([\-\d.]+),\s*([\-\d.]+)",
+        r"\[[\"'](\d{8})[\"'],\s*([\-\d.]+),\s*([\-\d.]+),\s*([\-\d.]+),\s*([\-\d.]+),\s*([\-\d.]+)",
         resp.text,
     )
     if not rows:
