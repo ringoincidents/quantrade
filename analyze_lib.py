@@ -3,6 +3,7 @@ import math
 import json
 import os
 import re
+import time
 import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta
 
@@ -16,9 +17,11 @@ HARD_STOP_LOSS = {"단타": -5, "스윙": -10, "장기": -25}
 # 매수/매도 각각에 편도로 적용되는 가정치(%) — 왕복 시 두 번 적용됨.
 # 실측치 확보 전까지의 잠정 가정이며, 백테스트 결과 해석 시 이 가정에 의존한다는 점을 감안할 것.
 TRADING_COSTS = {
-    "crypto": {"fee_pct": 0.05, "slippage_pct": 0.1},   # 업비트 수수료 + 가정 슬리피지
-    "krx": {"fee_pct": 0.015, "slippage_pct": 0.1},     # 토스증권 온라인 수수료 + 가정 슬리피지
-    "stock": {"fee_pct": 0.25, "slippage_pct": 0.1},    # 해외주식 매매수수료 가정치 + 슬리피지
+    "crypto": {"fee_pct": 0.05, "slippage_pct": 0.1},   # 업비트 매수/매도 수수료 0.05%(실측) + 가정 슬리피지
+    "krx": {"fee_pct": 0.015, "slippage_pct": 0.1, "sell_tax_pct": 0.18},
+        # 토스증권 온라인 수수료(매수/매도 각 0.015%) + 가정 슬리피지 + 매도 시에만 붙는
+        # 증권거래세+농특세(코스피 기준 약 0.18%; 코스닥은 이보다 낮지만 보수적으로 통일)
+    "stock": {"fee_pct": 0.25, "slippage_pct": 0.1},    # 해외주식 매매수수료 가정치 + 슬리피지 (SEC 수수료 등은 미미해 생략)
 }
 
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN", "")
@@ -65,6 +68,39 @@ def estimate_holding_period(prices):
     avg = sum(lengths) / len(lengths) if lengths else 7
     return max(3, round(avg))
 
+def is_golden_cross(closes, short=20, long=60):
+    """단순이동평균 골든크로스 감지: 직전 봉까지는 short≤long이었다가
+    이번 봉에서 short>long으로 상향 돌파했는지."""
+    if len(closes) < long + 1:
+        return False
+    ma_short_now, ma_long_now = calc_ma(closes, short), calc_ma(closes, long)
+    ma_short_prev, ma_long_prev = calc_ma(closes[:-1], short), calc_ma(closes[:-1], long)
+    return ma_short_prev <= ma_long_prev and ma_short_now > ma_long_now
+
+def calc_adx(highs, lows, closes, period=14):
+    """추세 강도 근사치. calc_rsi와 동일하게 최근 period 구간을 단순평균해서
+    구하는 간이 버전이며(Wilder 재귀평활은 생략), 25 이상이면 '추세가 있다'는
+    게이트로만 쓴다 — 정밀한 ADX 값 자체가 목적이 아님."""
+    n = len(closes)
+    if n < period + 1:
+        return 0
+    plus_dms, minus_dms, trs = [], [], []
+    for i in range(n - period, n):
+        up_move = highs[i] - highs[i - 1]
+        down_move = lows[i - 1] - lows[i]
+        plus_dms.append(up_move if (up_move > down_move and up_move > 0) else 0.0)
+        minus_dms.append(down_move if (down_move > up_move and down_move > 0) else 0.0)
+        trs.append(max(highs[i] - lows[i], abs(highs[i] - closes[i - 1]), abs(lows[i] - closes[i - 1])))
+    avg_tr = sum(trs) / len(trs)
+    if avg_tr == 0:
+        return 0
+    plus_di = 100 * (sum(plus_dms) / len(plus_dms)) / avg_tr
+    minus_di = 100 * (sum(minus_dms) / len(minus_dms)) / avg_tr
+    denom = plus_di + minus_di
+    if denom == 0:
+        return 0
+    return 100 * abs(plus_di - minus_di) / denom
+
 def classify_strategy(expected_days):
     if expected_days <= 6:
         return "단타"
@@ -107,6 +143,8 @@ def get_krw_candles(market, count=60):
         to_param = batch[-1]["candle_date_time_utc"]
         if len(batch) < batch_size:
             break
+        if len(all_candles) < count:
+            time.sleep(0.12)  # 업비트 rate limit 배려 - 다중 페이지네이션(백테스트의 대량 히스토리 조회)에서만 발생
     all_candles.reverse()
     return all_candles
 
@@ -139,13 +177,132 @@ def scan_crypto(exclude, top_n=3):
     return results[:top_n]
 
 
+HTTP_HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; quantrade-bot/1.0)"}
+
+
 def get_us_closes(ticker, count=60):
-    resp = requests.get(f"https://stooq.com/q/d/l/?s={ticker.lower()}.us&i=d", timeout=10)
-    lines = resp.text.strip().split("\n")[1:]
-    return [float(l.split(",")[4]) for l in lines if len(l.split(",")) >= 5][-count:]
+    """미국주식 일봉 종가. stooq가 GitHub Actions IP에서 봇차단 JS 챌린지를 주는 것이
+    확인되어(phase-1 백테스트, backtest_report.json에 미국주식 결과가 아예 안 잡힘 —
+    CLAUDE.md 참고) Yahoo Finance 차트 API를 우선 시도하고, 실패하면 stooq로 폴백한다.
+    Yahoo도 언젠가 같은 이유로 막힐 수 있고 이 환경에서는 실제 네트워크 검증이
+    불가능했으므로, daily.yml/backtest.yml 실행 로그로 실제 동작을 확인할 것."""
+    errors = []
+    try:
+        return _get_us_closes_yahoo(ticker, count)
+    except Exception as e:
+        errors.append(f"yahoo: {e}")
+    try:
+        return _get_us_closes_stooq(ticker, count)
+    except Exception as e:
+        errors.append(f"stooq: {e}")
+    raise ValueError(f"{ticker} 시세 조회 실패 - " + " / ".join(errors))
+
+
+def _get_us_closes_yahoo(ticker, count):
+    end = datetime.now()
+    start = end - timedelta(days=int(count * 1.6) + 30)
+    params = {"period1": int(start.timestamp()), "period2": int(end.timestamp()), "interval": "1d"}
+    resp = requests.get(
+        f"https://query1.finance.yahoo.com/v8/finance/chart/{ticker.upper()}",
+        params=params, timeout=10, headers=HTTP_HEADERS,
+    )
+    try:
+        data = resp.json()
+    except ValueError:
+        raise ValueError(f"JSON 아님 (status={resp.status_code}, body[:120]={resp.text[:120]!r})")
+    result = (data.get("chart") or {}).get("result")
+    if not result:
+        err = (data.get("chart") or {}).get("error")
+        raise ValueError(f"result 없음 (error={err}, status={resp.status_code})")
+    closes_raw = result[0]["indicators"]["quote"][0]["close"]
+    closes = [c for c in closes_raw if c is not None]
+    if not closes:
+        raise ValueError("유효한 종가 없음")
+    return closes[-count:]
+
+
+def _get_us_closes_stooq(ticker, count):
+    resp = requests.get(f"https://stooq.com/q/d/l/?s={ticker.lower()}.us&i=d", timeout=10, headers=HTTP_HEADERS)
+    lines = resp.text.strip().split("\n")
+    if not lines or not lines[0].lower().startswith("date,"):
+        raise ValueError(
+            f"CSV 대신 다른 응답 - 클라우드 IP 차단(봇 감지) 가능성 "
+            f"(status={resp.status_code}, body[:120]={resp.text[:120]!r})"
+        )
+    closes = [float(l.split(",")[4]) for l in lines[1:] if len(l.split(",")) >= 5]
+    if not closes:
+        raise ValueError(f"stooq 응답에서 시세를 못 찾음 (status={resp.status_code}, body[:120]={resp.text[:120]!r})")
+    return closes[-count:]
 
 def get_us_price(ticker):
     return get_us_closes(ticker, 5)[-1]
+
+def get_us_candles(ticker, count=60):
+    """get_us_closes와 별개로 OHLC 전체가 필요한 소비자(백테스트의 ADX 계산 등)용.
+    라이브 스캔(scan_stocks/get_us_price)은 계속 get_us_closes만 쓰므로 영향 없음.
+    get_us_closes와 동일하게 Yahoo 우선, stooq 폴백 순서를 따른다."""
+    errors = []
+    try:
+        return _get_us_candles_yahoo(ticker, count)
+    except Exception as e:
+        errors.append(f"yahoo: {e}")
+    try:
+        return _get_us_candles_stooq(ticker, count)
+    except Exception as e:
+        errors.append(f"stooq: {e}")
+    raise ValueError(f"{ticker} OHLC 조회 실패 - " + " / ".join(errors))
+
+
+def _get_us_candles_yahoo(ticker, count):
+    end = datetime.now()
+    start = end - timedelta(days=int(count * 1.6) + 30)
+    params = {"period1": int(start.timestamp()), "period2": int(end.timestamp()), "interval": "1d"}
+    resp = requests.get(
+        f"https://query1.finance.yahoo.com/v8/finance/chart/{ticker.upper()}",
+        params=params, timeout=10, headers=HTTP_HEADERS,
+    )
+    try:
+        data = resp.json()
+    except ValueError:
+        raise ValueError(f"JSON 아님 (status={resp.status_code}, body[:120]={resp.text[:120]!r})")
+    result = (data.get("chart") or {}).get("result")
+    if not result:
+        err = (data.get("chart") or {}).get("error")
+        raise ValueError(f"result 없음 (error={err}, status={resp.status_code})")
+    timestamps = result[0].get("timestamp") or []
+    quote = result[0]["indicators"]["quote"][0]
+    candles = []
+    for i, ts in enumerate(timestamps):
+        o, h, l, c = quote["open"][i], quote["high"][i], quote["low"][i], quote["close"][i]
+        if None in (o, h, l, c):
+            continue
+        candles.append({
+            "date": datetime.utcfromtimestamp(ts).strftime("%Y-%m-%d"),
+            "open": o, "high": h, "low": l, "close": c, "volume": quote["volume"][i] or 0,
+        })
+    if not candles:
+        raise ValueError("유효한 OHLC 없음")
+    return candles[-count:]
+
+
+def _get_us_candles_stooq(ticker, count):
+    resp = requests.get(f"https://stooq.com/q/d/l/?s={ticker.lower()}.us&i=d", timeout=10, headers=HTTP_HEADERS)
+    lines = resp.text.strip().split("\n")
+    if not lines or not lines[0].lower().startswith("date,"):
+        raise ValueError(
+            f"CSV 대신 다른 응답 - 클라우드 IP 차단(봇 감지) 가능성 "
+            f"(status={resp.status_code}, body[:120]={resp.text[:120]!r})"
+        )
+    candles = []
+    for l in lines[1:]:
+        parts = l.split(",")
+        if len(parts) < 6:
+            continue
+        candles.append({"date": parts[0], "open": float(parts[1]), "high": float(parts[2]),
+                         "low": float(parts[3]), "close": float(parts[4]), "volume": float(parts[5])})
+    if not candles:
+        raise ValueError(f"stooq 응답에서 시세를 못 찾음 (status={resp.status_code}, body[:120]={resp.text[:120]!r})")
+    return candles[-count:]
 
 def scan_stocks(exclude, top_n=2):
     results = []
@@ -182,11 +339,13 @@ def get_krx_candles(code, count=750):
         "startTime": start.strftime("%Y%m%d"), "endTime": end.strftime("%Y%m%d"),
         "timeframe": "day",
     }
-    resp = requests.get("https://api.finance.naver.com/siseJson.naver", params=params, timeout=10)
+    resp = requests.get("https://api.finance.naver.com/siseJson.naver", params=params, timeout=10, headers=HTTP_HEADERS)
     rows = re.findall(
-        r"\['(\d{8})',\s*([\-\d.]+),\s*([\-\d.]+),\s*([\-\d.]+),\s*([\-\d.]+),\s*([\-\d.]+)",
+        r"\[[\"'](\d{8})[\"'],\s*([\-\d.]+),\s*([\-\d.]+),\s*([\-\d.]+),\s*([\-\d.]+),\s*([\-\d.]+)",
         resp.text,
     )
+    if not rows:
+        raise ValueError(f"네이버 시세 응답에서 데이터를 못 찾음 (status={resp.status_code}, body[:120]={resp.text[:120]!r})")
     candles = [
         {"date": r[0], "open": float(r[1]), "high": float(r[2]), "low": float(r[3]),
          "close": float(r[4]), "volume": float(r[5])}

@@ -1,20 +1,35 @@
-"""QuanTrade 백테스트 엔진 (Phase 1, 종합계획서 v3 §5).
+"""QuanTrade 백테스트 엔진 (Phase 1, 종합계획서 v3 §5) — 추세추종 재설계 버전.
 
-라이브 스캔(scan_crypto/scan_stocks)이 쓰는 진입 규칙(entry_score)과 하드손절
-규칙(HARD_STOP_LOSS)을 과거 시세에 그대로 재현해 검증한다.
+메인 신호는 추세추종(20/60일 이동평균 골든크로스 + ADX 25 이상)으로,
+RSI/볼린저는 "진입해도 되는가"가 아니라 "지금 들어가기 좋은 타이밍인가"만
+판단하는 보조 필터로 격하했다. 사용자 검토 결과 기존 RSI+볼린저 단독 눌림목
+매수가 검증구간에서 재현이 안 됐던 문제(2026-07-31 1차 백테스트)에 대한 대응.
+
+주의: 이 신호는 아직 라이브 스캔(scan_crypto/scan_stocks, entry_score)에
+반영되지 않았다 — 의도적으로 분리했다. "전략 검증이 아키텍처보다 먼저다"
+원칙에 따라, 백테스트로 먼저 검증하고 사용자가 명시적으로 승인한 뒤에만
+entry_score를 이 규칙으로 교체해야 한다.
 
 한계: 실거래에서 보유/매도는 매번 Claude에게 물어 결정하지만, 과거 시점의
 AI 판단을 재현할 방법이 없다(비용·비결정성 문제). 이 엔진은 매도 쪽을
 규칙 기반(하드손절 / RSI 과열 / 타임스탑)으로 근사한다 — Phase 2의 AI 확신도
 캘리브레이션이 도입되면 이 근사를 교체해야 한다.
+
+거래비용(TRADING_COSTS, analyze_lib.py)은 매수/매도 양쪽에 apply_cost()로
+적용되며, KRX는 매도 시에만 붙는 증권거래세를 별도(sell_tax_pct)로 반영한다.
+같은 종목/같은 기간에 대해 buy_hold_trades()로 단순 매수 후 보유 벤치마크도
+같이 계산해서 전략이 그냥 사서 들고 있는 것보다 나은지 report의
+benchmark_buy_hold/strategy_vs_buy_hold에서 바로 비교할 수 있게 한다.
 """
 import argparse
+import time
 from datetime import datetime
 
 from analyze_lib import (
-    calc_rsi, entry_score, estimate_holding_period, classify_strategy,
+    calc_rsi, calc_bollinger, calc_adx, is_golden_cross,
+    estimate_holding_period, classify_strategy,
     HARD_STOP_LOSS, TRADING_COSTS, US_STOCKS,
-    get_krw_candles, get_us_closes, get_krx_candles, save_json,
+    get_krw_candles, get_us_candles, get_krx_candles, get_all_krw_markets, save_json,
 )
 
 # 종합계획서 v3 §4.3 — 결과가 나온 뒤 기준을 짜맞추는 것을 막기 위해 미리 박아둔
@@ -26,14 +41,39 @@ SUCCESS_CRITERIA = {
     "mdd_limit_pct": -20,
 }
 
+# MDD는 Phase 2 Risk Engine(포지션 사이징)이 들어오기 전까지 참고용이다.
+# 지금 계산은 모든 종목의 거래를 청산일 순으로 이어붙여 매번 자산 전액을
+# 재투자한다고 가정하는 방식이라, 실제로 자금을 나눠 동시 보유하는 포트폴리오의
+# 낙폭보다 훨씬 크게 나온다.
+MDD_CAVEAT = "포지션 사이징 미반영 참고용 수치 - Phase 2 Risk Engine 도입 후 재계산 예정"
+
+MA_SHORT = 20               # 골든크로스 단기 이동평균
+MA_LONG = 60                # 골든크로스 장기 이동평균
+ADX_PERIOD = 14
+ADX_TREND_THRESHOLD = 25    # 이 미만이면 "추세 없음"으로 후보 제외
+RSI_ENTRY_OVERBOUGHT = 75   # 추세 신호가 떴어도 이미 과열이면 진입 보류
+
 REGIME_WINDOW = 60          # 국면 판정에 쓰는 추세 관찰 기간(일)
 REGIME_THRESHOLD_PCT = 10   # 이 구간 수익률을 넘으면 상승장/하락장으로 분류
 MAX_HOLD_MULTIPLIER = 2     # 예상 보유기간의 2배를 넘기면 타임스탑
-TAKE_PROFIT_RSI = 70        # RSI 과열 구간 진입 시 익절
+TAKE_PROFIT_RSI = 70        # 보유 중 RSI 과열 구간 진입 시 익절(진입 게이트와는 별개)
 
-DEFAULT_CRYPTO_MARKETS = ["KRW-BTC", "KRW-ETH", "KRW-XRP"]
 DEFAULT_STOCK_TICKERS = US_STOCKS
-WARMUP = 30                 # 지표 계산에 필요한 최소 선행 데이터 길이
+CRYPTO_UNIVERSE_CAP = 80    # scan_crypto가 보는 것과 동일한 상한(get_all_krw_markets()[:80])
+UPBIT_MARKET_SLEEP = 0.1    # 크립토 종목 사이 추가 유예(업비트 rate limit 배려)
+
+# 코스피/코스닥 시가총액 상위권 스냅샷(정적 목록). 토스 API로 실시간 시총 랭킹을
+# 가져올 수 있게 되면 동적 스캔으로 교체할 잠정 목록 — 상장폐지/합병 등으로 일부
+# 종목이 조회 실패할 수 있으나, 기존 try/except가 그런 종목을 조용히 건너뛴다.
+KRX_MARKET_CAP_TOP = [
+    "005930", "000660", "373220", "207940", "005380", "005490", "006400", "051910",
+    "035420", "000270", "105560", "055550", "012330", "035720", "068270", "028260",
+    "066570", "096770", "032830", "003550", "015760", "034730", "086790", "010130",
+    "009150", "042660", "196170", "000810", "316140", "024110",
+    "247540", "086520", "328130", "240810", "041510", "112040", "039030", "068760",
+]
+
+WARMUP = MA_LONG + 5        # 골든크로스(60일선)+ADX 계산에 필요한 최소 선행 데이터 길이
 
 
 def classify_regime(closes, i, window=REGIME_WINDOW):
@@ -52,7 +92,10 @@ def classify_regime(closes, i, window=REGIME_WINDOW):
 
 def apply_cost(price, asset_class, side):
     costs = TRADING_COSTS.get(asset_class, TRADING_COSTS["stock"])
-    total_pct = (costs["fee_pct"] + costs["slippage_pct"]) / 100
+    total_pct = costs["fee_pct"] + costs["slippage_pct"]
+    if side == "sell":
+        total_pct += costs.get("sell_tax_pct", 0)  # KRX 증권거래세 등, 매도 시에만 적용
+    total_pct /= 100
     return price * (1 + total_pct) if side == "buy" else price * (1 - total_pct)
 
 
@@ -60,20 +103,21 @@ def load_candles(market, asset_class, count):
     if asset_class == "crypto":
         raw = get_krw_candles(market, count)
         return [
-            {"date": c["candle_date_time_utc"][:10], "close": c["trade_price"],
+            {"date": c["candle_date_time_utc"][:10], "open": c["opening_price"],
+             "high": c["high_price"], "low": c["low_price"], "close": c["trade_price"],
              "volume": c["candle_acc_trade_volume"]}
             for c in raw
         ]
     if asset_class == "krx":
         return get_krx_candles(market, count)
-    return [{"date": None, "close": c} for c in get_us_closes(market, count)]
+    return get_us_candles(market, count)
 
 
 def simulate(market, asset_class, candles):
-    """candles: 날짜 오름차순 dict 리스트({'close': ..., 'volume': ...(선택), 'date': ...})."""
+    """candles: 날짜 오름차순 OHLC dict 리스트({'open','high','low','close','date', ...})."""
     closes = [c["close"] for c in candles]
-    has_volume = all("volume" in c for c in candles)
-    volumes = [c["volume"] for c in candles] if has_volume else None
+    highs = [c["high"] for c in candles]
+    lows = [c["low"] for c in candles]
     dates = [c.get("date") for c in candles]
 
     trades = []
@@ -81,23 +125,35 @@ def simulate(market, asset_class, candles):
 
     for i in range(WARMUP, len(closes)):
         window_closes = closes[:i + 1]
-        window_volumes = volumes[:i + 1] if volumes else None
+        window_highs = highs[:i + 1]
+        window_lows = lows[:i + 1]
         price = closes[i]
 
         if position is None:
-            score, _ = entry_score(window_closes, window_volumes)
-            threshold = 3 if has_volume else 2
-            if score >= threshold:
-                expected_days = estimate_holding_period(window_closes)
-                strategy_type = classify_strategy(expected_days)
-                position = {
-                    "entry_index": i,
-                    "entry_price": apply_cost(price, asset_class, "buy"),
-                    "entry_date": dates[i],
-                    "strategy_type": strategy_type,
-                    "expected_days": expected_days,
-                    "regime": classify_regime(closes, i),
-                }
+            # 메인 신호: 골든크로스 + 추세 강도(ADX)
+            if not is_golden_cross(window_closes, MA_SHORT, MA_LONG):
+                continue
+            adx = calc_adx(window_highs, window_lows, window_closes, ADX_PERIOD)
+            if adx < ADX_TREND_THRESHOLD:
+                continue
+
+            # 보조 필터: RSI/볼린저는 진입 타이밍만 확인(이미 과열이면 보류)
+            rsi = calc_rsi(window_closes)
+            upper, _, _ = calc_bollinger(window_closes)
+            if rsi >= RSI_ENTRY_OVERBOUGHT or price > upper:
+                continue
+
+            expected_days = estimate_holding_period(window_closes)
+            strategy_type = classify_strategy(expected_days)
+            position = {
+                "entry_index": i,
+                "entry_price": apply_cost(price, asset_class, "buy"),
+                "entry_date": dates[i],
+                "strategy_type": strategy_type,
+                "expected_days": expected_days,
+                "regime": classify_regime(closes, i),
+                "entry_adx": round(adx, 1),
+            }
             continue
 
         days_held = i - position["entry_index"]
@@ -121,6 +177,7 @@ def simulate(market, asset_class, candles):
                 "market": market, "asset_class": asset_class,
                 "strategy_type": position["strategy_type"], "regime": position["regime"],
                 "entry_index": position["entry_index"], "entry_date": position["entry_date"],
+                "entry_adx": position["entry_adx"],
                 "exit_date": dates[i], "days_held": days_held,
                 "return_pct": round(final_return, 3),
                 "exit_reason": exit_reason or "end_of_data",
@@ -128,6 +185,36 @@ def simulate(market, asset_class, candles):
             position = None
 
     return trades
+
+
+def buy_hold_trades(market, asset_class, candles, split_index):
+    """전략과 같은 종목/같은 기간을 그냥 사서 들고만 있었다면 어땠을지의 벤치마크.
+    전략의 entry_index 버킷팅 규칙(< split_index면 훈련, 그 이상이면 검증)을 그대로
+    따르도록 훈련구간 진입점은 WARMUP, 검증구간 진입점은 split_index로 맞춘다 —
+    이래야 같은 期간 비교가 된다."""
+    closes = [c["close"] for c in candles]
+    dates = [c.get("date") for c in candles]
+    last_index = len(closes) - 1
+    trades = []
+
+    if split_index - 1 > WARMUP:
+        trades.append(_buy_hold_trade(market, asset_class, closes, dates, WARMUP, split_index - 1))
+    if last_index > split_index:
+        trades.append(_buy_hold_trade(market, asset_class, closes, dates, split_index, last_index))
+
+    return trades
+
+
+def _buy_hold_trade(market, asset_class, closes, dates, entry_index, exit_index):
+    entry_price = apply_cost(closes[entry_index], asset_class, "buy")
+    exit_price = apply_cost(closes[exit_index], asset_class, "sell")
+    return_pct = (exit_price - entry_price) / entry_price * 100
+    return {
+        "market": market, "asset_class": asset_class, "strategy_type": "buy_hold",
+        "entry_index": entry_index, "entry_date": dates[entry_index],
+        "exit_date": dates[exit_index], "days_held": exit_index - entry_index,
+        "return_pct": round(return_pct, 3), "exit_reason": "buy_hold",
+    }
 
 
 def compute_metrics(trades):
@@ -161,22 +248,15 @@ def evaluate_success(metrics):
     if metrics["trade_count"] < SUCCESS_CRITERIA["min_trades"]:
         return f"표본 부족 ({metrics['trade_count']}건 < 최소 {SUCCESS_CRITERIA['min_trades']}건) - 판단 보류"
 
-    verdicts = []
     sharpe = metrics["sharpe_like"]
     if sharpe >= SUCCESS_CRITERIA["sharpe_meaningful"]:
-        verdicts.append(f"샤프 유사 지표 {sharpe} - 유의미")
+        verdict = f"샤프 유사 지표 {sharpe} - 유의미"
     elif sharpe < SUCCESS_CRITERIA["sharpe_review"]:
-        verdicts.append(f"샤프 유사 지표 {sharpe} - 규칙 재검토 필요")
+        verdict = f"샤프 유사 지표 {sharpe} - 규칙 재검토 필요"
     else:
-        verdicts.append(f"샤프 유사 지표 {sharpe} - 애매(추가 관찰 필요)")
+        verdict = f"샤프 유사 지표 {sharpe} - 애매(추가 관찰 필요)"
 
-    mdd = metrics["mdd_pct"]
-    if mdd < SUCCESS_CRITERIA["mdd_limit_pct"]:
-        verdicts.append(f"MDD {mdd}% - 리스크 규칙 재점검 필요")
-    else:
-        verdicts.append(f"MDD {mdd}% - 한도 이내")
-
-    return " / ".join(verdicts)
+    return f"{verdict} / MDD {metrics['mdd_pct']}%({MDD_CAVEAT})"
 
 
 def group_metrics(trades, key):
@@ -193,37 +273,53 @@ def run_instrument(market, asset_class, count):
         return None
     trades = simulate(market, asset_class, candles)
     split_index = int(len(candles) * 0.7)
+    bh_trades = buy_hold_trades(market, asset_class, candles, split_index)
     return {
         "candle_count": len(candles),
         "trades": trades,
         "train_trades": [t for t in trades if t["entry_index"] < split_index],
         "val_trades": [t for t in trades if t["entry_index"] >= split_index],
+        "bh_train_trades": [t for t in bh_trades if t["entry_index"] < split_index],
+        "bh_val_trades": [t for t in bh_trades if t["entry_index"] >= split_index],
     }
 
 
 def main():
-    parser = argparse.ArgumentParser(description="QuanTrade 백테스트 엔진 (Phase 1)")
-    parser.add_argument("--crypto", nargs="*", default=DEFAULT_CRYPTO_MARKETS)
+    parser = argparse.ArgumentParser(description="QuanTrade 백테스트 엔진 (Phase 1, 추세추종)")
+    parser.add_argument("--crypto", nargs="*", default=None,
+                         help=f"생략하면 scan_crypto와 동일하게 업비트 KRW마켓 최대 {CRYPTO_UNIVERSE_CAP}개를 동적으로 사용")
     parser.add_argument("--stocks", nargs="*", default=DEFAULT_STOCK_TICKERS)
-    parser.add_argument("--krx", nargs="*", default=[], help="예: --krx 005930 373220")
-    parser.add_argument("--count", type=int, default=750, help="일봉 개수(기본 약 3년치, 계획서 §4.2)")
+    parser.add_argument("--krx", nargs="*", default=None,
+                         help="생략하면 코스피/코스닥 시가총액 상위 스냅샷(KRX_MARKET_CAP_TOP)을 사용. 예: --krx 005930 373220")
+    parser.add_argument("--count", type=int, default=1500, help="KRX/미국주식 일봉 개수(기본 약 6년치)")
+    parser.add_argument("--crypto-count", type=int, default=5000,
+                         help="크립토 일봉 개수 - 상장 시점까지 최대한 확보하도록 넉넉히 잡고, 실제로는 페이지네이션이 상장일에서 자연히 멈춤")
     parser.add_argument("--out", default="backtest_report.json")
     args = parser.parse_args()
 
+    crypto_markets = args.crypto if args.crypto is not None else get_all_krw_markets()[:CRYPTO_UNIVERSE_CAP]
+    krx_tickers = args.krx if args.krx is not None else KRX_MARKET_CAP_TOP
+
     universe = (
-        [(m, "crypto") for m in args.crypto]
+        [(m, "crypto") for m in crypto_markets]
         + [(m, "stock") for m in args.stocks]
-        + [(m, "krx") for m in args.krx]
+        + [(m, "krx") for m in krx_tickers]
     )
+    print(f"유니버스: 크립토 {len(crypto_markets)} / 미국주식 {len(args.stocks)} / KRX {len(krx_tickers)}")
 
     all_trades, all_train, all_val, per_instrument = [], [], [], []
+    all_bh_train, all_bh_val = [], []
 
     for market, asset_class in universe:
+        count = args.crypto_count if asset_class == "crypto" else args.count
         try:
-            result = run_instrument(market, asset_class, args.count)
+            result = run_instrument(market, asset_class, count)
         except Exception as e:
             print(f"⚠️ {market} 데이터 조회/시뮬레이션 실패: {e}")
             continue
+        finally:
+            if asset_class == "crypto":
+                time.sleep(UPBIT_MARKET_SLEEP)  # 업비트 rate limit 배려(80개 마켓 연속 조회)
         if not result:
             continue
         per_instrument.append({
@@ -233,17 +329,35 @@ def main():
         all_trades += result["trades"]
         all_train += result["train_trades"]
         all_val += result["val_trades"]
+        all_bh_train += result["bh_train_trades"]
+        all_bh_val += result["bh_val_trades"]
 
     overall = {
         "all": compute_metrics(all_trades),
         "train": compute_metrics(all_train),
         "validation": compute_metrics(all_val),
     }
+    benchmark_buy_hold = {
+        "train": compute_metrics(all_bh_train),
+        "validation": compute_metrics(all_bh_val),
+    }
+
+    def beats_buy_hold(strategy_metrics, bh_metrics):
+        if strategy_metrics["trade_count"] == 0 or bh_metrics["trade_count"] == 0:
+            return "비교 불가(거래 없음)"
+        return ("전략 우위" if strategy_metrics["avg_return_pct"] > bh_metrics["avg_return_pct"]
+                else "buy&hold 우위")
 
     report = {
         "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "strategy": {
+            "main_signal": f"MA{MA_SHORT}/MA{MA_LONG} 골든크로스 + ADX>={ADX_TREND_THRESHOLD}",
+            "timing_filter": f"RSI<{RSI_ENTRY_OVERBOUGHT} and price<=볼린저상단",
+            "exit": "하드손절 / RSI과열({}) / 타임스탑(예상보유기간x{})".format(TAKE_PROFIT_RSI, MAX_HOLD_MULTIPLIER),
+        },
         "universe": [f"{m}({a})" for m, a in universe],
         "success_criteria": SUCCESS_CRITERIA,
+        "mdd_caveat": MDD_CAVEAT,
         "instruments": per_instrument,
         "overall": overall,
         "by_regime": group_metrics(all_trades, "regime"),
@@ -253,14 +367,23 @@ def main():
             "train": evaluate_success(overall["train"]),
             "validation": evaluate_success(overall["validation"]),
         },
+        "benchmark_buy_hold": benchmark_buy_hold,
+        "strategy_vs_buy_hold": {
+            "train": beats_buy_hold(overall["train"], benchmark_buy_hold["train"]),
+            "validation": beats_buy_hold(overall["validation"], benchmark_buy_hold["validation"]),
+        },
     }
 
     save_json(args.out, report)
 
     print(f"\n총 {len(all_trades)}건 거래 (훈련 {len(all_train)} / 검증 {len(all_val)})")
-    print(f"전체 지표: {overall['all']}")
-    print(f"훈련구간 판정: {report['verdict']['train']}")
-    print(f"검증구간 판정: {report['verdict']['validation']}")
+    print(f"[전략] 훈련구간 지표: {overall['train']}")
+    print(f"[전략] 검증구간 지표: {overall['validation']}")
+    print(f"[전략] 훈련구간 판정: {report['verdict']['train']}")
+    print(f"[전략] 검증구간 판정: {report['verdict']['validation']}")
+    print(f"[buy&hold] 훈련구간 지표: {benchmark_buy_hold['train']}")
+    print(f"[buy&hold] 검증구간 지표: {benchmark_buy_hold['validation']}")
+    print(f"전략 vs buy&hold - 훈련: {report['strategy_vs_buy_hold']['train']} / 검증: {report['strategy_vs_buy_hold']['validation']}")
     print(f"리포트 저장 완료: {args.out}")
 
 
