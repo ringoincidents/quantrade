@@ -10,6 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PROXY_URL: ${{ secrets.PROXY_URL }}
+      TOSS_TOKEN_URL: ${{ secrets.TOSS_TOKEN_URL }}
+      TOSS_BALANCE_URL: ${{ secrets.TOSS_BALANCE_URL }}
+      TOSS_CLIENT_ID: ${{ secrets.TOSS_CLIENT_ID }}
+      TOSS_CLIENT_SECRET: ${{ secrets.TOSS_CLIENT_SECRET }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
