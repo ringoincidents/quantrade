@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-01 01:59:40",
+  "generated_at": "2026-08-01 05:47:43",
   "strategy": {
     "main_signal": "MA20/MA60 골든크로스 + ADX>=25",
     "timing_filter": "RSI<75 and price<=볼린저상단",
@@ -136,7 +136,8 @@
     "sharpe_review": 0.5,
     "mdd_limit_pct": -20
   },
-  "mdd_caveat": "포지션 사이징 미반영 참고용 수치 - Phase 2 Risk Engine 도입 후 재계산 예정",
+  "mdd_caveat": "포지션 비중(기본 10%, AUTO_TIER_WEIGHT) 가중 순차보유 근사치 - 동시 다종목 보유의 날짜별 낙폭까지는 반영하지 않음",
+  "mdd_position_weight": 0.1,
   "instruments": [
     {
       "market": "KRW-WAXP",
@@ -853,21 +854,21 @@
       "win_rate_pct": 50.94,
       "avg_return_pct": 0.66,
       "sharpe_like": 0.051,
-      "mdd_pct": -99.8
+      "mdd_pct": -33.58
     },
     "train": {
       "trade_count": 403,
       "win_rate_pct": 52.36,
       "avg_return_pct": 1.21,
       "sharpe_like": 0.088,
-      "mdd_pct": -98.22
+      "mdd_pct": -28.86
     },
     "validation": {
       "trade_count": 180,
       "win_rate_pct": 47.78,
-      "avg_return_pct": -0.59,
+      "avg_return_pct": -0.58,
       "sharpe_like": -0.055,
-      "mdd_pct": -95.88
+      "mdd_pct": -22.83
     }
   },
   "by_regime_strategy": {
@@ -876,51 +877,51 @@
       "win_rate_pct": 49.3,
       "avg_return_pct": -0.36,
       "sharpe_like": -0.037,
-      "mdd_pct": -98.66
+      "mdd_pct": -27.58
     },
     "상승장": {
       "trade_count": 82,
       "win_rate_pct": 57.32,
       "avg_return_pct": 4.45,
       "sharpe_like": 0.244,
-      "mdd_pct": -54.82
+      "mdd_pct": -7.12
     },
     "하락장": {
       "trade_count": 146,
       "win_rate_pct": 51.37,
-      "avg_return_pct": 1.0,
-      "sharpe_like": 0.065,
-      "mdd_pct": -89.57
+      "avg_return_pct": 1.01,
+      "sharpe_like": 0.066,
+      "mdd_pct": -16.13
     }
   },
   "by_regime_buy_hold": {
     "하락장": {
       "trade_count": 106,
-      "win_rate_pct": 31.13,
-      "avg_return_pct": 20.51,
+      "win_rate_pct": 29.25,
+      "avg_return_pct": 20.47,
       "sharpe_like": 0.119,
-      "mdd_pct": -100.0
+      "mdd_pct": -92.69
     },
     "횡보장": {
       "trade_count": 66,
       "win_rate_pct": 54.55,
-      "avg_return_pct": 45.66,
-      "sharpe_like": 0.29,
-      "mdd_pct": -100.0
+      "avg_return_pct": 45.74,
+      "sharpe_like": 0.291,
+      "mdd_pct": -58.81
     },
     "상승장": {
       "trade_count": 55,
       "win_rate_pct": 40.0,
-      "avg_return_pct": 20.53,
+      "avg_return_pct": 20.54,
       "sharpe_like": 0.115,
-      "mdd_pct": -100.0
+      "mdd_pct": -70.64
     },
     "미분류": {
       "trade_count": 3,
       "win_rate_pct": 33.33,
-      "avg_return_pct": 0.29,
-      "sharpe_like": 0.054,
-      "mdd_pct": -5.95
+      "avg_return_pct": 0.46,
+      "sharpe_like": 0.093,
+      "mdd_pct": -0.47
     }
   },
   "by_strategy_type": {
@@ -929,27 +930,27 @@
       "win_rate_pct": 60.0,
       "avg_return_pct": 1.66,
       "sharpe_like": 0.269,
-      "mdd_pct": -21.04
+      "mdd_pct": -2.27
     },
     "스윙": {
       "trade_count": 560,
       "win_rate_pct": 50.54,
       "avg_return_pct": 0.56,
       "sharpe_like": 0.044,
-      "mdd_pct": -99.65
+      "mdd_pct": -30.62
     },
     "장기": {
       "trade_count": 8,
       "win_rate_pct": 62.5,
       "avg_return_pct": 5.77,
       "sharpe_like": 0.228,
-      "mdd_pct": -36.64
+      "mdd_pct": -3.96
     }
   },
   "verdict": {
-    "all": "샤프 유사 지표 0.051 - 규칙 재검토 필요 / MDD -99.8%(포지션 사이징 미반영 참고용 수치 - Phase 2 Risk Engine 도입 후 재계산 예정)",
-    "train": "샤프 유사 지표 0.088 - 규칙 재검토 필요 / MDD -98.22%(포지션 사이징 미반영 참고용 수치 - Phase 2 Risk Engine 도입 후 재계산 예정)",
-    "validation": "샤프 유사 지표 -0.055 - 규칙 재검토 필요 / MDD -95.88%(포지션 사이징 미반영 참고용 수치 - Phase 2 Risk Engine 도입 후 재계산 예정)"
+    "all": "샤프 유사 지표 0.051 - 규칙 재검토 필요 / MDD -33.58%(포지션 비중(기본 10%, AUTO_TIER_WEIGHT) 가중 순차보유 근사치 - 동시 다종목 보유의 날짜별 낙폭까지는 반영하지 않음)",
+    "train": "샤프 유사 지표 0.088 - 규칙 재검토 필요 / MDD -28.86%(포지션 비중(기본 10%, AUTO_TIER_WEIGHT) 가중 순차보유 근사치 - 동시 다종목 보유의 날짜별 낙폭까지는 반영하지 않음)",
+    "validation": "샤프 유사 지표 -0.055 - 규칙 재검토 필요 / MDD -22.83%(포지션 비중(기본 10%, AUTO_TIER_WEIGHT) 가중 순차보유 근사치 - 동시 다종목 보유의 날짜별 낙폭까지는 반영하지 않음)"
   },
   "benchmark_buy_hold": {
     "train": {
@@ -957,14 +958,14 @@
       "win_rate_pct": 42.86,
       "avg_return_pct": 44.63,
       "sharpe_like": 0.228,
-      "mdd_pct": -100.0
+      "mdd_pct": -86.76
     },
     "validation": {
       "trade_count": 118,
-      "win_rate_pct": 37.29,
-      "avg_return_pct": 11.18,
+      "win_rate_pct": 35.59,
+      "avg_return_pct": 11.19,
       "sharpe_like": 0.082,
-      "mdd_pct": -100.0
+      "mdd_pct": -94.5
     }
   },
   "strategy_vs_buy_hold": {
@@ -981,8 +982,8 @@
       "Buy&Hold 대비 우위(검증)": false
     },
     "mdd_reference_only": {
-      "train": "-98.22% (기준 -20%, 포지션 사이징 미반영 참고용 수치 - Phase 2 Risk Engine 도입 후 재계산 예정)",
-      "validation": "-95.88% (기준 -20%, 포지션 사이징 미반영 참고용 수치 - Phase 2 Risk Engine 도입 후 재계산 예정)"
+      "train": "-28.86% (기준 -20%, 포지션 비중(기본 10%, AUTO_TIER_WEIGHT) 가중 순차보유 근사치 - 동시 다종목 보유의 날짜별 낙폭까지는 반영하지 않음)",
+      "validation": "-22.83% (기준 -20%, 포지션 비중(기본 10%, AUTO_TIER_WEIGHT) 가중 순차보유 근사치 - 동시 다종목 보유의 날짜별 낙폭까지는 반영하지 않음)"
     },
     "gate_passed": false
   }
