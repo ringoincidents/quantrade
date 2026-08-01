@@ -48,7 +48,7 @@ def run():
     for c in all_cands:
         c["expected_days"] = estimate_holding_period(c["raw_closes"])
         c["strategy_type"] = classify_strategy(c["expected_days"])
-        news_by_market[c["market"]] = get_news_headlines(c["market"].replace("KRW-", ""))
+        news_by_market[c["market"]] = get_news_sentiment(c["market"].replace("KRW-", ""))
 
     ai_result = ask_claude_decision(portfolio["positions"], all_cands, news_by_market)
     report.append("🤖 AI 시장 요약")
