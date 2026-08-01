@@ -1,19 +1,19 @@
-"""토스증권 실계좌 잔고 동기화 (초안, 조회 전용).
+"""토스증권 실계좌 잔고 동기화 (조회 전용).
 
 이 스크립트는 실계좌에 연결되는 첫 코드이므로 의도적으로 analyze_lib.py의
 시뮬레이션 상태(portfolio.json 등)와 분리해뒀다 — 가상 포트폴리오와 실계좌를
 같은 코드 경로에 섞으면 "분석 보조자이지 자동매매기가 아니다"라는 경계가
 흐려지기 쉽다(CLAUDE.md).
 
-토스 Open API는 실제로 존재하며(개발자센터: developers.tossinvest.com/docs,
-신청: corp.tossinvest.com/ko/open-api) OAuth 2.0 인증을 사용한다는 것까지는
-확인됐지만, 토큰 발급 엔드포인트 경로/파라미터와 잔고조회 엔드포인트의 정확한
-스펙은 아직 확인되지 않았다(문서가 로그인 필요 — 계획서 v3 §3.4에서 다음 PC
-세션에 확인 예정). 그 확인 전까지 get_access_token()/sync_portfolio()의 실제
-호출부는 TODO로 남겨둔다 — 확인되지 않은 엔드포인트/파라미터를 지어내 채우지
-않는다. 값은 전부 환경변수(GitHub Secrets)로만 주입한다.
+엔드포인트/스키마는 토스증권 공식 Open API 명세(2026-08-01 확인, OpenAPI
+3.1.0, version 1.2.5, https://openapi.tossinvest.com)를 기준으로 구현했다.
+OAuth 2.0 Client Credentials Grant로 토큰을 발급받고(`POST /oauth2/token`),
+계좌 목록(`GET /api/v1/accounts`) → 보유종목(`GET /api/v1/holdings`) →
+매수가능금액(`GET /api/v1/buying-power`) 순으로 조회한다. USD 보유분은
+원화 환산을 위해 `GET /api/v1/exchange-rate`로 환율을 함께 조회한다.
 
-이 스크립트는 잔고 "조회"만 한다. 주문 실행 로직은 포함하지 않는다.
+이 스크립트는 잔고 "조회"만 한다. 주문 실행 로직은 포함하지 않는다(CLAUDE.md
+원칙 — 조회 전용 단계에서 매수/매도 주문 함수는 만들지 않는다).
 """
 import json
 import os
@@ -24,12 +24,12 @@ import requests
 PROXY_URL = os.environ.get("PROXY_URL", "")
 proxies = {"http": PROXY_URL, "https": PROXY_URL} if PROXY_URL else None
 
-# developers.tossinvest.com/docs 확인 후 채울 값들. 코드에 하드코딩하지 않고
-# GitHub Secrets -> 환경변수로만 주입한다.
-TOSS_TOKEN_URL = os.environ.get("TOSS_TOKEN_URL", "")
-TOSS_BALANCE_URL = os.environ.get("TOSS_BALANCE_URL", "")
+# client_id/client_secret은 계정별 발급값이므로 GitHub Secrets로만 주입한다.
+# 엔드포인트 자체는 공식 스펙으로 확인됐으므로 코드에 고정한다.
 TOSS_CLIENT_ID = os.environ.get("TOSS_CLIENT_ID", "")
 TOSS_CLIENT_SECRET = os.environ.get("TOSS_CLIENT_SECRET", "")
+
+TOSS_API_BASE = "https://openapi.tossinvest.com"
 
 REAL_PORTFOLIO_PATH = "real_portfolio.json"
 
@@ -60,55 +60,118 @@ def check_proxy_ip(expected_ip=None):
     return actual_ip
 
 
-def get_access_token():
-    """OAuth 2.0 액세스 토큰 발급.
-
-    토큰 엔드포인트 경로/grant_type/파라미터 형식이 developers.tossinvest.com/docs
-    기준으로 확인되기 전까지는 미구현 — 잘못된 인증 파라미터를 지어내 실제 계좌에
-    보내지 않기 위함.
-    """
-    if not (TOSS_TOKEN_URL and TOSS_CLIENT_ID and TOSS_CLIENT_SECRET):
-        raise NotImplementedError(
-            "토스 OAuth 토큰 엔드포인트가 아직 확인되지 않았습니다(계획서 v3 §3.4). "
-            "TOSS_TOKEN_URL / TOSS_CLIENT_ID / TOSS_CLIENT_SECRET 환경변수와 실제 "
-            "인증 요청 로직을 developers.tossinvest.com/docs 기준으로 채운 뒤 사용하세요."
-        )
-    # TODO: 실제 OAuth 흐름(grant_type, 요청 바디/헤더 형식)을 문서 확인 후 구현.
-    raise NotImplementedError("get_access_token() 구현이 아직 채워지지 않았습니다.")
-
-
-def sync_portfolio():
-    """토스증권 실계좌 잔고 조회. 엔드포인트가 확정되기 전까지는 미구현."""
-    if not TOSS_BALANCE_URL:
-        raise NotImplementedError(
-            "토스 잔고조회 엔드포인트가 아직 확인되지 않았습니다(계획서 v3 §3.4). "
-            "TOSS_BALANCE_URL 환경변수와 실제 잔고 조회 요청 로직을 채운 뒤 사용하세요."
-        )
-    access_token = get_access_token()
+def _request(method, path, token=None, account_seq=None, **kwargs):
+    """공통 요청 래퍼. 프록시 실패와 토스 API 실패를 구분해서 올린다."""
+    headers = kwargs.pop("headers", {})
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    if account_seq is not None:
+        headers["X-Tossinvest-Account"] = str(account_seq)
     try:
-        resp = requests.get(
-            TOSS_BALANCE_URL,
-            headers={"Authorization": f"Bearer {access_token}"},
+        resp = requests.request(
+            method,
+            f"{TOSS_API_BASE}{path}",
+            headers=headers,
             proxies=proxies,
             timeout=10,
+            **kwargs,
         )
     except requests.exceptions.ProxyError as e:
         raise ProxyConnectionError(f"프록시 서버(141.164.41.178:3128) 연결 실패: {e}") from e
     except requests.exceptions.RequestException as e:
-        raise TossApiError(f"토스 API 요청 실패(네트워크): {e}") from e
+        raise TossApiError(f"토스 API 요청 실패({path}): {e}") from e
 
     if resp.status_code != 200:
-        raise TossApiError(f"토스 API 응답 오류 {resp.status_code}: {resp.text[:200]}")
+        raise TossApiError(f"토스 API 응답 오류 {path} {resp.status_code}: {resp.text[:300]}")
     return resp.json()
+
+
+def get_access_token():
+    """OAuth 2.0 Client Credentials Grant로 액세스 토큰 발급 (POST /oauth2/token)."""
+    if not (TOSS_CLIENT_ID and TOSS_CLIENT_SECRET):
+        raise NotImplementedError(
+            "TOSS_CLIENT_ID / TOSS_CLIENT_SECRET이 설정되지 않았습니다. "
+            "GitHub Secrets에 등록한 뒤 사용하세요."
+        )
+    body = _request(
+        "POST",
+        "/oauth2/token",
+        data={
+            "grant_type": "client_credentials",
+            "client_id": TOSS_CLIENT_ID,
+            "client_secret": TOSS_CLIENT_SECRET,
+        },
+    )
+    return body["access_token"]
+
+
+def _get_result(path, token, account_seq=None, params=None):
+    """`{"result": ...}` envelope에서 result만 꺼낸다 (토큰 발급 API 제외 모든 API 공통)."""
+    body = _request("GET", path, token=token, account_seq=account_seq, params=params)
+    return body["result"]
+
+
+def sync_portfolio():
+    """토스증권 실계좌 잔고 조회 (계좌 → 보유종목 → 매수가능금액 → 환율 순)."""
+    token = get_access_token()
+
+    accounts = _get_result("/api/v1/accounts", token)
+    if not accounts:
+        raise TossApiError("토스 계좌가 없습니다 (GET /api/v1/accounts 응답이 빈 배열).")
+    account_seq = accounts[0]["accountSeq"]
+
+    holdings = _get_result("/api/v1/holdings", token, account_seq=account_seq)
+    krw_buying_power = _get_result(
+        "/api/v1/buying-power", token, account_seq=account_seq, params={"currency": "KRW"}
+    )
+    usd_buying_power = _get_result(
+        "/api/v1/buying-power", token, account_seq=account_seq, params={"currency": "USD"}
+    )
+
+    try:
+        rate = _get_result(
+            "/api/v1/exchange-rate", token, params={"baseCurrency": "USD", "quoteCurrency": "KRW"}
+        )
+        usd_krw_rate = float(rate["rate"])
+    except TossApiError:
+        # 환율 조회 실패 시 USD 자산은 원화 합산에서 제외하고 계속 진행
+        # (전체 동기화를 막을 정도는 아님 — 다음 실행에서 재시도됨).
+        usd_krw_rate = 0.0
+
+    krw_cash = float(krw_buying_power["cashBuyingPower"])
+    usd_cash = float(usd_buying_power["cashBuyingPower"])
+    total_cash_krw = krw_cash + usd_cash * usd_krw_rate
+
+    positions = []
+    for item in holdings.get("items", []):
+        currency = item["currency"]
+        eval_amount = float(item["marketValue"]["amount"])
+        eval_amount_krw = eval_amount if currency == "KRW" else eval_amount * usd_krw_rate
+        positions.append(
+            {
+                "symbol": item["symbol"],
+                "name": item["name"],
+                "market_country": item["marketCountry"],
+                "currency": currency,
+                "quantity": item["quantity"],
+                "avg_price": item["averagePurchasePrice"],
+                "current_price": item["lastPrice"],
+                "eval_amount": eval_amount,
+                "eval_amount_krw": eval_amount_krw,
+                "return_pct": float(item["profitLoss"]["rate"]) * 100,
+            }
+        )
+
+    return {"cash": total_cash_krw, "positions": positions}
 
 
 def save_real_portfolio(data):
     """조회 결과를 real_portfolio.json에 저장 (가상 portfolio.json과 분리 유지).
 
-    data는 {"cash": int, "positions": [{"name", "quantity", "avg_price",
-    "current_price", "eval_amount", "return_pct"}, ...]} 형태로 정규화되어
-    있어야 한다 — 이 정규화는 sync_portfolio()가 실제 토스 응답 스키마를 확인한
-    뒤 채워야 할 부분이다.
+    data는 {"cash": 원화 환산 총 현금, "positions": [{"symbol", "name",
+    "market_country", "currency", "quantity", "avg_price", "current_price",
+    "eval_amount"(원종목통화), "eval_amount_krw"(원화환산), "return_pct"}, ...]}
+    형태 — sync_portfolio()가 이 형태로 정규화해서 반환한다.
     """
     payload = {
         "synced_at": datetime.now(timezone.utc).isoformat(),

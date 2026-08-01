@@ -162,7 +162,7 @@ async function loadData() {
       const real = await realResp.json();
       document.getElementById('real-pending-msg').style.display = 'none';
       document.getElementById('real-section').style.display = 'block';
-      const realTotal = (real.cash || 0) + (real.positions || []).reduce((s, p) => s + (p.eval_amount || 0), 0);
+      const realTotal = (real.cash || 0) + (real.positions || []).reduce((s, p) => s + (p.eval_amount_krw || 0), 0);
       const syncedAt = real.synced_at ? new Date(real.synced_at).toLocaleString('ko-KR') : '-';
       document.getElementById('real-summary').innerHTML =
         `💰 실제 총자산 약 ${realTotal.toLocaleString()}원 &nbsp;|&nbsp; 현금 ${(real.cash || 0).toLocaleString()}원` +
