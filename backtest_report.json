@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-01 05:47:43",
+  "generated_at": "2026-08-01 06:43:35",
   "strategy": {
     "main_signal": "MA20/MA60 골든크로스 + ADX>=25",
     "timing_filter": "RSI<75 and price<=볼린저상단",
@@ -136,7 +136,7 @@
     "sharpe_review": 0.5,
     "mdd_limit_pct": -20
   },
-  "mdd_caveat": "포지션 비중(기본 10%, AUTO_TIER_WEIGHT) 가중 순차보유 근사치 - 동시 다종목 보유의 날짜별 낙폭까지는 반영하지 않음",
+  "mdd_caveat": "포지션 비중 10% 상수 스케일링 근사치 - 동시보유/분산효과/2단계 상한(10%/20% 혼합) 미반영 포트폴리오 레벨 시뮬레이션 아님. 참고용 개선 방향으로만 취급, 절대값 인용 금지",
   "mdd_position_weight": 0.1,
   "instruments": [
     {
@@ -897,31 +897,31 @@
   "by_regime_buy_hold": {
     "하락장": {
       "trade_count": 106,
-      "win_rate_pct": 29.25,
-      "avg_return_pct": 20.47,
+      "win_rate_pct": 30.19,
+      "avg_return_pct": 20.46,
       "sharpe_like": 0.119,
-      "mdd_pct": -92.69
+      "mdd_pct": -92.7
     },
     "횡보장": {
       "trade_count": 66,
       "win_rate_pct": 54.55,
-      "avg_return_pct": 45.74,
+      "avg_return_pct": 45.81,
       "sharpe_like": 0.291,
-      "mdd_pct": -58.81
+      "mdd_pct": -58.63
     },
     "상승장": {
       "trade_count": 55,
       "win_rate_pct": 40.0,
-      "avg_return_pct": 20.54,
+      "avg_return_pct": 20.57,
       "sharpe_like": 0.115,
-      "mdd_pct": -70.64
+      "mdd_pct": -70.6
     },
     "미분류": {
       "trade_count": 3,
       "win_rate_pct": 33.33,
-      "avg_return_pct": 0.46,
-      "sharpe_like": 0.093,
-      "mdd_pct": -0.47
+      "avg_return_pct": 0.13,
+      "sharpe_like": 0.027,
+      "mdd_pct": -0.52
     }
   },
   "by_strategy_type": {
@@ -948,9 +948,9 @@
     }
   },
   "verdict": {
-    "all": "샤프 유사 지표 0.051 - 규칙 재검토 필요 / MDD -33.58%(포지션 비중(기본 10%, AUTO_TIER_WEIGHT) 가중 순차보유 근사치 - 동시 다종목 보유의 날짜별 낙폭까지는 반영하지 않음)",
-    "train": "샤프 유사 지표 0.088 - 규칙 재검토 필요 / MDD -28.86%(포지션 비중(기본 10%, AUTO_TIER_WEIGHT) 가중 순차보유 근사치 - 동시 다종목 보유의 날짜별 낙폭까지는 반영하지 않음)",
-    "validation": "샤프 유사 지표 -0.055 - 규칙 재검토 필요 / MDD -22.83%(포지션 비중(기본 10%, AUTO_TIER_WEIGHT) 가중 순차보유 근사치 - 동시 다종목 보유의 날짜별 낙폭까지는 반영하지 않음)"
+    "all": "샤프 유사 지표 0.051 - 규칙 재검토 필요 / MDD -33.58%(포지션 비중 10% 상수 스케일링 근사치 - 동시보유/분산효과/2단계 상한(10%/20% 혼합) 미반영 포트폴리오 레벨 시뮬레이션 아님. 참고용 개선 방향으로만 취급, 절대값 인용 금지)",
+    "train": "샤프 유사 지표 0.088 - 규칙 재검토 필요 / MDD -28.86%(포지션 비중 10% 상수 스케일링 근사치 - 동시보유/분산효과/2단계 상한(10%/20% 혼합) 미반영 포트폴리오 레벨 시뮬레이션 아님. 참고용 개선 방향으로만 취급, 절대값 인용 금지)",
+    "validation": "샤프 유사 지표 -0.055 - 규칙 재검토 필요 / MDD -22.83%(포지션 비중 10% 상수 스케일링 근사치 - 동시보유/분산효과/2단계 상한(10%/20% 혼합) 미반영 포트폴리오 레벨 시뮬레이션 아님. 참고용 개선 방향으로만 취급, 절대값 인용 금지)"
   },
   "benchmark_buy_hold": {
     "train": {
@@ -962,10 +962,10 @@
     },
     "validation": {
       "trade_count": 118,
-      "win_rate_pct": 35.59,
-      "avg_return_pct": 11.19,
+      "win_rate_pct": 36.44,
+      "avg_return_pct": 11.23,
       "sharpe_like": 0.082,
-      "mdd_pct": -94.5
+      "mdd_pct": -94.47
     }
   },
   "strategy_vs_buy_hold": {
@@ -982,8 +982,8 @@
       "Buy&Hold 대비 우위(검증)": false
     },
     "mdd_reference_only": {
-      "train": "-28.86% (기준 -20%, 포지션 비중(기본 10%, AUTO_TIER_WEIGHT) 가중 순차보유 근사치 - 동시 다종목 보유의 날짜별 낙폭까지는 반영하지 않음)",
-      "validation": "-22.83% (기준 -20%, 포지션 비중(기본 10%, AUTO_TIER_WEIGHT) 가중 순차보유 근사치 - 동시 다종목 보유의 날짜별 낙폭까지는 반영하지 않음)"
+      "train": "-28.86% (기준 -20%, 포지션 비중 10% 상수 스케일링 근사치 - 동시보유/분산효과/2단계 상한(10%/20% 혼합) 미반영 포트폴리오 레벨 시뮬레이션 아님. 참고용 개선 방향으로만 취급, 절대값 인용 금지)",
+      "validation": "-22.83% (기준 -20%, 포지션 비중 10% 상수 스케일링 근사치 - 동시보유/분산효과/2단계 상한(10%/20% 혼합) 미반영 포트폴리오 레벨 시뮬레이션 아님. 참고용 개선 방향으로만 취급, 절대값 인용 금지)"
     },
     "gate_passed": false
   }
