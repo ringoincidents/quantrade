@@ -1,13 +1,13 @@
 {
   "date": "2026-08-01",
-  "market_summary": "전반적으로 스윙 포지션이 소폭 플러스 수익 유지 중이며 신규 후보군은 RSI 과매도 근접 구간이나 점수 낮아 선별적 접근 필요",
+  "market_summary": "크립토 시장은 밈코인 및 알트코인 중심으로 소폭 반등 중이나 뚜렷한 촉매 부재, AAPL은 실적 후 공급망 우려로 9% 급락하며 빅테크 혼조세",
   "positions": [
     {
       "market": "KRW-USDE",
       "asset_class": "crypto",
       "strategy_type": "스윙",
       "amount_krw": 33333.333333333336,
-      "current_return": -0.3486750348675035,
+      "current_return": 0.20920502092050208,
       "conviction": false
     },
     {
@@ -15,7 +15,7 @@
       "asset_class": "crypto",
       "strategy_type": "스윙",
       "amount_krw": 4354,
-      "current_return": 6.408706166868212,
+      "current_return": 5.683192261185014,
       "conviction": false
     },
     {
@@ -31,7 +31,7 @@
       "asset_class": "crypto",
       "strategy_type": "스윙",
       "amount_krw": 5775,
-      "current_return": 1.1261261261261262,
+      "current_return": 1.9144144144144177,
       "conviction": false
     },
     {
@@ -39,7 +39,7 @@
       "asset_class": "crypto",
       "strategy_type": "스윙",
       "amount_krw": 3272,
-      "current_return": 0,
+      "current_return": 0.6160164271047278,
       "conviction": false
     }
   ],
