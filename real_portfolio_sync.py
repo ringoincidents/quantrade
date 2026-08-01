@@ -1,29 +1,55 @@
-"""토스증권 실계좌 잔고 동기화 (초안, 조회 전용).
+"""토스증권 실계좌 잔고 동기화 (조회 전용).
 
 이 스크립트는 실계좌에 연결되는 첫 코드이므로 의도적으로 analyze_lib.py의
 시뮬레이션 상태(portfolio.json 등)와 분리해뒀다 — 가상 포트폴리오와 실계좌를
 같은 코드 경로에 섞으면 "분석 보조자이지 자동매매기가 아니다"라는 경계가
 흐려지기 쉽다(CLAUDE.md).
 
-토스 Open API의 실제 엔드포인트/인증 방식은 아직 확인되지 않았다(계획서 v3
-§3.4: 권한 범위, IP 제한, 모의투자 여부, Rate Limit을 다음 PC 세션에서 확인
-예정). 그 확인 전까지 sync_portfolio()의 실제 호출부는 TODO로 남겨둔다 —
-확인되지 않은 엔드포인트를 지어내 채우지 않는다.
+엔드포인트/스키마는 토스증권 공식 Open API 명세(2026-08-01 확인, OpenAPI
+3.1.0, version 1.2.5, https://openapi.tossinvest.com)를 기준으로 구현했다.
+OAuth 2.0 Client Credentials Grant로 토큰을 발급받고(`POST /oauth2/token`),
+계좌 목록(`GET /api/v1/accounts`) → 보유종목(`GET /api/v1/holdings`) →
+매수가능금액(`GET /api/v1/buying-power`) 순으로 조회한다. USD 보유분은
+원화 환산을 위해 `GET /api/v1/exchange-rate`로 환율을 함께 조회한다.
 
-이 스크립트는 잔고 "조회"만 한다. 주문 실행 로직은 포함하지 않는다.
+이 스크립트는 잔고 "조회"만 한다. 주문 실행 로직은 포함하지 않는다(CLAUDE.md
+원칙 — 조회 전용 단계에서 매수/매도 주문 함수는 만들지 않는다).
 """
+import json
 import os
+from datetime import datetime, timezone
+
 import requests
 
 PROXY_URL = os.environ.get("PROXY_URL", "")
 proxies = {"http": PROXY_URL, "https": PROXY_URL} if PROXY_URL else None
 
-TOSS_API_BASE_URL = os.environ.get("TOSS_API_BASE_URL", "")  # 계획서 §3.4 확인 후 채울 것
-TOSS_API_KEY = os.environ.get("TOSS_API_KEY", "")
+# client_id/client_secret은 계정별 발급값이므로 GitHub Secrets로만 주입한다.
+# 엔드포인트 자체는 공식 스펙으로 확인됐으므로 코드에 고정한다.
+TOSS_CLIENT_ID = os.environ.get("TOSS_CLIENT_ID", "")
+TOSS_CLIENT_SECRET = os.environ.get("TOSS_CLIENT_SECRET", "")
+
+TOSS_API_BASE = "https://openapi.tossinvest.com"
+
+REAL_PORTFOLIO_PATH = "real_portfolio.json"
+
+
+class ProxyConnectionError(Exception):
+    """프록시 서버(Vultr, 141.164.41.178:3128) 자체에 연결할 수 없을 때."""
+
+
+class TossApiError(Exception):
+    """프록시 연결은 됐지만 토스 API 호출/응답이 실패했을 때."""
 
 
 def check_proxy_ip(expected_ip=None):
-    """[임시 테스트용 - 검증 끝나면 제거 예정] 프록시를 거쳐 나가는 실제 egress IP 확인."""
+    """프록시를 거쳐 나가는 실제 egress IP 확인.
+
+    2026-08-01 기준 Vultr 프록시(141.164.41.178:3128) 경유 확인 완료. 토스 API가
+    IP 화이트리스트 기반이라 프록시 자체가 죽거나 자격증명이 바뀌면 원인을
+    "프록시 문제"로 바로 좁힐 수 있도록, sync_portfolio() 실행 전 사전 점검으로
+    계속 둔다.
+    """
     resp = requests.get("https://api.ipify.org", proxies=proxies, timeout=10)
     actual_ip = resp.text.strip()
     print(f"프록시 경유 IP: {actual_ip}")
@@ -34,22 +60,139 @@ def check_proxy_ip(expected_ip=None):
     return actual_ip
 
 
-def sync_portfolio():
-    """토스증권 실계좌 잔고 조회. 엔드포인트/인증 방식이 확정되기 전까지는 미구현."""
-    if not TOSS_API_BASE_URL:
-        raise NotImplementedError(
-            "토스 API 엔드포인트가 아직 확인되지 않았습니다(계획서 v3 §3.4). "
-            "TOSS_API_BASE_URL 환경변수와 실제 잔고 조회 요청 로직을 채운 뒤 사용하세요."
+def _request(method, path, token=None, account_seq=None, **kwargs):
+    """공통 요청 래퍼. 프록시 실패와 토스 API 실패를 구분해서 올린다."""
+    headers = kwargs.pop("headers", {})
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    if account_seq is not None:
+        headers["X-Tossinvest-Account"] = str(account_seq)
+    try:
+        resp = requests.request(
+            method,
+            f"{TOSS_API_BASE}{path}",
+            headers=headers,
+            proxies=proxies,
+            timeout=10,
+            **kwargs,
         )
-    resp = requests.get(
-        TOSS_API_BASE_URL,  # TODO: 실제 잔고 조회 엔드포인트 경로로 교체
-        headers={"Authorization": f"Bearer {TOSS_API_KEY}"},
-        proxies=proxies,
-        timeout=10,
-    )
-    resp.raise_for_status()
+    except requests.exceptions.ProxyError as e:
+        raise ProxyConnectionError(f"프록시 서버(141.164.41.178:3128) 연결 실패: {e}") from e
+    except requests.exceptions.RequestException as e:
+        raise TossApiError(f"토스 API 요청 실패({path}): {e}") from e
+
+    if resp.status_code != 200:
+        raise TossApiError(f"토스 API 응답 오류 {path} {resp.status_code}: {resp.text[:300]}")
     return resp.json()
 
 
-if __name__ == "__main__":
+def get_access_token():
+    """OAuth 2.0 Client Credentials Grant로 액세스 토큰 발급 (POST /oauth2/token)."""
+    if not (TOSS_CLIENT_ID and TOSS_CLIENT_SECRET):
+        raise NotImplementedError(
+            "TOSS_CLIENT_ID / TOSS_CLIENT_SECRET이 설정되지 않았습니다. "
+            "GitHub Secrets에 등록한 뒤 사용하세요."
+        )
+    body = _request(
+        "POST",
+        "/oauth2/token",
+        data={
+            "grant_type": "client_credentials",
+            "client_id": TOSS_CLIENT_ID,
+            "client_secret": TOSS_CLIENT_SECRET,
+        },
+    )
+    return body["access_token"]
+
+
+def _get_result(path, token, account_seq=None, params=None):
+    """`{"result": ...}` envelope에서 result만 꺼낸다 (토큰 발급 API 제외 모든 API 공통)."""
+    body = _request("GET", path, token=token, account_seq=account_seq, params=params)
+    return body["result"]
+
+
+def sync_portfolio():
+    """토스증권 실계좌 잔고 조회 (계좌 → 보유종목 → 매수가능금액 → 환율 순)."""
+    token = get_access_token()
+
+    accounts = _get_result("/api/v1/accounts", token)
+    if not accounts:
+        raise TossApiError("토스 계좌가 없습니다 (GET /api/v1/accounts 응답이 빈 배열).")
+    account_seq = accounts[0]["accountSeq"]
+
+    holdings = _get_result("/api/v1/holdings", token, account_seq=account_seq)
+    krw_buying_power = _get_result(
+        "/api/v1/buying-power", token, account_seq=account_seq, params={"currency": "KRW"}
+    )
+    usd_buying_power = _get_result(
+        "/api/v1/buying-power", token, account_seq=account_seq, params={"currency": "USD"}
+    )
+
+    try:
+        rate = _get_result(
+            "/api/v1/exchange-rate", token, params={"baseCurrency": "USD", "quoteCurrency": "KRW"}
+        )
+        usd_krw_rate = float(rate["rate"])
+    except TossApiError:
+        # 환율 조회 실패 시 USD 자산은 원화 합산에서 제외하고 계속 진행
+        # (전체 동기화를 막을 정도는 아님 — 다음 실행에서 재시도됨).
+        usd_krw_rate = 0.0
+
+    krw_cash = float(krw_buying_power["cashBuyingPower"])
+    usd_cash = float(usd_buying_power["cashBuyingPower"])
+    total_cash_krw = krw_cash + usd_cash * usd_krw_rate
+
+    positions = []
+    for item in holdings.get("items", []):
+        currency = item["currency"]
+        eval_amount = float(item["marketValue"]["amount"])
+        eval_amount_krw = eval_amount if currency == "KRW" else eval_amount * usd_krw_rate
+        positions.append(
+            {
+                "symbol": item["symbol"],
+                "name": item["name"],
+                "market_country": item["marketCountry"],
+                "currency": currency,
+                "quantity": item["quantity"],
+                "avg_price": item["averagePurchasePrice"],
+                "current_price": item["lastPrice"],
+                "eval_amount": eval_amount,
+                "eval_amount_krw": eval_amount_krw,
+                "return_pct": float(item["profitLoss"]["rate"]) * 100,
+            }
+        )
+
+    return {"cash": total_cash_krw, "positions": positions}
+
+
+def save_real_portfolio(data):
+    """조회 결과를 real_portfolio.json에 저장 (가상 portfolio.json과 분리 유지).
+
+    data는 {"cash": 원화 환산 총 현금, "positions": [{"symbol", "name",
+    "market_country", "currency", "quantity", "avg_price", "current_price",
+    "eval_amount"(원종목통화), "eval_amount_krw"(원화환산), "return_pct"}, ...]}
+    형태 — sync_portfolio()가 이 형태로 정규화해서 반환한다.
+    """
+    payload = {
+        "synced_at": datetime.now(timezone.utc).isoformat(),
+        "cash": data.get("cash", 0),
+        "positions": data.get("positions", []),
+    }
+    with open(REAL_PORTFOLIO_PATH, "w", encoding="utf-8") as f:
+        json.dump(payload, f, ensure_ascii=False, indent=2)
+    return payload
+
+
+def main():
     check_proxy_ip(expected_ip="141.164.41.178")
+    try:
+        data = sync_portfolio()
+    except NotImplementedError as e:
+        print(f"[대기] {e}")
+        return
+    save_real_portfolio(data)
+    print(f"실계좌 잔고 저장 완료 → {REAL_PORTFOLIO_PATH}")
+
+
+if __name__ == "__main__":
+    main()

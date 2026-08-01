@@ -25,9 +25,13 @@
   .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 10px 18px; border-radius: 8px; font-size: 13px; display: none; }
   #summary-text { font-size: 14px; line-height: 1.5; color: #cbd5e1; }
   .cash-line { font-size: 16px; font-weight: bold; }
+  .real-card { border: 1px solid #0d9488; }
+  .badge-real { font-size: 11px; padding: 2px 6px; border-radius: 6px; margin-left: 6px; background: #134e4a; color: #5eead4; }
+  .section-divider { color: #64748b; font-size: 12px; margin: 20px 0 8px; text-transform: uppercase; letter-spacing: 0.05em; }
 </style>
 </head>
 <body>
+<div class="section-divider">가상 시뮬레이션 (분석/백테스트용, 실거래 아님)</div>
 <h2>📊 내 포트폴리오</h2>
 
 <div class="card">
@@ -57,6 +61,19 @@
 <div class="card">
   <h3>💎 확신 장기보유 종목</h3>
   <div id="conviction-list"></div>
+</div>
+
+<div class="section-divider">실제 계좌 (토스증권, 조회전용)</div>
+<h2>🏦 실제 계좌 현황 <span class="badge-real">조회전용</span></h2>
+
+<div class="card real-card">
+  <div id="real-pending-msg" style="display:none; color:#64748b; font-size:13px;">
+    토스증권 연동 준비 중입니다. 실제 계좌의 매도/비중조정 제안은 준비되는 대로 기존과 동일하게 텔레그램 승인을 통해서만 진행됩니다.
+  </div>
+  <div id="real-section" style="display:none;">
+    <div class="cash-line" id="real-summary"></div>
+    <div id="real-positions-list" style="margin-top:10px;"></div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -137,6 +154,33 @@ async function loadData() {
       <span class="${cls}">${ret >= 0 ? '+' : ''}${ret.toFixed(2)}%</span>
     </div>`;
   }).join('') || '<p style="color:#64748b;">지정된 확신종목 없음</p>';
+
+  // 실제 계좌 현황 (토스증권, 조회전용) — 아직 연동 전이면 real_portfolio.json이 없어 404
+  try {
+    const realResp = await fetch('real_portfolio.json' + bust);
+    if (realResp.ok) {
+      const real = await realResp.json();
+      document.getElementById('real-pending-msg').style.display = 'none';
+      document.getElementById('real-section').style.display = 'block';
+      const realTotal = (real.cash || 0) + (real.positions || []).reduce((s, p) => s + (p.eval_amount_krw || 0), 0);
+      const syncedAt = real.synced_at ? new Date(real.synced_at).toLocaleString('ko-KR') : '-';
+      document.getElementById('real-summary').innerHTML =
+        `💰 실제 총자산 약 ${realTotal.toLocaleString()}원 &nbsp;|&nbsp; 현금 ${(real.cash || 0).toLocaleString()}원` +
+        `<div style="font-size:11px; font-weight:normal; color:#64748b; margin-top:4px;">마지막 동기화: ${syncedAt}</div>`;
+      document.getElementById('real-positions-list').innerHTML = (real.positions || []).map(p => {
+        const ret = p.return_pct || 0;
+        const cls = ret >= 0 ? 'positive' : 'negative';
+        return `<div class="pos">
+          <span>${p.name}</span>
+          <span class="${cls}">${ret >= 0 ? '+' : ''}${ret.toFixed(2)}%</span>
+        </div>`;
+      }).join('') || '<p style="color:#64748b;">보유 종목 없음</p>';
+    } else {
+      document.getElementById('real-pending-msg').style.display = 'block';
+    }
+  } catch (e) {
+    document.getElementById('real-pending-msg').style.display = 'block';
+  }
 }
 loadData();
 </script>

@@ -3,13 +3,15 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   run:
     runs-on: ubuntu-latest
     env:
       PROXY_URL: ${{ secrets.PROXY_URL }}
+      TOSS_CLIENT_ID: ${{ secrets.TOSS_CLIENT_ID }}
+      TOSS_CLIENT_SECRET: ${{ secrets.TOSS_CLIENT_SECRET }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -17,3 +19,12 @@ jobs:
           python-version: '3.11'
       - run: pip install requests
       - run: python real_portfolio_sync.py
+      - name: Commit real_portfolio.json
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          if [ -f real_portfolio.json ]; then
+            git add real_portfolio.json
+            git diff --quiet && git diff --staged --quiet || git commit -m "Real portfolio sync"
+            git push
+          fi
