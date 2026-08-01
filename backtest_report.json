@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-08-01 00:12:01",
+  "generated_at": "2026-08-01 01:59:40",
   "strategy": {
     "main_signal": "MA20/MA60 골든크로스 + ADX>=25",
     "timing_filter": "RSI<75 and price<=볼린저상단",
-    "exit": "하드손절 / RSI과열(70) / 타임스탑(예상보유기간x2)"
+    "exit": "하드손절 / RSI과열(70.0) / 타임스탑(예상보유기간x2)"
   },
   "universe": [
     "KRW-GEOD(crypto)",
@@ -147,7 +147,7 @@
     {
       "market": "KRW-CARV",
       "asset_class": "crypto",
-      "candle_count": 655,
+      "candle_count": 656,
       "trade_count": 4
     },
     {
@@ -183,7 +183,7 @@
     {
       "market": "KRW-PUNDIX",
       "asset_class": "crypto",
-      "candle_count": 2675,
+      "candle_count": 2676,
       "trade_count": 16
     },
     {
@@ -225,7 +225,7 @@
     {
       "market": "KRW-BEAM",
       "asset_class": "crypto",
-      "candle_count": 792,
+      "candle_count": 793,
       "trade_count": 5
     },
     {
@@ -273,7 +273,7 @@
     {
       "market": "KRW-BOUNTY",
       "asset_class": "crypto",
-      "candle_count": 2850,
+      "candle_count": 2851,
       "trade_count": 13
     },
     {
@@ -357,7 +357,7 @@
     {
       "market": "KRW-SKY",
       "asset_class": "crypto",
-      "candle_count": 123,
+      "candle_count": 124,
       "trade_count": 0
     },
     {
@@ -369,7 +369,7 @@
     {
       "market": "KRW-SKR",
       "asset_class": "crypto",
-      "candle_count": 158,
+      "candle_count": 159,
       "trade_count": 0
     },
     {
@@ -579,7 +579,7 @@
     {
       "market": "KRW-AHT",
       "asset_class": "crypto",
-      "candle_count": 2196,
+      "candle_count": 2197,
       "trade_count": 16
     },
     {
@@ -866,11 +866,11 @@
       "trade_count": 180,
       "win_rate_pct": 47.78,
       "avg_return_pct": -0.59,
-      "sharpe_like": -0.056,
+      "sharpe_like": -0.055,
       "mdd_pct": -95.88
     }
   },
-  "by_regime": {
+  "by_regime_strategy": {
     "횡보장": {
       "trade_count": 355,
       "win_rate_pct": 49.3,
@@ -891,6 +891,36 @@
       "avg_return_pct": 1.0,
       "sharpe_like": 0.065,
       "mdd_pct": -89.57
+    }
+  },
+  "by_regime_buy_hold": {
+    "하락장": {
+      "trade_count": 106,
+      "win_rate_pct": 31.13,
+      "avg_return_pct": 20.51,
+      "sharpe_like": 0.119,
+      "mdd_pct": -100.0
+    },
+    "횡보장": {
+      "trade_count": 66,
+      "win_rate_pct": 54.55,
+      "avg_return_pct": 45.66,
+      "sharpe_like": 0.29,
+      "mdd_pct": -100.0
+    },
+    "상승장": {
+      "trade_count": 55,
+      "win_rate_pct": 40.0,
+      "avg_return_pct": 20.53,
+      "sharpe_like": 0.115,
+      "mdd_pct": -100.0
+    },
+    "미분류": {
+      "trade_count": 3,
+      "win_rate_pct": 33.33,
+      "avg_return_pct": 0.29,
+      "sharpe_like": 0.054,
+      "mdd_pct": -5.95
     }
   },
   "by_strategy_type": {
@@ -919,26 +949,41 @@
   "verdict": {
     "all": "샤프 유사 지표 0.051 - 규칙 재검토 필요 / MDD -99.8%(포지션 사이징 미반영 참고용 수치 - Phase 2 Risk Engine 도입 후 재계산 예정)",
     "train": "샤프 유사 지표 0.088 - 규칙 재검토 필요 / MDD -98.22%(포지션 사이징 미반영 참고용 수치 - Phase 2 Risk Engine 도입 후 재계산 예정)",
-    "validation": "샤프 유사 지표 -0.056 - 규칙 재검토 필요 / MDD -95.88%(포지션 사이징 미반영 참고용 수치 - Phase 2 Risk Engine 도입 후 재계산 예정)"
+    "validation": "샤프 유사 지표 -0.055 - 규칙 재검토 필요 / MDD -95.88%(포지션 사이징 미반영 참고용 수치 - Phase 2 Risk Engine 도입 후 재계산 예정)"
   },
   "benchmark_buy_hold": {
     "train": {
       "trade_count": 112,
       "win_rate_pct": 42.86,
-      "avg_return_pct": 44.65,
+      "avg_return_pct": 44.63,
       "sharpe_like": 0.228,
       "mdd_pct": -100.0
     },
     "validation": {
       "trade_count": 118,
-      "win_rate_pct": 38.14,
-      "avg_return_pct": 11.01,
-      "sharpe_like": 0.08,
+      "win_rate_pct": 37.29,
+      "avg_return_pct": 11.18,
+      "sharpe_like": 0.082,
       "mdd_pct": -100.0
     }
   },
   "strategy_vs_buy_hold": {
     "train": "buy&hold 우위",
     "validation": "buy&hold 우위"
+  },
+  "gate": {
+    "criteria": {
+      "거래 30건 이상(훈련)": true,
+      "거래 30건 이상(검증)": true,
+      "검증구간 샤프≥1.0": false,
+      "훈련/검증 같은 방향(과최적화 징후 없음)": false,
+      "Buy&Hold 대비 우위(훈련)": false,
+      "Buy&Hold 대비 우위(검증)": false
+    },
+    "mdd_reference_only": {
+      "train": "-98.22% (기준 -20%, 포지션 사이징 미반영 참고용 수치 - Phase 2 Risk Engine 도입 후 재계산 예정)",
+      "validation": "-95.88% (기준 -20%, 포지션 사이징 미반영 참고용 수치 - Phase 2 Risk Engine 도입 후 재계산 예정)"
+    },
+    "gate_passed": false
   }
 }
