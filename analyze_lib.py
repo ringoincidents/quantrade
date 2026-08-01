@@ -396,16 +396,26 @@ def get_news_headlines(query, limit=5):
     2026-08-01: get_news_sentiment를 대체해 ask_claude_decision에 직접
     연결했었으나, 검증되지 않은 변경을 실제 승인 흐름에 바로 반영한 것 자체가
     "안전장치·승인기준은 검증 전 변경 금지" 원칙 위반이라 되돌렸다. 이 함수와
-    _format_news는 삭제하지 않고 별도 실험 스크립트용으로 남겨둔다 — 사건유형
-    분류(실적발표/공시/M&A/규제 등)까지 포함한 설계가 KRX 유니버스 기준으로
-    확정되고, 캘리브레이션 결과가 나온 뒤에 언제/어떻게 실제 흐름에 다시
-    연결할지 별도로 논의한다. 그 전까지 라이브 뉴스 판단은 get_news_sentiment
-    (감성 단어 카운트)가 담당한다.
+    _format_news는 삭제하지 않고 별도 실험 스크립트(news_event_experiment.py)
+    전용으로 남겨둔다 — 캘리브레이션 결과가 나온 뒤에 언제/어떻게 실제 흐름에
+    다시 연결할지 별도로 논의한다. 그 전까지 라이브 뉴스 판단은
+    get_news_sentiment(감성 단어 카운트)가 담당한다.
+
+    2026-08-01 추가 변경: Phase 2가 KRX 중심(계획서 원칙)이라 쿼리 로케일을
+    en-US에서 ko-KR로 바꿨다 — 실적발표/공시/M&A/규제 같은 사건 뉴스는 거의
+    다 한국어로 나오므로 영어 로케일로는 관련 기사를 거의 못 찾는다.
+    get_news_sentiment는 여전히 라이브 경로라 로케일을 그대로 두고 건드리지
+    않았다(분리 원칙). query는 종목코드(예: "005930") 그대로 넘기면 되는데,
+    한국 금융 기사는 관례적으로 회사명 옆에 "(코드)"를 병기하는 경우가 많아
+    코드만으로도 어느 정도 매칭이 되지만, 회사명 매핑이 없어 코드만 못 실린
+    기사는 놓친다 — 재현율을 더 높이려면 종목코드→회사명 매핑이 필요하고,
+    이건 이 세션 스코프 밖으로 남겨둔다(Naver 실시간시세 API가 이름 필드를
+    주는지는 이 샌드박스에서 네트워크가 막혀 있어 확인하지 못했다).
 
     반환값: 성공 시 헤드라인 리스트(빈 리스트=진짜 관련 뉴스 없음), 조회 자체가
     실패하면 None(네트워크 실패와 "뉴스 없음"을 구분해야 프롬프트에서 다르게
     표현할 수 있다)."""
-    url = f"https://news.google.com/rss/search?q={query}&hl=en-US&gl=US&ceid=US:en"
+    url = f"https://news.google.com/rss/search?q={query}&hl=ko&gl=KR&ceid=KR:ko"
     try:
         resp = requests.get(url, timeout=10)
         root = ET.fromstring(resp.content)

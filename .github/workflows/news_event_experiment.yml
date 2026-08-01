@@ -1,0 +1,35 @@
+name: News Event Experiment
+
+# Phase 2 뉴스 이벤트 추출 실험(Phase2_뉴스이벤트추출_인수인계.md) 전용 워크플로.
+# daily.yml(11:00 UTC)/poll.yml(15분마다)과 다른 파일(news_event_calibration_log.json)만
+# 건드리므로 커밋 레이스가 없다. analyze.py/ask_claude_decision과는 완전히 분리된
+# 별도 실험이며, 이 스크립트는 어떤 매매도 실행하지 않는다.
+on:
+  schedule:
+    - cron: '30 9 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    env:
+      CLAUDE_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
+      TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+      - run: python news_event_experiment.py
+      - name: Commit log
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add news_event_calibration_log.json
+          git diff --quiet && git diff --staged --quiet || git commit -m "News event experiment log update"
+          git push
