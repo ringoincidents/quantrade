@@ -9,8 +9,6 @@ from datetime import datetime, timedelta
 
 EXCLUDE_MARKETS = {"KRW-USDT", "KRW-USDC", "KRW-USDE", "KRW-USDS", "KRW-DAI"}
 US_STOCKS = ["AAPL", "MSFT", "GOOGL", "NVDA", "AMZN"]
-POSITIVE_WORDS = ["surge", "rally", "gain", "bullish", "record", "growth", "beat", "strong"]
-NEGATIVE_WORDS = ["crash", "plunge", "bearish", "loss", "fall", "concern", "risk", "weak", "drop"]
 HARD_STOP_LOSS = {"단타": -5, "스윙": -10, "장기": -25}
 
 # 종합계획서 v3 §2 "거래비용/슬리피지가 백테스트 계산에서 빠져 있음" 대응.
@@ -109,8 +107,13 @@ def classify_strategy(expected_days):
     return "장기"
 
 def entry_score(closes, volumes=None):
-    """스캔/백테스트가 공유하는 진입 판단 규칙. 라이브 스캔과 과거 시뮬레이션이
-    서로 다른 로직으로 갈라지지 않도록 여기서 한 곳에만 둔다."""
+    """스캔/백테스트가 공유하는 관심종목 사전 필터. 라이브 스캔과 과거 시뮬레이션이
+    서로 다른 로직으로 갈라지지 않도록 여기서 한 곳에만 둔다.
+
+    Phase 2부터는 이 점수가 매수 근거가 아니다 — 하루에 전체 마켓(크립토만 80개+)을
+    다 Claude에 보낼 수 없어서 후보를 추리는 실무적 사전 필터일 뿐이고, 실제 매수/매도
+    판단은 ask_claude_decision이 뉴스 사건을 중심으로 내린다(계획서 v3 원칙 #4).
+    HARD_STOP_LOSS만 여전히 AI 판단과 무관한 무조건 안전장치다."""
     rsi = calc_rsi(closes)
     upper, mid, lower = calc_bollinger(closes)
     price = closes[-1]
@@ -354,23 +357,26 @@ def get_krx_candles(code, count=750):
     return candles[-count:]
 
 
-def get_news_sentiment(query):
+def get_news_headlines(query, limit=5):
+    """뉴스 헤드라인 원문을 가져온다 — 사건 추출용(계획서 v3 원칙 #4: "뉴스는
+    감성이 아니라 사건 단위로 분석해야 의미가 있다"). 예전 get_news_sentiment는
+    긍정/부정 단어 개수만 세서 "긍정 우세 (3/1)" 같은 라벨 하나로 압축했는데,
+    그 과정에서 실제 사건 내용이 다 버려졌다. 별도 추출 전용 API 호출을 추가하지
+    않고, 헤드라인 원문을 그대로 ask_claude_decision 프롬프트에 넘겨 기존 결정
+    호출 하나 안에서 Claude가 직접 사건을 판단하게 한다(호출 늘리면 실패 지점도
+    늘어남).
+
+    반환값: 성공 시 헤드라인 리스트(빈 리스트=진짜 관련 뉴스 없음), 조회 자체가
+    실패하면 None(네트워크 실패와 "뉴스 없음"을 구분해야 프롬프트에서 다르게
+    표현할 수 있다)."""
     url = f"https://news.google.com/rss/search?q={query}&hl=en-US&gl=US&ceid=US:en"
     try:
         resp = requests.get(url, timeout=10)
         root = ET.fromstring(resp.content)
-        titles = [item.find("title").text for item in root.findall(".//item")][:10]
+        titles = [item.find("title").text for item in root.findall(".//item") if item.find("title") is not None]
+        return titles[:limit]
     except Exception:
-        return "뉴스 조회 실패"
-    pos = sum(1 for t in titles for w in POSITIVE_WORDS if w in t.lower())
-    neg = sum(1 for t in titles for w in NEGATIVE_WORDS if w in t.lower())
-    if pos + neg == 0:
-        return "중립"
-    if pos > neg:
-        return f"긍정 우세 ({pos}/{neg})"
-    if neg > pos:
-        return f"부정 우세 ({pos}/{neg})"
-    return "혼조"
+        return None
 
 
 def load_json(path, default):
@@ -393,6 +399,14 @@ def get_current_price(asset_class, market):
         return get_us_price(market)
 
 
+def _format_news(headlines):
+    if headlines is None:
+        return "뉴스 조회 실패"
+    if not headlines:
+        return "관련 뉴스 없음"
+    return " / ".join(headlines)
+
+
 def ask_claude_decision(held_positions, candidates, news_by_market):
     tradeable = [p for p in held_positions if not p.get("conviction")]
     conviction_holds = [p for p in held_positions if p.get("conviction")]
@@ -408,12 +422,16 @@ def ask_claude_decision(held_positions, candidates, news_by_market):
     ]) or "없음"
 
     candidates_text = "\n".join([
-        f"- {c['market']} ({c['asset_class']}): 점수 {c['score']}, RSI {c['rsi']:.0f}, 예상보유 {c['expected_days']}일, 뉴스분위기 {news_by_market.get(c['market'], '정보없음')}"
+        f"- {c['market']} ({c['asset_class']}): [관심종목 필터 통과 - 참고용 지표일 뿐 매수 근거 아님: 필터점수 {c['score']}, RSI {c['rsi']:.0f}, 예상보유 {c['expected_days']}일] "
+        f"최근 뉴스: {_format_news(news_by_market.get(c['market']))}"
         for c in candidates
     ]) or "없음"
 
     prompt_text = (
         "너는 개인 투자자를 위한 퀀트 자산관리 AI야. 아래 정보를 보고 실제 결정을 내려줘.\n\n"
+        "판단 원칙: 가격 지표(필터점수, RSI 등)는 후보를 추리는 최소 필터일 뿐 매수/매도 근거가 아니야. "
+        "실제 판단은 최근 뉴스에서 드러나는 사건(실적, 규제, 파트너십, 사고, 거시 이벤트 등)을 중심으로 내려줘. "
+        "뉴스 조회에 실패했거나 특별한 사건이 없으면 가격 지표만 보고 무리하게 매수하지 말고 보유/관망을 우선해.\n\n"
         f"[매매 판단 대상 보유 포지션]\n{holdings_text}\n\n"
         f"[사용자 확신 장기보유 종목 - 참고만]\n{conviction_text}\n\n"
         f"[신규 진입 후보]\n{candidates_text}\n\n"
