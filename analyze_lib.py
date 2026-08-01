@@ -17,9 +17,11 @@ HARD_STOP_LOSS = {"단타": -5, "스윙": -10, "장기": -25}
 # 매수/매도 각각에 편도로 적용되는 가정치(%) — 왕복 시 두 번 적용됨.
 # 실측치 확보 전까지의 잠정 가정이며, 백테스트 결과 해석 시 이 가정에 의존한다는 점을 감안할 것.
 TRADING_COSTS = {
-    "crypto": {"fee_pct": 0.05, "slippage_pct": 0.1},   # 업비트 수수료 + 가정 슬리피지
-    "krx": {"fee_pct": 0.015, "slippage_pct": 0.1},     # 토스증권 온라인 수수료 + 가정 슬리피지
-    "stock": {"fee_pct": 0.25, "slippage_pct": 0.1},    # 해외주식 매매수수료 가정치 + 슬리피지
+    "crypto": {"fee_pct": 0.05, "slippage_pct": 0.1},   # 업비트 매수/매도 수수료 0.05%(실측) + 가정 슬리피지
+    "krx": {"fee_pct": 0.015, "slippage_pct": 0.1, "sell_tax_pct": 0.18},
+        # 토스증권 온라인 수수료(매수/매도 각 0.015%) + 가정 슬리피지 + 매도 시에만 붙는
+        # 증권거래세+농특세(코스피 기준 약 0.18%; 코스닥은 이보다 낮지만 보수적으로 통일)
+    "stock": {"fee_pct": 0.25, "slippage_pct": 0.1},    # 해외주식 매매수수료 가정치 + 슬리피지 (SEC 수수료 등은 미미해 생략)
 }
 
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN", "")

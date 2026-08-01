@@ -14,6 +14,12 @@ entry_score를 이 규칙으로 교체해야 한다.
 AI 판단을 재현할 방법이 없다(비용·비결정성 문제). 이 엔진은 매도 쪽을
 규칙 기반(하드손절 / RSI 과열 / 타임스탑)으로 근사한다 — Phase 2의 AI 확신도
 캘리브레이션이 도입되면 이 근사를 교체해야 한다.
+
+거래비용(TRADING_COSTS, analyze_lib.py)은 매수/매도 양쪽에 apply_cost()로
+적용되며, KRX는 매도 시에만 붙는 증권거래세를 별도(sell_tax_pct)로 반영한다.
+같은 종목/같은 기간에 대해 buy_hold_trades()로 단순 매수 후 보유 벤치마크도
+같이 계산해서 전략이 그냥 사서 들고 있는 것보다 나은지 report의
+benchmark_buy_hold/strategy_vs_buy_hold에서 바로 비교할 수 있게 한다.
 """
 import argparse
 import time
@@ -86,7 +92,10 @@ def classify_regime(closes, i, window=REGIME_WINDOW):
 
 def apply_cost(price, asset_class, side):
     costs = TRADING_COSTS.get(asset_class, TRADING_COSTS["stock"])
-    total_pct = (costs["fee_pct"] + costs["slippage_pct"]) / 100
+    total_pct = costs["fee_pct"] + costs["slippage_pct"]
+    if side == "sell":
+        total_pct += costs.get("sell_tax_pct", 0)  # KRX 증권거래세 등, 매도 시에만 적용
+    total_pct /= 100
     return price * (1 + total_pct) if side == "buy" else price * (1 - total_pct)
 
 
@@ -178,6 +187,36 @@ def simulate(market, asset_class, candles):
     return trades
 
 
+def buy_hold_trades(market, asset_class, candles, split_index):
+    """전략과 같은 종목/같은 기간을 그냥 사서 들고만 있었다면 어땠을지의 벤치마크.
+    전략의 entry_index 버킷팅 규칙(< split_index면 훈련, 그 이상이면 검증)을 그대로
+    따르도록 훈련구간 진입점은 WARMUP, 검증구간 진입점은 split_index로 맞춘다 —
+    이래야 같은 期간 비교가 된다."""
+    closes = [c["close"] for c in candles]
+    dates = [c.get("date") for c in candles]
+    last_index = len(closes) - 1
+    trades = []
+
+    if split_index - 1 > WARMUP:
+        trades.append(_buy_hold_trade(market, asset_class, closes, dates, WARMUP, split_index - 1))
+    if last_index > split_index:
+        trades.append(_buy_hold_trade(market, asset_class, closes, dates, split_index, last_index))
+
+    return trades
+
+
+def _buy_hold_trade(market, asset_class, closes, dates, entry_index, exit_index):
+    entry_price = apply_cost(closes[entry_index], asset_class, "buy")
+    exit_price = apply_cost(closes[exit_index], asset_class, "sell")
+    return_pct = (exit_price - entry_price) / entry_price * 100
+    return {
+        "market": market, "asset_class": asset_class, "strategy_type": "buy_hold",
+        "entry_index": entry_index, "entry_date": dates[entry_index],
+        "exit_date": dates[exit_index], "days_held": exit_index - entry_index,
+        "return_pct": round(return_pct, 3), "exit_reason": "buy_hold",
+    }
+
+
 def compute_metrics(trades):
     if not trades:
         return {"trade_count": 0, "win_rate_pct": None, "avg_return_pct": None,
@@ -234,11 +273,14 @@ def run_instrument(market, asset_class, count):
         return None
     trades = simulate(market, asset_class, candles)
     split_index = int(len(candles) * 0.7)
+    bh_trades = buy_hold_trades(market, asset_class, candles, split_index)
     return {
         "candle_count": len(candles),
         "trades": trades,
         "train_trades": [t for t in trades if t["entry_index"] < split_index],
         "val_trades": [t for t in trades if t["entry_index"] >= split_index],
+        "bh_train_trades": [t for t in bh_trades if t["entry_index"] < split_index],
+        "bh_val_trades": [t for t in bh_trades if t["entry_index"] >= split_index],
     }
 
 
@@ -266,6 +308,7 @@ def main():
     print(f"유니버스: 크립토 {len(crypto_markets)} / 미국주식 {len(args.stocks)} / KRX {len(krx_tickers)}")
 
     all_trades, all_train, all_val, per_instrument = [], [], [], []
+    all_bh_train, all_bh_val = [], []
 
     for market, asset_class in universe:
         count = args.crypto_count if asset_class == "crypto" else args.count
@@ -286,12 +329,24 @@ def main():
         all_trades += result["trades"]
         all_train += result["train_trades"]
         all_val += result["val_trades"]
+        all_bh_train += result["bh_train_trades"]
+        all_bh_val += result["bh_val_trades"]
 
     overall = {
         "all": compute_metrics(all_trades),
         "train": compute_metrics(all_train),
         "validation": compute_metrics(all_val),
     }
+    benchmark_buy_hold = {
+        "train": compute_metrics(all_bh_train),
+        "validation": compute_metrics(all_bh_val),
+    }
+
+    def beats_buy_hold(strategy_metrics, bh_metrics):
+        if strategy_metrics["trade_count"] == 0 or bh_metrics["trade_count"] == 0:
+            return "비교 불가(거래 없음)"
+        return ("전략 우위" if strategy_metrics["avg_return_pct"] > bh_metrics["avg_return_pct"]
+                else "buy&hold 우위")
 
     report = {
         "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -312,15 +367,23 @@ def main():
             "train": evaluate_success(overall["train"]),
             "validation": evaluate_success(overall["validation"]),
         },
+        "benchmark_buy_hold": benchmark_buy_hold,
+        "strategy_vs_buy_hold": {
+            "train": beats_buy_hold(overall["train"], benchmark_buy_hold["train"]),
+            "validation": beats_buy_hold(overall["validation"], benchmark_buy_hold["validation"]),
+        },
     }
 
     save_json(args.out, report)
 
     print(f"\n총 {len(all_trades)}건 거래 (훈련 {len(all_train)} / 검증 {len(all_val)})")
-    print(f"훈련구간 지표: {overall['train']}")
-    print(f"검증구간 지표: {overall['validation']}")
-    print(f"훈련구간 판정: {report['verdict']['train']}")
-    print(f"검증구간 판정: {report['verdict']['validation']}")
+    print(f"[전략] 훈련구간 지표: {overall['train']}")
+    print(f"[전략] 검증구간 지표: {overall['validation']}")
+    print(f"[전략] 훈련구간 판정: {report['verdict']['train']}")
+    print(f"[전략] 검증구간 판정: {report['verdict']['validation']}")
+    print(f"[buy&hold] 훈련구간 지표: {benchmark_buy_hold['train']}")
+    print(f"[buy&hold] 검증구간 지표: {benchmark_buy_hold['validation']}")
+    print(f"전략 vs buy&hold - 훈련: {report['strategy_vs_buy_hold']['train']} / 검증: {report['strategy_vs_buy_hold']['validation']}")
     print(f"리포트 저장 완료: {args.out}")
 
 
