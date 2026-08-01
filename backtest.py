@@ -113,8 +113,11 @@ def load_candles(market, asset_class, count):
     return get_us_candles(market, count)
 
 
-def simulate(market, asset_class, candles):
-    """candles: 날짜 오름차순 OHLC dict 리스트({'open','high','low','close','date', ...})."""
+def simulate(market, asset_class, candles, max_hold_multiplier=MAX_HOLD_MULTIPLIER, rsi_exit=TAKE_PROFIT_RSI):
+    """candles: 날짜 오름차순 OHLC dict 리스트({'open','high','low','close','date', ...}).
+
+    max_hold_multiplier/rsi_exit는 실험 B(타임스탑/RSI과열 익절 완화, 단 1회)를 위해
+    CLI에서 넘길 수 있게 매개변수화했다 — 기본값은 검증된 원래 설정과 동일하다."""
     closes = [c["close"] for c in candles]
     highs = [c["high"] for c in candles]
     lows = [c["low"] for c in candles]
@@ -164,9 +167,9 @@ def simulate(market, asset_class, candles):
         exit_reason = None
         if current_return <= stop_threshold:
             exit_reason = "hard_stop"
-        elif rsi >= TAKE_PROFIT_RSI:
+        elif rsi >= rsi_exit:
             exit_reason = "rsi_overbought"
-        elif days_held >= position["expected_days"] * MAX_HOLD_MULTIPLIER:
+        elif days_held >= position["expected_days"] * max_hold_multiplier:
             exit_reason = "time_stop"
 
         is_last_day = i == len(closes) - 1
@@ -206,6 +209,10 @@ def buy_hold_trades(market, asset_class, candles, split_index):
 
 
 def _buy_hold_trade(market, asset_class, closes, dates, entry_index, exit_index):
+    """실험 A(국면별 buy&hold 비교)를 위해 전략 거래와 동일한 방식으로 진입 시점의
+    국면을 태깅한다. 단, buy&hold는 그 국면에서 시작해 몇 년을 그대로 들고 가므로,
+    태그는 '보유 시작 시점의 국면'이지 보유기간 내내의 국면이 아니다 — 국면별 비교
+    결과를 읽을 때 감안할 것."""
     entry_price = apply_cost(closes[entry_index], asset_class, "buy")
     exit_price = apply_cost(closes[exit_index], asset_class, "sell")
     return_pct = (exit_price - entry_price) / entry_price * 100
@@ -214,6 +221,7 @@ def _buy_hold_trade(market, asset_class, closes, dates, entry_index, exit_index)
         "entry_index": entry_index, "entry_date": dates[entry_index],
         "exit_date": dates[exit_index], "days_held": exit_index - entry_index,
         "return_pct": round(return_pct, 3), "exit_reason": "buy_hold",
+        "regime": classify_regime(closes, entry_index),
     }
 
 
@@ -259,6 +267,35 @@ def evaluate_success(metrics):
     return f"{verdict} / MDD {metrics['mdd_pct']}%({MDD_CAVEAT})"
 
 
+def evaluate_gate(overall, strategy_vs_buy_hold):
+    """인수인계 문서 §2.1 게이트 조건 그대로: 거래 30건 이상(훈련/검증 각각),
+    검증구간 샤프≥1.0, 훈련/검증 같은 방향(과최적화 징후 없음), buy&hold 대비 우위
+    (훈련/검증 모두). MDD -20%는 문서 자체가 '포지션사이징 반영 전까지는 참고용'이라고
+    명시하고 있어 참고 항목으로만 표시하고 통과 판정에는 포함하지 않는다."""
+    train, val = overall["train"], overall["validation"]
+
+    checks = {
+        "거래 30건 이상(훈련)": train["trade_count"] >= SUCCESS_CRITERIA["min_trades"],
+        "거래 30건 이상(검증)": val["trade_count"] >= SUCCESS_CRITERIA["min_trades"],
+        "검증구간 샤프≥1.0": (val["sharpe_like"] is not None
+                            and val["sharpe_like"] >= SUCCESS_CRITERIA["sharpe_meaningful"]),
+        "훈련/검증 같은 방향(과최적화 징후 없음)": (
+            train["sharpe_like"] is not None and val["sharpe_like"] is not None
+            and (train["sharpe_like"] >= 0) == (val["sharpe_like"] >= 0)
+        ),
+        "Buy&Hold 대비 우위(훈련)": strategy_vs_buy_hold["train"] == "전략 우위",
+        "Buy&Hold 대비 우위(검증)": strategy_vs_buy_hold["validation"] == "전략 우위",
+    }
+    return {
+        "criteria": checks,
+        "mdd_reference_only": {
+            "train": f"{train['mdd_pct']}% (기준 {SUCCESS_CRITERIA['mdd_limit_pct']}%, {MDD_CAVEAT})",
+            "validation": f"{val['mdd_pct']}% (기준 {SUCCESS_CRITERIA['mdd_limit_pct']}%, {MDD_CAVEAT})",
+        },
+        "gate_passed": all(checks.values()),
+    }
+
+
 def group_metrics(trades, key):
     groups = {}
     for t in trades:
@@ -266,12 +303,12 @@ def group_metrics(trades, key):
     return {k: compute_metrics(v) for k, v in groups.items()}
 
 
-def run_instrument(market, asset_class, count):
+def run_instrument(market, asset_class, count, max_hold_multiplier=MAX_HOLD_MULTIPLIER, rsi_exit=TAKE_PROFIT_RSI):
     candles = load_candles(market, asset_class, count)
     if len(candles) < WARMUP + 10:
         print(f"⚠️ {market}: 데이터 {len(candles)}건 - 백테스트하기엔 부족해 건너뜀")
         return None
-    trades = simulate(market, asset_class, candles)
+    trades = simulate(market, asset_class, candles, max_hold_multiplier, rsi_exit)
     split_index = int(len(candles) * 0.7)
     bh_trades = buy_hold_trades(market, asset_class, candles, split_index)
     return {
@@ -294,6 +331,10 @@ def main():
     parser.add_argument("--count", type=int, default=1500, help="KRX/미국주식 일봉 개수(기본 약 6년치)")
     parser.add_argument("--crypto-count", type=int, default=5000,
                          help="크립토 일봉 개수 - 상장 시점까지 최대한 확보하도록 넉넉히 잡고, 실제로는 페이지네이션이 상장일에서 자연히 멈춤")
+    parser.add_argument("--max-hold-multiplier", type=int, default=MAX_HOLD_MULTIPLIER,
+                         help="타임스탑 배수(예상보유기간 x N). 실험 B(1회 한정) 전용 오버라이드")
+    parser.add_argument("--rsi-exit", type=float, default=TAKE_PROFIT_RSI,
+                         help="보유 중 RSI 과열 익절 기준. 실험 B(1회 한정) 전용 오버라이드")
     parser.add_argument("--out", default="backtest_report.json")
     args = parser.parse_args()
 
@@ -306,6 +347,7 @@ def main():
         + [(m, "krx") for m in krx_tickers]
     )
     print(f"유니버스: 크립토 {len(crypto_markets)} / 미국주식 {len(args.stocks)} / KRX {len(krx_tickers)}")
+    print(f"타임스탑 배수={args.max_hold_multiplier} / RSI과열익절={args.rsi_exit}")
 
     all_trades, all_train, all_val, per_instrument = [], [], [], []
     all_bh_train, all_bh_val = [], []
@@ -313,7 +355,7 @@ def main():
     for market, asset_class in universe:
         count = args.crypto_count if asset_class == "crypto" else args.count
         try:
-            result = run_instrument(market, asset_class, count)
+            result = run_instrument(market, asset_class, count, args.max_hold_multiplier, args.rsi_exit)
         except Exception as e:
             print(f"⚠️ {market} 데이터 조회/시뮬레이션 실패: {e}")
             continue
@@ -348,19 +390,30 @@ def main():
         return ("전략 우위" if strategy_metrics["avg_return_pct"] > bh_metrics["avg_return_pct"]
                 else "buy&hold 우위")
 
+    strategy_vs_buy_hold = {
+        "train": beats_buy_hold(overall["train"], benchmark_buy_hold["train"]),
+        "validation": beats_buy_hold(overall["validation"], benchmark_buy_hold["validation"]),
+    }
+
+    # 실험 A: 국면별 전략 vs buy&hold 비교(훈련+검증 합산 — 국면별 표본을 늘리기 위해)
+    all_bh_trades = all_bh_train + all_bh_val
+    by_regime_strategy = group_metrics(all_trades, "regime")
+    by_regime_buy_hold = group_metrics(all_bh_trades, "regime")
+
     report = {
         "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "strategy": {
             "main_signal": f"MA{MA_SHORT}/MA{MA_LONG} 골든크로스 + ADX>={ADX_TREND_THRESHOLD}",
             "timing_filter": f"RSI<{RSI_ENTRY_OVERBOUGHT} and price<=볼린저상단",
-            "exit": "하드손절 / RSI과열({}) / 타임스탑(예상보유기간x{})".format(TAKE_PROFIT_RSI, MAX_HOLD_MULTIPLIER),
+            "exit": "하드손절 / RSI과열({}) / 타임스탑(예상보유기간x{})".format(args.rsi_exit, args.max_hold_multiplier),
         },
         "universe": [f"{m}({a})" for m, a in universe],
         "success_criteria": SUCCESS_CRITERIA,
         "mdd_caveat": MDD_CAVEAT,
         "instruments": per_instrument,
         "overall": overall,
-        "by_regime": group_metrics(all_trades, "regime"),
+        "by_regime_strategy": by_regime_strategy,
+        "by_regime_buy_hold": by_regime_buy_hold,
         "by_strategy_type": group_metrics(all_trades, "strategy_type"),
         "verdict": {
             "all": evaluate_success(overall["all"]),
@@ -368,10 +421,8 @@ def main():
             "validation": evaluate_success(overall["validation"]),
         },
         "benchmark_buy_hold": benchmark_buy_hold,
-        "strategy_vs_buy_hold": {
-            "train": beats_buy_hold(overall["train"], benchmark_buy_hold["train"]),
-            "validation": beats_buy_hold(overall["validation"], benchmark_buy_hold["validation"]),
-        },
+        "strategy_vs_buy_hold": strategy_vs_buy_hold,
+        "gate": evaluate_gate(overall, strategy_vs_buy_hold),
     }
 
     save_json(args.out, report)
@@ -384,6 +435,8 @@ def main():
     print(f"[buy&hold] 훈련구간 지표: {benchmark_buy_hold['train']}")
     print(f"[buy&hold] 검증구간 지표: {benchmark_buy_hold['validation']}")
     print(f"전략 vs buy&hold - 훈련: {report['strategy_vs_buy_hold']['train']} / 검증: {report['strategy_vs_buy_hold']['validation']}")
+    print(f"\n§2.1 게이트 조건: {report['gate']['criteria']}")
+    print(f"게이트 통과 여부: {report['gate']['gate_passed']}")
     print(f"리포트 저장 완료: {args.out}")
 
 
