@@ -13,6 +13,16 @@ POSITIVE_WORDS = ["surge", "rally", "gain", "bullish", "record", "growth", "beat
 NEGATIVE_WORDS = ["crash", "plunge", "bearish", "loss", "fall", "concern", "risk", "weak", "drop"]
 HARD_STOP_LOSS = {"단타": -5, "스윙": -10, "장기": -25}
 
+# 포지션 사이징(2026-08-01 설계 확정). 라이브(analyze.py의 needs_approval)와
+# 백테스트(backtest.py의 MDD 재계산)가 같은 숫자를 쓰도록 여기 한 곳에만 둔다.
+# - AUTO_TIER_WEIGHT 미만: 자동 실행
+# - AUTO_TIER_WEIGHT 이상: 사람 승인 필요
+# - POSITION_WEIGHT_HARD_CAP 초과: 승인해도 차단(하드 상한, 매수 금액을 이 비중으로 clamp)
+# 기존 LARGE_POSITION_THRESHOLD(0.25, 승인만 필요·상한 없음)를 대체 — 백테스트 gate가
+# 명확히 미통과한 상태에서 자산 대부분을 검증 안 된 판단에 거는 걸 막기 위해 강화했다.
+AUTO_TIER_WEIGHT = 0.10
+POSITION_WEIGHT_HARD_CAP = 0.20
+
 # 종합계획서 v3 §2 "거래비용/슬리피지가 백테스트 계산에서 빠져 있음" 대응.
 # 매수/매도 각각에 편도로 적용되는 가정치(%) — 왕복 시 두 번 적용됨.
 # 실측치 확보 전까지의 잠정 가정이며, 백테스트 결과 해석 시 이 가정에 의존한다는 점을 감안할 것.

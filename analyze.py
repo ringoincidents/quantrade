@@ -5,8 +5,7 @@ PORTFOLIO_FILE = "portfolio.json"
 HISTORY_FILE = "trade_history.json"
 PENDING_FILE = "pending_actions.json"
 TOTAL_BUDGET = 100000
-MIN_CASH_RESERVE_RATIO = 0.2
-LARGE_POSITION_THRESHOLD = 0.25  # 전체 자산의 25% 이상이면 승인 필요
+MIN_CASH_RESERVE_RATIO = 0.3  # 리스크자산 노출 상한 70% (2026-08-01: 0.2->0.3, Phase 1 게이트 미통과 반영)
 
 
 def needs_approval(pos, total_assets):
@@ -14,7 +13,7 @@ def needs_approval(pos, total_assets):
         return True
     if pos.get("asset_class") in ("stock", "krx"):
         return True
-    if total_assets > 0 and (pos["amount_krw"] / total_assets) >= LARGE_POSITION_THRESHOLD:
+    if total_assets > 0 and (pos["amount_krw"] / total_assets) >= AUTO_TIER_WEIGHT:
         return True
     return False
 
@@ -119,7 +118,9 @@ def run():
 
     portfolio["positions"] = still_holding
 
-    min_cash = TOTAL_BUDGET * MIN_CASH_RESERVE_RATIO
+    # min_cash는 total_assets(현재 실제 총자산) 기준 — 예전엔 고정 TOTAL_BUDGET 기준이라
+    # 자산이 불어나거나 줄어도 예비 현금이 그대로였다(버그). 실제 "총자산의 30%"가 되도록 수정.
+    min_cash = total_assets * MIN_CASH_RESERVE_RATIO
     available = portfolio["cash"] - min_cash
 
     for c in all_cands:
@@ -128,6 +129,17 @@ def run():
             weight_pct = decision.get("target_weight_pct") or 20
             amount = round(available * (weight_pct / 100))
             amount = min(amount, available)
+
+            # 종목당 비중 하드 상한(POSITION_WEIGHT_HARD_CAP) — 승인이 되더라도 이 비중을 넘는
+            # 금액은 집행하지 않고 상한선까지만 잘라서 매수한다.
+            hard_cap_amount = round(total_assets * POSITION_WEIGHT_HARD_CAP)
+            if amount > hard_cap_amount:
+                report.append(
+                    f"⚠️ {c['market']} 요청 비중이 하드 상한({POSITION_WEIGHT_HARD_CAP*100:.0f}%)을 초과해 "
+                    f"{amount:,.0f}원 → {hard_cap_amount:,.0f}원으로 조정"
+                )
+                amount = hard_cap_amount
+
             if amount <= 0:
                 continue
 
