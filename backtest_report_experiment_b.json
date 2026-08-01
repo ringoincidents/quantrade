@@ -1,0 +1,989 @@
+{
+  "generated_at": "2026-08-01 02:11:30",
+  "strategy": {
+    "main_signal": "MA20/MA60 골든크로스 + ADX>=25",
+    "timing_filter": "RSI<75 and price<=볼린저상단",
+    "exit": "하드손절 / RSI과열(80.0) / 타임스탑(예상보유기간x4)"
+  },
+  "universe": [
+    "KRW-GEOD(crypto)",
+    "KRW-WAXP(crypto)",
+    "KRW-CARV(crypto)",
+    "KRW-LSK(crypto)",
+    "KRW-0G(crypto)",
+    "KRW-WIF(crypto)",
+    "KRW-TRAC(crypto)",
+    "KRW-BORA(crypto)",
+    "KRW-PUNDIX(crypto)",
+    "KRW-PROS(crypto)",
+    "KRW-USD1(crypto)",
+    "KRW-BAT(crypto)",
+    "KRW-HUNT(crypto)",
+    "KRW-PENGU(crypto)",
+    "KRW-FIL(crypto)",
+    "KRW-BEAM(crypto)",
+    "KRW-META2(crypto)",
+    "KRW-DOOD(crypto)",
+    "KRW-WAVES(crypto)",
+    "KRW-MOVE(crypto)",
+    "KRW-TREE(crypto)",
+    "KRW-USDG(crypto)",
+    "KRW-AERGO(crypto)",
+    "KRW-WET(crypto)",
+    "KRW-2Z(crypto)",
+    "KRW-BOUNTY(crypto)",
+    "KRW-KAITO(crypto)",
+    "KRW-LPT(crypto)",
+    "KRW-BLAST(crypto)",
+    "KRW-ETHFI(crypto)",
+    "KRW-DKA(crypto)",
+    "KRW-ANKR(crypto)",
+    "KRW-ALGO(crypto)",
+    "KRW-SHIB(crypto)",
+    "KRW-UNI(crypto)",
+    "KRW-BIO(crypto)",
+    "KRW-WLFI(crypto)",
+    "KRW-UP2(crypto)",
+    "KRW-TOKAMAK(crypto)",
+    "KRW-SKY(crypto)",
+    "KRW-CYBER(crypto)",
+    "KRW-SKR(crypto)",
+    "KRW-DOGE(crypto)",
+    "KRW-WLD(crypto)",
+    "KRW-PEPE(crypto)",
+    "KRW-HBAR(crypto)",
+    "KRW-BCH(crypto)",
+    "KRW-NEWT(crypto)",
+    "KRW-SEI(crypto)",
+    "KRW-BONK(crypto)",
+    "KRW-JST(crypto)",
+    "KRW-AAVE(crypto)",
+    "KRW-JTO(crypto)",
+    "KRW-JUP(crypto)",
+    "KRW-VVV(crypto)",
+    "KRW-AI(crypto)",
+    "KRW-PIEVERSE(crypto)",
+    "KRW-ALT(crypto)",
+    "KRW-B3(crypto)",
+    "KRW-LAYER(crypto)",
+    "KRW-TRX(crypto)",
+    "KRW-POWR(crypto)",
+    "KRW-EUL(crypto)",
+    "KRW-ATOM(crypto)",
+    "KRW-ARKM(crypto)",
+    "KRW-CRO(crypto)",
+    "KRW-NXPC(crypto)",
+    "KRW-A(crypto)",
+    "KRW-TRUMP(crypto)",
+    "KRW-F(crypto)",
+    "KRW-G(crypto)",
+    "KRW-CELO(crypto)",
+    "KRW-AERO(crypto)",
+    "KRW-CTC(crypto)",
+    "KRW-ANIME(crypto)",
+    "KRW-APT(crypto)",
+    "KRW-MOCA(crypto)",
+    "KRW-API3(crypto)",
+    "KRW-AHT(crypto)",
+    "KRW-EGLD(crypto)",
+    "AAPL(stock)",
+    "MSFT(stock)",
+    "GOOGL(stock)",
+    "NVDA(stock)",
+    "AMZN(stock)",
+    "005930(krx)",
+    "000660(krx)",
+    "373220(krx)",
+    "207940(krx)",
+    "005380(krx)",
+    "005490(krx)",
+    "006400(krx)",
+    "051910(krx)",
+    "035420(krx)",
+    "000270(krx)",
+    "105560(krx)",
+    "055550(krx)",
+    "012330(krx)",
+    "035720(krx)",
+    "068270(krx)",
+    "028260(krx)",
+    "066570(krx)",
+    "096770(krx)",
+    "032830(krx)",
+    "003550(krx)",
+    "015760(krx)",
+    "034730(krx)",
+    "086790(krx)",
+    "010130(krx)",
+    "009150(krx)",
+    "042660(krx)",
+    "196170(krx)",
+    "000810(krx)",
+    "316140(krx)",
+    "024110(krx)",
+    "247540(krx)",
+    "086520(krx)",
+    "328130(krx)",
+    "240810(krx)",
+    "041510(krx)",
+    "112040(krx)",
+    "039030(krx)",
+    "068760(krx)"
+  ],
+  "success_criteria": {
+    "min_trades": 30,
+    "sharpe_meaningful": 1.0,
+    "sharpe_review": 0.5,
+    "mdd_limit_pct": -20
+  },
+  "mdd_caveat": "포지션 사이징 미반영 참고용 수치 - Phase 2 Risk Engine 도입 후 재계산 예정",
+  "instruments": [
+    {
+      "market": "KRW-WAXP",
+      "asset_class": "crypto",
+      "candle_count": 2791,
+      "trade_count": 14
+    },
+    {
+      "market": "KRW-CARV",
+      "asset_class": "crypto",
+      "candle_count": 656,
+      "trade_count": 4
+    },
+    {
+      "market": "KRW-LSK",
+      "asset_class": "crypto",
+      "candle_count": 3230,
+      "trade_count": 15
+    },
+    {
+      "market": "KRW-0G",
+      "asset_class": "crypto",
+      "candle_count": 314,
+      "trade_count": 1
+    },
+    {
+      "market": "KRW-WIF",
+      "asset_class": "crypto",
+      "candle_count": 88,
+      "trade_count": 0
+    },
+    {
+      "market": "KRW-TRAC",
+      "asset_class": "crypto",
+      "candle_count": 76,
+      "trade_count": 0
+    },
+    {
+      "market": "KRW-BORA",
+      "asset_class": "crypto",
+      "candle_count": 2188,
+      "trade_count": 8
+    },
+    {
+      "market": "KRW-PUNDIX",
+      "asset_class": "crypto",
+      "candle_count": 2676,
+      "trade_count": 16
+    },
+    {
+      "market": "KRW-PROS",
+      "asset_class": "crypto",
+      "candle_count": 86,
+      "trade_count": 0
+    },
+    {
+      "market": "KRW-USD1",
+      "asset_class": "crypto",
+      "candle_count": 335,
+      "trade_count": 3
+    },
+    {
+      "market": "KRW-BAT",
+      "asset_class": "crypto",
+      "candle_count": 2932,
+      "trade_count": 14
+    },
+    {
+      "market": "KRW-HUNT",
+      "asset_class": "crypto",
+      "candle_count": 2147,
+      "trade_count": 10
+    },
+    {
+      "market": "KRW-PENGU",
+      "asset_class": "crypto",
+      "candle_count": 450,
+      "trade_count": 1
+    },
+    {
+      "market": "KRW-FIL",
+      "asset_class": "crypto",
+      "candle_count": 485,
+      "trade_count": 3
+    },
+    {
+      "market": "KRW-BEAM",
+      "asset_class": "crypto",
+      "candle_count": 793,
+      "trade_count": 5
+    },
+    {
+      "market": "KRW-DOOD",
+      "asset_class": "crypto",
+      "candle_count": 299,
+      "trade_count": 2
+    },
+    {
+      "market": "KRW-WAVES",
+      "asset_class": "crypto",
+      "candle_count": 3230,
+      "trade_count": 14
+    },
+    {
+      "market": "KRW-MOVE",
+      "asset_class": "crypto",
+      "candle_count": 600,
+      "trade_count": 0
+    },
+    {
+      "market": "KRW-TREE",
+      "asset_class": "crypto",
+      "candle_count": 339,
+      "trade_count": 1
+    },
+    {
+      "market": "KRW-AERGO",
+      "asset_class": "crypto",
+      "candle_count": 2655,
+      "trade_count": 14
+    },
+    {
+      "market": "KRW-WET",
+      "asset_class": "crypto",
+      "candle_count": 230,
+      "trade_count": 1
+    },
+    {
+      "market": "KRW-2Z",
+      "asset_class": "crypto",
+      "candle_count": 304,
+      "trade_count": 2
+    },
+    {
+      "market": "KRW-BOUNTY",
+      "asset_class": "crypto",
+      "candle_count": 2851,
+      "trade_count": 13
+    },
+    {
+      "market": "KRW-KAITO",
+      "asset_class": "crypto",
+      "candle_count": 515,
+      "trade_count": 3
+    },
+    {
+      "market": "KRW-LPT",
+      "asset_class": "crypto",
+      "candle_count": 429,
+      "trade_count": 0
+    },
+    {
+      "market": "KRW-BLAST",
+      "asset_class": "crypto",
+      "candle_count": 767,
+      "trade_count": 4
+    },
+    {
+      "market": "KRW-ETHFI",
+      "asset_class": "crypto",
+      "candle_count": 136,
+      "trade_count": 1
+    },
+    {
+      "market": "KRW-DKA",
+      "asset_class": "crypto",
+      "candle_count": 2210,
+      "trade_count": 13
+    },
+    {
+      "market": "KRW-ANKR",
+      "asset_class": "crypto",
+      "candle_count": 2680,
+      "trade_count": 11
+    },
+    {
+      "market": "KRW-ALGO",
+      "asset_class": "crypto",
+      "candle_count": 1718,
+      "trade_count": 5
+    },
+    {
+      "market": "KRW-SHIB",
+      "asset_class": "crypto",
+      "candle_count": 1292,
+      "trade_count": 5
+    },
+    {
+      "market": "KRW-UNI",
+      "asset_class": "crypto",
+      "candle_count": 649,
+      "trade_count": 3
+    },
+    {
+      "market": "KRW-BIO",
+      "asset_class": "crypto",
+      "candle_count": 286,
+      "trade_count": 1
+    },
+    {
+      "market": "KRW-WLFI",
+      "asset_class": "crypto",
+      "candle_count": 335,
+      "trade_count": 1
+    },
+    {
+      "market": "KRW-UP2",
+      "asset_class": "crypto",
+      "candle_count": 81,
+      "trade_count": 0
+    },
+    {
+      "market": "KRW-TOKAMAK",
+      "asset_class": "crypto",
+      "candle_count": 2168,
+      "trade_count": 10
+    },
+    {
+      "market": "KRW-SKY",
+      "asset_class": "crypto",
+      "candle_count": 124,
+      "trade_count": 0
+    },
+    {
+      "market": "KRW-CYBER",
+      "asset_class": "crypto",
+      "candle_count": 355,
+      "trade_count": 1
+    },
+    {
+      "market": "KRW-SKR",
+      "asset_class": "crypto",
+      "candle_count": 159,
+      "trade_count": 0
+    },
+    {
+      "market": "KRW-DOGE",
+      "asset_class": "crypto",
+      "candle_count": 1985,
+      "trade_count": 5
+    },
+    {
+      "market": "KRW-WLD",
+      "asset_class": "crypto",
+      "candle_count": 327,
+      "trade_count": 0
+    },
+    {
+      "market": "KRW-PEPE",
+      "asset_class": "crypto",
+      "candle_count": 626,
+      "trade_count": 1
+    },
+    {
+      "market": "KRW-HBAR",
+      "asset_class": "crypto",
+      "candle_count": 2511,
+      "trade_count": 9
+    },
+    {
+      "market": "KRW-BCH",
+      "asset_class": "crypto",
+      "candle_count": 3230,
+      "trade_count": 11
+    },
+    {
+      "market": "KRW-NEWT",
+      "asset_class": "crypto",
+      "candle_count": 404,
+      "trade_count": 0
+    },
+    {
+      "market": "KRW-SEI",
+      "asset_class": "crypto",
+      "candle_count": 1082,
+      "trade_count": 4
+    },
+    {
+      "market": "KRW-BONK",
+      "asset_class": "crypto",
+      "candle_count": 620,
+      "trade_count": 2
+    },
+    {
+      "market": "KRW-JST",
+      "asset_class": "crypto",
+      "candle_count": 2179,
+      "trade_count": 11
+    },
+    {
+      "market": "KRW-AAVE",
+      "asset_class": "crypto",
+      "candle_count": 1740,
+      "trade_count": 7
+    },
+    {
+      "market": "KRW-JTO",
+      "asset_class": "crypto",
+      "candle_count": 527,
+      "trade_count": 3
+    },
+    {
+      "market": "KRW-JUP",
+      "asset_class": "crypto",
+      "candle_count": 759,
+      "trade_count": 2
+    },
+    {
+      "market": "KRW-VVV",
+      "asset_class": "crypto",
+      "candle_count": 82,
+      "trade_count": 0
+    },
+    {
+      "market": "KRW-PIEVERSE",
+      "asset_class": "crypto",
+      "candle_count": 104,
+      "trade_count": 0
+    },
+    {
+      "market": "KRW-ALT",
+      "asset_class": "crypto",
+      "candle_count": 412,
+      "trade_count": 1
+    },
+    {
+      "market": "KRW-B3",
+      "asset_class": "crypto",
+      "candle_count": 87,
+      "trade_count": 0
+    },
+    {
+      "market": "KRW-LAYER",
+      "asset_class": "crypto",
+      "candle_count": 536,
+      "trade_count": 1
+    },
+    {
+      "market": "KRW-TRX",
+      "asset_class": "crypto",
+      "candle_count": 3041,
+      "trade_count": 8
+    },
+    {
+      "market": "KRW-POWR",
+      "asset_class": "crypto",
+      "candle_count": 3183,
+      "trade_count": 18
+    },
+    {
+      "market": "KRW-ATOM",
+      "asset_class": "crypto",
+      "candle_count": 2648,
+      "trade_count": 8
+    },
+    {
+      "market": "KRW-ARKM",
+      "asset_class": "crypto",
+      "candle_count": 509,
+      "trade_count": 0
+    },
+    {
+      "market": "KRW-CRO",
+      "asset_class": "crypto",
+      "candle_count": 2172,
+      "trade_count": 10
+    },
+    {
+      "market": "KRW-NXPC",
+      "asset_class": "crypto",
+      "candle_count": 444,
+      "trade_count": 2
+    },
+    {
+      "market": "KRW-A",
+      "asset_class": "crypto",
+      "candle_count": 3055,
+      "trade_count": 9
+    },
+    {
+      "market": "KRW-TRUMP",
+      "asset_class": "crypto",
+      "candle_count": 535,
+      "trade_count": 3
+    },
+    {
+      "market": "KRW-F",
+      "asset_class": "crypto",
+      "candle_count": 285,
+      "trade_count": 1
+    },
+    {
+      "market": "KRW-G",
+      "asset_class": "crypto",
+      "candle_count": 752,
+      "trade_count": 2
+    },
+    {
+      "market": "KRW-CELO",
+      "asset_class": "crypto",
+      "candle_count": 1599,
+      "trade_count": 9
+    },
+    {
+      "market": "KRW-AERO",
+      "asset_class": "crypto",
+      "candle_count": 345,
+      "trade_count": 2
+    },
+    {
+      "market": "KRW-CTC",
+      "asset_class": "crypto",
+      "candle_count": 964,
+      "trade_count": 3
+    },
+    {
+      "market": "KRW-ANIME",
+      "asset_class": "crypto",
+      "candle_count": 555,
+      "trade_count": 2
+    },
+    {
+      "market": "KRW-APT",
+      "asset_class": "crypto",
+      "candle_count": 1383,
+      "trade_count": 4
+    },
+    {
+      "market": "KRW-MOCA",
+      "asset_class": "crypto",
+      "candle_count": 594,
+      "trade_count": 2
+    },
+    {
+      "market": "KRW-API3",
+      "asset_class": "crypto",
+      "candle_count": 348,
+      "trade_count": 0
+    },
+    {
+      "market": "KRW-AHT",
+      "asset_class": "crypto",
+      "candle_count": 2197,
+      "trade_count": 16
+    },
+    {
+      "market": "KRW-EGLD",
+      "asset_class": "crypto",
+      "candle_count": 1193,
+      "trade_count": 4
+    },
+    {
+      "market": "AAPL",
+      "asset_class": "stock",
+      "candle_count": 1500,
+      "trade_count": 5
+    },
+    {
+      "market": "MSFT",
+      "asset_class": "stock",
+      "candle_count": 1500,
+      "trade_count": 3
+    },
+    {
+      "market": "GOOGL",
+      "asset_class": "stock",
+      "candle_count": 1500,
+      "trade_count": 2
+    },
+    {
+      "market": "NVDA",
+      "asset_class": "stock",
+      "candle_count": 1500,
+      "trade_count": 3
+    },
+    {
+      "market": "AMZN",
+      "asset_class": "stock",
+      "candle_count": 1500,
+      "trade_count": 5
+    },
+    {
+      "market": "005930",
+      "asset_class": "krx",
+      "candle_count": 1500,
+      "trade_count": 4
+    },
+    {
+      "market": "000660",
+      "asset_class": "krx",
+      "candle_count": 1500,
+      "trade_count": 4
+    },
+    {
+      "market": "373220",
+      "asset_class": "krx",
+      "candle_count": 1101,
+      "trade_count": 5
+    },
+    {
+      "market": "207940",
+      "asset_class": "krx",
+      "candle_count": 1500,
+      "trade_count": 7
+    },
+    {
+      "market": "005380",
+      "asset_class": "krx",
+      "candle_count": 1500,
+      "trade_count": 4
+    },
+    {
+      "market": "005490",
+      "asset_class": "krx",
+      "candle_count": 1500,
+      "trade_count": 7
+    },
+    {
+      "market": "006400",
+      "asset_class": "krx",
+      "candle_count": 1500,
+      "trade_count": 5
+    },
+    {
+      "market": "051910",
+      "asset_class": "krx",
+      "candle_count": 1500,
+      "trade_count": 3
+    },
+    {
+      "market": "035420",
+      "asset_class": "krx",
+      "candle_count": 1500,
+      "trade_count": 4
+    },
+    {
+      "market": "000270",
+      "asset_class": "krx",
+      "candle_count": 1500,
+      "trade_count": 7
+    },
+    {
+      "market": "105560",
+      "asset_class": "krx",
+      "candle_count": 1500,
+      "trade_count": 5
+    },
+    {
+      "market": "055550",
+      "asset_class": "krx",
+      "candle_count": 1500,
+      "trade_count": 5
+    },
+    {
+      "market": "012330",
+      "asset_class": "krx",
+      "candle_count": 1500,
+      "trade_count": 8
+    },
+    {
+      "market": "035720",
+      "asset_class": "krx",
+      "candle_count": 1500,
+      "trade_count": 4
+    },
+    {
+      "market": "068270",
+      "asset_class": "krx",
+      "candle_count": 1500,
+      "trade_count": 7
+    },
+    {
+      "market": "028260",
+      "asset_class": "krx",
+      "candle_count": 1500,
+      "trade_count": 6
+    },
+    {
+      "market": "066570",
+      "asset_class": "krx",
+      "candle_count": 1500,
+      "trade_count": 9
+    },
+    {
+      "market": "096770",
+      "asset_class": "krx",
+      "candle_count": 1500,
+      "trade_count": 7
+    },
+    {
+      "market": "032830",
+      "asset_class": "krx",
+      "candle_count": 1500,
+      "trade_count": 3
+    },
+    {
+      "market": "003550",
+      "asset_class": "krx",
+      "candle_count": 1500,
+      "trade_count": 6
+    },
+    {
+      "market": "015760",
+      "asset_class": "krx",
+      "candle_count": 1500,
+      "trade_count": 7
+    },
+    {
+      "market": "034730",
+      "asset_class": "krx",
+      "candle_count": 1500,
+      "trade_count": 7
+    },
+    {
+      "market": "086790",
+      "asset_class": "krx",
+      "candle_count": 1500,
+      "trade_count": 6
+    },
+    {
+      "market": "010130",
+      "asset_class": "krx",
+      "candle_count": 1500,
+      "trade_count": 4
+    },
+    {
+      "market": "009150",
+      "asset_class": "krx",
+      "candle_count": 1500,
+      "trade_count": 1
+    },
+    {
+      "market": "042660",
+      "asset_class": "krx",
+      "candle_count": 1500,
+      "trade_count": 4
+    },
+    {
+      "market": "196170",
+      "asset_class": "krx",
+      "candle_count": 1500,
+      "trade_count": 6
+    },
+    {
+      "market": "000810",
+      "asset_class": "krx",
+      "candle_count": 1500,
+      "trade_count": 7
+    },
+    {
+      "market": "316140",
+      "asset_class": "krx",
+      "candle_count": 1500,
+      "trade_count": 7
+    },
+    {
+      "market": "024110",
+      "asset_class": "krx",
+      "candle_count": 1500,
+      "trade_count": 7
+    },
+    {
+      "market": "247540",
+      "asset_class": "krx",
+      "candle_count": 1500,
+      "trade_count": 4
+    },
+    {
+      "market": "086520",
+      "asset_class": "krx",
+      "candle_count": 1500,
+      "trade_count": 4
+    },
+    {
+      "market": "328130",
+      "asset_class": "krx",
+      "candle_count": 984,
+      "trade_count": 5
+    },
+    {
+      "market": "240810",
+      "asset_class": "krx",
+      "candle_count": 1500,
+      "trade_count": 3
+    },
+    {
+      "market": "041510",
+      "asset_class": "krx",
+      "candle_count": 1500,
+      "trade_count": 5
+    },
+    {
+      "market": "112040",
+      "asset_class": "krx",
+      "candle_count": 1500,
+      "trade_count": 5
+    },
+    {
+      "market": "039030",
+      "asset_class": "krx",
+      "candle_count": 1500,
+      "trade_count": 3
+    },
+    {
+      "market": "068760",
+      "asset_class": "krx",
+      "candle_count": 1500,
+      "trade_count": 5
+    }
+  ],
+  "overall": {
+    "all": {
+      "trade_count": 577,
+      "win_rate_pct": 43.15,
+      "avg_return_pct": 1.9,
+      "sharpe_like": 0.093,
+      "mdd_pct": -99.99
+    },
+    "train": {
+      "trade_count": 398,
+      "win_rate_pct": 43.72,
+      "avg_return_pct": 2.29,
+      "sharpe_like": 0.112,
+      "mdd_pct": -99.92
+    },
+    "validation": {
+      "trade_count": 179,
+      "win_rate_pct": 41.9,
+      "avg_return_pct": 1.03,
+      "sharpe_like": 0.05,
+      "mdd_pct": -98.94
+    }
+  },
+  "by_regime_strategy": {
+    "횡보장": {
+      "trade_count": 350,
+      "win_rate_pct": 42.86,
+      "avg_return_pct": 0.58,
+      "sharpe_like": 0.033,
+      "mdd_pct": -99.81
+    },
+    "상승장": {
+      "trade_count": 81,
+      "win_rate_pct": 58.02,
+      "avg_return_pct": 12.38,
+      "sharpe_like": 0.413,
+      "mdd_pct": -76.09
+    },
+    "하락장": {
+      "trade_count": 146,
+      "win_rate_pct": 35.62,
+      "avg_return_pct": -0.76,
+      "sharpe_like": -0.042,
+      "mdd_pct": -98.97
+    }
+  },
+  "by_regime_buy_hold": {
+    "하락장": {
+      "trade_count": 106,
+      "win_rate_pct": 31.13,
+      "avg_return_pct": 20.5,
+      "sharpe_like": 0.119,
+      "mdd_pct": -100.0
+    },
+    "횡보장": {
+      "trade_count": 66,
+      "win_rate_pct": 54.55,
+      "avg_return_pct": 45.69,
+      "sharpe_like": 0.29,
+      "mdd_pct": -100.0
+    },
+    "상승장": {
+      "trade_count": 55,
+      "win_rate_pct": 40.0,
+      "avg_return_pct": 20.52,
+      "sharpe_like": 0.115,
+      "mdd_pct": -100.0
+    },
+    "미분류": {
+      "trade_count": 3,
+      "win_rate_pct": 33.33,
+      "avg_return_pct": 0.64,
+      "sharpe_like": 0.125,
+      "mdd_pct": -5.21
+    }
+  },
+  "by_strategy_type": {
+    "단타": {
+      "trade_count": 15,
+      "win_rate_pct": 66.67,
+      "avg_return_pct": 11.27,
+      "sharpe_like": 0.58,
+      "mdd_pct": -19.89
+    },
+    "스윙": {
+      "trade_count": 554,
+      "win_rate_pct": 42.6,
+      "avg_return_pct": 1.74,
+      "sharpe_like": 0.086,
+      "mdd_pct": -99.96
+    },
+    "장기": {
+      "trade_count": 8,
+      "win_rate_pct": 37.5,
+      "avg_return_pct": -5.07,
+      "sharpe_like": -0.206,
+      "mdd_pct": -64.8
+    }
+  },
+  "verdict": {
+    "all": "샤프 유사 지표 0.093 - 규칙 재검토 필요 / MDD -99.99%(포지션 사이징 미반영 참고용 수치 - Phase 2 Risk Engine 도입 후 재계산 예정)",
+    "train": "샤프 유사 지표 0.112 - 규칙 재검토 필요 / MDD -99.92%(포지션 사이징 미반영 참고용 수치 - Phase 2 Risk Engine 도입 후 재계산 예정)",
+    "validation": "샤프 유사 지표 0.05 - 규칙 재검토 필요 / MDD -98.94%(포지션 사이징 미반영 참고용 수치 - Phase 2 Risk Engine 도입 후 재계산 예정)"
+  },
+  "benchmark_buy_hold": {
+    "train": {
+      "trade_count": 112,
+      "win_rate_pct": 42.86,
+      "avg_return_pct": 44.63,
+      "sharpe_like": 0.228,
+      "mdd_pct": -100.0
+    },
+    "validation": {
+      "trade_count": 118,
+      "win_rate_pct": 37.29,
+      "avg_return_pct": 11.19,
+      "sharpe_like": 0.082,
+      "mdd_pct": -100.0
+    }
+  },
+  "strategy_vs_buy_hold": {
+    "train": "buy&hold 우위",
+    "validation": "buy&hold 우위"
+  },
+  "gate": {
+    "criteria": {
+      "거래 30건 이상(훈련)": true,
+      "거래 30건 이상(검증)": true,
+      "검증구간 샤프≥1.0": false,
+      "훈련/검증 같은 방향(과최적화 징후 없음)": true,
+      "Buy&Hold 대비 우위(훈련)": false,
+      "Buy&Hold 대비 우위(검증)": false
+    },
+    "mdd_reference_only": {
+      "train": "-99.92% (기준 -20%, 포지션 사이징 미반영 참고용 수치 - Phase 2 Risk Engine 도입 후 재계산 예정)",
+      "validation": "-98.94% (기준 -20%, 포지션 사이징 미반영 참고용 수치 - Phase 2 Risk Engine 도입 후 재계산 예정)"
+    },
+    "gate_passed": false
+  }
+}
