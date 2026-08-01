@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-01 06:26:04",
+  "generated_at": "2026-08-01 07:05:34",
   "strategy": {
     "main_signal": "MA20/MA60 골든크로스 + ADX>=25",
     "timing_filter": "RSI<75 and price<=볼린저상단",
@@ -136,7 +136,7 @@
     "sharpe_review": 0.5,
     "mdd_limit_pct": -20
   },
-  "mdd_caveat": "포지션 비중(기본 10%, AUTO_TIER_WEIGHT) 가중 순차보유 근사치 - 동시 다종목 보유의 날짜별 낙폭까지는 반영하지 않음",
+  "mdd_caveat": "포지션 비중 10% 상수 스케일링 근사치 - 동시보유/분산효과/2단계 상한(10%/20% 혼합) 미반영 포트폴리오 레벨 시뮬레이션 아님. 참고용 개선 방향으로만 취급, 절대값 인용 금지",
   "mdd_position_weight": 0.1,
   "instruments": [
     {
@@ -618,372 +618,144 @@
       "asset_class": "stock",
       "candle_count": 1500,
       "trade_count": 5
-    },
-    {
-      "market": "005930",
-      "asset_class": "krx",
-      "candle_count": 1500,
-      "trade_count": 4
-    },
-    {
-      "market": "000660",
-      "asset_class": "krx",
-      "candle_count": 1500,
-      "trade_count": 4
-    },
-    {
-      "market": "373220",
-      "asset_class": "krx",
-      "candle_count": 1101,
-      "trade_count": 5
-    },
-    {
-      "market": "207940",
-      "asset_class": "krx",
-      "candle_count": 1500,
-      "trade_count": 7
-    },
-    {
-      "market": "005380",
-      "asset_class": "krx",
-      "candle_count": 1500,
-      "trade_count": 4
-    },
-    {
-      "market": "005490",
-      "asset_class": "krx",
-      "candle_count": 1500,
-      "trade_count": 7
-    },
-    {
-      "market": "006400",
-      "asset_class": "krx",
-      "candle_count": 1500,
-      "trade_count": 5
-    },
-    {
-      "market": "051910",
-      "asset_class": "krx",
-      "candle_count": 1500,
-      "trade_count": 3
-    },
-    {
-      "market": "035420",
-      "asset_class": "krx",
-      "candle_count": 1500,
-      "trade_count": 4
-    },
-    {
-      "market": "000270",
-      "asset_class": "krx",
-      "candle_count": 1500,
-      "trade_count": 7
-    },
-    {
-      "market": "105560",
-      "asset_class": "krx",
-      "candle_count": 1500,
-      "trade_count": 5
-    },
-    {
-      "market": "055550",
-      "asset_class": "krx",
-      "candle_count": 1500,
-      "trade_count": 5
-    },
-    {
-      "market": "012330",
-      "asset_class": "krx",
-      "candle_count": 1500,
-      "trade_count": 8
-    },
-    {
-      "market": "035720",
-      "asset_class": "krx",
-      "candle_count": 1500,
-      "trade_count": 4
-    },
-    {
-      "market": "068270",
-      "asset_class": "krx",
-      "candle_count": 1500,
-      "trade_count": 7
-    },
-    {
-      "market": "028260",
-      "asset_class": "krx",
-      "candle_count": 1500,
-      "trade_count": 6
-    },
-    {
-      "market": "066570",
-      "asset_class": "krx",
-      "candle_count": 1500,
-      "trade_count": 9
-    },
-    {
-      "market": "096770",
-      "asset_class": "krx",
-      "candle_count": 1500,
-      "trade_count": 7
-    },
-    {
-      "market": "032830",
-      "asset_class": "krx",
-      "candle_count": 1500,
-      "trade_count": 3
-    },
-    {
-      "market": "003550",
-      "asset_class": "krx",
-      "candle_count": 1500,
-      "trade_count": 6
-    },
-    {
-      "market": "015760",
-      "asset_class": "krx",
-      "candle_count": 1500,
-      "trade_count": 7
-    },
-    {
-      "market": "034730",
-      "asset_class": "krx",
-      "candle_count": 1500,
-      "trade_count": 7
-    },
-    {
-      "market": "086790",
-      "asset_class": "krx",
-      "candle_count": 1500,
-      "trade_count": 6
-    },
-    {
-      "market": "010130",
-      "asset_class": "krx",
-      "candle_count": 1500,
-      "trade_count": 4
-    },
-    {
-      "market": "009150",
-      "asset_class": "krx",
-      "candle_count": 1500,
-      "trade_count": 1
-    },
-    {
-      "market": "042660",
-      "asset_class": "krx",
-      "candle_count": 1500,
-      "trade_count": 4
-    },
-    {
-      "market": "196170",
-      "asset_class": "krx",
-      "candle_count": 1500,
-      "trade_count": 6
-    },
-    {
-      "market": "000810",
-      "asset_class": "krx",
-      "candle_count": 1500,
-      "trade_count": 7
-    },
-    {
-      "market": "316140",
-      "asset_class": "krx",
-      "candle_count": 1500,
-      "trade_count": 7
-    },
-    {
-      "market": "024110",
-      "asset_class": "krx",
-      "candle_count": 1500,
-      "trade_count": 7
-    },
-    {
-      "market": "247540",
-      "asset_class": "krx",
-      "candle_count": 1500,
-      "trade_count": 4
-    },
-    {
-      "market": "086520",
-      "asset_class": "krx",
-      "candle_count": 1500,
-      "trade_count": 4
-    },
-    {
-      "market": "328130",
-      "asset_class": "krx",
-      "candle_count": 984,
-      "trade_count": 5
-    },
-    {
-      "market": "240810",
-      "asset_class": "krx",
-      "candle_count": 1500,
-      "trade_count": 3
-    },
-    {
-      "market": "041510",
-      "asset_class": "krx",
-      "candle_count": 1500,
-      "trade_count": 5
-    },
-    {
-      "market": "112040",
-      "asset_class": "krx",
-      "candle_count": 1500,
-      "trade_count": 5
-    },
-    {
-      "market": "039030",
-      "asset_class": "krx",
-      "candle_count": 1500,
-      "trade_count": 3
-    },
-    {
-      "market": "068760",
-      "asset_class": "krx",
-      "candle_count": 1500,
-      "trade_count": 5
     }
   ],
   "overall": {
     "all": {
-      "trade_count": 577,
-      "win_rate_pct": 42.98,
-      "avg_return_pct": 1.89,
-      "sharpe_like": 0.093,
-      "mdd_pct": -50.63
+      "trade_count": 377,
+      "win_rate_pct": 37.67,
+      "avg_return_pct": 2.05,
+      "sharpe_like": 0.088,
+      "mdd_pct": -55.73
     },
     "train": {
-      "trade_count": 398,
-      "win_rate_pct": 43.72,
-      "avg_return_pct": 2.29,
-      "sharpe_like": 0.112,
-      "mdd_pct": -46.36
+      "trade_count": 258,
+      "win_rate_pct": 41.09,
+      "avg_return_pct": 3.32,
+      "sharpe_like": 0.142,
+      "mdd_pct": -34.88
     },
     "validation": {
-      "trade_count": 179,
-      "win_rate_pct": 41.34,
-      "avg_return_pct": 1.01,
-      "sharpe_like": 0.049,
-      "mdd_pct": -30.4
+      "trade_count": 119,
+      "win_rate_pct": 30.25,
+      "avg_return_pct": -0.71,
+      "sharpe_like": -0.032,
+      "mdd_pct": -41.42
     }
   },
   "by_regime_strategy": {
     "횡보장": {
-      "trade_count": 350,
-      "win_rate_pct": 42.57,
-      "avg_return_pct": 0.57,
-      "sharpe_like": 0.032,
-      "mdd_pct": -38.12
+      "trade_count": 196,
+      "win_rate_pct": 34.18,
+      "avg_return_pct": -0.05,
+      "sharpe_like": -0.002,
+      "mdd_pct": -41.98
     },
     "상승장": {
-      "trade_count": 81,
-      "win_rate_pct": 58.02,
-      "avg_return_pct": 12.38,
-      "sharpe_like": 0.413,
-      "mdd_pct": -11.92
+      "trade_count": 59,
+      "win_rate_pct": 59.32,
+      "avg_return_pct": 15.85,
+      "sharpe_like": 0.478,
+      "mdd_pct": -8.84
     },
     "하락장": {
-      "trade_count": 146,
-      "win_rate_pct": 35.62,
-      "avg_return_pct": -0.77,
-      "sharpe_like": -0.043,
-      "mdd_pct": -29.83
+      "trade_count": 122,
+      "win_rate_pct": 32.79,
+      "avg_return_pct": -1.26,
+      "sharpe_like": -0.071,
+      "mdd_pct": -33.49
     }
   },
   "by_regime_buy_hold": {
     "하락장": {
-      "trade_count": 106,
-      "win_rate_pct": 30.19,
-      "avg_return_pct": 20.48,
-      "sharpe_like": 0.119,
-      "mdd_pct": -92.69
+      "trade_count": 88,
+      "win_rate_pct": 22.73,
+      "avg_return_pct": 2.24,
+      "sharpe_like": 0.015,
+      "mdd_pct": -94.24
     },
     "횡보장": {
-      "trade_count": 66,
-      "win_rate_pct": 54.55,
-      "avg_return_pct": 45.76,
-      "sharpe_like": 0.291,
-      "mdd_pct": -58.77
+      "trade_count": 31,
+      "win_rate_pct": 32.26,
+      "avg_return_pct": 11.59,
+      "sharpe_like": 0.065,
+      "mdd_pct": -56.82
     },
     "상승장": {
-      "trade_count": 55,
-      "win_rate_pct": 40.0,
-      "avg_return_pct": 20.55,
-      "sharpe_like": 0.115,
-      "mdd_pct": -70.63
+      "trade_count": 32,
+      "win_rate_pct": 21.88,
+      "avg_return_pct": -36.64,
+      "sharpe_like": -0.495,
+      "mdd_pct": -72.25
     },
     "미분류": {
       "trade_count": 3,
       "win_rate_pct": 33.33,
-      "avg_return_pct": 0.14,
-      "sharpe_like": 0.026,
-      "mdd_pct": -0.59
+      "avg_return_pct": 0.17,
+      "sharpe_like": 0.034,
+      "mdd_pct": -0.52
     }
   },
   "by_strategy_type": {
     "단타": {
-      "trade_count": 15,
-      "win_rate_pct": 66.67,
-      "avg_return_pct": 11.27,
-      "sharpe_like": 0.58,
+      "trade_count": 7,
+      "win_rate_pct": 42.86,
+      "avg_return_pct": 10.42,
+      "sharpe_like": 0.419,
       "mdd_pct": -2.13
     },
     "스윙": {
-      "trade_count": 554,
-      "win_rate_pct": 42.42,
-      "avg_return_pct": 1.74,
-      "sharpe_like": 0.086,
-      "mdd_pct": -47.12
+      "trade_count": 363,
+      "win_rate_pct": 37.74,
+      "avg_return_pct": 2.1,
+      "sharpe_like": 0.091,
+      "mdd_pct": -51.61
     },
     "장기": {
-      "trade_count": 8,
-      "win_rate_pct": 37.5,
-      "avg_return_pct": -5.07,
-      "sharpe_like": -0.206,
-      "mdd_pct": -8.79
+      "trade_count": 7,
+      "win_rate_pct": 28.57,
+      "avg_return_pct": -8.95,
+      "sharpe_like": -0.375,
+      "mdd_pct": -9.22
     }
   },
   "verdict": {
-    "all": "샤프 유사 지표 0.093 - 규칙 재검토 필요 / MDD -50.63%(포지션 비중(기본 10%, AUTO_TIER_WEIGHT) 가중 순차보유 근사치 - 동시 다종목 보유의 날짜별 낙폭까지는 반영하지 않음)",
-    "train": "샤프 유사 지표 0.112 - 규칙 재검토 필요 / MDD -46.36%(포지션 비중(기본 10%, AUTO_TIER_WEIGHT) 가중 순차보유 근사치 - 동시 다종목 보유의 날짜별 낙폭까지는 반영하지 않음)",
-    "validation": "샤프 유사 지표 0.049 - 규칙 재검토 필요 / MDD -30.4%(포지션 비중(기본 10%, AUTO_TIER_WEIGHT) 가중 순차보유 근사치 - 동시 다종목 보유의 날짜별 낙폭까지는 반영하지 않음)"
+    "all": "샤프 유사 지표 0.088 - 규칙 재검토 필요 / MDD -55.73%(포지션 비중 10% 상수 스케일링 근사치 - 동시보유/분산효과/2단계 상한(10%/20% 혼합) 미반영 포트폴리오 레벨 시뮬레이션 아님. 참고용 개선 방향으로만 취급, 절대값 인용 금지)",
+    "train": "샤프 유사 지표 0.142 - 규칙 재검토 필요 / MDD -34.88%(포지션 비중 10% 상수 스케일링 근사치 - 동시보유/분산효과/2단계 상한(10%/20% 혼합) 미반영 포트폴리오 레벨 시뮬레이션 아님. 참고용 개선 방향으로만 취급, 절대값 인용 금지)",
+    "validation": "샤프 유사 지표 -0.032 - 규칙 재검토 필요 / MDD -41.42%(포지션 비중 10% 상수 스케일링 근사치 - 동시보유/분산효과/2단계 상한(10%/20% 혼합) 미반영 포트폴리오 레벨 시뮬레이션 아님. 참고용 개선 방향으로만 취급, 절대값 인용 금지)"
   },
   "benchmark_buy_hold": {
     "train": {
-      "trade_count": 112,
-      "win_rate_pct": 42.86,
-      "avg_return_pct": 44.63,
-      "sharpe_like": 0.228,
-      "mdd_pct": -86.76
+      "trade_count": 74,
+      "win_rate_pct": 31.08,
+      "avg_return_pct": 23.98,
+      "sharpe_like": 0.125,
+      "mdd_pct": -90.24
     },
     "validation": {
-      "trade_count": 118,
-      "win_rate_pct": 36.44,
-      "avg_return_pct": 11.21,
-      "sharpe_like": 0.082,
-      "mdd_pct": -94.49
+      "trade_count": 80,
+      "win_rate_pct": 18.75,
+      "avg_return_pct": -29.89,
+      "sharpe_like": -0.455,
+      "mdd_pct": -94.12
     }
   },
   "strategy_vs_buy_hold": {
     "train": "buy&hold 우위",
-    "validation": "buy&hold 우위"
+    "validation": "전략 우위"
   },
   "gate": {
     "criteria": {
       "거래 30건 이상(훈련)": true,
       "거래 30건 이상(검증)": true,
       "검증구간 샤프≥1.0": false,
-      "훈련/검증 같은 방향(과최적화 징후 없음)": true,
+      "훈련/검증 같은 방향(과최적화 징후 없음)": false,
       "Buy&Hold 대비 우위(훈련)": false,
-      "Buy&Hold 대비 우위(검증)": false
+      "Buy&Hold 대비 우위(검증)": true
     },
     "mdd_reference_only": {
-      "train": "-46.36% (기준 -20%, 포지션 비중(기본 10%, AUTO_TIER_WEIGHT) 가중 순차보유 근사치 - 동시 다종목 보유의 날짜별 낙폭까지는 반영하지 않음)",
-      "validation": "-30.4% (기준 -20%, 포지션 비중(기본 10%, AUTO_TIER_WEIGHT) 가중 순차보유 근사치 - 동시 다종목 보유의 날짜별 낙폭까지는 반영하지 않음)"
+      "train": "-34.88% (기준 -20%, 포지션 비중 10% 상수 스케일링 근사치 - 동시보유/분산효과/2단계 상한(10%/20% 혼합) 미반영 포트폴리오 레벨 시뮬레이션 아님. 참고용 개선 방향으로만 취급, 절대값 인용 금지)",
+      "validation": "-41.42% (기준 -20%, 포지션 비중 10% 상수 스케일링 근사치 - 동시보유/분산효과/2단계 상한(10%/20% 혼합) 미반영 포트폴리오 레벨 시뮬레이션 아님. 참고용 개선 방향으로만 취급, 절대값 인용 금지)"
     },
     "gate_passed": false
   }
