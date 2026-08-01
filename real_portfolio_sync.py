@@ -43,7 +43,13 @@ class TossApiError(Exception):
 
 
 def check_proxy_ip(expected_ip=None):
-    """[임시 테스트용 - 검증 끝나면 제거 예정] 프록시를 거쳐 나가는 실제 egress IP 확인."""
+    """프록시를 거쳐 나가는 실제 egress IP 확인.
+
+    2026-08-01 기준 Vultr 프록시(141.164.41.178:3128) 경유 확인 완료. 토스 API가
+    IP 화이트리스트 기반이라 프록시 자체가 죽거나 자격증명이 바뀌면 원인을
+    "프록시 문제"로 바로 좁힐 수 있도록, sync_portfolio() 실행 전 사전 점검으로
+    계속 둔다.
+    """
     resp = requests.get("https://api.ipify.org", proxies=proxies, timeout=10)
     actual_ip = resp.text.strip()
     print(f"프록시 경유 IP: {actual_ip}")
