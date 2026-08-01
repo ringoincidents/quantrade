@@ -10,6 +10,18 @@ on:
         description: 'KRX 종목코드 (공백 구분). 비워두면 KRX_MARKET_CAP_TOP 기본 유니버스 사용'
         required: false
         default: ''
+      max_hold_multiplier:
+        description: '타임스탑 배수(예상보유기간 x N). 실험 B(1회 한정) 전용 - 기본값(2) 유지 시 검증된 규칙 그대로'
+        required: false
+        default: '2'
+      rsi_exit:
+        description: '보유 중 RSI 과열 익절 기준. 실험 B(1회 한정) 전용 - 기본값(70) 유지 시 검증된 규칙 그대로'
+        required: false
+        default: '70'
+      out_file:
+        description: '리포트 저장 파일명'
+        required: false
+        default: 'backtest_report.json'
 
 permissions:
   contents: write
@@ -28,16 +40,21 @@ jobs:
         env:
           COUNT: ${{ github.event.inputs.count }}
           KRX: ${{ github.event.inputs.krx }}
+          MAX_HOLD_MULTIPLIER: ${{ github.event.inputs.max_hold_multiplier }}
+          RSI_EXIT: ${{ github.event.inputs.rsi_exit }}
+          OUT_FILE: ${{ github.event.inputs.out_file }}
         run: |
           if [ -n "$KRX" ]; then
-            python backtest.py --count "$COUNT" --krx $KRX
+            python backtest.py --count "$COUNT" --krx $KRX --max-hold-multiplier "$MAX_HOLD_MULTIPLIER" --rsi-exit "$RSI_EXIT" --out "$OUT_FILE"
           else
-            python backtest.py --count "$COUNT"
+            python backtest.py --count "$COUNT" --max-hold-multiplier "$MAX_HOLD_MULTIPLIER" --rsi-exit "$RSI_EXIT" --out "$OUT_FILE"
           fi
       - name: Commit report
+        env:
+          OUT_FILE: ${{ github.event.inputs.out_file }}
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add backtest_report.json
-          git diff --quiet && git diff --staged --quiet || git commit -m "Backtest report update"
+          git add "$OUT_FILE"
+          git diff --quiet && git diff --staged --quiet || git commit -m "Backtest report update ($OUT_FILE)"
           git push
