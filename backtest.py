@@ -28,7 +28,7 @@ from datetime import datetime
 from analyze_lib import (
     calc_rsi, calc_bollinger, calc_adx, is_golden_cross,
     estimate_holding_period, classify_strategy,
-    HARD_STOP_LOSS, TRADING_COSTS, US_STOCKS,
+    HARD_STOP_LOSS, TRADING_COSTS, US_STOCKS, AUTO_TIER_WEIGHT,
     get_krw_candles, get_us_candles, get_krx_candles, get_all_krw_markets, save_json,
 )
 
@@ -41,11 +41,28 @@ SUCCESS_CRITERIA = {
     "mdd_limit_pct": -20,
 }
 
-# MDD는 Phase 2 Risk Engine(포지션 사이징)이 들어오기 전까지 참고용이다.
-# 지금 계산은 모든 종목의 거래를 청산일 순으로 이어붙여 매번 자산 전액을
-# 재투자한다고 가정하는 방식이라, 실제로 자금을 나눠 동시 보유하는 포트폴리오의
-# 낙폭보다 훨씬 크게 나온다.
-MDD_CAVEAT = "포지션 사이징 미반영 참고용 수치 - Phase 2 Risk Engine 도입 후 재계산 예정"
+# MDD (2026-08-01 갱신, 2026-08-01 한계 재명시): 포지션 사이징 설계 확정
+# (analyze_lib.AUTO_TIER_WEIGHT=10%)에 맞춰, 청산일 순으로 이어붙인 각 거래의
+# 수익률에 종목당 비중(POSITION_WEIGHT)을 곱해 자산 전체가 아니라 그 비중만큼만
+# 자산이 오르내린다고 가정하도록 바꿨다 — 예전엔 거래 하나하나가 자산 전액을
+# 태우는 것처럼 계산해 실제보다 훨씬 큰 낙폭이 나왔다.
+#
+# 이건 "10%라는 상수를 곱하는 스케일링"일 뿐, 실제 포트폴리오 레벨 시뮬레이션이
+# 아니다. 구체적으로 반영하지 않는 것들:
+# - 동시보유: 여러 종목을 겹쳐서 보유하는 실제 포트폴리오의 날짜별 동시 낙폭
+#   (그러려면 날짜 축으로 포지션을 병렬 추적해야 한다 - Phase 2 이후 과제)
+# - 분산효과: 종목 간 상관관계로 인한 리스크 분산/집중 효과
+# - 2단계 상한의 혼합 분포: 실제로는 자동단계 10% / 사람 승인 시 최대 20%가 섞여
+#   있는데(analyze.py의 AUTO_TIER_WEIGHT/POSITION_WEIGHT_HARD_CAP), 이 계산은
+#   모든 거래에 10% 하나만 균일하게 곱한다
+# 따라서 이 수치는 "기존 근사치보다 방향이 개선됐다"는 참고용 개선치로만 쓰고,
+# 절대값 자체를 인용하거나(예: "MDD -22.83%") 이걸 실제 예상 낙폭으로 제시하지
+# 않는다.
+MDD_CAVEAT = ("포지션 비중 10% 상수 스케일링 근사치 - 동시보유/분산효과/2단계 상한"
+              "(10%/20% 혼합) 미반영 포트폴리오 레벨 시뮬레이션 아님. "
+              "참고용 개선 방향으로만 취급, 절대값 인용 금지")
+
+POSITION_WEIGHT = AUTO_TIER_WEIGHT  # MDD 계산에 쓰는 종목당 비중(자동/AI단계 기준)
 
 MA_SHORT = 20               # 골든크로스 단기 이동평균
 MA_LONG = 60                # 골든크로스 장기 이동평균
@@ -232,7 +249,9 @@ def _buy_hold_trade(market, asset_class, closes, dates, entry_index, exit_index)
     }
 
 
-def compute_metrics(trades):
+def compute_metrics(trades, position_weight=POSITION_WEIGHT):
+    """position_weight는 MDD 계산에만 쓴다 - 승률/평균수익률/샤프는 종목 비중과
+    무관하게 거래별 원래 수익률(raw return_pct)로 그대로 계산한다."""
     if not trades:
         return {"trade_count": 0, "win_rate_pct": None, "avg_return_pct": None,
                 "sharpe_like": None, "mdd_pct": None}
@@ -246,7 +265,7 @@ def compute_metrics(trades):
 
     equity, peak, mdd = 1.0, 1.0, 0.0
     for t in sorted(trades, key=lambda t: (t["exit_date"] or "", t["entry_index"])):
-        equity *= (1 + t["return_pct"] / 100)
+        equity *= (1 + position_weight * t["return_pct"] / 100)
         peak = max(peak, equity)
         mdd = min(mdd, (equity - peak) / peak * 100)
 
@@ -303,11 +322,11 @@ def evaluate_gate(overall, strategy_vs_buy_hold):
     }
 
 
-def group_metrics(trades, key):
+def group_metrics(trades, key, position_weight=POSITION_WEIGHT):
     groups = {}
     for t in trades:
         groups.setdefault(t.get(key) or "미분류", []).append(t)
-    return {k: compute_metrics(v) for k, v in groups.items()}
+    return {k: compute_metrics(v, position_weight) for k, v in groups.items()}
 
 
 def run_instrument(market, asset_class, count, max_hold_multiplier=MAX_HOLD_MULTIPLIER, rsi_exit=TAKE_PROFIT_RSI):
@@ -417,6 +436,7 @@ def main():
         "universe": [f"{m}({a})" for m, a in universe],
         "success_criteria": SUCCESS_CRITERIA,
         "mdd_caveat": MDD_CAVEAT,
+        "mdd_position_weight": POSITION_WEIGHT,
         "instruments": per_instrument,
         "overall": overall,
         "by_regime_strategy": by_regime_strategy,
