@@ -148,7 +148,9 @@ def maybe_notify_sample_size(log):
     if count >= SAMPLE_SIZE_ALERT and not log.get("notified_30"):
         send_telegram(
             f"📰 뉴스 이벤트 실험 표본 {count}건 도달 (기준 {SAMPLE_SIZE_ALERT}건)\n"
-            "중간 점검 가능 시점 - 참고용 알림이며 자동 판정/게이트에는 반영되지 않습니다."
+            "중간 점검 가능 시점 - 참고용 알림이며 자동 판정/게이트에는 반영되지 않습니다.\n"
+            "판단 기록 30건 누적 — outcomes(D+1/5/20)는 아직 미확정, 캘리브레이션 분석은 "
+            "최초 코호트 D+20 도달 후 가능합니다."
         )
         log["notified_30"] = True
 
