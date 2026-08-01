@@ -1,5 +1,5 @@
 {
-  "cash": 52723.709684840105,
+  "cash": 49451.709684840105,
   "positions": [
     {
       "market": "KRW-USDE",
@@ -7,8 +7,8 @@
       "entry_date": "2026-07-29",
       "expected_days": 7,
       "amount_krw": 33333.333333333336,
-      "current_price": 1428.0,
-      "current_return": -0.41841004184100417
+      "current_price": 1429.0,
+      "current_return": -0.3486750348675035
     },
     {
       "market": "KRW-PENGU",
@@ -18,8 +18,8 @@
       "entry_date": "2026-07-30",
       "expected_days": 11,
       "amount_krw": 4354,
-      "current_price": 8.67,
-      "current_return": 4.836759371221286
+      "current_price": 8.8,
+      "current_return": 6.408706166868212
     },
     {
       "market": "KRW-WIF",
@@ -29,8 +29,8 @@
       "entry_date": "2026-07-31",
       "expected_days": 11,
       "amount_krw": 3557,
-      "current_price": 204.0,
-      "current_return": 0.9900990099009901
+      "current_price": 209.0,
+      "current_return": 3.4653465346534658
     },
     {
       "market": "KRW-LAYER",
@@ -39,7 +39,18 @@
       "entry_price": 88.8,
       "entry_date": "2026-07-31",
       "expected_days": 11,
-      "amount_krw": 5775
+      "amount_krw": 5775,
+      "current_price": 89.8,
+      "current_return": 1.1261261261261262
+    },
+    {
+      "market": "KRW-ANKR",
+      "asset_class": "crypto",
+      "strategy_type": "스윙",
+      "entry_price": 4.87,
+      "entry_date": "2026-08-01",
+      "expected_days": 11,
+      "amount_krw": 3272
     }
   ]
 }
