@@ -1,5 +1,5 @@
 {
-  "cash": 49451.709684840105,
+  "cash": 47498.709684840105,
   "positions": [
     {
       "market": "KRW-USDE",
@@ -18,8 +18,8 @@
       "entry_date": "2026-07-30",
       "expected_days": 11,
       "amount_krw": 4354,
-      "current_price": 8.5,
-      "current_return": 2.7811366384522422
+      "current_price": 8.55,
+      "current_return": 3.385731559854911
     },
     {
       "market": "KRW-WIF",
@@ -29,8 +29,8 @@
       "entry_date": "2026-07-31",
       "expected_days": 11,
       "amount_krw": 3557,
-      "current_price": 204.0,
-      "current_return": 0.9900990099009901
+      "current_price": 203.0,
+      "current_return": 0.49504950495049505
     },
     {
       "market": "KRW-LAYER",
@@ -40,8 +40,8 @@
       "entry_date": "2026-07-31",
       "expected_days": 11,
       "amount_krw": 5775,
-      "current_price": 89.1,
-      "current_return": 0.33783783783783466
+      "current_price": 88.7,
+      "current_return": -0.11261261261260622
     },
     {
       "market": "KRW-ANKR",
@@ -53,6 +53,15 @@
       "amount_krw": 3272,
       "current_price": 4.92,
       "current_return": 1.0266940451745343
+    },
+    {
+      "market": "KRW-BEAM",
+      "asset_class": "crypto",
+      "strategy_type": "단타",
+      "entry_price": 2.06,
+      "entry_date": "2026-08-01",
+      "expected_days": 4,
+      "amount_krw": 1953
     }
   ]
 }

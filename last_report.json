@@ -1,6 +1,6 @@
 {
   "date": "2026-08-01",
-  "market_summary": "보유 포지션 전반적으로 소폭 플러스 유지 중이며 신규 후보군은 RSI 과매도 구간이나 점수 낮고 뉴스 모멘텀 부재로 적극 진입 불필요한 상황",
+  "market_summary": "전반적으로 혼조세 속 소폭 손익 구간, 암호화폐 일부 반등 시도 중이나 강한 추세 부재",
   "positions": [
     {
       "market": "KRW-USDE",
@@ -15,7 +15,7 @@
       "asset_class": "crypto",
       "strategy_type": "스윙",
       "amount_krw": 4354,
-      "current_return": 2.7811366384522422,
+      "current_return": 3.385731559854911,
       "conviction": false
     },
     {
@@ -23,7 +23,7 @@
       "asset_class": "crypto",
       "strategy_type": "스윙",
       "amount_krw": 3557,
-      "current_return": 0.9900990099009901,
+      "current_return": 0.49504950495049505,
       "conviction": false
     },
     {
@@ -31,7 +31,7 @@
       "asset_class": "crypto",
       "strategy_type": "스윙",
       "amount_krw": 5775,
-      "current_return": 0.33783783783783466,
+      "current_return": -0.11261261261260622,
       "conviction": false
     },
     {
@@ -41,8 +41,16 @@
       "amount_krw": 3272,
       "current_return": 1.0266940451745343,
       "conviction": false
+    },
+    {
+      "market": "KRW-BEAM",
+      "asset_class": "crypto",
+      "strategy_type": "단타",
+      "amount_krw": 1953,
+      "current_return": 0,
+      "conviction": false
     }
   ],
   "pending": [],
-  "cash": 49451.709684840105
+  "cash": 47498.709684840105
 }
