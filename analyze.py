@@ -49,13 +49,64 @@ def run():
         c["strategy_type"] = classify_strategy(c["expected_days"])
         news_by_market[c["market"]] = get_news_sentiment(c["market"].replace("KRW-", ""))
 
-    ai_result = ask_claude_decision(portfolio["positions"], all_cands, news_by_market)
+    # 실계좌(토스, 조회전용) 보유종목 — 계좌번호 등 식별정보는 절대 넘기지 않는다.
+    real_portfolio = load_json("real_portfolio.json", {"positions": []})
+    real_positions = real_portfolio.get("positions", [])
+    real_positions_for_ai = [
+        {
+            "symbol": p["symbol"], "name": p.get("name", p["symbol"]),
+            "quantity": p.get("quantity"), "current_price": p.get("current_price"),
+            "return_pct": p.get("return_pct", 0),
+        }
+        for p in real_positions
+    ]
+
+    ai_result = ask_claude_decision(portfolio["positions"], all_cands, news_by_market, real_positions_for_ai)
     report.append("🤖 AI 시장 요약")
     report.append(ai_result.get("market_summary", "요약 없음"))
     report.append("")
 
     decisions = ai_result.get("decisions", [])
     decision_map = {d["market"]: d for d in decisions}
+
+    # 실계좌 매도/비중조정 제안 — 게이트(TRACK_B_ENABLED) 무관하게 항상 참고는 하되,
+    # 게이트가 꺼져 있는 동안(기본값)은 dry_run으로만 기록한다. 자동실행 경로는 절대 없음 —
+    # 실계좌엔 애초에 주문 함수가 없다(CLAUDE.md 조회전용 원칙).
+    real_by_symbol = {p["symbol"]: p for p in real_positions}
+    for d in decisions:
+        market = d.get("market", "")
+        if not market.startswith("REAL:"):
+            continue
+        symbol = market[len("REAL:"):]
+        rp = real_by_symbol.get(symbol)
+        if not rp:
+            continue
+        action = d.get("action")
+        if action not in ("매도", "비중조정"):
+            continue
+        action_type = "sell" if action == "매도" else "rebalance"
+        action_id = f"REAL_{symbol}_{today}"
+        already_pending = any(a.get("id") == action_id for a in pending["actions"])
+        if already_pending:
+            continue
+        dry_run = not TRACK_B_ENABLED
+        name = rp.get("name", symbol)
+        reasoning = d.get("reasoning", "-")
+        pending["actions"].append({
+            "id": action_id,
+            "action_type": action_type,
+            "target_account": "real",
+            "market": symbol,
+            "name": name,
+            "reasoning": f"[모의] {reasoning}" if dry_run else reasoning,
+            "status": "waiting",
+            "dry_run": dry_run,
+        })
+        gate_tag = " [모의] 게이트 미통과로 실행 비활성" if dry_run else ""
+        report.append("")
+        report.append(f"⏳ 실계좌 {action} 제안{gate_tag}: {name} ({rp.get('return_pct', 0):+.2f}%)")
+        report.append(f"   AI 이유: {reasoning}")
+        report.append(f"   👉 승인 /approve {action_id} / 거절 /reject {action_id}")
 
     still_holding = []
     for pos in portfolio["positions"]:
@@ -178,6 +229,8 @@ def run():
     waiting_count = len([a for a in pending["actions"] if a["status"] == "waiting"])
     if waiting_count:
         report.append(f"⏳ 승인 대기 중 {waiting_count}건")
+    if real_positions:
+        report.append(f"🏦 실계좌 게이트(TRACK_B_ENABLED): {'활성' if TRACK_B_ENABLED else '비활성 (dry_run)'}")
 
     last_report = {
         "date": today,

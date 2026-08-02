@@ -17,6 +17,17 @@ def get_updates(offset):
 def handle_approve(action_id, portfolio, history, pending):
     for action in pending["actions"]:
         if action["id"] == action_id and action["status"] == "waiting":
+            if action.get("target_account") == "real":
+                # 실계좌는 조회 전용 — 주문 API 자체가 없다. 게이트가 꺼져 있으면(기본값)
+                # 승인해도 아무것도 실행되지 않는다는 걸 명시적으로 알리기만 하고,
+                # status는 "waiting"으로 유지해 반복 승인 시도도 안전하게 no-op이 되게 한다.
+                label = "매도" if action.get("action_type") == "sell" else "비중조정"
+                name = action.get("name", action.get("market"))
+                if action.get("dry_run", True):
+                    send_telegram(f"🔒 [모의] {name} {label} — 게이트 미통과 상태, 실행되지 않음 (TRACK_B_ENABLED=false)")
+                else:
+                    send_telegram(f"⚠️ {name} {label} — 실계좌 주문 실행은 아직 구현되어 있지 않습니다 (조회 전용)")
+                return True
             if action["type"] == "sell":
                 market = action["market"]
                 pos = next((p for p in portfolio["positions"] if p["market"] == market), None)
@@ -52,7 +63,12 @@ def handle_reject(action_id, pending):
     for action in pending["actions"]:
         if action["id"] == action_id and action["status"] == "waiting":
             action["status"] = "rejected"
-            send_telegram(f"❌ 거절됨: {action['market']} 매도 취소, 계속 보유")
+            if action.get("target_account") == "real":
+                label = "매도" if action.get("action_type") == "sell" else "비중조정"
+                name = action.get("name", action.get("market"))
+                send_telegram(f"❌ 거절됨: {name} 실계좌 {label} 제안 취소")
+            else:
+                send_telegram(f"❌ 거절됨: {action['market']} 매도 취소, 계속 보유")
             return True
     return False
 
