@@ -33,6 +33,12 @@ NEWS_LOG_FILE = "news_event_calibration_log.json"
 
 OUTCOME_WINDOWS = {"d1": 1, "d5": 5, "d20": 20}
 SAMPLE_SIZE_ALERT = 30
+# 판단 모델을 상수로 뺀 이유(2026-08-02): 과거 뉴스 백테스트 트랙
+# (news_event_backtest.py)이 이 파일의 ask_news_event_judgment를 그대로 import해
+# 쓰는데, 두 트랙의 캘리브레이션을 비교하려면 프롬프트뿐 아니라 모델도 반드시
+# 같아야 한다. 리터럴이 두 군데로 갈라지지 않게 단일 출처로 고정한다.
+# 동작 변경은 없다 - 기존에 하드코딩돼 있던 값 그대로.
+JUDGE_MODEL = "claude-sonnet-4-6"
 UNIVERSE_SLEEP = 0.2  # 종목 사이 Google News RSS 유예 - crypto의 UPBIT_MARKET_SLEEP과 같은 취지
 
 
@@ -69,7 +75,7 @@ def ask_news_event_judgment(market, headlines):
             response = requests.post(
                 "https://api.anthropic.com/v1/messages",
                 headers={"x-api-key": CLAUDE_API_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json"},
-                json={"model": "claude-sonnet-4-6", "max_tokens": 500, "messages": [{"role": "user", "content": prompt_text}]},
+                json={"model": JUDGE_MODEL, "max_tokens": 500, "messages": [{"role": "user", "content": prompt_text}]},
                 timeout=30
             )
             data = response.json()
