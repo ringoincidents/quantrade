@@ -175,28 +175,60 @@ Phase 1에서 되돌린 시도(같은 날 `get_news_sentiment`를 `get_news_head
   자체 판단으로 추가/재활성화하지 말 것 — 방향성 세션에서 먼저 승인" 원칙(CLAUDE.md)과 같은
   맥락 — Phase 2도 아직 검증 전 단계이므로 함부로 확장하지 않는다.
 
-## 7. 2026-08-21(D+20) 도달 시 착수 작업 — §2.1 캘리브레이션 로직 설계 스케치
-
-**아직 구현하지 않음 — 데이터가 없는 상태에서 로직만 먼저 짜는 건 검증 불가능한 코드를
-쌓는 것이라 위험(§6 참고). 아래는 D+20 도달 시 바로 시작할 수 있도록 미리 잡아두는 설계
-스케치이며, 실제 데이터를 보면서 조정될 수 있다.**
+## 7. §2.1 캘리브레이션 로직 — 구현 완료 (`news_event_calibration_analysis.py`)
 
 목표 지표: 계획서 v3.1 §2.1의 캘리브레이션 조건 **"고확신군 승률 > 저확신군 승률"**.
 
-- **적중(hit) 정의(안)**: `direction`이 "호재"이고 해당 window의 `return_pct > 0`, 또는
-  "악재"이고 `return_pct < 0`이면 적중. "중립" 판단은 무엇이 "맞았다"인지 모호하므로 승률
-  계산에서 제외하고 표본 수만 별도 표기(승률을 0/1로 강제 분류해 왜곡시키지 않기 위함).
-- **고확신/저확신 분리(안)**: `confidence >= 70` vs `< 70`의 고정 임계값 분리를 1차로 제안 —
-  중앙값(median) 분리는 표본이 늘 때마다 경계선이 움직여서 같은 판단이 시점에 따라 고확신/
-  저확신을 오갈 수 있어 비교가 불안정해짐. 다만 이 임계값이 실제 confidence 분포와 맞는지는
-  D+20 시점의 실제 데이터 히스토그램을 보고 조정 필요.
-- **window별로 따로 계산**: d1/d5/d20 각각 독립적으로 승률을 낸다 — 단기 반응과 중장기 반응이
-  다를 수 있으므로 하나로 합치지 않는다.
-- **표본 부족 시 처리**: 8/21 시점엔 최초 코호트(38건)만 outcomes가 채워지고, 그마저도 이벤트
-  유형/고저확신군으로 쪼개면 칸당 표본이 한 자릿수일 가능성이 높다 — `backtest.py`의
-  `SUCCESS_CRITERIA`처럼 최소 표본 기준을 정해서 그 밑이면 "판단 보류"로 명시하고, 섣불리
-  "고확신군이 이겼다/졌다" 결론을 내지 않는다.
-- **구현 위치**: `news_event_experiment.py`에 함수를 추가하는 대신, 분석 전용 스크립트로
-  분리하는 걸 권장 — 이 실험 스크립트는 "매일 판단하고 채우는" 파이프라인 역할만 하고,
-  캘리브레이션 집계·리포트는 읽기 전용 별도 스크립트(예: `news_event_calibration_report.py`)로
-  둬야 파이프라인 코드가 비대해지지 않는다.
+- **적중(hit) 정의**: `direction`이 "호재"이고 해당 window의 `return_pct > 0`, 또는 "악재"이고
+  `return_pct < 0`이면 적중. "중립" 판단은 무엇이 "맞았다"인지 모호하므로 승률/ECE 계산에서
+  제외하고 표본 수만 별도 표기.
+- **고확신/저확신 분리**: `confidence >= 70` vs `< 70` 고정 임계값. 실제 confidence 분포와
+  맞는지는 D+20 이후 실제 데이터를 보고 재검토 여지 있음.
+- **window별로 따로 계산**: d1/d5/d20 각각 독립적으로 승률/ECE·MCE/유의성 검정을 낸다.
+- **표본 부족 시 처리**: `MIN_BUCKET_SAMPLES=10` 미만이면 숫자를 내지 않고 "판단 보류".
+- **구현 위치**: 예상대로 `news_event_experiment.py`(판단 기록 파이프라인)와 분리된 읽기 전용
+  스크립트 `news_event_calibration_analysis.py`.
+
+**2026-08-02 확장 — ECE/MCE + 통계적 유의성 검정 ("다운타임 상시 작업 목록 A-4"):**
+- **ECE(Expected Calibration Error)/MCE(Maximum Calibration Error)**: `compute_ece_mce()`,
+  confidence(0-100)를 `--bins`(기본 10) 개 등폭 구간으로 나눠 구간별 평균 확신도와 실제
+  적중률의 차이를 낸다. ECE는 표본수 가중평균, MCE는 최댓값. 전체 표본이
+  `MIN_BUCKET_SAMPLES` 미만이면 판단 보류.
+- **통계적 유의성 검정**: `significance_test()`, 고확신/저확신군 승률 차이를 **Fisher's exact
+  test**로 검정 — scipy 없이 `math.comb`만으로 순수 stdlib 구현(CLAUDE.md 의존성
+  최소화 원칙). 초기 표본 규모에서 정규근사(z-test)보다 정확검정이 더 적절해서 채택. R/scipy
+  참조값(`[[3,1],[1,3]]`→0.4857, `[[8,2],[1,5]]`→0.03497, 양측검정 기준)과 대조해 구현
+  정확성 확인.
+
+**2026-08-02 사전 확정 — 캘리브레이션 통계 판정기준 (D+20 데이터 도착 전 고정):**
+- **단측(one-tailed) 검정으로 전환**: §2.1 가설이 "고확신군 승률 > 저확신군 승률"로 방향이
+  이미 명시돼 있으므로, 양측(two-tailed)이 아니라 `fisher_exact_p_value(..., alternative=
+  "greater")`(단측, a=고확신군 hit 수가 우연보다 유의미하게 큰지만 검정)를 `significance_test()`에서
+  쓴다. `fisher_exact_p_value()`는 `alternative` 파라미터로 두 방식을 모두 지원하되(기본값은
+  여전히 양측), 캘리브레이션 판정에는 단측만 사용한다.
+- **유의수준 3단계 분류**: `classify_significance(p_value)` — p<`SIGNIFICANCE_ALPHA_STRONG`(0.05)
+  "강한신호", `SIGNIFICANCE_ALPHA_STRONG`≤p<`SIGNIFICANCE_ALPHA_WEAK`(0.10) "약한신호",
+  p≥`SIGNIFICANCE_ALPHA_WEAK` "유의미하지 않음". `significance_test()`의 반환값에서 기존
+  boolean `significant` 필드는 이 3단계 `signal` 문자열 필드로 대체했다(외부 호출부가 이
+  파일 안에만 있어 하위호환 걱정 없이 정리).
+- **표본 부족 기준은 그대로**: 그룹(고확신/저확신)당 `MIN_BUCKET_SAMPLES`(10) 미만이면 검정
+  자체를 실행하지 않고 기존과 동일하게 "판단 보류"(`signal: null`) — 이번 변경으로 건드리지
+  않음.
+- **사전 고정(pre-registration), 사후 변경 금지**: 이 3가지(단측 방향, `SIGNIFICANCE_ALPHA_STRONG`/
+  `SIGNIFICANCE_ALPHA_WEAK` 두 임계값)는 `news_event_calibration_analysis.py` 모듈 상단
+  주석에서 명시적으로 사전 고정했고, **2026-08-21 최초 코호트 D+20 도달로 실제 outcomes
+  데이터가 들어온 뒤에도 결과를 보고 사후에 바꾸지 않는다** — `backtest.py`의
+  `SUCCESS_CRITERIA`("결과가 나온 뒤 기준을 짜맞추는 것을 막기 위해 미리 박아둔 성공 기준")와
+  정확히 같은 원칙. 바꿔야 한다면 이 세션이 아니라 별도로 논의하고 명시적으로 기록한다.
+- **더미 데이터 자체 테스트**: `python3 news_event_calibration_analysis.py --self-test`로
+  실행 — 실제 로그 파일은 전혀 열지 않고 메모리 내 합성 레코드만으로 (1) 잘 보정된 데이터→
+  낮은 ECE, (2) 과신 데이터→높은 ECE/MCE, (3) 유의성 3단계(강한신호/약한신호/유의미하지
+  않음) 각각을 `alternative="greater"`로 사전 계산해 정확히 그 경계에 떨어지도록 만든
+  결정적(난수 아님) hit/miss 카운트로 재현 확인 — 고확신 8승2패 vs 저확신 2승8패(p=0.0115,
+  강한신호), 7승3패 vs 3승7패(p=0.0894, 약한신호), 6승4패 vs 5승5패(p=0.5, 유의미하지 않음),
+  (4) 표본 부족 시 전부 판단 보류, (5) `--bins` 파라미터 반영 여부를 검증. 전부 통과 확인.
+- **매매 로직 미접촉**: `analyze.py`/`analyze_lib.py`/`ask_claude_decision` 전혀 안 건드림 —
+  이 파일은 여전히 읽기 전용 사후 분석 도구.
+- 실제 `news_event_calibration_log.json`(outcomes 전부 null) 기준 재실행 확인 — 모든
+  window에서 "판단 보류" 정상 출력, 실행 전후 파일 변경 없음(read-only 재확인, md5 체크섬
+  일치).
