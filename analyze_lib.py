@@ -38,6 +38,13 @@ TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN", "")
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")
 CLAUDE_API_KEY = os.environ.get("CLAUDE_API_KEY", "")
 
+# 실계좌(토스) 승인 구조 게이트 (2026-08-01). False인 동안 ask_claude_decision은
+# real_portfolio.json 보유종목을 계속 참고해 매도/비중조정 제안을 만들지만, 그 제안은
+# pending_actions.json에 dry_run: true로만 기록되고 /approve를 눌러도 실제로는 아무것도
+# 실행되지 않는다(실계좌엔 애초에 주문 API가 없다 — CLAUDE.md "조회 전용" 원칙). 10월 말
+# 게이트 통과 판정(claude.ai 방향성 세션) 전까지 이 값을 true로 바꾸지 말 것.
+TRACK_B_ENABLED = os.environ.get("TRACK_B_ENABLED", "false").lower() == "true"
+
 
 def calc_ma(prices, window):
     return sum(prices[-window:]) / window
@@ -456,7 +463,8 @@ def _format_news(headlines):
     return " / ".join(headlines)
 
 
-def ask_claude_decision(held_positions, candidates, news_by_market):
+def ask_claude_decision(held_positions, candidates, news_by_market, real_positions=None):
+    real_positions = real_positions or []
     tradeable = [p for p in held_positions if not p.get("conviction")]
     conviction_holds = [p for p in held_positions if p.get("conviction")]
 
@@ -475,11 +483,21 @@ def ask_claude_decision(held_positions, candidates, news_by_market):
         for c in candidates
     ]) or "없음"
 
+    # 실계좌(토스) 보유종목 — 계좌번호 등 식별정보는 절대 넘기지 않는다. 종목명/수량/현재가/
+    # 수익률만 전달(analyze.py에서 이미 필터링해서 넘어옴).
+    real_text = "\n".join([
+        f"- {p['name']} ({p['symbol']}): 수량 {p['quantity']}, 현재가 {p['current_price']}, 수익률 {p.get('return_pct', 0):+.2f}%"
+        for p in real_positions
+    ]) or "없음"
+
     prompt_text = (
         "너는 개인 투자자를 위한 퀀트 자산관리 AI야. 아래 정보를 보고 실제 결정을 내려줘.\n\n"
         f"[매매 판단 대상 보유 포지션]\n{holdings_text}\n\n"
         f"[사용자 확신 장기보유 종목 - 참고만]\n{conviction_text}\n\n"
         f"[신규 진입 후보]\n{candidates_text}\n\n"
+        f"[실계좌 보유종목 - 조회전용, 매도 또는 비중조정만 판단(매수 불가)]\n{real_text}\n\n"
+        "실계좌 종목에 대한 결정은 market 필드를 반드시 'REAL:종목코드' 형식으로 써(예: REAL:005930). "
+        "action은 매도 또는 비중조정만 가능하고, 보유가 적절한 실계좌 종목은 별도 decision을 만들지 마.\n\n"
         "다음 JSON 형식으로만 답해줘. 매우 중요한 규칙:\n"
         "- 다른 설명 텍스트 없이 순수 JSON만 출력\n"
         "- 모든 문자열 값은 반드시 큰따옴표로 감싸고, 문자열 안에는 줄바꿈이나 큰따옴표를 절대 넣지 마\n"
