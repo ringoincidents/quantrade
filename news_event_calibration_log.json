@@ -18,9 +18,9 @@
       "price_at_judgment": 262500.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-02",
+          "price": 262500.0,
+          "return_pct": 0.0
         },
         "d5": {
           "date": null,
@@ -52,9 +52,9 @@
       "price_at_judgment": 1718000.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-02",
+          "price": 1718000.0,
+          "return_pct": 0.0
         },
         "d5": {
           "date": null,
@@ -86,9 +86,9 @@
       "price_at_judgment": 328000.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-02",
+          "price": 328000.0,
+          "return_pct": 0.0
         },
         "d5": {
           "date": null,
@@ -120,9 +120,9 @@
       "price_at_judgment": 1485000.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-02",
+          "price": 1485000.0,
+          "return_pct": 0.0
         },
         "d5": {
           "date": null,
@@ -154,9 +154,9 @@
       "price_at_judgment": 388000.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-02",
+          "price": 388000.0,
+          "return_pct": 0.0
         },
         "d5": {
           "date": null,
@@ -188,9 +188,9 @@
       "price_at_judgment": 312500.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-02",
+          "price": 312500.0,
+          "return_pct": 0.0
         },
         "d5": {
           "date": null,
@@ -222,9 +222,9 @@
       "price_at_judgment": 397000.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-02",
+          "price": 397000.0,
+          "return_pct": 0.0
         },
         "d5": {
           "date": null,
@@ -256,9 +256,9 @@
       "price_at_judgment": 258000.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-02",
+          "price": 258000.0,
+          "return_pct": 0.0
         },
         "d5": {
           "date": null,
@@ -290,9 +290,9 @@
       "price_at_judgment": 208000.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-02",
+          "price": 208000.0,
+          "return_pct": 0.0
         },
         "d5": {
           "date": null,
@@ -324,9 +324,9 @@
       "price_at_judgment": 131900.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-02",
+          "price": 131900.0,
+          "return_pct": 0.0
         },
         "d5": {
           "date": null,
@@ -358,9 +358,9 @@
       "price_at_judgment": 168500.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-02",
+          "price": 168500.0,
+          "return_pct": 0.0
         },
         "d5": {
           "date": null,
@@ -392,9 +392,9 @@
       "price_at_judgment": 100700.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-02",
+          "price": 100700.0,
+          "return_pct": 0.0
         },
         "d5": {
           "date": null,
@@ -426,9 +426,9 @@
       "price_at_judgment": 476000.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-02",
+          "price": 476000.0,
+          "return_pct": 0.0
         },
         "d5": {
           "date": null,
@@ -460,9 +460,9 @@
       "price_at_judgment": 37400.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-02",
+          "price": 37400.0,
+          "return_pct": 0.0
         },
         "d5": {
           "date": null,
@@ -494,9 +494,9 @@
       "price_at_judgment": 186700.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-02",
+          "price": 186700.0,
+          "return_pct": 0.0
         },
         "d5": {
           "date": null,
@@ -528,9 +528,9 @@
       "price_at_judgment": 351500.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-02",
+          "price": 351500.0,
+          "return_pct": 0.0
         },
         "d5": {
           "date": null,
@@ -562,9 +562,9 @@
       "price_at_judgment": 162100.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-02",
+          "price": 162100.0,
+          "return_pct": 0.0
         },
         "d5": {
           "date": null,
@@ -596,9 +596,9 @@
       "price_at_judgment": 110500.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-02",
+          "price": 110500.0,
+          "return_pct": 0.0
         },
         "d5": {
           "date": null,
@@ -630,9 +630,9 @@
       "price_at_judgment": 311500.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-02",
+          "price": 311500.0,
+          "return_pct": 0.0
         },
         "d5": {
           "date": null,
@@ -664,9 +664,9 @@
       "price_at_judgment": 101100.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-02",
+          "price": 101100.0,
+          "return_pct": 0.0
         },
         "d5": {
           "date": null,
@@ -698,9 +698,9 @@
       "price_at_judgment": 34800.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-02",
+          "price": 34800.0,
+          "return_pct": 0.0
         },
         "d5": {
           "date": null,
@@ -732,9 +732,9 @@
       "price_at_judgment": 557000.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-02",
+          "price": 557000.0,
+          "return_pct": 0.0
         },
         "d5": {
           "date": null,
@@ -766,9 +766,9 @@
       "price_at_judgment": 125400.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-02",
+          "price": 125400.0,
+          "return_pct": 0.0
         },
         "d5": {
           "date": null,
@@ -800,9 +800,9 @@
       "price_at_judgment": 999000.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-02",
+          "price": 999000.0,
+          "return_pct": 0.0
         },
         "d5": {
           "date": null,
@@ -834,9 +834,9 @@
       "price_at_judgment": 1142000.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-02",
+          "price": 1142000.0,
+          "return_pct": 0.0
         },
         "d5": {
           "date": null,
@@ -868,9 +868,9 @@
       "price_at_judgment": 85200.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-02",
+          "price": 85200.0,
+          "return_pct": 0.0
         },
         "d5": {
           "date": null,
@@ -902,9 +902,9 @@
       "price_at_judgment": 308500.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-02",
+          "price": 308500.0,
+          "return_pct": 0.0
         },
         "d5": {
           "date": null,
@@ -936,9 +936,9 @@
       "price_at_judgment": 632000.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-02",
+          "price": 632000.0,
+          "return_pct": 0.0
         },
         "d5": {
           "date": null,
@@ -970,9 +970,9 @@
       "price_at_judgment": 33600.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-02",
+          "price": 33600.0,
+          "return_pct": 0.0
         },
         "d5": {
           "date": null,
@@ -1004,9 +1004,9 @@
       "price_at_judgment": 20650.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-02",
+          "price": 20650.0,
+          "return_pct": 0.0
         },
         "d5": {
           "date": null,
@@ -1038,9 +1038,9 @@
       "price_at_judgment": 103500.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-02",
+          "price": 103500.0,
+          "return_pct": 0.0
         },
         "d5": {
           "date": null,
@@ -1072,9 +1072,9 @@
       "price_at_judgment": 79100.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-02",
+          "price": 79100.0,
+          "return_pct": 0.0
         },
         "d5": {
           "date": null,
@@ -1106,9 +1106,9 @@
       "price_at_judgment": 9250.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-02",
+          "price": 9250.0,
+          "return_pct": 0.0
         },
         "d5": {
           "date": null,
@@ -1140,9 +1140,9 @@
       "price_at_judgment": 97600.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-02",
+          "price": 97600.0,
+          "return_pct": 0.0
         },
         "d5": {
           "date": null,
@@ -1174,9 +1174,9 @@
       "price_at_judgment": 68400.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-02",
+          "price": 68400.0,
+          "return_pct": 0.0
         },
         "d5": {
           "date": null,
@@ -1208,9 +1208,9 @@
       "price_at_judgment": 15990.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-02",
+          "price": 15990.0,
+          "return_pct": 0.0
         },
         "d5": {
           "date": null,
@@ -1242,9 +1242,9 @@
       "price_at_judgment": 296000.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-02",
+          "price": 296000.0,
+          "return_pct": 0.0
         },
         "d5": {
           "date": null,
@@ -1273,6 +1273,1298 @@
       "direction": "호재",
       "confidence": 78,
       "reasoning": "1분기 영업이익 129억원으로 전년 대비 20% 증가했고 신제품 옴리클로 300mg PFS 제형 국내 출시로 성장 모멘텀 확보, 실적 개선과 신제품 출시가 동시에 확인되어 긍정적 신호로 판단",
+      "price_at_judgment": 40200.0,
+      "outcomes": {
+        "d1": {
+          "date": "2026-08-02",
+          "price": 40200.0,
+          "return_pct": 0.0
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "005930_2026-08-02",
+      "market": "005930",
+      "judged_at": "2026-08-02",
+      "headlines": [
+        "20% 넘는 폭등에도…삼전닉스 주가, 목표가의 반토막 수준 - 연합뉴스",
+        "삼성전자(005930) - 매일경제 마켓",
+        "🧭 [HBS Chart Compass] 삼성전자 (005930) - 네이버 프리미엄콘텐츠",
+        "삼성전자(005930)저점을 줄때마다 물량 모아둘 기회로 보이며 이후 전망 및 대응전략. - 씽크풀 AI",
+        "삼성전자(005930) - 매일경제 마켓"
+      ],
+      "event_type": "기타",
+      "direction": "중립",
+      "confidence": 40,
+      "reasoning": "20% 폭등에도 목표가 대비 절반 수준이라는 언급은 저평가 상태를 시사하나 악재 해소가 충분치 않음을 의미하며, 저점 매수 기회 언급은 반등 기대감을 나타내지만 전반적으로 뚜렷한 방향성 없이 관망 분위기가 혼재된 상황으로 판단됨",
+      "price_at_judgment": 262500.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "000660_2026-08-02",
+      "market": "000660",
+      "judged_at": "2026-08-02",
+      "headlines": [
+        "SK하이닉스(000660) - 매일경제 마켓",
+        "SK하이닉스(000660)밀릴때마다 물량 모아둘 기회로 보이며 이후 전망 및 대응전략. - 씽크풀 AI",
+        "20% 넘는 폭등에도…삼전닉스 주가, 목표가의 반토막 수준 - 연합뉴스",
+        "\"나 떨고 있냐'…SK하이닉스 경력채용 발표 앞두고 대기업들 긴장 - 뉴스1",
+        "SK하이닉스 주가 조정은 매수 기회…메모리 부족 심화 - 경제타임스"
+      ],
+      "event_type": "기타",
+      "direction": "호재",
+      "confidence": 72,
+      "reasoning": "목표가 대비 주가가 반토막 수준이라는 부정적 언급이 있으나. 조정 시 매수 기회 권고. 메모리 부족 심화로 업황 긍정. 경력채용 발표로 사업 확장 기대감이 복합적으로 작용하며 전반적으로 매수 우위 심리가 우세함",
+      "price_at_judgment": 1718000.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "373220_2026-08-02",
+      "market": "373220",
+      "judged_at": "2026-08-02",
+      "headlines": [
+        "LG에너지솔루션(373220) - 매일경제 마켓",
+        "[1보] LG에너지솔루션 2분기 영업이익 1천133억원…작년 대비 77%↓ - 연합뉴스",
+        "LG엔솔 2Q 컨센 하회, 하반기 ESS 흑자전환에 눈길 - 경제타임스",
+        "LG에너지솔루션, 2분기 영업익 1천133억…잠정치 부합 - KB Think",
+        "[LG에너지솔루션] LG에너지솔루션 주가 전망, AI 데이터센터가 새 돌파구 될까?(2026년_2Q) - 네이버 프리미엄콘텐츠"
+      ],
+      "event_type": "실적발표",
+      "direction": "악재",
+      "confidence": 72,
+      "reasoning": "2분기 영업이익이 전년 대비 77% 급감했고 컨센서스도 하회했으나, 잠정치와는 부합하며 하반기 ESS 흑자전환 기대와 AI 데이터센터 신성장동력 언급으로 낙폭은 제한될 수 있음",
+      "price_at_judgment": 328000.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "207940_2026-08-02",
+      "market": "207940",
+      "judged_at": "2026-08-02",
+      "headlines": [
+        "[헷갈리면 손해] “공장 가동률이냐, 신약 특허냐” 삼성바이오로직스 vs 삼성에피스홀딩스 분리 법칙 - theconnectmoney.com",
+        "[특징주] 삼성바이오로직스(207940), 글로벌 생산망 확장…수주 경쟁력 강화 - v.daum.net",
+        "법원 \"삼성바이오 노조, 일부작업중단 지시 안 돼\"…영향은 - KB Think",
+        "삼성바이오 노사, 21차례 교섭에도 입장차 - 연합뉴스",
+        "24일, 거래소 외국인 순매수상위에 의약품 업종 2종목 - 씽크풀 AI"
+      ],
+      "event_type": "기타",
+      "direction": "중립",
+      "confidence": 45,
+      "reasoning": "글로벌 생산망 확장과 외국인 순매수는 호재 신호이나. 노사 갈등 21차례 교섭 결렬과 법원의 작업중단 관련 판결은 악재 요소로. 호재와 악재가 혼재하여 방향성이 상쇄됨",
+      "price_at_judgment": 1485000.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "005380_2026-08-02",
+      "market": "005380",
+      "judged_at": "2026-08-02",
+      "headlines": [
+        "현대차, ‘아이오닉 9’ 최대 550만원 할인 - 서울경제",
+        "현대차 005380 | 관련 기업 - 데일리바이트(DAILY BYTE)",
+        "현대차·제네시스, 썸머 페스타 확대…아이오닉9 최대 550만원 할인 - 뉴스1",
+        "현대차그룹 정의선 회장, 브라질공장 방문…중장기 성장 전략 점검 - 인포스탁데일리",
+        "현대차그룹 정의선, 브라질 공장 찾아…\"매우 중요한 시장\" 강조 - KB Think"
+      ],
+      "event_type": "기타",
+      "direction": "호재",
+      "confidence": 62,
+      "reasoning": "아이오닉9 최대 550만원 할인은 단기 판매 촉진 긍정 신호이나 수익성 압박 우려도 존재. 정의선 회장의 브라질 공장 방문 및 중장기 성장 전략 점검은 글로벌 시장 확장 의지를 보여주는 긍정적 시그널로 전반적으로 소폭 호재로 판단",
+      "price_at_judgment": 388000.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "005490_2026-08-02",
+      "market": "005490",
+      "judged_at": "2026-08-02",
+      "headlines": [
+        "포스코홀딩스 2분기 영업이익 8천200억원…작년 대비 34.4%↑ - 연합뉴스",
+        "포스코홀딩스, 계열사 지분 3.5兆 처분에 배당↓…'4년 뒤 리튬'이 메울까 - KB Think",
+        "포스코홀딩스 목표가 하향에도 \"여전히 저평가 매력\" - 경제타임스",
+        "AI주식상승확률분석 : POSCO홀딩스(005490) 주가 전망과 상승확률 분석 - Investing.com 한국어",
+        "키움증권 \"포스코홀딩스 목표가 하향…리튬 가격 약세 반영\" - 파이낸셜뉴스"
+      ],
+      "event_type": "실적발표",
+      "direction": "중립",
+      "confidence": 55,
+      "reasoning": "2분기 영업이익 34.4% 증가로 실적 자체는 긍정적이나. 계열사 지분 3.5조 처분과 배당 감소. 리튬 가격 약세로 목표가 하향 조정이 잇따르며 중장기 성장 불확실성이 상존해 호악재가 혼재된 중립 국면으로 판단",
+      "price_at_judgment": 312500.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "006400_2026-08-02",
+      "market": "006400",
+      "judged_at": "2026-08-02",
+      "headlines": [
+        "삼성SDI 006400 - 데일리바이트(DAILY BYTE)",
+        "삼성SDI 2분기 영업이익 2천38억원…흑자 전환 - 연합뉴스",
+        "[투데이리포트]삼성SDI, \"2Q26 Revie…\" HOLD-LS증권 - 씽크풀 AI",
+        "[삼성SDI] ESS 수주가 2029년까지 찼다…삼성SDI의 반격이 시작됐다(2026년_2Q) - 네이버 프리미엄콘텐츠",
+        "'깜짝 흑자' 삼성SDI, 2Q 영업익 2천38억원(상보) - KB Think"
+      ],
+      "event_type": "실적발표",
+      "direction": "호재",
+      "confidence": 88,
+      "reasoning": "2Q 영업이익 2038억원으로 흑자 전환 달성. 시장 기대를 상회하는 깜짝 흑자로 평가됨. ESS 수주가 2029년까지 확보되어 중장기 성장 가시성도 확보된 상황. 다만 증권사 투자의견은 HOLD 유지로 상단 제한 가능성 존재",
+      "price_at_judgment": 397000.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "051910_2026-08-02",
+      "market": "051910",
+      "judged_at": "2026-08-02",
+      "headlines": [
+        "LG화학 2분기 영업이익 5천996억원…작년 동기 대비 25.8%↑ - 연합뉴스",
+        "[LG화학] 적자 탈출한 LG화학, 하지만 3분기가 더 중요한 이유(2026년_2Q) - 네이버 프리미엄콘텐츠",
+        "[잠정실적]LG화학, 올해 2Q 매출액 14조1759억(+29%) 영업이익 5996억(+26%) (연결) - 씽크풀 AI",
+        "LG화학, 2Q 매출 19.0%·영업익 25.8%↑…석화·첨단소재 동반 성장(종합) - 뉴스1",
+        "LG화학, 석화·첨단소재 힘입어 2분기 영업익 25% 늘어 - 서울경제"
+      ],
+      "event_type": "실적발표",
+      "direction": "호재",
+      "confidence": 82,
+      "reasoning": "2분기 영업이익 25.8% 증가로 적자 탈출 및 매출 19% 성장을 달성했고 석화와 첨단소재 부문이 동반 성장했으나. 3분기 불확실성에 대한 우려가 언급되어 완전한 호재로 보기에는 유보적 시각이 존재함",
+      "price_at_judgment": 258000.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "035420_2026-08-02",
+      "market": "035420",
+      "judged_at": "2026-08-02",
+      "headlines": [
+        "엔비디아, 1조4800억에 네이버 3대주주 된다? AI가 분석해주는 NAVER (035420) 상승확률은? - 네이버 프리미엄콘텐츠",
+        "NAVER, 엔비디아 직접 투자와 연말 두나무 합병까지 겹경사 -하나 - 인포스탁데일리",
+        "엔비디아, 왜 네이버에 직접 투자했나 - KB Think",
+        "한투증권 \"네이버, 엔비디아 투자로 AI 파트너십 강화\" - 연합뉴스",
+        "[MK 골든크로스 돌파종목 : NAVER(035420) & 나이스디앤비(130580)] - 매일경제 마켓"
+      ],
+      "event_type": "M&A",
+      "direction": "호재",
+      "confidence": 88,
+      "reasoning": "엔비디아가 네이버에 직접 투자해 3대주주 등극 예정이며 AI 파트너십 강화 기대감이 높고, 두나무 합병 이슈까지 겹치며 복수의 긍정적 촉매가 동시에 작용 중이고, 골든크로스 돌파 신호까지 포착되어 시장 모멘텀도 우호적으로 형성됨",
+      "price_at_judgment": 208000.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "000270_2026-08-02",
+      "market": "000270",
+      "judged_at": "2026-08-02",
+      "headlines": [
+        "기아(000270) - 매일경제 마켓",
+        "기아(000270), 사상 최대 매출에도 수익성 기대 밑돌아…하반기 신차 믹스가 관건 - 한국투데이",
+        "[기업 이모저모] 이 길 맞겠지…현대차·기아의 전기차 딜레마 - KB Think",
+        "현대차·기아, 칠레 '한국의 거리'에 순찰차 기증 - 연합뉴스 한민족센터",
+        "[잠정실적]기아, 3년 중 최고 매출 달성, 영업이익은 전년동기 대비 -4.9%↓ (연결) - 씽크풀 AI"
+      ],
+      "event_type": "실적발표",
+      "direction": "악재",
+      "confidence": 68,
+      "reasoning": "사상 최대 매출 달성에도 불구하고 영업이익이 전년 동기 대비 4.9% 감소하며 수익성 기대치 하회. 전기차 딜레마 언급으로 중장기 불확실성 존재. 하반기 신차 믹스가 관건이라는 표현은 현 시점 불확실성을 시사함",
+      "price_at_judgment": 131900.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "105560_2026-08-02",
+      "market": "105560",
+      "judged_at": "2026-08-02",
+      "headlines": [
+        "KB금융, 1천500억원 규모 유니콘 기업 육성 펀드 조성 - 매일경제 마켓",
+        "[특징주] KB금융(105560), 이익·자본·성장 '삼박자'…투자 매력 부각 - v.daum.net",
+        "KB금융 2분기 영업이익 2조7천125억원…작년 동기 대비 27.2%↑ - 연합뉴스",
+        "AI주식상승확률분석 : KB금융(105560) 주가 전망과 상승확률 분석 - Investing.com 한국어",
+        "KB금융, 반도체·피지컬AI·데이터센터 집중 지원…유니콘 펀드 1500억원 조성 - NSP통신"
+      ],
+      "event_type": "실적발표",
+      "direction": "호재",
+      "confidence": 85,
+      "reasoning": "2분기 영업이익 2조7천125억원으로 전년 동기 대비 27.2% 증가한 실적 호조. 이익·자본·성장 삼박자 부각 평가. 1500억원 규모 유니콘 펀드 조성으로 미래 성장 투자 신호도 긍정적.",
+      "price_at_judgment": 168500.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "055550_2026-08-02",
+      "market": "055550",
+      "judged_at": "2026-08-02",
+      "headlines": [
+        "[MK 골든크로스 돌파종목 : 시프트업(462870) & 신한지주(055550)] - 매일경제 마켓",
+        "신한라이프, 고용부 청년 일경험 사업 참여…8주간 실무 프로젝트 진행 - NSP통신",
+        "신한카드 2분기 영업이익 1천845억원…작년 동기 대비 32.8%↑ - 연합뉴스",
+        "23일, 외국인 거래소에서 SK하이닉스(+4.86%), 삼성전자(+3.65%) 등 순매수 - 씽크풀 AI",
+        "신한지주 2분기 실적 발표…신한은행 영업이익 상승, 매출은 감소세 - 공감신문"
+      ],
+      "event_type": "실적발표",
+      "direction": "호재",
+      "confidence": 72,
+      "reasoning": "신한카드 2분기 영업이익 32.8% 상승이 뚜렷한 호재. 신한은행 영업이익도 상승했으나 매출 감소세가 혼재. 골든크로스 돌파 신호도 긍정적 기술적 신호로 작용. 전반적으로 호재 우세하나 매출 감소 우려가 신뢰도를 일부 제한",
+      "price_at_judgment": 100700.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "012330_2026-08-02",
+      "market": "012330",
+      "judged_at": "2026-08-02",
+      "headlines": [
+        "현대모비스(012330), 제조부문 흑자 전환…전장 믹스 개선과 로봇 부품이 성장축 - 한국투데이",
+        "하나증권 \"현대모비스, 2분기 실적 시장 예상치 부합 전망\" - 연합뉴스",
+        "투자정보 - 매일경제 마켓",
+        "현대모비스(012330)저점을 줄때마다 물량 모아둘 기회로 보이며 이후 전망 및 대응전략. - 씽크풀 AI",
+        "현대모비스, 2분기 실적은 기대치 상회·중장기 성장성에 대한 확인 필요 -신한 - 인포스탁데일리"
+      ],
+      "event_type": "실적발표",
+      "direction": "호재",
+      "confidence": 72,
+      "reasoning": "제조부문 흑자 전환 및 2분기 실적 시장 예상치 부합 내지 기대치 상회 전망이 긍정적이나, 중장기 성장성 확인 필요라는 조건부 시각이 존재해 완전한 호재로 보기엔 일부 유보적 요소가 있음",
+      "price_at_judgment": 476000.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "035720_2026-08-02",
+      "market": "035720",
+      "judged_at": "2026-08-02",
+      "headlines": [
+        "카카오톡 친구탭 이번주 업데이트…이전으로 복구 예정 - 매일경제 마켓",
+        "카카오, 경량 언어모델 4종 오픈소스로 공개... “글로벌 수준 성능” - 인포스탁데일리",
+        "[AI픽] 카카오, AI 경량모델 4종 오픈소스 공개 - 연합뉴스",
+        "이해진 3.91%, 김범수 24%…AI 시대 창업자의 진짜 힘 [김현아의 IT세상읽기] - 네이트",
+        "카카오 노사, 임금협상 잠정 합의…최종 타결 '눈앞' - 세계일보"
+      ],
+      "event_type": "기타",
+      "direction": "호재",
+      "confidence": 62,
+      "reasoning": "AI 경량 모델 4종 오픈소스 공개로 기술력 부각 및 글로벌 경쟁력 어필. 카카오톡 친구탭 복구로 사용자 불만 해소 기대. 노사 임금협상 잠정 합의로 내부 불확실성 감소. 다만 창업자 지분 관련 기사는 지배구조 이슈 잠재 가능성 있어 완전한 호재로 보기엔 제한적",
+      "price_at_judgment": 37400.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "068270_2026-08-02",
+      "market": "068270",
+      "judged_at": "2026-08-02",
+      "headlines": [
+        "[MK 골든크로스 돌파종목 : 롯데칠성(005300) & 셀트리온(068270)] - 매일경제 마켓",
+        "[투데이리포트]셀트리온, \"신규 제품이 바꾼 …\" 매수-신한투자증권 - 씽크풀 AI",
+        "로보인베스팅 골든크로스 돌파종목 : 롯데칠성(005300) & 셀트리온(068270) - Investing.com 한국어",
+        "셀트리온, 이탈리아 판매 확대…유럽 시장 공략 박차 - 연합뉴스",
+        "셀트리온, '2Q26 Review: 안정적 성장' 증권사 발표에 강세 - 매일경제 마켓"
+      ],
+      "event_type": "실적발표",
+      "direction": "호재",
+      "confidence": 78,
+      "reasoning": "2Q26 실적 리뷰에서 안정적 성장 평가와 매수 의견 제시. 이탈리아 등 유럽 시장 판매 확대 소식. 골든크로스 돌파로 기술적 모멘텀도 긍정적",
+      "price_at_judgment": 186700.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "028260_2026-08-02",
+      "market": "028260",
+      "judged_at": "2026-08-02",
+      "headlines": [
+        "[종목상담] 삼성물산(028260) - 매일경제TV",
+        "삼성물산(028260)저점을 줄때마다 물량 모아둘 기회로 보이며 이후 전망 및 대응전략. - 씽크풀 AI",
+        "삼성물산 2분기 영업이익 1조317억원…작년 동기 대비 37.1%↑ - 연합뉴스",
+        "삼성물산 2분기 영업이익 1조317억원…작년 동기 대비 37.1%↑(종합) - 매일경제 마켓",
+        "삼성물산, 2Q 영업익 1조 넘어…건설·상사 호조에 '깜짝 실적'(종합) - KB Think"
+      ],
+      "event_type": "실적발표",
+      "direction": "호재",
+      "confidence": 90,
+      "reasoning": "삼성물산 2분기 영업이익 1조317억원으로 전년 동기 대비 37.1% 증가, 건설과 상사 부문 호조로 시장 기대치를 상회하는 깜짝 실적 달성, 저점 매수 추천 의견도 긍정적 시각 반영",
+      "price_at_judgment": 351500.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "066570_2026-08-02",
+      "market": "066570",
+      "judged_at": "2026-08-02",
+      "headlines": [
+        "가전서 희비 갈린 삼성·LG…영업익 2분기째 1조원 격차 - 연합뉴스",
+        "LG전자(066570) 7월 3주차 리포트 - 데일리바이트(DAILY BYTE)",
+        "[기업실적]LG전자, 2Q 실적 ‘상승’…영업이익 전년比 147%↑ - NSP통신",
+        "LG전자(066570)밀릴때마다 물량 모아둘 기회로 보이며 이후 전망 및 대응전략. - 씽크풀 AI",
+        "LG전자, 증권사 목표가 상향에 강세…15.63% - 매일경제 마켓"
+      ],
+      "event_type": "실적발표",
+      "direction": "호재",
+      "confidence": 88,
+      "reasoning": "2분기 영업이익 전년 대비 147% 상승이라는 강력한 실적 개선이 확인됐고. 증권사 목표가 상향과 주가 15% 이상 강세가 동반되어 시장 반응도 긍정적. 삼성과의 격차 언급은 일부 경쟁 우위 훼손 우려를 시사하나 전체 기조는 명확히 호재",
+      "price_at_judgment": 162100.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "096770_2026-08-02",
+      "market": "096770",
+      "judged_at": "2026-08-02",
+      "headlines": [
+        "[잠정실적]SK이노베이션, 올해 2Q 영업이익 3조4873억원... 전년동기比 큰 폭 증가 (연결) - 씽크풀 AI",
+        "SK이노베이션 2분기 영업이익 3조4천873억원…흑자 전환 - 연합뉴스",
+        "SK이노, 2Q 영업익 3.5조 서프라이즈…SK온은 7분기만에 흑자(종합) - KB Think",
+        "[SK이노베이션] 영업이익 3.5조인데 순이익은 735억…SK이노베이션 실적의 두 얼굴(2026년_2Q) - 네이버 프리미엄콘텐츠",
+        "SK이노베이션, 전쟁 수혜로 호실적 지속 예상…17만1000원 상향 -유진 - 인포스탁데일리"
+      ],
+      "event_type": "실적발표",
+      "direction": "호재",
+      "confidence": 88,
+      "reasoning": "2Q 영업이익 3.5조 서프라이즈로 흑자 전환 달성. SK온 7분기만에 흑자 전환은 핵심 자회사 리스크 해소 신호. 단 영업이익 대비 순이익이 735억으로 매우 낮아 일회성 비용 등 내부 불확실성 존재. 유진증권 목표가 상향으로 긍정적 모멘텀 지속 예상",
+      "price_at_judgment": 110500.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "032830_2026-08-02",
+      "market": "032830",
+      "judged_at": "2026-08-02",
+      "headlines": [
+        "삼성생명(032830) - 매일경제 마켓",
+        "[비교해보니]삼성생명 ‘확대’·KB손보 ‘철수’…엇갈린 해외전략 - NSP통신",
+        "28일, 거래소 외국인 순매수상위에 전기,전자 업종 4종목 - 씽크풀 AI",
+        "AI주식상승확률분석 : 삼성생명(032830)주가 전망과 상승확률 분석 - Investing.com 한국어",
+        "AI가 분석해주는 삼성생명(032830) 상승확률은? - 네이버 프리미엄콘텐츠"
+      ],
+      "event_type": "기타",
+      "direction": "중립",
+      "confidence": 35,
+      "reasoning": "해외전략 확대 관련 보도는 긍정적 신호이나 구체적 실적이나 공시 없음. AI 분석 및 외국인 순매수 언급은 참고 수준이며 방향성 판단 근거 불충분함",
+      "price_at_judgment": 311500.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "003550_2026-08-02",
+      "market": "003550",
+      "judged_at": "2026-08-02",
+      "headlines": [
+        "LG - 씽크풀 AI",
+        "iM증권 \"LG, 피지컬AI 밸류체인·개정 상법 수혜 기대\" - 연합뉴스",
+        "교실로 간 LG 엑사원, 3만 AI인재 양성 - 서울경제",
+        "LG 주가 드디어 날아오르나…목표가 74%↑ 파격 상향, 왜 - tv.edaily.co.kr",
+        "LG - 씽크풀 AI"
+      ],
+      "event_type": "기타",
+      "direction": "호재",
+      "confidence": 78,
+      "reasoning": "피지컬AI 밸류체인 수혜 기대 및 개정 상법 긍정 평가. LG 엑사원 AI 인재 양성 사업 확대. 증권사 목표가 74% 파격 상향 등 전반적으로 긍정적 모멘텀이 집중되어 있음",
+      "price_at_judgment": 101100.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "015760_2026-08-02",
+      "market": "015760",
+      "judged_at": "2026-08-02",
+      "headlines": [
+        "한전, 호남 반도체 전력공급 총력…신기술·공법 도입 - KB Think",
+        "한화증권, 한국전력 목표가↓…\"에너지 가격 변동 커\" - 연합뉴스",
+        "[종목상담] 한국전력(015760) - 매일경제TV",
+        "[뉴스락 주식네비 2월 25일] 한국전력(015760), 원전 수출 모멘텀 타고 기업가치 재평가 - 뉴스락",
+        "증권사 리포트 총정리, 아이씨티케이, 한국전력 높은 목표가 제시 - 매일경제 마켓"
+      ],
+      "event_type": "기타",
+      "direction": "중립",
+      "confidence": 45,
+      "reasoning": "목표가 하향과 에너지 가격 변동 리스크는 악재 신호이나, 반도체 전력공급 총력 및 원전 수출 모멘텀 기반 기업가치 재평가와 높은 목표가 제시 리포트가 동시에 존재해 방향성이 상충됨",
+      "price_at_judgment": 34800.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "034730_2026-08-02",
+      "market": "034730",
+      "judged_at": "2026-08-02",
+      "headlines": [
+        "SK, 국내 유일 웨이퍼 제조사 SK실트론 왜 팔았나 - KB Think",
+        "최태원 회장, SK하이닉스 주식 3620주 장내매수 - 인포스탁데일리",
+        "SK(034730)밀릴때마다 물량 모아둘 기회로 보이며 이후 전망 및 대응전략. - 씽크풀 AI",
+        "두산, 2.3조에 SK실트론 인수 확정[시그널] - 서울경제",
+        "SK '이제는 할인이 아니라 프리미엄을 논할 때' 증권사 발표에 강세…3.78% - 매일경제 마켓"
+      ],
+      "event_type": "M&A",
+      "direction": "호재",
+      "confidence": 78,
+      "reasoning": "SK실트론을 2.3조에 두산에 매각하여 자산 유동성 확보, 최태원 회장의 자사 주식 장내매수로 책임경영 신호, 증권사에서 프리미엄 논할 때라는 긍정적 평가 발표로 주가 강세 기록",
+      "price_at_judgment": 557000.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "086790_2026-08-02",
+      "market": "086790",
+      "judged_at": "2026-08-02",
+      "headlines": [
+        "하나금융지주, '환율 환경과 밸류에이션 매력 모두 부각' 증권사 발표에 강세 - 매일경제 마켓",
+        "하나금융, 잠실 스포츠·마이스 복합공간 4조 PF 금융주관 맡는다 - NSP통신",
+        "24일, 거래소 외국인 순매수상위에 의약품 업종 2종목 - 씽크풀 AI",
+        "하나은행 2분기 영업이익 1조3천272억원…작년 동기 대비 4.4%↓ - 연합뉴스",
+        "[코스피·코스닥 전 거래일(24일) 주요공시] - 파이낸셜뉴스"
+      ],
+      "event_type": "실적발표",
+      "direction": "중립",
+      "confidence": 55,
+      "reasoning": "증권사의 밸류에이션 매력 부각과 대형 PF 금융주관 수주는 호재이나. 하나은행 2분기 영업이익이 전년 동기 대비 4.4% 감소한 실적은 악재로. 긍정·부정 요인이 혼재되어 중립으로 판단",
+      "price_at_judgment": 125400.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "010130_2026-08-02",
+      "market": "010130",
+      "judged_at": "2026-08-02",
+      "headlines": [
+        "창립52주년 맞은 고려아연…최윤범 “글로벌 핵심광물 플랫폼으로 도약” - 서울경제",
+        "고려아연 2분기 실적을 보는 세가지 銀·아연·환율 - KB Think",
+        "2100억 상속세 현실화…고려아연 최씨 일가 ‘우군’ 변수되나 - 마켓인",
+        "영풍 “비철금속협회 사유화 즉각 중단하라” - 서울경제",
+        "[마켓인]국민연금, 고려아연 투자목적 단순투자→일반투자 변경 - 네이트"
+      ],
+      "event_type": "기타",
+      "direction": "중립",
+      "confidence": 45,
+      "reasoning": "고려아연은 창립 52주년 및 글로벌 핵심광물 플랫폼 비전 제시로 긍정적 신호가 있으나. 영풍과의 지배구조 갈등 지속 및 협회 사유화 논란은 악재 요소이며. 국민연금의 투자목적 변경은 경영 개입 가능성을 시사해 불확실성을 높이고. 상속세 변수는 최씨 일가 우군 여부에 따라 방향이 달라질 수 있어 전체적으로 중립적 판단",
+      "price_at_judgment": 999000.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "009150_2026-08-02",
+      "market": "009150",
+      "judged_at": "2026-08-02",
+      "headlines": [
+        "삼성전기(009150) - 매일경제 마켓",
+        "삼성전기(009150)저점을 줄때마다 물량 모아둘 기회로 보이며 이후 전망 및 대응전략. - 씽크풀 AI",
+        "[실적 발표] 삼성전기(009150) 2Q26 반도체가 오를수록 웃는 회사 - 네이버 프리미엄콘텐츠",
+        "삼성전기(009150), 엔비디아 납품 기판 양산…수요 대응 본격화 - 인천일보",
+        "삼성전기 2분기 영업이익 4천404억원…작년 동기 대비 106.7%↑ - 연합뉴스"
+      ],
+      "event_type": "실적발표",
+      "direction": "호재",
+      "confidence": 92,
+      "reasoning": "2Q 영업이익 전년 동기 대비 106.7% 증가로 실적 서프라이즈 확인. 엔비디아 납품 기판 양산으로 AI 수혜 구체화. 저점 매집 추천 및 긍정적 전망 다수 등장으로 시장 센티먼트 우호적",
+      "price_at_judgment": 1142000.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "042660_2026-08-02",
+      "market": "042660",
+      "judged_at": "2026-08-02",
+      "headlines": [
+        "투자정보 - 매일경제 마켓",
+        "[투데이리포트]한화오션, \"상선 마진 추가 레…\" BUY-하나증권 - 씽크풀 AI",
+        "한화오션, KDDX 본계약 체결…7.8조원 차기구축함 사업 본격화 - KB Think",
+        "상장사는 한화오션(KRX:042660)의 최대주주이며 시가총액이 2.0조 원 하락한 후 타격을 입었습니다. - simplywall.st",
+        "‘대역전’ 한화, 7.8조 KDDX 결국 품었다...방사청과 최종 계약 - 서울경제"
+      ],
+      "event_type": "공시",
+      "direction": "호재",
+      "confidence": 85,
+      "reasoning": "한화오션이 7.8조원 규모의 KDDX 차기구축함 사업 본계약을 체결하며 대형 방산 수주를 확정했고, 하나증권은 BUY 의견과 함께 상선 마진 개선 전망을 제시했으나, 시가총액 2조원 하락 언급은 단기 변동성 요인으로 작용할 수 있음",
+      "price_at_judgment": 85200.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "196170_2026-08-02",
+      "market": "196170",
+      "judged_at": "2026-08-02",
+      "headlines": [
+        "알테오젠(196170) - 매일경제 마켓",
+        "AI가 분석해주는 알테오젠(196170) 상승확률은? - 네이버 프리미엄콘텐츠",
+        "알테오젠(196170)밀릴때마다 물량 모아둘 기회로 보이며 이후 전망 및 대응전략. - 씽크풀 AI",
+        "[특징주] 알테오젠, 기술수출 기대감 속 11% 급등 마감(종합) - 연합뉴스",
+        "[특징주] 알테오젠, 특허 소송 부담 덜고 코스닥 시총 1위(종합) - 연합뉴스"
+      ],
+      "event_type": "공시",
+      "direction": "호재",
+      "confidence": 82,
+      "reasoning": "기술수출 기대감으로 11% 급등 마감했고 특허 소송 부담 완화로 코스닥 시총 1위 달성. 전반적으로 긍정적 모멘텀이 확인되며 매집 추천 의견도 다수 등장함",
+      "price_at_judgment": 308500.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "000810_2026-08-02",
+      "market": "000810",
+      "judged_at": "2026-08-02",
+      "headlines": [
+        "[MK 골든크로스 돌파종목 : 기아(000270) & 삼성화재(000810)] - 매일경제 마켓",
+        "로보인베스팅 골든크로스 돌파종목 : 기아(000270) & 삼성화재(000810) - Investing.com 한국어",
+        "[투데이리포트]삼성화재, \"나도 삼성전자 주식…\" 매수-신한투자증권 - 씽크풀 AI",
+        "삼성화재 3분기 누적 순이익 1조7천836억원…작년 대비 4.4%↓(종합) - 연합뉴스",
+        "[생생한 주식쇼 생쇼] 삼성화재 (000810) 정책 수혜 기대감에 가치주 부각 - 매일경제TV"
+      ],
+      "event_type": "실적발표",
+      "direction": "중립",
+      "confidence": 55,
+      "reasoning": "3분기 누적 순이익 1조7836억원으로 전년 대비 4.4% 감소한 실적 발표가 악재 요소이나, 골든크로스 돌파 신호와 정책 수혜 기대감 및 가치주 부각, 증권사 매수 의견 등 긍정적 시그널이 혼재하여 전체적으로 중립으로 판단",
+      "price_at_judgment": 632000.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "316140_2026-08-02",
+      "market": "316140",
+      "judged_at": "2026-08-02",
+      "headlines": [
+        "[특징주] 우리금융, 1천500억원 자사주 매입·소각에 7%대 상승(종합) - 연합뉴스",
+        "[ET특징주] 우리금융지주, 1500억원 규모 자사주 매입 · 소각 발표… 주가 8%↑ - 전자신문",
+        "[기업실적]동양생명, 상반기 순이익 919억…보험·투자손익 동반 ‘턴어라운드’ - NSP통신",
+        "우리금융지주(316140) - 매일경제 마켓",
+        "동양 \"우리금융지주 지분가치만 약 1000억원\" - 파이낸셜뉴스"
+      ],
+      "event_type": "공시",
+      "direction": "호재",
+      "confidence": 90,
+      "reasoning": "우리금융지주가 1500억원 규모의 자사주 매입 및 소각을 발표하여 주가가 7~8% 급등했으며. 이는 주주환원 강화 신호로 명확한 호재. 동양생명의 상반기 순이익 턴어라운드 및 우리금융 지분가치 약 1000억원 언급도 긍정적 분위기를 뒷받침함",
+      "price_at_judgment": 33600.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "024110_2026-08-02",
+      "market": "024110",
+      "judged_at": "2026-08-02",
+      "headlines": [
+        "IBK기업은행, 현대기아차·기보와 중소기업 금융지원 업무협약 - 연합뉴스 한민족센터",
+        "기업은행 2분기 영업이익 9천151억원…작년 동기 대비 1.3%↓ - 매일경제 마켓",
+        "환율 급등에 발목…IBK기업은행, 상반기 순익 4.4% 감소 - 서울경제",
+        "[카드] 기업은행, IBK 착한금리 포용대출 출시 - 네이트",
+        "기업은행, 은행주 고ROE+저PER+저PBR 1위 - 버핏연구소"
+      ],
+      "event_type": "실적발표",
+      "direction": "중립",
+      "confidence": 55,
+      "reasoning": "2분기 영업이익 1.3% 감소 및 환율 영향으로 상반기 순익 4.4% 감소라는 부정적 실적이 있으나. 은행주 중 고ROE+저PER+저PBR 1위 밸류에이션 매력과 포용대출 출시 및 중소기업 금융지원 협약 등 긍정적 요소가 혼재하여 전반적으로 중립으로 판단",
+      "price_at_judgment": 20650.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "247540_2026-08-02",
+      "market": "247540",
+      "judged_at": "2026-08-02",
+      "headlines": [
+        "에코프로비엠(247540) - 매일경제 마켓",
+        "[잠정실적]에코프로비엠, 올해 2Q 매출액 5767억(-26%) 영업이익 180억(-63%) (연결) - 씽크풀 AI",
+        "에코프로비엠 2분기 영업이익 180억원…작년 동기 대비 63.2%↓ - 연합뉴스",
+        "[에코프로비엠] 1조2,000억 원 유상증자, 에코프로비엠의 위기일까 기회일까?(2026년_2Q) - 네이버 프리미엄콘텐츠",
+        "에코프로비엠, 2Q 영업익 180억 '63%↓'…유럽·미국 EV 시장 침체탓 - 뉴스1"
+      ],
+      "event_type": "실적발표",
+      "direction": "악재",
+      "confidence": 85,
+      "reasoning": "2Q 영업이익 180억으로 전년 동기 대비 63% 급감. 매출도 26% 감소. 유럽·미국 EV 시장 침체가 원인이며 1조2천억 유상증자까지 겹쳐 재무 부담 우려 존재.",
+      "price_at_judgment": 103500.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "086520_2026-08-02",
+      "market": "086520",
+      "judged_at": "2026-08-02",
+      "headlines": [
+        "AI주식상승확률분석 : 에코프로(086520) 주가 전망과 상승확률 분석 - Investing.com 한국어",
+        "2차전지 부활에…에코프로, 그룹시총 9위로 - 서울경제",
+        "23일, 기관 코스닥에서 알테오젠(+14.37%), 에코프로(+9.34%) 등 순매수 - 씽크풀 AI",
+        "특징주, 에코프로-리튬 테마 상승세에 2.62% ↑ - 매일경제 마켓",
+        "에코프로 '1.2조 유증', 냉랭했던 시장 재평가 분위기 - KB Think"
+      ],
+      "event_type": "공시",
+      "direction": "호재",
+      "confidence": 82,
+      "reasoning": "2차전지 테마 반등 속 기관 순매수 유입 확인, 리튬 테마 상승 동조, 1.2조 유상증자에 대한 시장 재평가 분위기 형성으로 전반적 긍정 신호가 우세함",
+      "price_at_judgment": 79100.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "328130_2026-08-02",
+      "market": "328130",
+      "judged_at": "2026-08-02",
+      "headlines": [
+        "루닛 (328130) - 씽크풀 AI",
+        "'실적 개선 기대' 루닛·토모큐브↑...'FDA 인증 획득 실패' 뷰노↓[바이오 맥짚기... - 마켓인",
+        "[생생한 주식쇼 생쇼] 루닛(328130) 투자 포인트 요약 - 매일경제TV",
+        "로보인베스팅 골든크로스 돌파 종목 : 두산에너빌리티(034020) & 루닛(328130) - Investing.com 한국어",
+        "서범석 대표이사, 루닛 주식 수 증가에도 보유 비율은 감소 - 디지털투데이"
+      ],
+      "event_type": "기타",
+      "direction": "호재",
+      "confidence": 55,
+      "reasoning": "실적 개선 기대감과 골든크로스 돌파 신호가 긍정적이나. 대표이사 보유 비율 감소는 내부자 매도 신호로 불확실성 존재. 전반적으로 약한 호재 우세",
+      "price_at_judgment": 9250.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "240810_2026-08-02",
+      "market": "240810",
+      "judged_at": "2026-08-02",
+      "headlines": [
+        "사모펀드, 코스닥 시장에서 테스 79.38억원 순매수 - 씽크풀 AI",
+        "원익 IPS(KOSDAQ:240810) 매수를 고려하기에는 이미 늦은 걸까요? - simplywall.st",
+        "SK증권 \"원익IPS 급증 수주 3분기부터 실적 체감…목표가↑\" - 매일경제 마켓",
+        "AI주식상승확률분석 : 원익IPS(240810) 주가 전망과 상승확률 분석 - Investing.com 한국어",
+        "원익IPS(240810)저점을 줄때마다 물량 모아둘 기회로 보이며 이후 전망 및 대응전략. - 씽크풀 AI"
+      ],
+      "event_type": "실적발표",
+      "direction": "호재",
+      "confidence": 78,
+      "reasoning": "SK증권의 목표가 상향과 수주 급증 및 3분기 실적 체감 전망이 긍정적 신호이며, 사모펀드의 대규모 순매수와 저점 매수 기회 언급이 맞물려 전반적으로 호재 흐름으로 판단됨. 다만 매수 타이밍 고민 헤드라인은 일부 불확실성을 내포함.",
+      "price_at_judgment": 97600.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "041510_2026-08-02",
+      "market": "041510",
+      "judged_at": "2026-08-02",
+      "headlines": [
+        "KB증권 \"에스엠, 2분기 실적 기대치 밑돌 것…목표가↓\" - 연합뉴스",
+        "[잠정실적]에스엠, 3년 중 최고 매출 달성, 영업이익은 전년동기 대비 262%↑ (연결) - 씽크풀 AI",
+        "엔터株에 부는 찬바람…올해 들어 시총 8조 날아가 - edaily.co.kr",
+        "탁영준 공동대표이사, 에스엠 주식 2000주 추가 매수 - 디지털투데이",
+        "정국·윈터 열애설에 개미들 \"불안하네\"…에스엠, 주가도 이달 6% '뚝' [이런국장 저런주식] - 서울경제"
+      ],
+      "event_type": "실적발표",
+      "direction": "악재",
+      "confidence": 65,
+      "reasoning": "잠정실적은 매출 최고치와 영업이익 262% 증가로 긍정적이나. KB증권의 목표가 하향과 2분기 기대치 하회 전망. 엔터주 전반 시총 8조 증발. 정국-윈터 열애설로 인한 심리 위축과 주가 6% 하락 등 부정적 요인이 우세함",
+      "price_at_judgment": 68400.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "112040_2026-08-02",
+      "market": "112040",
+      "judged_at": "2026-08-02",
+      "headlines": [
+        "9200억원 위메이드 인수, 누가 돈 대나…네오펄스 자금 구조 베일에 - 전자신문",
+        "위메이드 위믹스 또 해킹…\"스테이블코인 비정상 발행\" - 연합뉴스",
+        "위메이드, 애프터마켓서 10%대 급등 - 매일경제 마켓",
+        "위메이드, 공식 블로그 ‘WEMADE Stories’ 오픈 - NSP통신",
+        "[잠정실적]위메이드, 올해 1Q 매출액 1533억(+8.1%) 영업이익 84.9억(흑자전환) (연결) - 씽크풀 AI"
+      ],
+      "event_type": "M&A",
+      "direction": "악재",
+      "confidence": 62,
+      "reasoning": "1Q 흑자전환 및 인수 이슈로 단기 급등이 있었으나, 위믹스 해킹으로 스테이블코인 비정상 발행이 확인됐고, 9200억 인수 자금 구조가 불투명해 신뢰 리스크가 복합적으로 작용하는 상황임",
+      "price_at_judgment": 15990.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "039030_2026-08-02",
+      "market": "039030",
+      "judged_at": "2026-08-02",
+      "headlines": [
+        "사모펀드, 코스닥 시장에서 에코프로 26.28억원 순매수 - 씽크풀 AI",
+        "특징주, 이오테크닉스-반도체 장비 테마 상승세에 6.87% ↑ - 매일경제 마켓",
+        "AI가 분석해주는 이오테크닉스 (039030) 상승확률은? - 네이버 프리미엄콘텐츠",
+        "이오테크닉스, 애프터마켓서 10%대 급락 - 연합뉴스",
+        "이오테크닉스(039030)밀릴때마다 물량 모아둘 기회로 보이며 이후 전망 및 대응전략. - 씽크풀 AI"
+      ],
+      "event_type": "기타",
+      "direction": "악재",
+      "confidence": 62,
+      "reasoning": "애프터마켓에서 10%대 급락 헤드라인이 직접적 악재 신호이며, 반도체 장비 테마 상승과 매수 추천 기사가 혼재하나 급락이 핵심 이벤트로 판단됨. 밀릴 때 매수 기회 언급은 하락 방어 프레이밍으로 악재 흐름을 간접 확인함.",
+      "price_at_judgment": 296000.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "068760_2026-08-02",
+      "market": "068760",
+      "judged_at": "2026-08-02",
+      "headlines": [
+        "[바이오스냅] 셀트리온제약, 황새보호 위해 인공둥지탑 설치 - 연합뉴스",
+        "셀트리온제약, 1분기 영업이익 129억원…20% 증가 - 매일경제 마켓",
+        "[생생한 주식쇼 생쇼] 셀트리온제약 (068760) - 매일경제TV",
+        "셀트리온제약, 1분기 매출 1321억원·영업이익 129억원 기록 - 팜뉴스",
+        "셀트리온제약, 충청권에 2조 투자…PFS 생산 3.5배 확대 - 연합뉴스"
+      ],
+      "event_type": "실적발표",
+      "direction": "호재",
+      "confidence": 82,
+      "reasoning": "1분기 영업이익 129억원으로 전년 대비 20% 증가했고 매출 1321억원을 기록했으며, 충청권 2조 투자 및 PFS 생산 3.5배 확대 계획으로 성장 모멘텀이 뚜렷함",
       "price_at_judgment": 40200.0,
       "outcomes": {
         "d1": {
