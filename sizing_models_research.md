@@ -102,44 +102,15 @@ position_size = (account_risk_per_trade) / (ATR_multiple × ATR)
 
 ---
 
-## 3. "Council 불일치도(Agreement Level)" 연동 감쇄 가중치 공식
+## 3. "Council 불일치도(Agreement Level)" 연동 감쇄 가중치 공식 — 보류
 
-**이 항목은 완전히 채우지 못했다 — 아래에서 이유를 설명한다.**
+**정의하지 않는다.** `QuanTrade_미래비전로드맵.md` Gate C(방향성 세션의 명시적 스코프 확장
+결정) 대상이며, Gate A조차 아직 임시 판정 단계인 현재 시점에 정의하지 않는다.
 
-"Council"과 "Arbiter Signal"이라는 용어는 이 저장소의 코드(`analyze.py`, `analyze_lib.py`,
-`backtest.py`, `news_event_experiment.py`, `news_event_calibration_analysis.py`)나 이번
-세션에서 지금까지 만든 어떤 문서(`CLAUDE.md`, `Phase2_뉴스이벤트추출_인수인계.md`,
-`post_mortem_template.md`)에도 등장하지 않는다. 현재 이 프로젝트의 판단 구조는:
-
-- **라이브**: `ask_claude_decision` 단일 호출 하나가 시장 요약 + 종목별 결정을 낸다 — 여러
-  판단 소스가 투표/합의하는 구조(Council)나 그걸 중재하는 별도 계층(Arbiter)이 없다.
-- **Phase 2 실험**: `ask_news_event_judgment` 역시 헤드라인 하나를 보고 단일 판단(사건유형/
-  방향/confidence)을 낸다 — 마찬가지로 다중 판단자 구조가 아니다.
-
-그래서 "Council 불일치도"가 정확히 무엇을 가리키는지(예: 여러 AI 판단 소스 간의 불일치? 가격
-신호와 뉴스 신호 간의 불일치? 아니면 이 저장소 밖의 별도 계획 문서에 있는, 아직 이 코드베이스에
-반영 안 된 미래 설계?) 확인 없이 "연동 방식"을 구체적으로 쓰면 존재하지 않는 시스템과의 연동을
-지어내는 셈이 된다 — 그건 하지 않는 게 맞다고 판단했다.
-
-### 대신 정리한 것: 일반적인 "불일치도 기반 감쇄" 개념
-
-용어의 정확한 정의와 무관하게, "여러 판단 소스 간 의견이 갈릴수록 비중을 줄인다"는 아이디어
-자체는 일반적인 앙상블/멀티시그널 사이징 기법이다. 이 프로젝트에 적용 가능한 형태로 일반화하면:
-
-```
-weight_adjusted = base_weight × f(agreement_level)
-```
-
-- `agreement_level`: 0~1(또는 0~100) 스케일의 판단 소스 간 일치도
-- `f(agreement_level)`: 감쇄 함수 — 예를 들어 선형(`f(a) = a`), 또는 특정 임계값 아래에서만
-  감쇄하는 계단식 함수
-- 이 프로젝트에서 "판단 소스 간 불일치"에 해당할 수 있는 실측 후보는 현재 딱 하나 있다: Phase
-  2의 `confidence` 필드(0-100, `news_event_calibration_analysis.py`가 이미 고확신/저확신
-  분리 임계값 70으로 쓰고 있음) — 이걸 "단일 판단자의 자기 확신도"가 아니라 "여러 신호원 간
-  일치도"로 재해석해 쓰려는 것이라면 방향은 이해되지만, 이게 실제로 "Council"이 의도한 것인지는
-  확인이 필요하다.
-
-**확인 요청**: "Council"/"Arbiter Signal"이 가리키는 게 (a) 이 저장소 밖의 별도 계획
-문서(CLAUDE.md가 언급하는 "저장소 밖 로드맵 문서")에 있는 개념인지, (b) 여러 AI 호출을 병렬로
-돌려 투표시키는 새 아키텍처를 이번에 처음 제안하는 것인지, (c) 위에서 추측한 것처럼 confidence
-필드를 재해석하는 것인지 알려주시면 이 섹션을 마저 채우겠습니다.
+- 이 문서(§1/§2)와 `post_mortem_template.md`가 다루는 범위는 Gate A(Phase 1 §2.1 백테스트
+  게이트) 수준이고, "Council"/"Arbiter Signal"은 그보다 스코프가 넓은 Gate C 결정 사항 —
+  Gate A 판정도 아직 안 끝난 상태에서 Gate C 대상을 미리 설계하지 않는다.
+- 지난 조사에서 확인한 3가지 가능성(로드맵 문서 상의 기존 개념 / 이번에 처음 제안하는 신규
+  멀티에이전트 구조 / Phase 2 `confidence` 필드의 재해석)은 **메모로만** 남기고, 여기서
+  더 구체화하거나 코드·설계와 연동하지 않는다.
+- Gate C 논의가 방향성 세션에서 열리면 그때 이 섹션을 다시 채운다.
