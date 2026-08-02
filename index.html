@@ -3,77 +3,110 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>내 포트폴리오 대시보드</title>
+<title>QuanTrade 대시보드</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
   * { box-sizing: border-box; }
   body { font-family: -apple-system, sans-serif; background: #0f1115; color: #eee; padding: 12px; margin: 0; }
-  h2 { color: #7dd3fc; font-size: 20px; }
+  .page { max-width: 640px; margin: 0 auto; }
+  h1 { font-size: 18px; color: #eee; margin: 4px 0 2px; }
+  .subtitle { font-size: 12.5px; color: #64748b; margin: 0 0 8px; }
+  h2 { color: #7dd3fc; font-size: 20px; margin: 0 0 10px; }
   h3 { color: #a5b4fc; font-size: 15px; margin-bottom: 8px; }
   .card { background: #1a1d24; border-radius: 12px; padding: 14px; margin-bottom: 14px; }
   .pos { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #2a2d35; font-size: 14px; }
   .pos:last-child { border-bottom: none; }
+  .pos .pos-main { display: flex; flex-direction: column; gap: 2px; }
+  .pos .pos-sub { font-size: 11.5px; color: #64748b; }
   .positive { color: #4ade80; }
   .negative { color: #f87171; }
   .badge { font-size: 11px; padding: 2px 6px; border-radius: 6px; margin-left: 6px; }
-  .badge-conviction { background: #78350f; color: #facc15; }
-  .badge-strategy { background: #1e293b; color: #94a3b8; }
   .pending-card { background: #292116; border: 1px solid #78350f; border-radius: 10px; padding: 12px; margin-bottom: 10px; }
-  .btn { padding: 8px 14px; border-radius: 8px; border: none; font-size: 13px; margin-right: 6px; margin-top: 8px; }
+  .btn { padding: 8px 14px; border-radius: 8px; border: none; font-size: 13px; margin-right: 6px; margin-top: 8px; cursor: pointer; }
   .btn-approve { background: #16a34a; color: white; }
   .btn-reject { background: #dc2626; color: white; }
   .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 10px 18px; border-radius: 8px; font-size: 13px; display: none; }
-  #summary-text { font-size: 14px; line-height: 1.5; color: #cbd5e1; }
   .cash-line { font-size: 16px; font-weight: bold; }
+  .sync-note { font-size: 11px; font-weight: normal; color: #64748b; margin-top: 4px; }
   .real-card { border: 1px solid #0d9488; }
   .badge-real { font-size: 11px; padding: 2px 6px; border-radius: 6px; margin-left: 6px; background: #134e4a; color: #5eead4; }
-  .section-divider { color: #64748b; font-size: 12px; margin: 20px 0 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .section-divider { color: #64748b; font-size: 12px; margin: 22px 0 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .section-divider:first-of-type { margin-top: 8px; }
+
+  /* Phase 1 gate */
+  .gate-banner { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; margin-bottom: 12px; }
+  .gate-banner.pass { background: #052e1e; border: 1px solid #16653f; }
+  .gate-banner.fail { background: #2b1512; border: 1px solid #7f2d23; }
+  .gate-chip { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; padding: 3px 9px; border-radius: 999px; color: white; }
+  .gate-chip.pass { background: #16a34a; }
+  .gate-chip.fail { background: #dc2626; }
+  .gate-banner p { margin: 0; font-size: 13px; color: #cbd5e1; }
+  .criteria-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; font-size: 13px; border-bottom: 1px solid #2a2d35; }
+  .criteria-row:last-child { border-bottom: none; }
+  .criteria-mark { font-size: 13px; }
+  .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
+  .metric { background: #12151b; border-radius: 8px; padding: 8px 10px; }
+  .metric .label { font-size: 10.5px; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em; }
+  .metric .value { font-size: 14px; font-weight: 600; margin-top: 2px; }
+
+  /* Phase 2 */
+  .phase2-card { border: 1px solid #4338ca; }
+  .badge-phase2 { font-size: 11px; padding: 2px 6px; border-radius: 6px; margin-left: 6px; background: #312e81; color: #a5b4fc; }
+  .progress-bar { background: #12151b; border-radius: 999px; height: 8px; overflow: hidden; margin: 8px 0; }
+  .progress-fill { background: #6366f1; height: 100%; }
+  .waiting-note { font-size: 12.5px; color: #94a3b8; margin-top: 6px; }
+
+  .muted { color: #64748b; font-size: 13px; }
 </style>
 </head>
 <body>
-<div class="section-divider">가상 시뮬레이션 (분석/백테스트용, 실거래 아님)</div>
-<h2>📊 내 포트폴리오</h2>
+<div class="page">
 
-<div class="card">
-  <div class="cash-line" id="cash-summary">로딩 중...</div>
+<h1>QuanTrade 대시보드</h1>
+<p class="subtitle">국내주식 실계좌 조회 · Phase 1 백테스트 게이트 · Phase 2 뉴스 이벤트 데이터수집</p>
+
+<!-- ===== Block 1: 국내주식 실계좌 현황 ===== -->
+<div class="section-divider">국내주식 실계좌 (토스증권)</div>
+<h2>🏦 계좌현황 <span class="badge-real">조회전용</span></h2>
+
+<div class="card real-card" id="real-pending-msg" style="display:none;">
+  <span class="muted">토스증권 연동 준비 중입니다. real_portfolio.json이 아직 없습니다 — sync_real.yml을 수동 실행하면 생성됩니다.</span>
 </div>
 
-<div class="card">
-  <h3>🤖 최근 AI 시장 요약</h3>
-  <div id="summary-text"></div>
-</div>
-
-<div class="card" id="pending-section" style="display:none;">
-  <h3>⏳ 승인 대기 중인 매도</h3>
-  <div id="pending-list"></div>
-</div>
-
-<div class="card">
-  <h3>보유 비중 (전체 자산 대비)</h3>
-  <canvas id="pieChart"></canvas>
-</div>
-
-<div class="card">
-  <h3>종목별 현재 수익률</h3>
-  <div id="positions-list"></div>
-</div>
-
-<div class="card">
-  <h3>💎 확신 장기보유 종목</h3>
-  <div id="conviction-list"></div>
-</div>
-
-<div class="section-divider">실제 계좌 (토스증권, 조회전용)</div>
-<h2>🏦 실제 계좌 현황 <span class="badge-real">조회전용</span></h2>
-
-<div class="card real-card">
-  <div id="real-pending-msg" style="display:none; color:#64748b; font-size:13px;">
-    토스증권 연동 준비 중입니다. 실제 계좌의 매도/비중조정 제안은 준비되는 대로 기존과 동일하게 텔레그램 승인을 통해서만 진행됩니다.
-  </div>
-  <div id="real-section" style="display:none;">
+<div id="real-section" style="display:none;">
+  <div class="card real-card">
     <div class="cash-line" id="real-summary"></div>
-    <div id="real-positions-list" style="margin-top:10px;"></div>
   </div>
+  <div class="card">
+    <h3>보유 비중</h3>
+    <canvas id="pieChart"></canvas>
+  </div>
+  <div class="card">
+    <h3>종목별 현재 수익률</h3>
+    <div id="real-positions-list"></div>
+  </div>
+  <div class="card" id="real-pending-section" style="display:none;">
+    <h3>⏳ AI 제안 승인 대기중</h3>
+    <div id="real-pending-list"></div>
+  </div>
+</div>
+
+<!-- ===== Block 2: Phase 1 백테스트 게이트 판정 ===== -->
+<div class="section-divider">Phase 1 백테스트 검증 (완료)</div>
+<h2>📊 게이트 판정 요약</h2>
+
+<div class="card" id="gate-section">
+  <p class="muted">로딩 중...</p>
+</div>
+
+<!-- ===== Block 3: Phase 2 뉴스 이벤트 데이터수집 ===== -->
+<div class="section-divider">Phase 2 뉴스 이벤트 실험 (진행 중)</div>
+<h2>📰 데이터수집 진행상황 <span class="badge-phase2">캘리브레이션 대기</span></h2>
+
+<div class="card phase2-card" id="phase2-section">
+  <p class="muted">로딩 중...</p>
+</div>
+
 </div>
 
 <div class="toast" id="toast"></div>
@@ -92,95 +125,173 @@ function copyCommand(cmd) {
   });
 }
 
-async function loadData() {
-  const bust = '?t=' + Date.now();
-  const portfolio = await (await fetch('portfolio.json' + bust)).json();
-  let lastReport = {};
-  try {
-    lastReport = await (await fetch('last_report.json' + bust)).json();
-  } catch(e) {}
+function fmtPct(v) {
+  const n = v || 0;
+  return `${n >= 0 ? '+' : ''}${n.toFixed(2)}%`;
+}
 
-  const totalAssets = portfolio.cash + portfolio.positions.reduce((s, p) => s + p.amount_krw, 0);
-  document.getElementById('cash-summary').innerHTML =
-    `💰 총자산 약 ${totalAssets.toLocaleString()}원 &nbsp;|&nbsp; 현금 ${portfolio.cash.toLocaleString()}원`;
-
-  document.getElementById('summary-text').textContent = lastReport.market_summary || '아직 데이터 없음';
-
-  // 승인 대기 섹션
-  const pending = lastReport.pending || [];
-  if (pending.length > 0) {
-    document.getElementById('pending-section').style.display = 'block';
-    document.getElementById('pending-list').innerHTML = pending.map(a => `
-      <div class="pending-card">
-        <div><b>${a.market}</b></div>
-        <div style="font-size:13px; color:#cbd5e1; margin-top:4px;">${a.reasoning}</div>
-        <button class="btn btn-approve" onclick="copyCommand('/approve ${a.id}')">승인 명령어 복사</button>
-        <button class="btn btn-reject" onclick="copyCommand('/reject ${a.id}')">거절 명령어 복사</button>
-      </div>
-    `).join('');
-  }
-
-  // 비중 파이차트 (현금 포함)
-  const nonConviction = portfolio.positions;
-  const pieLabels = ['현금', ...nonConviction.map(p => p.market)];
-  const pieData = [portfolio.cash, ...nonConviction.map(p => p.amount_krw)];
-  new Chart(document.getElementById('pieChart'), {
-    type: 'doughnut',
-    data: {
-      labels: pieLabels,
-      datasets: [{ data: pieData, backgroundColor: ['#475569', '#f87171', '#fb923c', '#facc15', '#4ade80', '#22d3ee', '#818cf8', '#e879f9'] }]
-    },
-    options: { plugins: { legend: { position: 'bottom', labels: { color: '#eee', font: { size: 11 } } } } }
-  });
-
-  // 종목별 수익률 리스트 (확신종목 제외)
-  const activePositions = portfolio.positions.filter(p => !p.conviction);
-  document.getElementById('positions-list').innerHTML = activePositions.map(p => {
-    const ret = p.current_return || 0;
-    const cls = ret >= 0 ? 'positive' : 'negative';
-    return `<div class="pos">
-      <span>${p.market} <span class="badge badge-strategy">${p.strategy_type || '-'}</span></span>
-      <span class="${cls}">${ret >= 0 ? '+' : ''}${ret.toFixed(2)}%</span>
-    </div>`;
-  }).join('') || '<p style="color:#64748b;">보유 종목 없음</p>';
-
-  // 확신종목 리스트
-  const convictionPositions = portfolio.positions.filter(p => p.conviction);
-  document.getElementById('conviction-list').innerHTML = convictionPositions.map(p => {
-    const ret = p.current_return || 0;
-    const cls = ret >= 0 ? 'positive' : 'negative';
-    return `<div class="pos">
-      <span>${p.market} <span class="badge badge-conviction">💎 확신</span></span>
-      <span class="${cls}">${ret >= 0 ? '+' : ''}${ret.toFixed(2)}%</span>
-    </div>`;
-  }).join('') || '<p style="color:#64748b;">지정된 확신종목 없음</p>';
-
-  // 실제 계좌 현황 (토스증권, 조회전용) — 아직 연동 전이면 real_portfolio.json이 없어 404
+async function loadRealAccount(bust) {
   try {
     const realResp = await fetch('real_portfolio.json' + bust);
-    if (realResp.ok) {
-      const real = await realResp.json();
-      document.getElementById('real-pending-msg').style.display = 'none';
-      document.getElementById('real-section').style.display = 'block';
-      const realTotal = (real.cash || 0) + (real.positions || []).reduce((s, p) => s + (p.eval_amount_krw || 0), 0);
-      const syncedAt = real.synced_at ? new Date(real.synced_at).toLocaleString('ko-KR') : '-';
-      document.getElementById('real-summary').innerHTML =
-        `💰 실제 총자산 약 ${realTotal.toLocaleString()}원 &nbsp;|&nbsp; 현금 ${(real.cash || 0).toLocaleString()}원` +
-        `<div style="font-size:11px; font-weight:normal; color:#64748b; margin-top:4px;">마지막 동기화: ${syncedAt}</div>`;
-      document.getElementById('real-positions-list').innerHTML = (real.positions || []).map(p => {
-        const ret = p.return_pct || 0;
-        const cls = ret >= 0 ? 'positive' : 'negative';
-        return `<div class="pos">
-          <span>${p.name}</span>
-          <span class="${cls}">${ret >= 0 ? '+' : ''}${ret.toFixed(2)}%</span>
-        </div>`;
-      }).join('') || '<p style="color:#64748b;">보유 종목 없음</p>';
-    } else {
+    if (!realResp.ok) {
       document.getElementById('real-pending-msg').style.display = 'block';
+      return;
     }
+    const real = await realResp.json();
+    const positions = real.positions || [];
+    document.getElementById('real-pending-msg').style.display = 'none';
+    document.getElementById('real-section').style.display = 'block';
+
+    const realTotal = (real.cash || 0) + positions.reduce((s, p) => s + (p.eval_amount_krw || 0), 0);
+    const syncedAt = real.synced_at ? new Date(real.synced_at).toLocaleString('ko-KR') : '-';
+    document.getElementById('real-summary').innerHTML =
+      `💰 총자산 약 ${Math.round(realTotal).toLocaleString()}원 &nbsp;|&nbsp; 현금 ${Math.round(real.cash || 0).toLocaleString()}원` +
+      `<div class="sync-note">마지막 동기화: ${syncedAt} (수동 실행 시에만 갱신됨)</div>`;
+
+    // 종목 리스트는 데이터만 있으면 항상 렌더링한다 - 아래 Chart.js 렌더링이
+    // (CDN 차단 등으로) 실패해도 이 목록까지 같이 사라지면 안 되므로 먼저 그린다.
+    document.getElementById('real-positions-list').innerHTML = positions.map(p => {
+      const ret = p.return_pct || 0;
+      const cls = ret >= 0 ? 'positive' : 'negative';
+      // 원 통화(외화 보유 시)와 원화 환산 금액을 나란히 표시 — real_portfolio.json엔 환율 자체가
+      // 저장되지 않아서(조회 시점 변환만 저장), 외화 보유분의 환산 맥락은 이렇게 보여준다.
+      const amountLine = p.currency && p.currency !== 'KRW'
+        ? `${p.currency} ${Number(p.eval_amount).toLocaleString()} (₩${Math.round(p.eval_amount_krw).toLocaleString()})`
+        : `₩${Math.round(p.eval_amount_krw).toLocaleString()}`;
+      return `<div class="pos">
+        <span class="pos-main">${p.name}<span class="pos-sub">${amountLine}</span></span>
+        <span class="${cls}">${fmtPct(ret)}</span>
+      </div>`;
+    }).join('') || '<p class="muted">보유 종목 없음</p>';
   } catch (e) {
+    // real_portfolio.json 자체를 못 읽었을 때만 "연동 준비 중" 메시지로 대체한다.
     document.getElementById('real-pending-msg').style.display = 'block';
+    return;
   }
+
+  // 파이차트는 별도 try/catch - Chart.js CDN이 막혀 있어도(광고 차단기, 네트워크 문제 등)
+  // 위에서 이미 그린 계좌 요약/종목 리스트는 영향받지 않는다.
+  try {
+    const real = await (await fetch('real_portfolio.json' + bust)).json();
+    const positions = real.positions || [];
+    const pieLabels = ['현금', ...positions.map(p => p.name)];
+    const pieData = [real.cash || 0, ...positions.map(p => p.eval_amount_krw || 0)];
+    new Chart(document.getElementById('pieChart'), {
+      type: 'doughnut',
+      data: {
+        labels: pieLabels,
+        datasets: [{ data: pieData, backgroundColor: ['#475569', '#f87171', '#fb923c', '#facc15', '#4ade80', '#22d3ee', '#818cf8', '#e879f9'] }]
+      },
+      options: { plugins: { legend: { position: 'bottom', labels: { color: '#eee', font: { size: 11 } } } } }
+    });
+  } catch (e) {
+    document.getElementById('pieChart').replaceWith(
+      Object.assign(document.createElement('p'), { className: 'muted', textContent: '차트를 불러올 수 없습니다.' })
+    );
+  }
+}
+
+async function loadRealPending(bust) {
+  try {
+    const lastReport = await (await fetch('last_report.json' + bust)).json();
+    const realPending = (lastReport.pending || []).filter(a => a.target_account === 'real');
+    if (realPending.length === 0) return;
+    document.getElementById('real-pending-section').style.display = 'block';
+    document.getElementById('real-pending-list').innerHTML = realPending.map(a => {
+      const label = a.action_type === 'sell' ? '매도' : '비중조정';
+      const dryRunTag = a.dry_run ? ' [모의]' : '';
+      return `<div class="pending-card">
+        <div><b>${a.name || a.market}</b> ${label}${dryRunTag}</div>
+        <div style="font-size:13px; color:#cbd5e1; margin-top:4px;">${a.reasoning || ''}</div>
+        <button class="btn btn-approve" onclick="copyCommand('/approve ${a.id}')">승인 명령어 복사</button>
+        <button class="btn btn-reject" onclick="copyCommand('/reject ${a.id}')">거절 명령어 복사</button>
+      </div>`;
+    }).join('');
+  } catch (e) {
+    // last_report.json 조회 실패 시 조용히 생략 - 계좌현황 자체는 이미 렌더링됨
+  }
+}
+
+async function loadGate(bust) {
+  const el = document.getElementById('gate-section');
+  try {
+    const bt = await (await fetch('backtest_report.json' + bust)).json();
+    const gate = bt.gate || {};
+    const passed = !!gate.gate_passed;
+    const criteria = gate.criteria || {};
+    const train = (bt.overall && bt.overall.train) || {};
+    const val = (bt.overall && bt.overall.validation) || {};
+
+    const criteriaHtml = Object.entries(criteria).map(([name, ok]) => `
+      <div class="criteria-row">
+        <span>${name}</span>
+        <span class="criteria-mark">${ok ? '✅' : '❌'}</span>
+      </div>
+    `).join('');
+
+    el.innerHTML = `
+      <div class="gate-banner ${passed ? 'pass' : 'fail'}">
+        <span class="gate-chip ${passed ? 'pass' : 'fail'}">${passed ? 'GATE PASSED' : 'GATE FAILED'}</span>
+        <p>${bt.strategy ? bt.strategy.main_signal : ''} — ${passed ? '§2.1 게이트 통과' : '§2.1 게이트 미통과 (Phase 1 최종 판정)'}</p>
+      </div>
+      <div>${criteriaHtml}</div>
+      <div class="metrics-grid" style="margin-top:12px;">
+        <div class="metric"><div class="label">검증 거래</div><div class="value">${val.trade_count ?? '-'}건</div></div>
+        <div class="metric"><div class="label">검증 승률</div><div class="value">${val.win_rate_pct ?? '-'}%</div></div>
+        <div class="metric"><div class="label">검증 샤프</div><div class="value">${val.sharpe_like ?? '-'}</div></div>
+        <div class="metric"><div class="label">훈련 샤프</div><div class="value">${train.sharpe_like ?? '-'}</div></div>
+      </div>
+      <p class="muted" style="margin-top:10px; margin-bottom:0;">백테스트 실행: ${bt.generated_at || '-'} · MDD는 참고용 수치(날짜축 시뮬레이션 근사치)이며 게이트 판정에는 포함되지 않음</p>
+    `;
+  } catch (e) {
+    el.innerHTML = '<p class="muted">backtest_report.json을 아직 불러올 수 없습니다.</p>';
+  }
+}
+
+async function loadPhase2(bust) {
+  const el = document.getElementById('phase2-section');
+  try {
+    const log = await (await fetch('news_event_calibration_log.json' + bust)).json();
+    const records = log.records || [];
+    const total = records.length;
+    const withOutcome = records.filter(r =>
+      r.outcomes && ['d1', 'd5', 'd20'].some(w => r.outcomes[w] && r.outcomes[w].return_pct !== null)
+    ).length;
+
+    let waitingNote = '기록된 판단이 아직 없습니다.';
+    if (total > 0) {
+      const earliest = records.map(r => r.judged_at).sort()[0];
+      const target = new Date(earliest);
+      target.setDate(target.getDate() + 20);
+      const targetStr = target.toISOString().slice(0, 10);
+      const reached = new Date() >= target;
+      waitingNote = reached
+        ? `최초 코호트 D+20(${targetStr}) 도달 — 캘리브레이션 분석 가능 시점입니다.`
+        : `최초 코호트 D+20 도달 예정: ${targetStr} (그 전까지는 outcomes가 계속 채워지는 중)`;
+    }
+
+    const pct = total > 0 ? Math.round((withOutcome / total) * 100) : 0;
+
+    el.innerHTML = `
+      <div class="metrics-grid">
+        <div class="metric"><div class="label">판단 기록</div><div class="value">${total}건</div></div>
+        <div class="metric"><div class="label">결과 확정</div><div class="value">${withOutcome}/${total}건</div></div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;"></div></div>
+      <p class="waiting-note">${waitingNote}</p>
+      <p class="muted" style="margin-bottom:0;">캘리브레이션 판정(고확신군 승률 비교)은 D+20 도달 후 별도 스크립트(news_event_calibration_analysis.py)로 계산 — 이 화면은 진행 상황만 보여줍니다.</p>
+    `;
+  } catch (e) {
+    el.innerHTML = '<p class="muted">news_event_calibration_log.json을 아직 불러올 수 없습니다.</p>';
+  }
+}
+
+async function loadData() {
+  const bust = '?t=' + Date.now();
+  await loadRealAccount(bust);
+  await loadRealPending(bust);
+  await loadGate(bust);
+  await loadPhase2(bust);
 }
 loadData();
 </script>
