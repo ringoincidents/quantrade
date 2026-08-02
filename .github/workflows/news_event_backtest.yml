@@ -13,9 +13,9 @@ on:
   workflow_dispatch:
     inputs:
       limit:
-        description: '이번 실행 최대 수집 건수(비용 조절용, 비우면 전량). 첫 실행은 20 정도로 시험해볼 것'
+        description: '이번 실행 최대 수집 건수(비용 조절용). 비우면 전수 수집. 시험 실행은 20 정도'
         required: false
-        default: '20'
+        default: ''
       stride:
         description: '판단일 간격(거래일). 사전 고정 기본값 5 - 바꾸면 데이터셋에 기록됨'
         required: false
@@ -45,10 +45,21 @@ jobs:
           python news_event_backtest.py $ARGS
       - name: Calibration analysis (backtest dataset only)
         run: python news_event_calibration_analysis.py --log-file news_event_backtest_log.json
+      # 전수 수집은 30분 넘게 걸려서 그 사이 main이 움직일 가능성이 높다(daily.yml,
+       # 사람의 push 등). 단순 push는 그때 거부되고 수집 결과가 통째로 버려진다 —
+       # 실제로 2026-08-02 전수 실행이 이렇게 날아갔다. 그래서 rebase 후 재시도한다.
+       # 이 데이터셋은 이 워크플로만 쓰므로 rebase 충돌이 날 파일이 아니다.
       - name: Commit backtest dataset
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add news_event_backtest_log.json
-          git diff --quiet && git diff --staged --quiet || git commit -m "News event backtest dataset update"
-          git push
+          git diff --quiet && git diff --staged --quiet && echo "변경 없음" && exit 0
+          git commit -m "News event backtest dataset update"
+          for attempt in 1 2 3 4 5; do
+            if git push; then echo "push 성공 (시도 $attempt)"; exit 0; fi
+            echo "push 거부됨 - main을 가져와 rebase 후 재시도 ($attempt/5)"
+            git pull --rebase origin main || exit 1
+            sleep $((attempt * 5))
+          done
+          echo "5회 시도 후에도 push 실패"; exit 1
