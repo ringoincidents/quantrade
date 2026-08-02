@@ -38,7 +38,19 @@ HIGH_CONFIDENCE_THRESHOLD = 70
 MIN_BUCKET_SAMPLES = 10
 WINDOWS = ("d1", "d5", "d20")
 DEFAULT_ECE_BINS = 10
-SIGNIFICANCE_ALPHA = 0.05
+
+# 2026-08-02 사전 고정(pre-registration) — §2.1 캘리브레이션 통계 판정기준.
+# 계획서 v3.1 §2.1 가설이 "고확신군 승률 > 저확신군 승률"로 방향이 명시돼 있으므로
+# 양측이 아닌 단측(one-tailed, alternative="greater") Fisher's exact test를 쓴다
+# (significance_test() 참고). 판정 3단계: p<ALPHA_STRONG "강한신호",
+# ALPHA_STRONG<=p<ALPHA_WEAK "약한신호", p>=ALPHA_WEAK "유의미하지 않음"
+# (classify_significance() 참고). **이 기준(단측 방향, 두 임계값)은 여기서 사전
+# 고정하며, 2026-08-21 최초 코호트 D+20 도달로 실제 outcomes 데이터가 들어온
+# 뒤에도 결과를 보고 사후에 바꾸지 않는다** — backtest.py의 SUCCESS_CRITERIA와
+# 정확히 같은 원칙(결과가 나온 뒤 기준을 짜맞추는 것을 막기 위해 미리 박아둠).
+# 바꿔야 한다면 이 세션이 아니라 별도로 논의하고 명시적으로 기록한다.
+SIGNIFICANCE_ALPHA_STRONG = 0.05
+SIGNIFICANCE_ALPHA_WEAK = 0.10
 
 
 def classify_hit(direction, return_pct):
@@ -112,18 +124,27 @@ def _hypergeom_pmf(a, r1, r2, c1):
     return (math.comb(r1, a) * math.comb(r2, c)) / math.comb(n, c1)
 
 
-def fisher_exact_p_value(a, b, c, d):
-    """2x2 분할표 [[a,b],[c,d]]의 Fisher's exact test 양측(two-tailed) p-value.
-    scipy 없이 순수 stdlib(math.comb)로 계산 — 이 프로젝트는 의존성을 최소로
-    유지한다(CLAUDE.md, 유일한 서드파티 의존성은 requests). 표본이 작을 걸
-    감안해 정규근사(z-test)가 아니라 정확검정을 쓴다 — 초기 표본 규모에서
-    z-test의 정규근사는 부정확할 수 있다."""
+def fisher_exact_p_value(a, b, c, d, alternative="two-sided"):
+    """2x2 분할표 [[a,b],[c,d]]의 Fisher's exact test p-value. scipy 없이 순수
+    stdlib(math.comb)로 계산 — 이 프로젝트는 의존성을 최소로 유지한다(CLAUDE.md,
+    유일한 서드파티 의존성은 requests). 표본이 작을 걸 감안해 정규근사(z-test)가
+    아니라 정확검정을 쓴다 — 초기 표본 규모에서 z-test의 정규근사는 부정확할 수
+    있다.
+
+    alternative="two-sided"(기본): 양측검정, observed_p 이하 확률을 가진 모든
+    분할표를 합산. alternative="greater": 단측(one-tailed) 검정, a가 관측값
+    이상으로 클 확률만 합산 — a(고확신군 hit)가 우연보다 유의미하게 큰지만 본다.
+    significance_test()는 §2.1의 방향성 가설에 맞춰 "greater"를 쓴다."""
     r1, r2 = a + b, c + d
     c1 = a + c
     n = r1 + r2
     if n == 0 or r1 == 0 or r2 == 0 or c1 == 0 or c1 == n:
         return None
     lo, hi = max(0, c1 - r2), min(r1, c1)
+
+    if alternative == "greater":
+        return min(sum(_hypergeom_pmf(x, r1, r2, c1) for x in range(a, hi + 1)), 1.0)
+
     observed_p = _hypergeom_pmf(a, r1, r2, c1)
     total = 0.0
     for x in range(lo, hi + 1):
@@ -133,27 +154,45 @@ def fisher_exact_p_value(a, b, c, d):
     return min(total, 1.0)
 
 
+def classify_significance(p_value):
+    """p-value를 3단계 신호 강도로 분류. 경계값은 SIGNIFICANCE_ALPHA_STRONG/WEAK
+    (모듈 상단에서 사전 고정, 8/21 데이터 도착 후 사후 변경 금지 — 이유는 그
+    상수 정의부 주석 참고)."""
+    if p_value is None:
+        return None
+    if p_value < SIGNIFICANCE_ALPHA_STRONG:
+        return "강한신호"
+    if p_value < SIGNIFICANCE_ALPHA_WEAK:
+        return "약한신호"
+    return "유의미하지 않음"
+
+
 def significance_test(high_stats, low_stats):
-    """고확신군/저확신군 승률 차이가 통계적으로 유의미한지 Fisher's exact test로
-    검증. 두 그룹 다 hits/misses 카운트가 있어야 계산 가능 — win_rate_for()가
+    """고확신군/저확신군 승률 차이가 통계적으로 유의미한지 단측(one-tailed,
+    alternative="greater") Fisher's exact test로 검증한다 — §2.1 가설이
+    "고확신군 승률 > 저확신군 승률"로 방향이 이미 명시돼 있어 양측검정보다
+    단측검정이 적절하다(이 방향 선택 자체도 사전 고정 대상, 모듈 상단 주석
+    참고). 두 그룹 다 hits/misses 카운트가 있어야 계산 가능 — win_rate_for()가
     표본 부족으로 win_rate_pct=None을 반환한 그룹은 hits/misses는 있어도(0일 수
     있음) 신뢰도가 낮다는 걸 감안해, MIN_BUCKET_SAMPLES 미만이면 검정 자체를
     "판단 보류"로 건너뛴다 — 승률 비교와 같은 표본 기준을 그대로 쓴다."""
     if high_stats["sample_count"] < MIN_BUCKET_SAMPLES or low_stats["sample_count"] < MIN_BUCKET_SAMPLES:
         return {
             "p_value": None,
-            "significant": None,
-            "method": "fisher_exact",
+            "signal": None,
+            "method": "fisher_exact_one_sided_greater",
             "verdict": "표본 부족 - 유의성 검정 판단 보류",
         }
     p_value = fisher_exact_p_value(
-        high_stats["hits"], high_stats["misses"], low_stats["hits"], low_stats["misses"]
+        high_stats["hits"], high_stats["misses"], low_stats["hits"], low_stats["misses"],
+        alternative="greater",
     )
     return {
         "p_value": round(p_value, 4) if p_value is not None else None,
-        "significant": (p_value is not None and p_value < SIGNIFICANCE_ALPHA),
-        "method": "fisher_exact",
-        "alpha": SIGNIFICANCE_ALPHA,
+        "signal": classify_significance(p_value),
+        "method": "fisher_exact_one_sided_greater",
+        "alpha_strong": SIGNIFICANCE_ALPHA_STRONG,
+        "alpha_weak": SIGNIFICANCE_ALPHA_WEAK,
         "verdict": None,
     }
 
@@ -306,39 +345,30 @@ def _dummy_overconfident(n=200):
     return records
 
 
-def _dummy_real_gap(n_per_group=30):
-    """고확신군(90+) 승률 90%, 저확신군(50 근처) 승률 40%로 실제 차이가 있는
-    데이터 - 유의성 검정에서 유의미(p<0.05)하게 나와야 정상."""
-    import random
-    rng = random.Random(1)
+def _make_exact_group(idx_start, confidence, n_hit, n_miss):
+    """랜덤이 아니라 정확한 hit/miss 개수로 그룹을 만든다 — 유의성 검정 3단계
+    (강한신호/약한신호/유의미하지 않음)를 매번 같은 p-value로 재현하려면
+    난수보다 결정적 카운트가 안전하다(ECE 더미 테스트에서 난수 시드 기반
+    데이터가 표본 크기에 따라 문턱값을 아슬아슬하게 넘나든 적이 있었음)."""
     records = []
-    idx = 0
-    for conf, hit_prob in ((95, 0.9), (55, 0.4)):
-        for _ in range(n_per_group):
-            hit = rng.random() < hit_prob
-            direction = "호재"
-            return_pct = rng.uniform(0.5, 5.0) if hit else -rng.uniform(0.5, 5.0)
-            records.append(_make_dummy_record(idx, direction, conf, return_pct))
-            idx += 1
-    return records
+    idx = idx_start
+    for _ in range(n_hit):
+        records.append(_make_dummy_record(idx, "호재", confidence, 2.0))
+        idx += 1
+    for _ in range(n_miss):
+        records.append(_make_dummy_record(idx, "호재", confidence, -2.0))
+        idx += 1
+    return records, idx
 
 
-def _dummy_no_gap(n_per_group=30):
-    """고확신/저확신 두 그룹 다 승률 60% 근처로 실제 차이가 없는 데이터 -
-    유의성 검정에서 보통 유의미하지 않게(p>=0.05) 나와야 정상(고정 시드라
-    결정적)."""
-    import random
-    rng = random.Random(2)
-    records = []
-    idx = 0
-    for conf in (95, 55):
-        for _ in range(n_per_group):
-            hit = rng.random() < 0.6
-            direction = "호재"
-            return_pct = rng.uniform(0.5, 5.0) if hit else -rng.uniform(0.5, 5.0)
-            records.append(_make_dummy_record(idx, direction, conf, return_pct))
-            idx += 1
-    return records
+def _dummy_signal_tier(high_hit, high_miss, low_hit, low_miss):
+    """고확신군(conf=95)/저확신군(conf=55) 각각 정확한 hit/miss 카운트로 구성된
+    데이터. fisher_exact_p_value(..., alternative="greater")로 사전 계산해 3개
+    유의성 등급(강한신호/약한신호/유의미하지 않음) 각각에 정확히 떨어지는
+    카운트를 run_self_test()에서 넘긴다."""
+    records, idx = _make_exact_group(0, 95, high_hit, high_miss)
+    low_records, _ = _make_exact_group(idx, 55, low_hit, low_miss)
+    return records + low_records
 
 
 def run_self_test():
@@ -360,21 +390,26 @@ def run_self_test():
     assert ece_over is not None and ece_over > 0.25, f"과신 데이터인데 ECE가 너무 작음: {ece_over}"
     assert mce_over is not None and mce_over >= ece_over, "MCE는 항상 ECE 이상이어야 함"
 
-    # 3) 실제 승률 차이가 있는 데이터 -> 유의미(p<0.05)해야 함
-    report = calibration_report(_dummy_real_gap())
-    sig = report["d1"]["significance"]
-    print(f"[3] 실제 차이 있는 더미 데이터: high={report['d1']['high_confidence']['win_rate_pct']}%, "
-          f"low={report['d1']['low_confidence']['win_rate_pct']}%, p={sig['p_value']}, significant={sig['significant']}")
-    assert sig["p_value"] is not None and sig["p_value"] < 0.05, f"실제 차이가 있는데 유의미하지 않게 나옴: p={sig['p_value']}"
-    assert sig["significant"] is True
+    # 3) 유의성 3단계(사전 고정 기준) 재현 확인 — 강한신호/약한신호/유의미하지 않음
+    #    각 케이스는 fisher_exact_p_value(..., alternative="greater")로 사전
+    #    계산해 정확히 그 등급 경계 안에 떨어지도록 만든 결정적 hit/miss 카운트다
+    #    (n_per_group=10, MIN_BUCKET_SAMPLES 정확히 충족).
+    tier_cases = [
+        ("강한신호", 8, 2, 2, 8),  # high 80% vs low 20% -> p=0.0115
+        ("약한신호", 7, 3, 3, 7),  # high 70% vs low 30% -> p=0.0894
+        ("유의미하지 않음", 6, 4, 5, 5),  # high 60% vs low 50% -> p=0.5
+    ]
+    for expected_signal, hh, hm, lh, lm in tier_cases:
+        report = calibration_report(_dummy_signal_tier(hh, hm, lh, lm))
+        sig = report["d1"]["significance"]
+        print(f"[3] {expected_signal} 재현: high={report['d1']['high_confidence']['win_rate_pct']}%, "
+              f"low={report['d1']['low_confidence']['win_rate_pct']}%, p={sig['p_value']}, signal={sig['signal']}")
+        assert sig["signal"] == expected_signal, (
+            f"{expected_signal} 재현 실패 - p={sig['p_value']}, signal={sig['signal']}"
+        )
+    # 강한신호 케이스는 calibration_holds(고확신 승률 > 저확신 승률)도 True여야 함
+    report = calibration_report(_dummy_signal_tier(8, 2, 2, 8))
     assert report["d1"]["calibration_holds"] is True, "고확신군 승률이 더 높아야 하는데 아님"
-
-    # 4) 실제 차이가 없는 데이터 -> 보통 유의미하지 않아야 함(고정 시드, 결정적)
-    report = calibration_report(_dummy_no_gap())
-    sig = report["d1"]["significance"]
-    print(f"[4] 차이 없는 더미 데이터: high={report['d1']['high_confidence']['win_rate_pct']}%, "
-          f"low={report['d1']['low_confidence']['win_rate_pct']}%, p={sig['p_value']}, significant={sig['significant']}")
-    assert sig["significant"] is False, f"실제 차이가 없는데 유의미하다고 나옴: p={sig['p_value']}"
 
     # 5) 표본 부족 시 전부 판단 보류(None)로 나오는지
     tiny = _dummy_well_calibrated(n_per_bucket=1)  # 버킷당 1건 -> 표본 부족
