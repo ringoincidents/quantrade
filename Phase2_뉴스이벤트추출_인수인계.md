@@ -232,3 +232,32 @@ Phase 1에서 되돌린 시도(같은 날 `get_news_sentiment`를 `get_news_head
 - 실제 `news_event_calibration_log.json`(outcomes 전부 null) 기준 재실행 확인 — 모든
   window에서 "판단 보류" 정상 출력, 실행 전후 파일 변경 없음(read-only 재확인, md5 체크섬
   일치).
+
+## 8. 과거 뉴스 백테스트 병행 트랙 (2026-08-02 추가)
+
+실시간 트랙만으로는 표본이 쌓이는 데 몇 달이 걸려, 결과가 이미 나와 있는 과거
+(2026-02~07) 뉴스로 캘리브레이션을 앞당기는 **병행 트랙**을 추가했다.
+**설계·선정 기준은 수집 전에 `Phase2_과거뉴스백테스트_설계.md`에 사전 고정했다** —
+상세 내용은 그 문서를 보고, 여기서는 이 문서(실시간 트랙) 입장에서 알아야 할 것만
+정리한다.
+
+- **실시간 트랙은 그대로 유지·중단하지 않는다.** `news_event_experiment.py`,
+  `news_event_experiment.yml`(매일 09:30 UTC), `news_event_calibration_log.json`
+  전부 이 작업에서 동작 변경 없음. §6 대기 구간 운영 지침도 그대로 유효하다.
+  (유일한 변경: 하드코딩돼 있던 판단 모델명을 `JUDGE_MODEL` 상수로 뺐다 — 과거
+  백테스트 트랙이 같은 프롬프트/모델을 써야 두 트랙 비교가 성립해서 단일 출처로
+  고정한 것이고, 동작은 동일하다.)
+- **데이터셋 완전 분리**: 과거 트랙은 `news_event_backtest_log.json`에만 쓴다.
+  레코드에 `track: "backtest"`, 파일 최상단에도 `track`/`judge_model`/
+  `selection_criteria`가 박힌다. 분석 출력의 `_meta.log_file`/`_meta.track`으로
+  어느 트랙 결과인지 항상 구분된다. **두 데이터셋을 합쳐서 분석하지 않는다.**
+- **분석은 같은 스크립트를 공유**: `news_event_calibration_analysis.py --log-file
+  news_event_backtest_log.json`. §7의 사전 고정 통계기준(단측 Fisher's, 3단계 α)이
+  그대로 적용된다 — 트랙별로 기준을 달리 두지 않는다.
+- **과거 트랙 결과만으로 §2.1 게이트 통과를 선언하지 않는다.** 판단 모델이 해당
+  기간을 학습했다면 헤드라인만 보고도 결말을 "기억"할 수 있고, 도구 차단으로는
+  막을 수 없는 한계다(설계 문서 §4-1). 회고 트랙에만 있고 실시간 트랙에는 없는
+  위험이라, 과거 트랙은 선행 참고치로 쓰고 최종 판정은 실시간 트랙으로 한다.
+- **실행**: `news_event_backtest.yml`을 `workflow_dispatch`로 수동 실행(스케줄 없음).
+  첫 실행은 `limit=20` 정도로 시험하고, **`stats.pubdate_rejected`와 수집 건수를
+  반드시 확인할 것** — 날짜 필터가 통째로 무시되면 수집 0건으로 드러난다(설계 §3-2).

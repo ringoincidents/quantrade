@@ -277,6 +277,10 @@ def main():
     parser = argparse.ArgumentParser(description="뉴스 이벤트 캘리브레이션 분석 (읽기 전용)")
     parser.add_argument("--bins", type=int, default=DEFAULT_ECE_BINS,
                          help=f"ECE/MCE 계산용 confidence 구간 개수 (기본 {DEFAULT_ECE_BINS})")
+    parser.add_argument("--log-file", default=NEWS_LOG_FILE,
+                         help=f"분석할 데이터셋 (기본 {NEWS_LOG_FILE} = 실시간 트랙, "
+                              "과거 백테스트 트랙은 news_event_backtest_log.json). "
+                              "두 트랙은 절대 합쳐서 분석하지 않는다 - 한 번에 하나만.")
     parser.add_argument("--self-test", action="store_true",
                          help="실제 로그 파일 대신 더미 데이터로 모듈 자체 검증만 하고 종료")
     args = parser.parse_args()
@@ -285,12 +289,25 @@ def main():
         run_self_test()
         return None
 
-    with open(NEWS_LOG_FILE, encoding="utf-8") as f:
+    with open(args.log_file, encoding="utf-8") as f:
         log = json.load(f)
     records = log.get("records", [])
     report = calibration_report(records, args.bins)
-    print(json.dumps(report, indent=2, ensure_ascii=False))
-    return report
+    # 어느 데이터셋을 본 결과인지 출력에 항상 박아둔다 — 과거 백테스트 결과와
+    # 실시간 결과를 나중에 구분 못 하는 상황을 막기 위함(과거백테스트 설계 §5).
+    # 판단 모델은 학습데이터 오염 한계(설계 §4-1) 해석에 필요해서 같이 싣는다.
+    out = {
+        "_meta": {
+            "log_file": args.log_file,
+            "track": log.get("track", "live"),
+            "judge_model": log.get("judge_model"),
+            "record_count": len(records),
+            "selection_criteria": log.get("selection_criteria"),
+        },
+        "windows": report,
+    }
+    print(json.dumps(out, indent=2, ensure_ascii=False))
+    return out
 
 
 # ---------------------------------------------------------------------------

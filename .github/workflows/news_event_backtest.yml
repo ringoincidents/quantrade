@@ -1,0 +1,54 @@
+name: News Event Backtest (Historical)
+
+# Phase 2 과거 뉴스 백테스트 트랙(Phase2_과거뉴스백테스트_설계.md) 전용 워크플로.
+#
+# **schedule: 없음 - workflow_dispatch 전용이다.** 과거 구간 1회성 수집이라
+# 주기 실행할 이유가 없고, 사람이 명시적으로 돌릴 때만 동작하는 편이 안전하다.
+#
+# 건드리는 파일은 news_event_backtest_log.json 하나뿐 - 실시간 트랙
+# (news_event_experiment.yml -> news_event_calibration_log.json)과도,
+# daily.yml/poll.yml의 상태 파일과도 겹치지 않으므로 커밋 레이스가 없다.
+# 이 스크립트는 어떤 매매도 실행하지 않는다.
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: '이번 실행 최대 수집 건수(비용 조절용, 비우면 전량). 첫 실행은 20 정도로 시험해볼 것'
+        required: false
+        default: '20'
+      stride:
+        description: '판단일 간격(거래일). 사전 고정 기본값 5 - 바꾸면 데이터셋에 기록됨'
+        required: false
+        default: '5'
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      CLAUDE_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+      - name: Self-test (network-free logic check)
+        run: python news_event_backtest.py --self-test
+      - name: Collect historical news judgments
+        run: |
+          ARGS="--stride ${{ inputs.stride }}"
+          if [ -n "${{ inputs.limit }}" ]; then ARGS="$ARGS --limit ${{ inputs.limit }}"; fi
+          python news_event_backtest.py $ARGS
+      - name: Calibration analysis (backtest dataset only)
+        run: python news_event_calibration_analysis.py --log-file news_event_backtest_log.json
+      - name: Commit backtest dataset
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add news_event_backtest_log.json
+          git diff --quiet && git diff --staged --quiet || git commit -m "News event backtest dataset update"
+          git push
