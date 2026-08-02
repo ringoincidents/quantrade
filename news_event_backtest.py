@@ -53,7 +53,13 @@ CALENDAR_TICKER = "005930"    # 거래일 달력 기준 종목(최대 유동성 
 CALENDAR_CANDLE_COUNT = 400   # 약 1.6년치 — 2026-02 커버에 충분
 
 KST = timezone(timedelta(hours=9))
-RSS_SLEEP = 0.2               # 실시간 트랙 UNIVERSE_SLEEP과 같은 취지(Google News RSS 유예)
+# Google News RSS 유예. 실시간 트랙(UNIVERSE_SLEEP=0.2)은 하루 38회만 부르지만
+# 전수 수집은 950회를 연속으로 부른다 — 2026-08-02 첫 전수 실행에서 약 300회쯤부터
+# Google이 거부하기 시작해 fetch_failed가 637건까지 올라갔다(각 15초 타임아웃을
+# 다 기다리느라 87분 소요). 그래서 이 트랙은 훨씬 느리게 간다.
+RSS_SLEEP = 1.5
+RSS_RETRIES = 2               # 일시적 거부와 영구 차단을 구분하기 위한 재시도
+RSS_BACKOFF = 5.0             # 재시도 대기(초), 시도마다 배수로 증가
 
 # 수집 과정 계기판. pubdate_rejected는 특히 중요 — 0이면 날짜 필터가 아예 안 걸린
 # 건지 의심해봐야 하고(설계 §3-2), 지나치게 높으면 해당 기간 기사가 원래 적었다는 뜻.
@@ -107,10 +113,17 @@ def fetch_historical_headlines(market, judgment_date, lookback_days=HEADLINE_LOO
     # pubDate로 판단일까지만 남기므로 여유를 줘도 미래 기사가 통과하지 못한다.
     before = (judgment_dt + timedelta(days=1)).strftime("%Y-%m-%d")
 
-    try:
-        resp = requests.get(_rss_url(market, lookback_start, before), timeout=15)
-        root = ET.fromstring(resp.content)
-    except Exception:
+    url = _rss_url(market, lookback_start, before)
+    root = None
+    for attempt in range(RSS_RETRIES + 1):
+        try:
+            resp = requests.get(url, timeout=15)
+            root = ET.fromstring(resp.content)
+            break
+        except Exception:
+            if attempt < RSS_RETRIES:
+                time.sleep(RSS_BACKOFF * (attempt + 1))
+    if root is None:
         return None, 0, []
 
     accepted, rejected_dates = [], []
@@ -270,9 +283,22 @@ def collect(log, judgment_dates, universe, lookback_days, limit=None, sleep=RSS_
 def run(args):
     log = load_json(BACKTEST_LOG_FILE, {"records": [], "stats": {}})
 
-    judgment_dates = build_judgment_dates(args.window_start, args.window_end, args.stride)
-    print(f"판단일 {len(judgment_dates)}개 x 유니버스 {len(KRX_MARKET_CAP_TOP)}종목 "
+    # 판단일은 **항상 사전 고정된 전체 기간**에서 뽑는다. --exec-from/--exec-until은
+    # 그 중 이번 실행이 처리할 구간만 고르는 실행 분할용이지, 선정 기준을 바꾸는 게
+    # 아니다. (--window-start/--window-end로 기간 자체를 잘라 돌리면 stride가 그
+    # 구간 안에서 0부터 다시 세어져 전체 기간 stride와 다른 날짜가 나온다 — 그러면
+    # 사전 고정 기준 위반이라, 분할은 반드시 이 방식으로만 한다.)
+    all_dates = build_judgment_dates(args.window_start, args.window_end, args.stride)
+    judgment_dates = [d for d in all_dates
+                      if (args.exec_from is None or d >= args.exec_from)
+                      and (args.exec_until is None or d <= args.exec_until)]
+    print(f"전체 판단일 {len(all_dates)}개 "
           f"({args.window_start} ~ {args.window_end}, 거래일 {args.stride}일 간격)")
+    if len(judgment_dates) != len(all_dates):
+        print(f"  -> 이번 실행 처리 대상 {len(judgment_dates)}개 "
+              f"({judgment_dates[0] if judgment_dates else '-'} ~ "
+              f"{judgment_dates[-1] if judgment_dates else '-'}) — 실행 분할, 선정 기준 불변")
+    print(f"유니버스 {len(KRX_MARKET_CAP_TOP)}종목")
 
     # 실행에 실제로 쓰인 기준을 그대로 박아둔다 - 사전 고정 문서와 대조 가능하게.
     log["selection_criteria"] = {
@@ -280,7 +306,7 @@ def run(args):
         "judgment_date_stride": args.stride, "headline_lookback_days": args.lookback,
         "universe": "backtest.KRX_MARKET_CAP_TOP", "universe_size": len(KRX_MARKET_CAP_TOP),
         "selection_method": "전수(exhaustive) - 무작위 추출 아님, 결과 기반 필터 없음",
-        "judgment_dates_count": len(judgment_dates),
+        "judgment_dates_count": len(all_dates),
         "defaults_used": (args.window_start == WINDOW_START and args.window_end == WINDOW_END
                           and args.stride == JUDGMENT_DATE_STRIDE
                           and args.lookback == HEADLINE_LOOKBACK_DAYS),
@@ -290,7 +316,8 @@ def run(args):
     log["track"] = "backtest"
     log["last_run_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    collected = collect(log, judgment_dates, KRX_MARKET_CAP_TOP, args.lookback, args.limit)
+    collected = collect(log, judgment_dates, KRX_MARKET_CAP_TOP, args.lookback,
+                        args.limit, sleep=args.sleep)
     save_json(BACKTEST_LOG_FILE, log)
 
     print(f"\n이번 실행 수집 {collected}건 / 누적 {len(log['records'])}건")
@@ -310,6 +337,13 @@ def main():
                         help=f"헤드라인 조회 창(일, 기본 {HEADLINE_LOOKBACK_DAYS})")
     parser.add_argument("--limit", type=int, default=None,
                         help="이번 실행에서 수집할 최대 건수(비용 조절용, 날짜 순 앞부분부터)")
+    parser.add_argument("--exec-from", default=None,
+                        help="이번 실행이 처리할 판단일 시작(YYYY-MM-DD). 실행 분할용이며 "
+                             "판단일 선정 자체는 전체 기간 기준 그대로 — 선정 기준 불변")
+    parser.add_argument("--exec-until", default=None,
+                        help="이번 실행이 처리할 판단일 끝(YYYY-MM-DD). --exec-from과 같은 취지")
+    parser.add_argument("--sleep", type=float, default=RSS_SLEEP,
+                        help=f"RSS 호출 간 대기(초, 기본 {RSS_SLEEP}). Google 거부를 피하려면 낮추지 말 것")
     parser.add_argument("--self-test", action="store_true",
                         help="네트워크 없이 로직만 검증하고 종료")
     args = parser.parse_args()
@@ -388,6 +422,18 @@ def run_self_test():
         print(f"[6] {label}: {stats}")
         assert all(k in stats for k in STATS_KEYS), f"{label}에서 카운터 키 누락"
     assert stats["pubdate_rejected"] == 8, "기존 카운트를 덮어쓰지 말고 이어받아야 함"
+
+    # 8) 실행 분할(--exec-from/--exec-until)이 판단일 선정을 바꾸지 않는지.
+    #    기간 자체를 잘라 돌리면 stride가 구간 안에서 다시 세어져 다른 날짜가 나오는데,
+    #    그건 사전 고정 기준 위반이다. 분할 실행분을 합치면 전체와 정확히 같아야 한다.
+    cal = [{"date": f"2026-02-{d:02d}"} for d in range(1, 29)]
+    full = build_judgment_dates("2026-02-01", "2026-02-28", 5, candles=cal)
+    split = ([d for d in full if d <= "2026-02-11"] + [d for d in full if d > "2026-02-11"])
+    wrong = build_judgment_dates("2026-02-12", "2026-02-28", 5, candles=cal)
+    print(f"[8] 전체={full} / 분할합침={split} / 기간을 잘랐을 때={wrong}")
+    assert split == full, "실행 분할은 전체 판단일 집합을 바꾸면 안 됨"
+    assert wrong != [d for d in full if d > "2026-02-11"], \
+        "기간을 자르면 stride가 재시작해 다른 날짜가 나온다 - 이래서 --window-*로 분할하면 안 됨"
 
     # 7) KST 변환이 실제로 적용되는지 - 감사 필드(headline_dates)에 저장되는 값이라
     #    여기서 틀리면 사후 대조 자체가 무의미해진다.

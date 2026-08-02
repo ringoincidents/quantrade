@@ -20,6 +20,14 @@ on:
         description: '판단일 간격(거래일). 사전 고정 기본값 5 - 바꾸면 데이터셋에 기록됨'
         required: false
         default: '5'
+      exec_from:
+        description: '이번 실행이 처리할 판단일 시작(YYYY-MM-DD). 실행 분할용 - 판단일 선정 자체는 전체 기간 기준 그대로'
+        required: false
+        default: ''
+      exec_until:
+        description: '이번 실행이 처리할 판단일 끝(YYYY-MM-DD)'
+        required: false
+        default: ''
 
 permissions:
   contents: write
@@ -42,6 +50,9 @@ jobs:
         run: |
           ARGS="--stride ${{ inputs.stride }}"
           if [ -n "${{ inputs.limit }}" ]; then ARGS="$ARGS --limit ${{ inputs.limit }}"; fi
+          if [ -n "${{ inputs.exec_from }}" ]; then ARGS="$ARGS --exec-from ${{ inputs.exec_from }}"; fi
+          if [ -n "${{ inputs.exec_until }}" ]; then ARGS="$ARGS --exec-until ${{ inputs.exec_until }}"; fi
+          echo "실행 인자: $ARGS"
           python news_event_backtest.py $ARGS
       - name: Calibration analysis (backtest dataset only)
         run: python news_event_calibration_analysis.py --log-file news_event_backtest_log.json
