@@ -1,13 +1,13 @@
 {
-  "date": "2026-08-01",
-  "market_summary": "전반적으로 혼조세 속 소폭 손익 구간, 암호화폐 일부 반등 시도 중이나 강한 추세 부재",
+  "date": "2026-08-02",
+  "market_summary": "전반적으로 암호화폐 시장은 혼조세이며 일부 종목 소폭 수익 중, 실계좌는 손실 종목 다수로 정리 필요",
   "positions": [
     {
       "market": "KRW-USDE",
       "asset_class": "crypto",
       "strategy_type": "스윙",
       "amount_krw": 33333.333333333336,
-      "current_return": -0.20920502092050208,
+      "current_return": 0.41841004184100417,
       "conviction": false
     },
     {
@@ -15,7 +15,7 @@
       "asset_class": "crypto",
       "strategy_type": "스윙",
       "amount_krw": 4354,
-      "current_return": 3.385731559854911,
+      "current_return": 6.287787182587662,
       "conviction": false
     },
     {
@@ -23,7 +23,7 @@
       "asset_class": "crypto",
       "strategy_type": "스윙",
       "amount_krw": 3557,
-      "current_return": 0.49504950495049505,
+      "current_return": -0.9900990099009901,
       "conviction": false
     },
     {
@@ -39,7 +39,7 @@
       "asset_class": "crypto",
       "strategy_type": "스윙",
       "amount_krw": 3272,
-      "current_return": 1.0266940451745343,
+      "current_return": 0.8213552361396311,
       "conviction": false
     },
     {
@@ -47,10 +47,67 @@
       "asset_class": "crypto",
       "strategy_type": "단타",
       "amount_krw": 1953,
+      "current_return": 0.9708737864077678,
+      "conviction": false
+    },
+    {
+      "market": "KRW-USD1",
+      "asset_class": "crypto",
+      "strategy_type": "스윙",
+      "amount_krw": 879,
+      "current_return": 0,
+      "conviction": false
+    },
+    {
+      "market": "KRW-DOOD",
+      "asset_class": "crypto",
+      "strategy_type": "스윙",
+      "amount_krw": 835,
       "current_return": 0,
       "conviction": false
     }
   ],
-  "pending": [],
-  "cash": 47498.709684840105
+  "pending": [
+    {
+      "id": "REAL_310200_2026-08-02",
+      "action_type": "rebalance",
+      "target_account": "real",
+      "market": "310200",
+      "name": "애니플러스",
+      "reasoning": "[모의] 애니플러스 +20.74% 수익으로 부분 익절 통해 수익 실현, 나머지는 계속 보유",
+      "status": "waiting",
+      "dry_run": true
+    },
+    {
+      "id": "REAL_NXXT_2026-08-02",
+      "action_type": "sell",
+      "target_account": "real",
+      "market": "NXXT",
+      "name": "넥스트NRG",
+      "reasoning": "[모의] 넥스트NRG -23.84% 손실 지속, 회복 가능성 불명확하고 기회비용 손실 크므로 손절 정리",
+      "status": "waiting",
+      "dry_run": true
+    },
+    {
+      "id": "REAL_AIXI_2026-08-02",
+      "action_type": "sell",
+      "target_account": "real",
+      "market": "AIXI",
+      "name": "샤오아이(ADR)",
+      "reasoning": "[모의] 샤오아이 ADR -95.78%로 사실상 전손 상태, 잔여 금액 회수 후 세금 손실 처리 활용",
+      "status": "waiting",
+      "dry_run": true
+    },
+    {
+      "id": "REAL_PMI_2026-08-02",
+      "action_type": "sell",
+      "target_account": "real",
+      "market": "PMI",
+      "name": "피카드 메디컬",
+      "reasoning": "[모의] 피카드 메디컬 -50.69% 손실, 소형 바이오 유동성 리스크 및 추가 하락 우려로 정리 권고",
+      "status": "waiting",
+      "dry_run": true
+    }
+  ],
+  "cash": 45784.709684840105
 }

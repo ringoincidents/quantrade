@@ -1,5 +1,5 @@
 {
-  "cash": 47498.709684840105,
+  "cash": 45784.709684840105,
   "positions": [
     {
       "market": "KRW-USDE",
@@ -7,8 +7,8 @@
       "entry_date": "2026-07-29",
       "expected_days": 7,
       "amount_krw": 33333.333333333336,
-      "current_price": 1431.0,
-      "current_return": -0.20920502092050208
+      "current_price": 1440.0,
+      "current_return": 0.41841004184100417
     },
     {
       "market": "KRW-PENGU",
@@ -18,8 +18,8 @@
       "entry_date": "2026-07-30",
       "expected_days": 11,
       "amount_krw": 4354,
-      "current_price": 8.55,
-      "current_return": 3.385731559854911
+      "current_price": 8.79,
+      "current_return": 6.287787182587662
     },
     {
       "market": "KRW-WIF",
@@ -29,8 +29,8 @@
       "entry_date": "2026-07-31",
       "expected_days": 11,
       "amount_krw": 3557,
-      "current_price": 203.0,
-      "current_return": 0.49504950495049505
+      "current_price": 200.0,
+      "current_return": -0.9900990099009901
     },
     {
       "market": "KRW-LAYER",
@@ -51,8 +51,8 @@
       "entry_date": "2026-08-01",
       "expected_days": 11,
       "amount_krw": 3272,
-      "current_price": 4.92,
-      "current_return": 1.0266940451745343
+      "current_price": 4.91,
+      "current_return": 0.8213552361396311
     },
     {
       "market": "KRW-BEAM",
@@ -61,7 +61,27 @@
       "entry_price": 2.06,
       "entry_date": "2026-08-01",
       "expected_days": 4,
-      "amount_krw": 1953
+      "amount_krw": 1953,
+      "current_price": 2.08,
+      "current_return": 0.9708737864077678
+    },
+    {
+      "market": "KRW-USD1",
+      "asset_class": "crypto",
+      "strategy_type": "스윙",
+      "entry_price": 1435.0,
+      "entry_date": "2026-08-02",
+      "expected_days": 11,
+      "amount_krw": 879
+    },
+    {
+      "market": "KRW-DOOD",
+      "asset_class": "crypto",
+      "strategy_type": "스윙",
+      "entry_price": 1.86,
+      "entry_date": "2026-08-02",
+      "expected_days": 11,
+      "amount_krw": 835
     }
   ]
 }
