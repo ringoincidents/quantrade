@@ -68,21 +68,29 @@ def _rss_url(market, start_date, end_date):
     return f"https://news.google.com/rss/search?q={query}&hl=ko&gl=KR&ceid=KR:ko"
 
 
-def _within_window(pub_date_text, lookback_start, judgment_date):
-    """RSS pubDate(RFC 822, GMT)를 KST 날짜로 바꿔 판단 창 안인지 본다.
+def _to_kst_date(pub_date_text):
+    """RSS pubDate(RFC 822, 보통 GMT)를 KST 기준 날짜 문자열로. 파싱 실패는 None.
 
     GMT->KST 변환을 빼먹으면 하루씩 어긋난다 — 한국 기사는 대개 KST 오전에
-    나오는데 그건 GMT로는 전날 밤이다. 판단일 이후 기사를 하나라도 통과시키면
-    실험이 무효이므로, 파싱 실패는 통과가 아니라 탈락으로 처리한다."""
+    나오는데 그건 GMT로는 전날 밤이다."""
     try:
         pub_dt = parsedate_to_datetime(pub_date_text)
     except Exception:
-        return False
+        return None
     if pub_dt is None:
-        return False
+        return None
     if pub_dt.tzinfo is None:
         pub_dt = pub_dt.replace(tzinfo=timezone.utc)
-    pub_day = pub_dt.astimezone(KST).strftime("%Y-%m-%d")
+    return pub_dt.astimezone(KST).strftime("%Y-%m-%d")
+
+
+def _within_window(pub_date_text, lookback_start, judgment_date):
+    """판단 창(lookback_start ~ judgment_date) 안에서 발행된 기사인지.
+    판단일 이후 기사를 하나라도 통과시키면 실험이 무효이므로, 파싱 실패는
+    통과가 아니라 탈락으로 처리한다."""
+    pub_day = _to_kst_date(pub_date_text)
+    if pub_day is None:
+        return False
     return lookback_start <= pub_day <= judgment_date
 
 
@@ -103,21 +111,24 @@ def fetch_historical_headlines(market, judgment_date, lookback_days=HEADLINE_LOO
         resp = requests.get(_rss_url(market, lookback_start, before), timeout=15)
         root = ET.fromstring(resp.content)
     except Exception:
-        return None, 0
+        return None, 0, []
 
-    headlines, rejected = [], 0
+    accepted, rejected_dates = [], []
     for item in root.findall(".//item"):
         title_el, date_el = item.find("title"), item.find("pubDate")
         if title_el is None or title_el.text is None:
             continue
         if date_el is None or date_el.text is None:
-            rejected += 1  # 발행일을 확인할 수 없으면 쓰지 않는다(안전한 쪽으로)
+            rejected_dates.append("(pubDate 없음)")
             continue
-        if not _within_window(date_el.text, lookback_start, judgment_date):
-            rejected += 1
+        pub_day = _to_kst_date(date_el.text)
+        if pub_day is None or not (lookback_start <= pub_day <= judgment_date):
+            rejected_dates.append(pub_day or "(파싱 실패)")
             continue
-        headlines.append(title_el.text)
-    return headlines[:limit], rejected
+        # 기사 제목과 KST 발행일을 짝지어 보관한다 — 판단일 창이 실제로 지켜졌는지
+        # 나중에 데이터셋만 보고 사람이 대조할 수 있어야 하기 때문(설계 §3-2 감사용).
+        accepted.append({"title": title_el.text, "pub_date_kst": pub_day})
+    return accepted[:limit], len(rejected_dates), rejected_dates
 
 
 def build_judgment_dates(window_start, window_end, stride, candles=None):
@@ -193,13 +204,20 @@ def collect(log, judgment_dates, universe, lookback_days, limit=None, sleep=RSS_
             if f"{market}_{judgment_date}" in existing:
                 continue
 
-            headlines, rejected = fetch_historical_headlines(market, judgment_date, lookback_days)
+            items, rejected, rejected_dates = fetch_historical_headlines(
+                market, judgment_date, lookback_days)
             stats["pubdate_rejected"] += rejected
+            # 무엇이 왜 걸러졌는지 표본으로 남긴다 — after:/before:가 무시되고 있다면
+            # 여기에 판단일 한참 뒤 날짜들이 찍혀서 바로 드러난다.
+            if rejected_dates and len(log.setdefault("rejected_samples", [])) < 40:
+                log["rejected_samples"].append(
+                    {"market": market, "judged_at": judgment_date,
+                     "rejected_pub_dates": sorted(set(rejected_dates))[:8]})
             time.sleep(sleep)
-            if headlines is None:
+            if items is None:
                 stats["fetch_failed"] += 1
                 continue
-            if not headlines:
+            if not items:
                 stats["no_headlines"] += 1
                 continue
 
@@ -218,6 +236,7 @@ def collect(log, judgment_dates, universe, lookback_days, limit=None, sleep=RSS_
                 stats["no_price"] += 1
                 continue
 
+            headlines = [it["title"] for it in items]
             judgment = ask_news_event_judgment(market, headlines)
             if judgment is None:
                 stats["judge_failed"] += 1
@@ -230,6 +249,9 @@ def collect(log, judgment_dates, universe, lookback_days, limit=None, sleep=RSS_
                 "market": market,
                 "judged_at": judgment_date,
                 "headlines": headlines,
+                # 판단에 쓴 기사 각각의 KST 발행일 — 창이 지켜졌는지 데이터셋만 보고
+                # 사람이 대조할 수 있어야 한다(실시간 트랙엔 없는, 회고 트랙 전용 감사 필드).
+                "headline_dates": [it["pub_date_kst"] for it in items],
                 "event_type": judgment.get("event_type", "기타"),
                 "direction": judgment.get("direction", "중립"),
                 "confidence": judgment.get("confidence"),
@@ -366,6 +388,19 @@ def run_self_test():
         print(f"[6] {label}: {stats}")
         assert all(k in stats for k in STATS_KEYS), f"{label}에서 카운터 키 누락"
     assert stats["pubdate_rejected"] == 8, "기존 카운트를 덮어쓰지 말고 이어받아야 함"
+
+    # 7) KST 변환이 실제로 적용되는지 - 감사 필드(headline_dates)에 저장되는 값이라
+    #    여기서 틀리면 사후 대조 자체가 무의미해진다.
+    kst_cases = [
+        ("Mon, 09 Mar 2026 05:00:00 GMT", "2026-03-09", "GMT 낮 -> 같은 날 KST"),
+        ("Mon, 09 Mar 2026 20:00:00 GMT", "2026-03-10", "GMT 밤 -> KST 익일(+9h)"),
+        ("Mon, 09 Mar 2026 23:30:00 +0900", "2026-03-09", "이미 KST면 그대로"),
+        ("garbage", None, "파싱 실패는 None"),
+    ]
+    for text, expected, label in kst_cases:
+        got = _to_kst_date(text)
+        print(f"[7] {label}: {text!r} -> {got}")
+        assert got == expected, f"KST 변환 오류: {text} -> {got}, 기대 {expected}"
 
     print("\n모든 자체 검증 통과 - 네트워크/실제 데이터셋 파일은 건드리지 않았음.")
 
