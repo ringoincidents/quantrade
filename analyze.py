@@ -69,8 +69,8 @@ def run():
     decisions = ai_result.get("decisions", [])
     decision_map = {d["market"]: d for d in decisions}
 
-    # 실계좌 매도/비중조정 제안 — 게이트(TRACK_B_ENABLED) 무관하게 항상 참고는 하되,
-    # 게이트가 꺼져 있는 동안(기본값)은 dry_run으로만 기록한다. 자동실행 경로는 절대 없음 —
+    # 실계좌 매도/비중조정 제안 — AI_SUGGESTION_DRY_RUN 무관하게 항상 참고는 하되,
+    # 기본값(true)인 동안은 dry_run으로만 기록한다. 자동실행 경로는 절대 없음 —
     # 실계좌엔 애초에 주문 함수가 없다(CLAUDE.md 조회전용 원칙).
     real_by_symbol = {p["symbol"]: p for p in real_positions}
     for d in decisions:
@@ -89,7 +89,7 @@ def run():
         already_pending = any(a.get("id") == action_id for a in pending["actions"])
         if already_pending:
             continue
-        dry_run = not TRACK_B_ENABLED
+        dry_run = AI_SUGGESTION_DRY_RUN
         name = rp.get("name", symbol)
         reasoning = d.get("reasoning", "-")
         pending["actions"].append({
@@ -230,7 +230,7 @@ def run():
     if waiting_count:
         report.append(f"⏳ 승인 대기 중 {waiting_count}건")
     if real_positions:
-        report.append(f"🏦 실계좌 게이트(TRACK_B_ENABLED): {'활성' if TRACK_B_ENABLED else '비활성 (dry_run)'}")
+        report.append(f"🏦 실계좌 제안: {'dry-run(모의)' if AI_SUGGESTION_DRY_RUN else '실행 가능 상태(실주문 코드는 아직 없음)'}")
 
     last_report = {
         "date": today,

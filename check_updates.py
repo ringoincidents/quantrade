@@ -24,7 +24,7 @@ def handle_approve(action_id, portfolio, history, pending):
                 label = "매도" if action.get("action_type") == "sell" else "비중조정"
                 name = action.get("name", action.get("market"))
                 if action.get("dry_run", True):
-                    send_telegram(f"🔒 [모의] {name} {label} — 게이트 미통과 상태, 실행되지 않음 (TRACK_B_ENABLED=false)")
+                    send_telegram(f"🔒 [모의] {name} {label} — dry-run 상태, 실행되지 않음 (AI_SUGGESTION_DRY_RUN=true)")
                 else:
                     send_telegram(f"⚠️ {name} {label} — 실계좌 주문 실행은 아직 구현되어 있지 않습니다 (조회 전용)")
                 return True

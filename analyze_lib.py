@@ -38,12 +38,18 @@ TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN", "")
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")
 CLAUDE_API_KEY = os.environ.get("CLAUDE_API_KEY", "")
 
-# 실계좌(토스) 승인 구조 게이트 (2026-08-01). False인 동안 ask_claude_decision은
-# real_portfolio.json 보유종목을 계속 참고해 매도/비중조정 제안을 만들지만, 그 제안은
-# pending_actions.json에 dry_run: true로만 기록되고 /approve를 눌러도 실제로는 아무것도
-# 실행되지 않는다(실계좌엔 애초에 주문 API가 없다 — CLAUDE.md "조회 전용" 원칙). 10월 말
-# 게이트 통과 판정(claude.ai 방향성 세션) 전까지 이 값을 true로 바꾸지 말 것.
-TRACK_B_ENABLED = os.environ.get("TRACK_B_ENABLED", "false").lower() == "true"
+# 실계좌(토스) AI 제안 dry-run 게이트 (2026-08-01, 2026-08-02 TRACK_B_ENABLED에서 리네이밍).
+# True(기본값)인 동안 ask_claude_decision은 real_portfolio.json 보유종목을 계속 참고해
+# 매도/비중조정 제안을 만들지만, 그 제안은 pending_actions.json에 dry_run: true로만
+# 기록되고 /approve를 눌러도 실제로는 아무것도 실행되지 않는다(실계좌엔 애초에 주문
+# API가 없다 — CLAUDE.md "조회 전용" 원칙). 10월 말 게이트 통과 판정(claude.ai
+# 방향성 세션) 전까지 이 값을 false로 바꾸지 말 것.
+#
+# 이름에 "TRACK_B"를 쓰지 않는 이유: CLAUDE.md가 "Track B"를 이미 별개의, 더 엄격한
+# 의미(실주문 코드 + 자동트리거가 둘 다 존재하는 실거래 자동화 상태)로 정의해뒀다.
+# TRACK_B_ENABLED라는 이름은 나중에 그 실제 마스터 스위치용으로 예약해두고, 지금은
+# 만들지 않는다 — 아직 실주문 코드 자체가 없어서 그 스위치가 가리킬 대상이 없다.
+AI_SUGGESTION_DRY_RUN = os.environ.get("AI_SUGGESTION_DRY_RUN", "true").lower() == "true"
 
 
 def calc_ma(prices, window):
