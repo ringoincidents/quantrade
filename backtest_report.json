@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-01 06:43:35",
+  "generated_at": "2026-08-02 00:34:24",
   "strategy": {
     "main_signal": "MA20/MA60 골든크로스 + ADX>=25",
     "timing_filter": "RSI<75 and price<=볼린저상단",
@@ -136,457 +136,461 @@
     "sharpe_review": 0.5,
     "mdd_limit_pct": -20
   },
-  "mdd_caveat": "포지션 비중 10% 상수 스케일링 근사치 - 동시보유/분산효과/2단계 상한(10%/20% 혼합) 미반영 포트폴리오 레벨 시뮬레이션 아님. 참고용 개선 방향으로만 취급, 절대값 인용 금지",
-  "mdd_position_weight": 0.1,
+  "mdd_caveat": "날짜축 포트폴리오 시뮬레이션(동시보유/분산효과/2단계 상한 10%-20% 혼합 반영) - 단, 거래 내부의 일별 가격 경로는 최종 수익률을 보유일수 동안 균등 복리로 분배한 근사치이며 실제 종가 변동을 재현하지 않음",
+  "mdd_position_weight_scheme": {
+    "auto_tier": 0.1,
+    "approval_tier": 0.2,
+    "assignment_rule": "장기 전략 또는 stock/krx 자산군 -> approval_tier, 그 외 -> auto_tier"
+  },
   "instruments": [
     {
       "market": "KRW-WAXP",
       "asset_class": "crypto",
-      "candle_count": 2791,
+      "candle_count": 2792,
       "trade_count": 14
     },
     {
       "market": "KRW-CARV",
       "asset_class": "crypto",
-      "candle_count": 656,
+      "candle_count": 657,
       "trade_count": 4
     },
     {
       "market": "KRW-LSK",
       "asset_class": "crypto",
-      "candle_count": 3230,
+      "candle_count": 3231,
       "trade_count": 15
     },
     {
       "market": "KRW-0G",
       "asset_class": "crypto",
-      "candle_count": 314,
+      "candle_count": 315,
       "trade_count": 1
     },
     {
       "market": "KRW-WIF",
       "asset_class": "crypto",
-      "candle_count": 88,
+      "candle_count": 89,
       "trade_count": 0
     },
     {
       "market": "KRW-TRAC",
       "asset_class": "crypto",
-      "candle_count": 76,
+      "candle_count": 77,
       "trade_count": 0
     },
     {
       "market": "KRW-BORA",
       "asset_class": "crypto",
-      "candle_count": 2188,
+      "candle_count": 2189,
       "trade_count": 8
     },
     {
       "market": "KRW-PUNDIX",
       "asset_class": "crypto",
-      "candle_count": 2676,
+      "candle_count": 2677,
       "trade_count": 16
     },
     {
       "market": "KRW-PROS",
       "asset_class": "crypto",
-      "candle_count": 86,
+      "candle_count": 87,
       "trade_count": 0
     },
     {
       "market": "KRW-USD1",
       "asset_class": "crypto",
-      "candle_count": 335,
+      "candle_count": 336,
       "trade_count": 3
     },
     {
       "market": "KRW-BAT",
       "asset_class": "crypto",
-      "candle_count": 2932,
+      "candle_count": 2933,
       "trade_count": 14
     },
     {
       "market": "KRW-HUNT",
       "asset_class": "crypto",
-      "candle_count": 2147,
+      "candle_count": 2148,
       "trade_count": 10
     },
     {
       "market": "KRW-PENGU",
       "asset_class": "crypto",
-      "candle_count": 450,
+      "candle_count": 451,
       "trade_count": 1
     },
     {
       "market": "KRW-FIL",
       "asset_class": "crypto",
-      "candle_count": 485,
+      "candle_count": 486,
       "trade_count": 3
     },
     {
       "market": "KRW-BEAM",
       "asset_class": "crypto",
-      "candle_count": 793,
+      "candle_count": 794,
       "trade_count": 5
     },
     {
       "market": "KRW-DOOD",
       "asset_class": "crypto",
-      "candle_count": 299,
+      "candle_count": 300,
       "trade_count": 2
     },
     {
       "market": "KRW-WAVES",
       "asset_class": "crypto",
-      "candle_count": 3230,
+      "candle_count": 3231,
       "trade_count": 14
     },
     {
       "market": "KRW-MOVE",
       "asset_class": "crypto",
-      "candle_count": 600,
+      "candle_count": 601,
       "trade_count": 0
     },
     {
       "market": "KRW-TREE",
       "asset_class": "crypto",
-      "candle_count": 339,
+      "candle_count": 340,
       "trade_count": 1
     },
     {
       "market": "KRW-AERGO",
       "asset_class": "crypto",
-      "candle_count": 2655,
+      "candle_count": 2656,
       "trade_count": 14
     },
     {
       "market": "KRW-WET",
       "asset_class": "crypto",
-      "candle_count": 230,
+      "candle_count": 231,
       "trade_count": 1
     },
     {
       "market": "KRW-2Z",
       "asset_class": "crypto",
-      "candle_count": 304,
+      "candle_count": 305,
       "trade_count": 2
     },
     {
       "market": "KRW-BOUNTY",
       "asset_class": "crypto",
-      "candle_count": 2851,
+      "candle_count": 2852,
       "trade_count": 13
     },
     {
       "market": "KRW-KAITO",
       "asset_class": "crypto",
-      "candle_count": 515,
+      "candle_count": 516,
       "trade_count": 3
     },
     {
       "market": "KRW-LPT",
       "asset_class": "crypto",
-      "candle_count": 429,
+      "candle_count": 430,
       "trade_count": 0
     },
     {
       "market": "KRW-BLAST",
       "asset_class": "crypto",
-      "candle_count": 767,
+      "candle_count": 768,
       "trade_count": 4
     },
     {
       "market": "KRW-ETHFI",
       "asset_class": "crypto",
-      "candle_count": 136,
+      "candle_count": 137,
       "trade_count": 1
     },
     {
       "market": "KRW-DKA",
       "asset_class": "crypto",
-      "candle_count": 2210,
+      "candle_count": 2211,
       "trade_count": 13
     },
     {
       "market": "KRW-ANKR",
       "asset_class": "crypto",
-      "candle_count": 2680,
+      "candle_count": 2681,
       "trade_count": 11
     },
     {
       "market": "KRW-ALGO",
       "asset_class": "crypto",
-      "candle_count": 1718,
+      "candle_count": 1719,
       "trade_count": 5
     },
     {
       "market": "KRW-SHIB",
       "asset_class": "crypto",
-      "candle_count": 1292,
+      "candle_count": 1293,
       "trade_count": 5
     },
     {
       "market": "KRW-UNI",
       "asset_class": "crypto",
-      "candle_count": 649,
+      "candle_count": 650,
       "trade_count": 3
     },
     {
       "market": "KRW-BIO",
       "asset_class": "crypto",
-      "candle_count": 286,
+      "candle_count": 287,
       "trade_count": 1
     },
     {
       "market": "KRW-WLFI",
       "asset_class": "crypto",
-      "candle_count": 335,
+      "candle_count": 336,
       "trade_count": 1
     },
     {
       "market": "KRW-UP2",
       "asset_class": "crypto",
-      "candle_count": 81,
+      "candle_count": 82,
       "trade_count": 0
     },
     {
       "market": "KRW-TOKAMAK",
       "asset_class": "crypto",
-      "candle_count": 2168,
+      "candle_count": 2169,
       "trade_count": 10
     },
     {
       "market": "KRW-SKY",
       "asset_class": "crypto",
-      "candle_count": 124,
+      "candle_count": 125,
       "trade_count": 0
     },
     {
       "market": "KRW-CYBER",
       "asset_class": "crypto",
-      "candle_count": 355,
+      "candle_count": 356,
       "trade_count": 1
     },
     {
       "market": "KRW-SKR",
       "asset_class": "crypto",
-      "candle_count": 159,
+      "candle_count": 160,
       "trade_count": 0
     },
     {
       "market": "KRW-DOGE",
       "asset_class": "crypto",
-      "candle_count": 1985,
+      "candle_count": 1986,
       "trade_count": 5
     },
     {
       "market": "KRW-WLD",
       "asset_class": "crypto",
-      "candle_count": 327,
+      "candle_count": 328,
       "trade_count": 0
     },
     {
       "market": "KRW-PEPE",
       "asset_class": "crypto",
-      "candle_count": 626,
+      "candle_count": 627,
       "trade_count": 1
     },
     {
       "market": "KRW-HBAR",
       "asset_class": "crypto",
-      "candle_count": 2511,
+      "candle_count": 2512,
       "trade_count": 9
     },
     {
       "market": "KRW-BCH",
       "asset_class": "crypto",
-      "candle_count": 3230,
+      "candle_count": 3231,
       "trade_count": 11
     },
     {
       "market": "KRW-NEWT",
       "asset_class": "crypto",
-      "candle_count": 404,
+      "candle_count": 405,
       "trade_count": 0
     },
     {
       "market": "KRW-SEI",
       "asset_class": "crypto",
-      "candle_count": 1082,
+      "candle_count": 1083,
       "trade_count": 4
     },
     {
       "market": "KRW-BONK",
       "asset_class": "crypto",
-      "candle_count": 620,
+      "candle_count": 621,
       "trade_count": 2
     },
     {
       "market": "KRW-JST",
       "asset_class": "crypto",
-      "candle_count": 2179,
+      "candle_count": 2180,
       "trade_count": 13
     },
     {
       "market": "KRW-AAVE",
       "asset_class": "crypto",
-      "candle_count": 1740,
+      "candle_count": 1741,
       "trade_count": 7
     },
     {
       "market": "KRW-JTO",
       "asset_class": "crypto",
-      "candle_count": 527,
+      "candle_count": 528,
       "trade_count": 3
     },
     {
       "market": "KRW-JUP",
       "asset_class": "crypto",
-      "candle_count": 759,
+      "candle_count": 760,
       "trade_count": 2
     },
     {
       "market": "KRW-VVV",
       "asset_class": "crypto",
-      "candle_count": 82,
+      "candle_count": 83,
       "trade_count": 0
     },
     {
       "market": "KRW-PIEVERSE",
       "asset_class": "crypto",
-      "candle_count": 104,
+      "candle_count": 105,
       "trade_count": 0
     },
     {
       "market": "KRW-ALT",
       "asset_class": "crypto",
-      "candle_count": 412,
+      "candle_count": 413,
       "trade_count": 1
     },
     {
       "market": "KRW-B3",
       "asset_class": "crypto",
-      "candle_count": 87,
+      "candle_count": 88,
       "trade_count": 0
     },
     {
       "market": "KRW-LAYER",
       "asset_class": "crypto",
-      "candle_count": 536,
+      "candle_count": 537,
       "trade_count": 1
     },
     {
       "market": "KRW-TRX",
       "asset_class": "crypto",
-      "candle_count": 3041,
+      "candle_count": 3042,
       "trade_count": 8
     },
     {
       "market": "KRW-POWR",
       "asset_class": "crypto",
-      "candle_count": 3183,
+      "candle_count": 3184,
       "trade_count": 18
     },
     {
       "market": "KRW-ATOM",
       "asset_class": "crypto",
-      "candle_count": 2648,
+      "candle_count": 2649,
       "trade_count": 9
     },
     {
       "market": "KRW-ARKM",
       "asset_class": "crypto",
-      "candle_count": 509,
+      "candle_count": 510,
       "trade_count": 0
     },
     {
       "market": "KRW-CRO",
       "asset_class": "crypto",
-      "candle_count": 2172,
+      "candle_count": 2173,
       "trade_count": 10
     },
     {
       "market": "KRW-NXPC",
       "asset_class": "crypto",
-      "candle_count": 444,
+      "candle_count": 445,
       "trade_count": 2
     },
     {
       "market": "KRW-A",
       "asset_class": "crypto",
-      "candle_count": 3055,
+      "candle_count": 3056,
       "trade_count": 9
     },
     {
       "market": "KRW-TRUMP",
       "asset_class": "crypto",
-      "candle_count": 535,
+      "candle_count": 536,
       "trade_count": 3
     },
     {
       "market": "KRW-F",
       "asset_class": "crypto",
-      "candle_count": 285,
+      "candle_count": 286,
       "trade_count": 1
     },
     {
       "market": "KRW-G",
       "asset_class": "crypto",
-      "candle_count": 752,
+      "candle_count": 753,
       "trade_count": 2
     },
     {
       "market": "KRW-CELO",
       "asset_class": "crypto",
-      "candle_count": 1599,
+      "candle_count": 1600,
       "trade_count": 9
     },
     {
       "market": "KRW-AERO",
       "asset_class": "crypto",
-      "candle_count": 345,
+      "candle_count": 346,
       "trade_count": 2
     },
     {
       "market": "KRW-CTC",
       "asset_class": "crypto",
-      "candle_count": 964,
+      "candle_count": 965,
       "trade_count": 3
     },
     {
       "market": "KRW-ANIME",
       "asset_class": "crypto",
-      "candle_count": 555,
+      "candle_count": 556,
       "trade_count": 2
     },
     {
       "market": "KRW-APT",
       "asset_class": "crypto",
-      "candle_count": 1383,
+      "candle_count": 1384,
       "trade_count": 4
     },
     {
       "market": "KRW-MOCA",
       "asset_class": "crypto",
-      "candle_count": 594,
+      "candle_count": 595,
       "trade_count": 2
     },
     {
       "market": "KRW-API3",
       "asset_class": "crypto",
-      "candle_count": 348,
+      "candle_count": 349,
       "trade_count": 0
     },
     {
       "market": "KRW-AHT",
       "asset_class": "crypto",
-      "candle_count": 2197,
+      "candle_count": 2198,
       "trade_count": 16
     },
     {
       "market": "KRW-EGLD",
       "asset_class": "crypto",
-      "candle_count": 1193,
+      "candle_count": 1194,
       "trade_count": 4
     },
     {
@@ -854,21 +858,21 @@
       "win_rate_pct": 50.94,
       "avg_return_pct": 0.66,
       "sharpe_like": 0.051,
-      "mdd_pct": -33.58
+      "mdd_pct": -49.81
     },
     "train": {
       "trade_count": 403,
       "win_rate_pct": 52.36,
       "avg_return_pct": 1.21,
       "sharpe_like": 0.088,
-      "mdd_pct": -28.86
+      "mdd_pct": -39.07
     },
     "validation": {
       "trade_count": 180,
       "win_rate_pct": 47.78,
-      "avg_return_pct": -0.58,
+      "avg_return_pct": -0.59,
       "sharpe_like": -0.055,
-      "mdd_pct": -22.83
+      "mdd_pct": -30.82
     }
   },
   "by_regime_strategy": {
@@ -877,51 +881,51 @@
       "win_rate_pct": 49.3,
       "avg_return_pct": -0.36,
       "sharpe_like": -0.037,
-      "mdd_pct": -27.58
+      "mdd_pct": -45.06
     },
     "상승장": {
       "trade_count": 82,
       "win_rate_pct": 57.32,
       "avg_return_pct": 4.45,
       "sharpe_like": 0.244,
-      "mdd_pct": -7.12
+      "mdd_pct": -12.35
     },
     "하락장": {
       "trade_count": 146,
       "win_rate_pct": 51.37,
-      "avg_return_pct": 1.01,
-      "sharpe_like": 0.066,
-      "mdd_pct": -16.13
+      "avg_return_pct": 1.0,
+      "sharpe_like": 0.065,
+      "mdd_pct": -21.6
     }
   },
   "by_regime_buy_hold": {
     "하락장": {
-      "trade_count": 106,
-      "win_rate_pct": 30.19,
-      "avg_return_pct": 20.46,
-      "sharpe_like": 0.119,
-      "mdd_pct": -92.7
+      "trade_count": 104,
+      "win_rate_pct": 31.73,
+      "avg_return_pct": 22.14,
+      "sharpe_like": 0.128,
+      "mdd_pct": -97.74
     },
     "횡보장": {
-      "trade_count": 66,
-      "win_rate_pct": 54.55,
-      "avg_return_pct": 45.81,
-      "sharpe_like": 0.291,
-      "mdd_pct": -58.63
+      "trade_count": 70,
+      "win_rate_pct": 51.43,
+      "avg_return_pct": 39.62,
+      "sharpe_like": 0.256,
+      "mdd_pct": -58.82
     },
     "상승장": {
-      "trade_count": 55,
-      "win_rate_pct": 40.0,
-      "avg_return_pct": 20.57,
-      "sharpe_like": 0.115,
-      "mdd_pct": -70.6
+      "trade_count": 53,
+      "win_rate_pct": 41.51,
+      "avg_return_pct": 23.79,
+      "sharpe_like": 0.131,
+      "mdd_pct": -87.1
     },
     "미분류": {
       "trade_count": 3,
       "win_rate_pct": 33.33,
-      "avg_return_pct": 0.13,
-      "sharpe_like": 0.027,
-      "mdd_pct": -0.52
+      "avg_return_pct": 0.08,
+      "sharpe_like": 0.016,
+      "mdd_pct": -0.03
     }
   },
   "by_strategy_type": {
@@ -930,42 +934,42 @@
       "win_rate_pct": 60.0,
       "avg_return_pct": 1.66,
       "sharpe_like": 0.269,
-      "mdd_pct": -2.27
+      "mdd_pct": -3.76
     },
     "스윙": {
       "trade_count": 560,
       "win_rate_pct": 50.54,
       "avg_return_pct": 0.56,
       "sharpe_like": 0.044,
-      "mdd_pct": -30.62
+      "mdd_pct": -46.2
     },
     "장기": {
       "trade_count": 8,
       "win_rate_pct": 62.5,
       "avg_return_pct": 5.77,
       "sharpe_like": 0.228,
-      "mdd_pct": -3.96
+      "mdd_pct": -8.92
     }
   },
   "verdict": {
-    "all": "샤프 유사 지표 0.051 - 규칙 재검토 필요 / MDD -33.58%(포지션 비중 10% 상수 스케일링 근사치 - 동시보유/분산효과/2단계 상한(10%/20% 혼합) 미반영 포트폴리오 레벨 시뮬레이션 아님. 참고용 개선 방향으로만 취급, 절대값 인용 금지)",
-    "train": "샤프 유사 지표 0.088 - 규칙 재검토 필요 / MDD -28.86%(포지션 비중 10% 상수 스케일링 근사치 - 동시보유/분산효과/2단계 상한(10%/20% 혼합) 미반영 포트폴리오 레벨 시뮬레이션 아님. 참고용 개선 방향으로만 취급, 절대값 인용 금지)",
-    "validation": "샤프 유사 지표 -0.055 - 규칙 재검토 필요 / MDD -22.83%(포지션 비중 10% 상수 스케일링 근사치 - 동시보유/분산효과/2단계 상한(10%/20% 혼합) 미반영 포트폴리오 레벨 시뮬레이션 아님. 참고용 개선 방향으로만 취급, 절대값 인용 금지)"
+    "all": "샤프 유사 지표 0.051 - 규칙 재검토 필요 / MDD -49.81%(날짜축 포트폴리오 시뮬레이션(동시보유/분산효과/2단계 상한 10%-20% 혼합 반영) - 단, 거래 내부의 일별 가격 경로는 최종 수익률을 보유일수 동안 균등 복리로 분배한 근사치이며 실제 종가 변동을 재현하지 않음)",
+    "train": "샤프 유사 지표 0.088 - 규칙 재검토 필요 / MDD -39.07%(날짜축 포트폴리오 시뮬레이션(동시보유/분산효과/2단계 상한 10%-20% 혼합 반영) - 단, 거래 내부의 일별 가격 경로는 최종 수익률을 보유일수 동안 균등 복리로 분배한 근사치이며 실제 종가 변동을 재현하지 않음)",
+    "validation": "샤프 유사 지표 -0.055 - 규칙 재검토 필요 / MDD -30.82%(날짜축 포트폴리오 시뮬레이션(동시보유/분산효과/2단계 상한 10%-20% 혼합 반영) - 단, 거래 내부의 일별 가격 경로는 최종 수익률을 보유일수 동안 균등 복리로 분배한 근사치이며 실제 종가 변동을 재현하지 않음)"
   },
   "benchmark_buy_hold": {
     "train": {
       "trade_count": 112,
       "win_rate_pct": 42.86,
-      "avg_return_pct": 44.63,
-      "sharpe_like": 0.228,
-      "mdd_pct": -86.76
+      "avg_return_pct": 44.3,
+      "sharpe_like": 0.227,
+      "mdd_pct": -98.51
     },
     "validation": {
       "trade_count": 118,
-      "win_rate_pct": 36.44,
-      "avg_return_pct": 11.23,
-      "sharpe_like": 0.082,
-      "mdd_pct": -94.47
+      "win_rate_pct": 37.29,
+      "avg_return_pct": 11.65,
+      "sharpe_like": 0.085,
+      "mdd_pct": -93.62
     }
   },
   "strategy_vs_buy_hold": {
@@ -982,8 +986,8 @@
       "Buy&Hold 대비 우위(검증)": false
     },
     "mdd_reference_only": {
-      "train": "-28.86% (기준 -20%, 포지션 비중 10% 상수 스케일링 근사치 - 동시보유/분산효과/2단계 상한(10%/20% 혼합) 미반영 포트폴리오 레벨 시뮬레이션 아님. 참고용 개선 방향으로만 취급, 절대값 인용 금지)",
-      "validation": "-22.83% (기준 -20%, 포지션 비중 10% 상수 스케일링 근사치 - 동시보유/분산효과/2단계 상한(10%/20% 혼합) 미반영 포트폴리오 레벨 시뮬레이션 아님. 참고용 개선 방향으로만 취급, 절대값 인용 금지)"
+      "train": "-39.07% (기준 -20%, 날짜축 포트폴리오 시뮬레이션(동시보유/분산효과/2단계 상한 10%-20% 혼합 반영) - 단, 거래 내부의 일별 가격 경로는 최종 수익률을 보유일수 동안 균등 복리로 분배한 근사치이며 실제 종가 변동을 재현하지 않음)",
+      "validation": "-30.82% (기준 -20%, 날짜축 포트폴리오 시뮬레이션(동시보유/분산효과/2단계 상한 10%-20% 혼합 반영) - 단, 거래 내부의 일별 가격 경로는 최종 수익률을 보유일수 동안 균등 복리로 분배한 근사치이며 실제 종가 변동을 재현하지 않음)"
     },
     "gate_passed": false
   }

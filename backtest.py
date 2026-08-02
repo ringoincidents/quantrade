@@ -23,12 +23,12 @@ benchmark_buy_hold/strategy_vs_buy_hold에서 바로 비교할 수 있게 한다
 """
 import argparse
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from analyze_lib import (
     calc_rsi, calc_bollinger, calc_adx, is_golden_cross,
     estimate_holding_period, classify_strategy,
-    HARD_STOP_LOSS, TRADING_COSTS, US_STOCKS, AUTO_TIER_WEIGHT,
+    HARD_STOP_LOSS, TRADING_COSTS, US_STOCKS, AUTO_TIER_WEIGHT, POSITION_WEIGHT_HARD_CAP,
     get_krw_candles, get_us_candles, get_krx_candles, get_all_krw_markets, save_json,
 )
 
@@ -41,28 +41,28 @@ SUCCESS_CRITERIA = {
     "mdd_limit_pct": -20,
 }
 
-# MDD (2026-08-01 갱신, 2026-08-01 한계 재명시): 포지션 사이징 설계 확정
-# (analyze_lib.AUTO_TIER_WEIGHT=10%)에 맞춰, 청산일 순으로 이어붙인 각 거래의
-# 수익률에 종목당 비중(POSITION_WEIGHT)을 곱해 자산 전체가 아니라 그 비중만큼만
-# 자산이 오르내린다고 가정하도록 바꿨다 — 예전엔 거래 하나하나가 자산 전액을
-# 태우는 것처럼 계산해 실제보다 훨씬 큰 낙폭이 나왔다.
+# MDD (2026-08-01 재설계 — 날짜축 포트폴리오 시뮬레이션): 예전엔 거래를 청산일
+# 순으로 그냥 이어붙여 자산 전액(또는 10% 균일 상수)을 매번 재투자한다고
+# 가정했다 — 실제로는 서로 다른 종목의 포지션이 같은 날짜에 겹쳐서 열려 있는데
+# 그걸 순차적으로 이어붙이면 동시보유/분산효과가 전혀 반영되지 않는다.
 #
-# 이건 "10%라는 상수를 곱하는 스케일링"일 뿐, 실제 포트폴리오 레벨 시뮬레이션이
-# 아니다. 구체적으로 반영하지 않는 것들:
-# - 동시보유: 여러 종목을 겹쳐서 보유하는 실제 포트폴리오의 날짜별 동시 낙폭
-#   (그러려면 날짜 축으로 포지션을 병렬 추적해야 한다 - Phase 2 이후 과제)
-# - 분산효과: 종목 간 상관관계로 인한 리스크 분산/집중 효과
-# - 2단계 상한의 혼합 분포: 실제로는 자동단계 10% / 사람 승인 시 최대 20%가 섞여
-#   있는데(analyze.py의 AUTO_TIER_WEIGHT/POSITION_WEIGHT_HARD_CAP), 이 계산은
-#   모든 거래에 10% 하나만 균일하게 곱한다
-# 따라서 이 수치는 "기존 근사치보다 방향이 개선됐다"는 참고용 개선치로만 쓰고,
-# 절대값 자체를 인용하거나(예: "MDD -22.83%") 이걸 실제 예상 낙폭으로 제시하지
-# 않는다.
-MDD_CAVEAT = ("포지션 비중 10% 상수 스케일링 근사치 - 동시보유/분산효과/2단계 상한"
-              "(10%/20% 혼합) 미반영 포트폴리오 레벨 시뮬레이션 아님. "
-              "참고용 개선 방향으로만 취급, 절대값 인용 금지")
-
-POSITION_WEIGHT = AUTO_TIER_WEIGHT  # MDD 계산에 쓰는 종목당 비중(자동/AI단계 기준)
+# 이제 compute_portfolio_mdd()가 각 거래를 entry_date~exit_date 구간에 걸쳐
+# assign_position_weight()가 배정한 비중(자동단계 10% / 승인단계 20%, 실제
+# 2단계 상한 그대로)만큼 매일 기여하는 것으로 보고, 날짜 축에서 동시에 열려
+# 있는 모든 포지션의 기여분을 합산해 하나의 포트폴리오 자산곡선을 만든다 —
+# 다른 종목이 같은 시기에 반대로 움직이면 자연히 상쇄되고(분산효과), 같은
+# 시기에 여러 손실이 겹치면 낙폭도 그만큼 실제로 커진다.
+#
+# 남아있는 한계: 거래 하나의 보유기간 동안 실제 일별 가격 변동(종가 배열)까지
+# 쓰지는 않는다 — 대신 그 거래의 최종 return_pct를 보유일수 동안 균등 복리로
+# 나눠 매일 같은 비율씩 쌓인다고 가정한다(거래 중간의 실제 변동성/경로는 모름).
+# 즉 "동시보유·분산효과·2단계 상한 혼합"은 이제 실제로 반영되지만, "거래 내부의
+# 일별 변동성"은 여전히 근사치다. 그래서 참고용 성격은 유지하되, 예전의 "상수
+# 스케일링일 뿐" 캐비엇은 더 이상 맞지 않아 문구를 갱신했다.
+MDD_CAVEAT = ("날짜축 포트폴리오 시뮬레이션 기반, 분산/집중효과 반영됨(2단계 상한 "
+              "10%-20% 혼합 그대로 적용) - 단, 거래 내부의 일별 가격 경로는 최종 "
+              "수익률을 보유일수 동안 균등 복리로 분배한 근사치이며 실제 종가 변동을 "
+              "재현하지 않음")
 
 MA_SHORT = 20               # 골든크로스 단기 이동평균
 MA_LONG = 60                # 골든크로스 장기 이동평균
@@ -249,9 +249,59 @@ def _buy_hold_trade(market, asset_class, closes, dates, entry_index, exit_index)
     }
 
 
-def compute_metrics(trades, position_weight=POSITION_WEIGHT):
-    """position_weight는 MDD 계산에만 쓴다 - 승률/평균수익률/샤프는 종목 비중과
-    무관하게 거래별 원래 수익률(raw return_pct)로 그대로 계산한다."""
+def assign_position_weight(trade):
+    """라이브 승인 흐름(needs_approval(), analyze.py)과 같은 조건을 재사용해,
+    이 거래가 라이브였다면 어느 비중 티어로 실행됐을지 근사한다: 장기 전략이거나
+    주식/KRX 자산군이면 항상 승인 대기로 넘어가므로(needs_approval()의 조건 그대로)
+    사람이 승인했을 때 갈 수 있는 상한인 POSITION_WEIGHT_HARD_CAP(20%)을 가정하고,
+    그 외(크립토 단타/스윙 등 자동 실행 대상)는 AUTO_TIER_WEIGHT(10%)를 쓴다.
+    과거 시점엔 Claude가 실제로 제안했을 target_weight_pct가 없어 상한을 보수적으로
+    쓰는 것 — 실제 승인 비중은 10~20% 사이 어딘가였을 수 있다."""
+    if trade.get("strategy_type") == "장기" or trade.get("asset_class") in ("stock", "krx"):
+        return POSITION_WEIGHT_HARD_CAP
+    return AUTO_TIER_WEIGHT
+
+
+def compute_portfolio_mdd(trades):
+    """날짜 축 기준으로 동시보유 포지션을 병렬 합산한 포트폴리오 MDD.
+    거래마다 entry_date~exit_date 구간에 걸쳐 균등 복리로 최종 수익률을 나눠
+    매일 assign_position_weight() 비중만큼 기여한다고 보고, 같은 날짜에 겹치는
+    모든 거래의 기여분을 차분 배열(difference array)로 합산해 일별 포트폴리오
+    수익률을 재구성한 뒤 복리로 쌓는다."""
+    delta = {}
+    for t in trades:
+        if not t.get("entry_date") or not t.get("exit_date"):
+            continue  # 날짜 정보 없는 거래는 날짜축 시뮬레이션에서 제외(집계 불가)
+        entry = datetime.strptime(t["entry_date"], "%Y-%m-%d").date()
+        exit_ = datetime.strptime(t["exit_date"], "%Y-%m-%d").date()
+        days_held = max((exit_ - entry).days, 1)
+        weight = assign_position_weight(t)
+        daily_return = (1 + t["return_pct"] / 100) ** (1 / days_held) - 1
+        contribution = weight * daily_return
+        delta[entry] = delta.get(entry, 0.0) + contribution
+        after_exit = exit_ + timedelta(days=1)
+        delta[after_exit] = delta.get(after_exit, 0.0) - contribution
+
+    if not delta:
+        return None
+
+    event_dates = sorted(delta.keys())
+    equity, peak, mdd, level = 1.0, 1.0, 0.0, 0.0
+    for i, d in enumerate(event_dates):
+        level += delta[d]
+        span_days = (event_dates[i + 1] - d).days if i + 1 < len(event_dates) else 1
+        for _ in range(span_days):
+            equity *= (1 + level)
+            peak = max(peak, equity)
+            mdd = min(mdd, (equity - peak) / peak * 100)
+
+    return round(mdd, 2)
+
+
+def compute_metrics(trades):
+    """승률/평균수익률/샤프는 종목 비중과 무관하게 거래별 원래 수익률(raw
+    return_pct)로 계산한다. MDD만 compute_portfolio_mdd()의 날짜축 포트폴리오
+    시뮬레이션 결과를 쓴다."""
     if not trades:
         return {"trade_count": 0, "win_rate_pct": None, "avg_return_pct": None,
                 "sharpe_like": None, "mdd_pct": None}
@@ -263,18 +313,12 @@ def compute_metrics(trades, position_weight=POSITION_WEIGHT):
     std = variance ** 0.5
     sharpe_like = (avg_return / std) if std > 0 else 0.0
 
-    equity, peak, mdd = 1.0, 1.0, 0.0
-    for t in sorted(trades, key=lambda t: (t["exit_date"] or "", t["entry_index"])):
-        equity *= (1 + position_weight * t["return_pct"] / 100)
-        peak = max(peak, equity)
-        mdd = min(mdd, (equity - peak) / peak * 100)
-
     return {
         "trade_count": len(trades),
         "win_rate_pct": round(win_rate, 2),
         "avg_return_pct": round(avg_return, 2),
         "sharpe_like": round(sharpe_like, 3),
-        "mdd_pct": round(mdd, 2),
+        "mdd_pct": compute_portfolio_mdd(trades),
     }
 
 
@@ -296,8 +340,11 @@ def evaluate_success(metrics):
 def evaluate_gate(overall, strategy_vs_buy_hold):
     """인수인계 문서 §2.1 게이트 조건 그대로: 거래 30건 이상(훈련/검증 각각),
     검증구간 샤프≥1.0, 훈련/검증 같은 방향(과최적화 징후 없음), buy&hold 대비 우위
-    (훈련/검증 모두). MDD -20%는 문서 자체가 '포지션사이징 반영 전까지는 참고용'이라고
-    명시하고 있어 참고 항목으로만 표시하고 통과 판정에는 포함하지 않는다."""
+    (훈련/검증 모두). MDD -20%는 날짜축 포트폴리오 시뮬레이션으로 재계산된 뒤에도
+    여전히 참고 항목으로만 표시하고 통과 판정에는 포함하지 않는다 — 거래 내부의
+    일별 가격 경로를 실제 종가가 아니라 균등 복리 근사로 채우는 한계가 남아있어서다
+    (MDD_CAVEAT 참고). 판정 자체는 원래도 승률/샤프/buy&hold 비교로만 정해져서
+    MDD 계산 방식이 바뀌어도 gate_passed 값은 변하지 않는다."""
     train, val = overall["train"], overall["validation"]
 
     checks = {
@@ -322,11 +369,11 @@ def evaluate_gate(overall, strategy_vs_buy_hold):
     }
 
 
-def group_metrics(trades, key, position_weight=POSITION_WEIGHT):
+def group_metrics(trades, key):
     groups = {}
     for t in trades:
         groups.setdefault(t.get(key) or "미분류", []).append(t)
-    return {k: compute_metrics(v, position_weight) for k, v in groups.items()}
+    return {k: compute_metrics(v) for k, v in groups.items()}
 
 
 def run_instrument(market, asset_class, count, max_hold_multiplier=MAX_HOLD_MULTIPLIER, rsi_exit=TAKE_PROFIT_RSI):
@@ -436,7 +483,11 @@ def main():
         "universe": [f"{m}({a})" for m, a in universe],
         "success_criteria": SUCCESS_CRITERIA,
         "mdd_caveat": MDD_CAVEAT,
-        "mdd_position_weight": POSITION_WEIGHT,
+        "mdd_position_weight_scheme": {
+            "auto_tier": AUTO_TIER_WEIGHT,
+            "approval_tier": POSITION_WEIGHT_HARD_CAP,
+            "assignment_rule": "장기 전략 또는 stock/krx 자산군 -> approval_tier, 그 외 -> auto_tier",
+        },
         "instruments": per_instrument,
         "overall": overall,
         "by_regime_strategy": by_regime_strategy,
