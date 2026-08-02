@@ -375,8 +375,12 @@ def get_krx_candles(code, count=750):
     if not rows:
         raise ValueError(f"네이버 시세 응답에서 데이터를 못 찾음 (status={resp.status_code}, body[:120]={resp.text[:120]!r})")
     candles = [
-        {"date": r[0], "open": float(r[1]), "high": float(r[2]), "low": float(r[3]),
-         "close": float(r[4]), "volume": float(r[5])}
+        # r[0]은 "20211207" 형태(구분자 없는 8자리) — 크립토/미국주식 캔들의
+        # "date" 필드는 전부 "YYYY-MM-DD"라 여기도 대시를 넣어 형식을 통일한다.
+        # 2026-08-01: backtest.py의 compute_portfolio_mdd()가 entry_date/exit_date를
+        # strptime("%Y-%m-%d")로 파싱하다가 이 불일치로 실제로 크래시났다(KRX 거래에서만).
+        {"date": f"{r[0][:4]}-{r[0][4:6]}-{r[0][6:8]}", "open": float(r[1]), "high": float(r[2]),
+         "low": float(r[3]), "close": float(r[4]), "volume": float(r[5])}
         for r in rows
     ]
     return candles[-count:]
