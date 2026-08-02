@@ -55,6 +55,10 @@ CALENDAR_CANDLE_COUNT = 400   # 약 1.6년치 — 2026-02 커버에 충분
 KST = timezone(timedelta(hours=9))
 RSS_SLEEP = 0.2               # 실시간 트랙 UNIVERSE_SLEEP과 같은 취지(Google News RSS 유예)
 
+# 수집 과정 계기판. pubdate_rejected는 특히 중요 — 0이면 날짜 필터가 아예 안 걸린
+# 건지 의심해봐야 하고(설계 §3-2), 지나치게 높으면 해당 기간 기사가 원래 적었다는 뜻.
+STATS_KEYS = ("pubdate_rejected", "no_headlines", "judge_failed", "no_price", "fetch_failed")
+
 
 def _rss_url(market, start_date, end_date):
     """종목코드 + 발행일 범위로 제한한 Google News RSS 검색 URL.
@@ -161,12 +165,23 @@ def compute_outcomes(judgment_date, candles):
     return baseline, outcomes
 
 
+def _init_stats(log):
+    """카운터를 키 단위로 채운다. log에 stats가 아예 없을 때뿐 아니라 빈 dict거나
+    일부 키만 있을 때(이전 실행/스키마 변경분 이어받기)도 안전해야 한다 —
+    dict 통째로 setdefault하면 이미 있는 빈 dict가 그대로 반환돼 카운터 키가
+    안 생기고, 첫 += 에서 KeyError로 죽는다(2026-08-02 첫 Actions 실행에서
+    실제로 이렇게 실패했다: run()이 기본값 {"stats": {}}로 로그를 만든 탓)."""
+    stats = log.setdefault("stats", {})
+    for key in STATS_KEYS:
+        stats.setdefault(key, 0)
+    return stats
+
+
 def collect(log, judgment_dates, universe, lookback_days, limit=None, sleep=RSS_SLEEP):
     """판단일 오름차순 -> 유니버스 정의 순서로 전수 수집. 중단되더라도 남는 건
     '날짜 순 앞부분'이라 결과와 무관한 부분집합이다(설계 §2)."""
     existing = {r["id"] for r in log["records"]}
-    stats = log.setdefault("stats", {"pubdate_rejected": 0, "no_headlines": 0,
-                                      "judge_failed": 0, "no_price": 0, "fetch_failed": 0})
+    stats = _init_stats(log)
     candle_cache = {}
     collected = 0
 
@@ -340,6 +355,17 @@ def run_self_test():
     # 5) 데이터셋 분리: 실시간 트랙 파일명을 쓰지 않는지(설계 §5)
     print(f"[5] 백테스트 데이터셋={BACKTEST_LOG_FILE}")
     assert BACKTEST_LOG_FILE != "news_event_calibration_log.json", "두 트랙 파일이 같으면 안 됨"
+
+    # 6) stats 카운터 초기화 - 첫 Actions 실행을 죽인 회귀(KeyError)를 막는 테스트.
+    #    run()이 넘기는 빈 dict, 아무것도 없는 로그, 일부 키만 있는 로그 전부 커버.
+    for label, log in [("빈 stats(run 기본값)", {"stats": {}}), ("stats 키 없음", {}),
+                       ("일부 키만 존재", {"stats": {"pubdate_rejected": 7}})]:
+        stats = _init_stats(log)
+        for key in STATS_KEYS:
+            stats[key] += 1  # 실제 수집 경로가 하는 것과 같은 연산
+        print(f"[6] {label}: {stats}")
+        assert all(k in stats for k in STATS_KEYS), f"{label}에서 카운터 키 누락"
+    assert stats["pubdate_rejected"] == 8, "기존 카운트를 덮어쓰지 말고 이어받아야 함"
 
     print("\n모든 자체 검증 통과 - 네트워크/실제 데이터셋 파일은 건드리지 않았음.")
 
