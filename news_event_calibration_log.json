@@ -1310,9 +1310,9 @@
       "price_at_judgment": 262500.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-03",
+          "price": 239500.0,
+          "return_pct": -8.762
         },
         "d5": {
           "date": null,
@@ -1344,9 +1344,9 @@
       "price_at_judgment": 1718000.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-03",
+          "price": 1567000.0,
+          "return_pct": -8.789
         },
         "d5": {
           "date": null,
@@ -1378,9 +1378,9 @@
       "price_at_judgment": 328000.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-03",
+          "price": 316000.0,
+          "return_pct": -3.659
         },
         "d5": {
           "date": null,
@@ -1412,9 +1412,9 @@
       "price_at_judgment": 1485000.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-03",
+          "price": 1423000.0,
+          "return_pct": -4.175
         },
         "d5": {
           "date": null,
@@ -1446,9 +1446,9 @@
       "price_at_judgment": 388000.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-03",
+          "price": 393000.0,
+          "return_pct": 1.289
         },
         "d5": {
           "date": null,
@@ -1480,9 +1480,9 @@
       "price_at_judgment": 312500.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-03",
+          "price": 303500.0,
+          "return_pct": -2.88
         },
         "d5": {
           "date": null,
@@ -1514,9 +1514,9 @@
       "price_at_judgment": 397000.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-03",
+          "price": 389500.0,
+          "return_pct": -1.889
         },
         "d5": {
           "date": null,
@@ -1548,9 +1548,9 @@
       "price_at_judgment": 258000.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-03",
+          "price": 247000.0,
+          "return_pct": -4.264
         },
         "d5": {
           "date": null,
@@ -1582,9 +1582,9 @@
       "price_at_judgment": 208000.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-03",
+          "price": 207500.0,
+          "return_pct": -0.24
         },
         "d5": {
           "date": null,
@@ -1616,9 +1616,9 @@
       "price_at_judgment": 131900.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-03",
+          "price": 129600.0,
+          "return_pct": -1.744
         },
         "d5": {
           "date": null,
@@ -1650,9 +1650,9 @@
       "price_at_judgment": 168500.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-03",
+          "price": 169500.0,
+          "return_pct": 0.593
         },
         "d5": {
           "date": null,
@@ -1684,9 +1684,9 @@
       "price_at_judgment": 100700.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-03",
+          "price": 102700.0,
+          "return_pct": 1.986
         },
         "d5": {
           "date": null,
@@ -1718,9 +1718,9 @@
       "price_at_judgment": 476000.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-03",
+          "price": 493500.0,
+          "return_pct": 3.676
         },
         "d5": {
           "date": null,
@@ -1752,9 +1752,9 @@
       "price_at_judgment": 37400.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-03",
+          "price": 37200.0,
+          "return_pct": -0.535
         },
         "d5": {
           "date": null,
@@ -1786,9 +1786,9 @@
       "price_at_judgment": 186700.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-03",
+          "price": 182200.0,
+          "return_pct": -2.41
         },
         "d5": {
           "date": null,
@@ -1820,9 +1820,9 @@
       "price_at_judgment": 351500.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-03",
+          "price": 329000.0,
+          "return_pct": -6.401
         },
         "d5": {
           "date": null,
@@ -1854,9 +1854,9 @@
       "price_at_judgment": 162100.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-03",
+          "price": 158800.0,
+          "return_pct": -2.036
         },
         "d5": {
           "date": null,
@@ -1888,9 +1888,9 @@
       "price_at_judgment": 110500.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-03",
+          "price": 108000.0,
+          "return_pct": -2.262
         },
         "d5": {
           "date": null,
@@ -1922,9 +1922,9 @@
       "price_at_judgment": 311500.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-03",
+          "price": 287500.0,
+          "return_pct": -7.705
         },
         "d5": {
           "date": null,
@@ -1956,9 +1956,9 @@
       "price_at_judgment": 101100.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-03",
+          "price": 99700.0,
+          "return_pct": -1.385
         },
         "d5": {
           "date": null,
@@ -1990,9 +1990,9 @@
       "price_at_judgment": 34800.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-03",
+          "price": 34500.0,
+          "return_pct": -0.862
         },
         "d5": {
           "date": null,
@@ -2024,9 +2024,9 @@
       "price_at_judgment": 557000.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-03",
+          "price": 523000.0,
+          "return_pct": -6.104
         },
         "d5": {
           "date": null,
@@ -2058,9 +2058,9 @@
       "price_at_judgment": 125400.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-03",
+          "price": 126900.0,
+          "return_pct": 1.196
         },
         "d5": {
           "date": null,
@@ -2092,9 +2092,9 @@
       "price_at_judgment": 999000.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-03",
+          "price": 1020000.0,
+          "return_pct": 2.102
         },
         "d5": {
           "date": null,
@@ -2126,9 +2126,9 @@
       "price_at_judgment": 1142000.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-03",
+          "price": 1181000.0,
+          "return_pct": 3.415
         },
         "d5": {
           "date": null,
@@ -2160,9 +2160,9 @@
       "price_at_judgment": 85200.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-03",
+          "price": 83000.0,
+          "return_pct": -2.582
         },
         "d5": {
           "date": null,
@@ -2194,9 +2194,9 @@
       "price_at_judgment": 308500.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-03",
+          "price": 317500.0,
+          "return_pct": 2.917
         },
         "d5": {
           "date": null,
@@ -2228,9 +2228,9 @@
       "price_at_judgment": 632000.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-03",
+          "price": 616000.0,
+          "return_pct": -2.532
         },
         "d5": {
           "date": null,
@@ -2262,9 +2262,9 @@
       "price_at_judgment": 33600.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-03",
+          "price": 33350.0,
+          "return_pct": -0.744
         },
         "d5": {
           "date": null,
@@ -2296,9 +2296,9 @@
       "price_at_judgment": 20650.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-03",
+          "price": 20250.0,
+          "return_pct": -1.937
         },
         "d5": {
           "date": null,
@@ -2330,9 +2330,9 @@
       "price_at_judgment": 103500.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-03",
+          "price": 96800.0,
+          "return_pct": -6.473
         },
         "d5": {
           "date": null,
@@ -2364,9 +2364,9 @@
       "price_at_judgment": 79100.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-03",
+          "price": 77400.0,
+          "return_pct": -2.149
         },
         "d5": {
           "date": null,
@@ -2398,9 +2398,9 @@
       "price_at_judgment": 9250.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-03",
+          "price": 9970.0,
+          "return_pct": 7.784
         },
         "d5": {
           "date": null,
@@ -2432,9 +2432,9 @@
       "price_at_judgment": 97600.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-03",
+          "price": 93700.0,
+          "return_pct": -3.996
         },
         "d5": {
           "date": null,
@@ -2466,9 +2466,9 @@
       "price_at_judgment": 68400.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-03",
+          "price": 71600.0,
+          "return_pct": 4.678
         },
         "d5": {
           "date": null,
@@ -2500,9 +2500,9 @@
       "price_at_judgment": 15990.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-03",
+          "price": 15650.0,
+          "return_pct": -2.126
         },
         "d5": {
           "date": null,
@@ -2534,9 +2534,9 @@
       "price_at_judgment": 296000.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-03",
+          "price": 292000.0,
+          "return_pct": -1.351
         },
         "d5": {
           "date": null,
@@ -2568,9 +2568,9 @@
       "price_at_judgment": 40200.0,
       "outcomes": {
         "d1": {
-          "date": null,
-          "price": null,
-          "return_pct": null
+          "date": "2026-08-03",
+          "price": 40300.0,
+          "return_pct": 0.249
         },
         "d5": {
           "date": null,
