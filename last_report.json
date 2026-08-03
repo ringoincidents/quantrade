@@ -1,6 +1,17 @@
 {
   "date": "2026-08-03",
-  "market_summary": "AI 판단 실패: Expecting ',' delimiter: line 93 column 6 (char 2571)",
+  "schema_version": "v3.2",
+  "prediction_enabled": false,
+  "guardrail_violations": [
+    {
+      "rule": "종목별 비중 상한",
+      "market": "KRW-USDE",
+      "limit_pct": 20.0,
+      "actual_pct": 33.4,
+      "fact": "KRW-USDE 비중이 총자산의 33.4%로 상한 20%를 초과"
+    }
+  ],
+  "market_summary": "",
   "positions": [
     {
       "market": "KRW-USDE",
@@ -15,7 +26,7 @@
       "asset_class": "crypto",
       "strategy_type": "스윙",
       "amount_krw": 4354,
-      "current_return": 4.594921402660227,
+      "current_return": 4.836759371221286,
       "conviction": false
     },
     {
@@ -23,7 +34,7 @@
       "asset_class": "crypto",
       "strategy_type": "스윙",
       "amount_krw": 3557,
-      "current_return": -2.9702970297029703,
+      "current_return": -2.4752475247524752,
       "conviction": false
     },
     {
@@ -31,7 +42,7 @@
       "asset_class": "crypto",
       "strategy_type": "스윙",
       "amount_krw": 5775,
-      "current_return": -4.391891891891882,
+      "current_return": -4.504504504504505,
       "conviction": false
     },
     {
@@ -39,7 +50,7 @@
       "asset_class": "crypto",
       "strategy_type": "스윙",
       "amount_krw": 3272,
-      "current_return": -1.6427104722792623,
+      "current_return": -1.437371663244359,
       "conviction": false
     },
     {
@@ -47,7 +58,7 @@
       "asset_class": "crypto",
       "strategy_type": "단타",
       "amount_krw": 1953,
-      "current_return": -1.4563106796116625,
+      "current_return": -0.9708737864077678,
       "conviction": false
     },
     {
@@ -63,7 +74,7 @@
       "asset_class": "crypto",
       "strategy_type": "스윙",
       "amount_krw": 835,
-      "current_return": -4.8387096774193585,
+      "current_return": -5.3763440860215095,
       "conviction": false
     }
   ],
