@@ -2,7 +2,32 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## ⚠️ v3.2 전환 (2026-08-03) — 예측은 비활성, AI 역할이 바뀌었다
+
+**이 문서를 읽는 세션은 이 절을 먼저 읽어라.** 아래 나머지 서술 상당수는 v3.1 시절(예측이 활성이던 때)에 쓰였고, 그 시절 동작을 설명하는 대목은 *역사적 기록*으로 남겨둔 것이지 현재 동작이 아니다.
+
+**무엇이 바뀌었나**: 계획서 v3.1은 AI에게 **알파 생성**(BUY/SELL 방향 판단)을 맡겼다. 두 신호원이 모두 §2.1 게이트를 통과하지 못해 그 역할을 거둔다.
+
+- **가격 신호** (`entry_score` → MA/ADX/RSI 계열, 백테스트 583~706건 규모): 게이트 미통과.
+- **뉴스 방향 판단** (`ask_news_event_judgment`, 과거 뉴스 706건): 게이트 미통과. 그뿐 아니라 **단순 다수클래스 baseline보다도 적중률이 낮았다** — 고확신군조차 세 window 전부 baseline 미달(D+1 −8.82p / D+5 −3.04p / D+20 −5.53p)이었고, 방향별 적중률이 기저비율과 사실상 동일(D+1 호재 40.0% vs 기저 40.1%)해 방향 판단에 정보가 없다는 결론이 나왔다. 근거: `Phase2_과거뉴스백테스트_설계.md` §8.
+
+**예측(BUY/SELL 방향 판단)은 현재 비활성이다. 이것은 두 신호원의 실패에 따른 결정이며, 영구 포기가 아니라 보류다.** 재개하려면 **다시 §2.1 게이트를 통과해야 한다** — "이번엔 될 것 같다"거나 프롬프트를 고쳤다는 이유로 재활성화하지 않는다. 관련 코드·데이터·로그는 전부 보존돼 있다(삭제 금지, 아래 참조).
+
+**v3.2에서 AI가 맡는 역할은 두 가지뿐이다:**
+
+**(a) 리스크 가드레일 — 규칙 기반, 결정론적.** 하드 손절, 비중 상한, 현금 비율 같은 *사전에 정해진 규칙*의 위반 여부만 판정한다. AI의 판단이 개입하지 않으므로 **통계 게이트(§2.1) 적용 대상이 아니다** — 예측이 아니라 산술이기 때문이다. 이 구분을 흐리지 마라: 규칙 위반 여부에 확신도나 승률을 붙이려는 시도가 나오면 그건 예측이 되돌아온 것이다.
+
+**(b) 뉴스 사건 설명 카드 — 예측이 아님.** "오늘 이 종목에 이런 뉴스가 있었다"는 *사실 설명*만 만든다. **`BUY`/`SELL`/`confidence` 필드가 아예 없다** — 스키마 수준에서 없앴다. 종목별 매매 제안이나 방향 판단을 넣지 않는다.
+
+**새 성공 지표**: "위험 행동 발견율"이 아니라 **"경고 후 실제 행동 변화 추적"**이다. 예: 과도쏠림 경고가 뜬 뒤 사용자가 실제로 포지션을 조정했는지를 로그로 남긴다. **이 지표는 통계 검정 대상이 아니다** — 표본이 작고, 사용자 1인의 행동이며, p값을 붙일 성질의 것이 아니다. 승률·유의성 검정을 이 지표에 적용하려 하지 마라(그렇게 하는 순간 예측 프레임으로 되돌아간다).
+
+**보존 원칙**: 기각된 신호 로직(`entry_score`, `scan_crypto`/`scan_stocks`, `ask_claude_decision`의 예측 경로, `backtest.py`, 뉴스 방향 판단 트랙)은 **삭제하지 않는다.** 실행 경로만 끊고 "기각된 연구 결과, 활성 기능 제외" 표시를 달아 남긴다 — 나중에 왜 기각됐는지 재구성할 수 있어야 하고, 재개 시 게이트를 다시 돌릴 대상이기도 하다.
+
+---
+
 ## What this is
+
+**(아래 문단은 v3.1 시절 서술이다. "asks Claude for buy/sell/hold decisions"와 "executes trades"는 v3.2에서 비활성 — 위 전환 절 참조.)**
 
 Quantrade is a personal quant portfolio bot ("분석, 추후엔 자동 거래" — analysis now, autotrading later). It scans Korean crypto (Upbit) and US stocks, asks Claude for buy/sell/hold decisions, executes small/low-risk trades automatically, and queues larger or riskier trades for manual approval via Telegram. State lives entirely in JSON files committed to the repo; GitHub Actions is the runtime (there is no server).
 
