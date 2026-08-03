@@ -1,0 +1,74 @@
+name: News Event Explanation Cards
+
+# [v3.2 활성 기능] 뉴스 사건 설명 카드 생성 — 예측이 아니라 사실 설명.
+# 출력 스키마에 direction/confidence/action이 없다(누락이 아니라 설계).
+#
+# 실시간 캘리브레이션 트랙(news_event_experiment.yml -> news_event_calibration_log.json)
+# 과는 **별개 파일/별개 워크플로**다. 그 트랙은 방향 판단 캘리브레이션을 계속
+# 검증하기 위해 그대로 돌고, 이 워크플로는 news_event_cards.json만 건드린다.
+on:
+  schedule:
+    # 09:50 UTC = 18:50 KST — 장 마감 후 그날 뉴스가 대체로 정리된 시점.
+    # news_event_experiment.yml(09:30 UTC)보다 20분 뒤라 커밋이 겹치지 않는다.
+    - cron: '50 9 * * *'
+  workflow_dispatch:
+    inputs:
+      max_cards:
+        description: '생성할 최대 카드 수 (기본 8)'
+        required: false
+        default: '8'
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CLAUDE_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+      - name: Self-test (network-free)
+        run: python news_event_cards.py --self-test
+      - name: Generate explanation cards
+        run: |
+          ARGS=""
+          if [ -n "${{ inputs.max_cards }}" ]; then ARGS="--max-cards ${{ inputs.max_cards }}"; fi
+          python news_event_cards.py $ARGS
+      - name: Verify no predictive fields leaked into cards
+        run: |
+          python - <<'PY'
+          import json, sys
+          FORBIDDEN = {"direction","confidence","action","recommendation",
+                       "target_weight_pct","signal","buy","sell","score"}
+          d = json.load(open("news_event_cards.json", encoding="utf-8"))
+          bad = [(c.get("market"), sorted(set(c) & FORBIDDEN))
+                 for c in d.get("cards", []) if set(c) & FORBIDDEN]
+          if bad:
+              print("예측성 필드가 카드에 남아 있음:", bad); sys.exit(1)
+          print(f"카드 {len(d.get('cards', []))}건 - 예측성 필드 없음 확인")
+          PY
+      - name: Verify live calibration track untouched
+        run: |
+          git diff --quiet -- news_event_calibration_log.json \
+            || { echo "실시간 트랙 파일이 변경됨 - 분리 원칙 위반"; exit 1; }
+          echo "실시간 트랙 무변경 확인"
+      - name: Commit cards
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add news_event_cards.json
+          git diff --quiet && git diff --staged --quiet && echo "변경 없음" && exit 0
+          git commit -m "News event explanation cards update"
+          for attempt in 1 2 3 4 5; do
+            if git push; then echo "push 성공 (시도 $attempt)"; exit 0; fi
+            echo "push 거부됨 - rebase 후 재시도 ($attempt/5)"
+            git pull --rebase origin main || exit 1
+            sleep $((attempt * 5))
+          done
+          echo "5회 시도 후에도 push 실패"; exit 1
