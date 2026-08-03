@@ -22,10 +22,28 @@
   .negative { color: #f87171; }
   .badge { font-size: 11px; padding: 2px 6px; border-radius: 6px; margin-left: 6px; }
   .pending-card { background: #292116; border: 1px solid #78350f; border-radius: 10px; padding: 12px; margin-bottom: 10px; }
+  /* [v3.2] 연구 종료 표시 — 회색조 + 상호작용 없음을 시각적으로 드러낸다 */
+  .retired-card { opacity: 0.72; }
+  .pending-card.retired { background: #1f2229; border-color: #3f4653; }
+  .badge-retired { background: #3f4653; color: #cbd5e1; font-size: 11px; padding: 2px 7px;
+                   border-radius: 999px; margin-left: 6px; vertical-align: middle; }
+  .retired-note { border-left: 3px solid #64748b; padding-left: 10px; margin: 8px 0 12px; }
+  /* [v3.2] (b) 보호적 경고 카드 — 규칙 위반 사실 전용 */
+  .guardrail-card { background: #2a1f1f; border: 1px solid #7f1d1d; border-radius: 10px;
+                    padding: 12px; margin-bottom: 10px; }
+  .guardrail-rule { font-weight: 600; color: #fca5a5; }
+  .guardrail-fact { margin-top: 4px; font-size: 14px; }
+  .guardrail-nums { margin-top: 6px; font-size: 12px; color: #94a3b8; }
+  .ok-line { color: #6ee7b7; font-weight: 600; }
+  /* [v3.2] (a) 정보성 카드 — 뉴스 사건 설명 전용. (b)와 스타일도 분리해 둔다. */
+  .newsinfo-card { background: #16202b; border: 1px solid #1e3a5f; border-radius: 10px;
+                   padding: 12px; margin-bottom: 10px; }
+  .newsinfo-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .newsinfo-type { background: #1e3a5f; color: #93c5fd; font-size: 11px; padding: 2px 7px;
+                   border-radius: 999px; white-space: nowrap; }
+  .newsinfo-summary { margin-top: 6px; font-size: 14px; line-height: 1.5; }
+  .newsinfo-heads { margin: 8px 0 0; padding-left: 18px; font-size: 12px; color: #94a3b8; }
   .btn { padding: 8px 14px; border-radius: 8px; border: none; font-size: 13px; margin-right: 6px; margin-top: 8px; cursor: pointer; }
-  .btn-approve { background: #16a34a; color: white; }
-  .btn-reject { background: #dc2626; color: white; }
-  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 10px 18px; border-radius: 8px; font-size: 13px; display: none; }
   .cash-line { font-size: 16px; font-weight: bold; }
   .sync-note { font-size: 11px; font-weight: normal; color: #64748b; margin-top: 4px; }
   .real-card { border: 1px solid #0d9488; }
@@ -63,7 +81,7 @@
 <div class="page">
 
 <h1>QuanTrade 대시보드</h1>
-<p class="subtitle">국내주식 실계좌 조회 · Phase 1 백테스트 게이트 · Phase 2 뉴스 이벤트 데이터수집</p>
+<p class="subtitle">실계좌 조회 · 리스크 가드레일 · 뉴스 사건 설명 · Phase 1/2 연구 기록 <b>(v3.2: 매매 예측 비활성)</b></p>
 
 <!-- ===== Block 1: 국내주식 실계좌 현황 ===== -->
 <div class="section-divider">국내주식 실계좌 (토스증권)</div>
@@ -85,13 +103,39 @@
     <h3>종목별 현재 수익률</h3>
     <div id="real-positions-list"></div>
   </div>
-  <div class="card" id="real-pending-section" style="display:none;">
-    <h3>⏳ AI 제안 승인 대기중</h3>
+  <!-- [v3.2] 연구 종료 — 상호작용 불가. 삭제하지 않고 화면에 남기되 승인/거절
+       버튼을 렌더링하지 않는다(loadRetiredPending 참고). -->
+  <div class="card retired-card" id="real-pending-section" style="display:none;">
+    <h3>⏳ AI 매매 제안 <span class="badge-retired">연구 종료</span></h3>
+    <p class="muted retired-note">
+      예측(매수/매도 방향 판단)은 §2.1 게이트 미통과로 중단됐습니다(v3.2).
+      아래는 중단 시점에 남아 있던 잔여 제안이며, <b>승인해도 집행되지 않습니다</b>.
+      기록 목적으로만 표시합니다.
+    </p>
     <div id="real-pending-list"></div>
   </div>
 </div>
 
-<!-- ===== Block 2: Phase 1 백테스트 게이트 판정 ===== -->
+<!-- ===== Block 2: [v3.2 신규] 보호적 경고 — 규칙 위반 사실만 ===== -->
+<!-- 이 블록은 정보성 카드(Block 3)와 코드/템플릿 레벨에서 분리돼 있다.
+     렌더러(renderGuardrailCard)는 허용 필드 화이트리스트만 읽고, 예측성 필드가
+     섞여 들어오면 assertNoPredictiveFields가 렌더를 거부한다. -->
+<div class="section-divider">리스크 가드레일 (활성)</div>
+<h2>🛡️ 규칙 위반 점검</h2>
+
+<div class="card" id="guardrail-section">
+  <p class="muted">로딩 중...</p>
+</div>
+
+<!-- ===== Block 3: [v3.2 신규] 정보성 — 뉴스 사건 설명 (예측 아님) ===== -->
+<div class="section-divider">뉴스 사건 설명 (정보성)</div>
+<h2>📄 오늘의 사건 카드</h2>
+
+<div class="card" id="newscard-section">
+  <p class="muted">로딩 중...</p>
+</div>
+
+<!-- ===== Block 4: Phase 1 백테스트 게이트 판정 ===== -->
 <div class="section-divider">Phase 1 백테스트 검증 (완료)</div>
 <h2>📊 게이트 판정 요약</h2>
 
@@ -99,7 +143,7 @@
   <p class="muted">로딩 중...</p>
 </div>
 
-<!-- ===== Block 3: Phase 2 뉴스 이벤트 데이터수집 ===== -->
+<!-- ===== Block 5: Phase 2 뉴스 이벤트 데이터수집 ===== -->
 <div class="section-divider">Phase 2 뉴스 이벤트 실험 (진행 중)</div>
 <h2>📰 데이터수집 진행상황 <span class="badge-phase2">캘리브레이션 대기</span></h2>
 
@@ -109,22 +153,8 @@
 
 </div>
 
-<div class="toast" id="toast"></div>
 
 <script>
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.style.display = 'block';
-  setTimeout(() => t.style.display = 'none', 2000);
-}
-
-function copyCommand(cmd) {
-  navigator.clipboard.writeText(cmd).then(() => {
-    showToast('복사됨! 텔레그램에 붙여넣으세요 📋');
-  });
-}
-
 function fmtPct(v) {
   const n = v || 0;
   return `${n >= 0 ? '+' : ''}${n.toFixed(2)}%`;
@@ -191,7 +221,115 @@ async function loadRealAccount(bust) {
   }
 }
 
-async function loadRealPending(bust) {
+// ───────────────────────────────────────────────────────────────────────────
+// [v3.2] 카드 타입 분리 장치.
+//
+// 보호적 경고 카드(b)와 정보성 카드(a)는 서로 다른 렌더러를 쓰고, 각자 **허용
+// 필드 화이트리스트**만 읽는다. 게다가 아래 가드가 예측성 필드를 감지하면 렌더
+// 자체를 거부한다 — 나중에 누군가 경고 카드에 "이 종목 매도 추천" 같은 필드를
+// 슬쩍 얹으면 조용히 표시되는 게 아니라 눈에 띄게 실패한다.
+// 주석만으로 막으면 결국 뚫리기 때문에 런타임 가드로 둔다.
+const PREDICTIVE_FIELDS = ['direction', 'confidence', 'action', 'recommendation',
+                           'target_weight_pct', 'signal', 'buy', 'sell', 'score'];
+
+function assertNoPredictiveFields(obj, cardType) {
+  const found = PREDICTIVE_FIELDS.filter(f => Object.prototype.hasOwnProperty.call(obj, f));
+  if (found.length) {
+    console.error(`[v3.2 위반] ${cardType} 카드에 예측성 필드가 있습니다: ${found.join(', ')}`);
+    return false;
+  }
+  return true;
+}
+
+function pick(obj, keys) {
+  const out = {};
+  keys.forEach(k => { if (obj[k] !== undefined) out[k] = obj[k]; });
+  return out;
+}
+
+function esc(s) {
+  return String(s === undefined || s === null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// ── (b) 보호적 경고 카드: 규칙 위반 "사실"만. 종목별 제안 문구 금지. ──
+const GUARDRAIL_FIELDS = ['rule', 'market', 'limit_pct', 'actual_pct', 'fact'];
+
+function renderGuardrailCard(rawViolation) {
+  if (!assertNoPredictiveFields(rawViolation, '보호적 경고')) return '';
+  const v = pick(rawViolation, GUARDRAIL_FIELDS);
+  const nums = (v.actual_pct === null || v.actual_pct === undefined)
+    ? `기준 ${esc(v.limit_pct)}`
+    : `기준 ${esc(v.limit_pct)}% / 현재 ${esc(v.actual_pct)}%`;
+  return `<div class="guardrail-card">
+    <div class="guardrail-rule">⚠️ ${esc(v.rule)}</div>
+    <div class="guardrail-fact">${esc(v.fact)}</div>
+    <div class="guardrail-nums">${nums}</div>
+  </div>`;
+}
+
+async function loadGuardrails(bust) {
+  const el = document.getElementById('guardrail-section');
+  try {
+    const lastReport = await (await fetch('last_report.json' + bust)).json();
+    const violations = lastReport.guardrail_violations;
+    if (violations === undefined) {
+      el.innerHTML = `<p class="muted">아직 v3.2 형식 리포트가 생성되지 않았습니다.
+        (다음 daily 실행 후 표시됩니다)</p>`;
+      return;
+    }
+    if (violations.length === 0) {
+      el.innerHTML = `<p class="ok-line">✅ 규칙 위반 없음</p>
+        <p class="muted">점검 항목: 종목별 비중 상한, 최소 현금 비율, 손절 판정 가능 여부</p>`;
+      return;
+    }
+    el.innerHTML = `<p class="muted">규칙 위반 ${violations.length}건 — 사실만 표시하며,
+      어떤 종목을 사거나 팔라는 제안은 포함하지 않습니다.</p>`
+      + violations.map(renderGuardrailCard).join('');
+  } catch (e) {
+    el.innerHTML = `<p class="muted">가드레일 점검 결과를 불러오지 못했습니다.</p>`;
+  }
+}
+
+// ── (a) 정보성 카드: 뉴스 사건 설명. 종목별 판단/추천 없음. ──
+const NEWSCARD_FIELDS = ['market', 'name', 'event_type', 'summary', 'headlines'];
+
+function renderNewsInfoCard(rawCard) {
+  if (!assertNoPredictiveFields(rawCard, '정보성')) return '';
+  const c = pick(rawCard, NEWSCARD_FIELDS);
+  const heads = (c.headlines || []).map(h => `<li>${esc(h)}</li>`).join('');
+  return `<div class="newsinfo-card">
+    <div class="newsinfo-head">
+      <b>${esc(c.name || c.market)}</b>
+      <span class="newsinfo-type">${esc(c.event_type)}</span>
+    </div>
+    <div class="newsinfo-summary">${esc(c.summary)}</div>
+    ${heads ? `<ul class="newsinfo-heads">${heads}</ul>` : ''}
+  </div>`;
+}
+
+async function loadNewsCards(bust) {
+  const el = document.getElementById('newscard-section');
+  try {
+    const data = await (await fetch('news_event_cards.json' + bust)).json();
+    const cards = data.cards || [];
+    if (cards.length === 0) {
+      el.innerHTML = `<p class="muted">오늘 생성된 사건 카드가 없습니다.</p>`;
+      return;
+    }
+    el.innerHTML = `<p class="muted">생성일 ${esc(data.generated_at || '-')} · ${cards.length}건 —
+      <b>사실 설명이며 매매 판단이 아닙니다.</b> 방향 예측/확신도는 제공하지 않습니다.</p>`
+      + cards.map(renderNewsInfoCard).join('');
+  } catch (e) {
+    el.innerHTML = `<p class="muted">사건 카드가 아직 생성되지 않았습니다
+      (news_event_cards.json 없음).</p>`;
+  }
+}
+
+// [v3.2] 연구 종료된 매매 제안 — 기록용 표시, 상호작용 불가.
+// 승인/거절 버튼을 렌더링하지 않는다: 예측 경로가 중단돼 승인해도 집행되지
+// 않으므로, 누를 수 있게 두면 동작할 것처럼 오해를 준다.
+async function loadRetiredPending(bust) {
   try {
     const lastReport = await (await fetch('last_report.json' + bust)).json();
     const realPending = (lastReport.pending || []).filter(a => a.target_account === 'real');
@@ -199,12 +337,9 @@ async function loadRealPending(bust) {
     document.getElementById('real-pending-section').style.display = 'block';
     document.getElementById('real-pending-list').innerHTML = realPending.map(a => {
       const label = a.action_type === 'sell' ? '매도' : '비중조정';
-      const dryRunTag = a.dry_run ? ' [모의]' : '';
-      return `<div class="pending-card">
-        <div><b>${a.name || a.market}</b> ${label}${dryRunTag}</div>
-        <div style="font-size:13px; color:#cbd5e1; margin-top:4px;">${a.reasoning || ''}</div>
-        <button class="btn btn-approve" onclick="copyCommand('/approve ${a.id}')">승인 명령어 복사</button>
-        <button class="btn btn-reject" onclick="copyCommand('/reject ${a.id}')">거절 명령어 복사</button>
+      return `<div class="pending-card retired">
+        <div><b>${esc(a.name || a.market)}</b> ${esc(label)} <span class="badge-retired">집행 안 됨</span></div>
+        <div style="font-size:13px; color:#94a3b8; margin-top:4px;">${esc(a.reasoning || '')}</div>
       </div>`;
     }).join('');
   } catch (e) {
@@ -288,8 +423,11 @@ async function loadPhase2(bust) {
 
 async function loadData() {
   const bust = '?t=' + Date.now();
+  // 각 블록을 독립적으로 로드한다 — 하나가 404/파싱 실패해도 나머지는 그려진다.
   await loadRealAccount(bust);
-  await loadRealPending(bust);
+  await loadRetiredPending(bust);
+  await loadGuardrails(bust);
+  await loadNewsCards(bust);
   await loadGate(bust);
   await loadPhase2(bust);
 }

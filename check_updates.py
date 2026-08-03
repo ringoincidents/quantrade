@@ -17,6 +17,17 @@ def get_updates(offset):
 def handle_approve(action_id, portfolio, history, pending):
     for action in pending["actions"]:
         if action["id"] == action_id and action["status"] == "waiting":
+            # [v3.2] 예측 경로가 비활성이면 그 산물인 매수/매도 승인도 집행하지 않는다.
+            # analyze.py가 신규 pending을 더 만들지 않더라도 **이전에 쌓인 대기 건이
+            # 남아 있어서**, 이 가드가 없으면 기각된 신호가 뒤늦게 체결될 수 있다.
+            # /reject는 그대로 동작한다 — 제안을 치우는 건 언제나 안전하다.
+            if not PREDICTION_ENABLED:
+                send_telegram(
+                    f"🔬 {action_id} — 예측 경로가 중단되어(v3.2, §2.1 게이트 미통과) "
+                    "승인 집행이 비활성입니다. 이 건은 종료된 연구의 잔여 제안입니다. "
+                    "정리하려면 /reject 를 쓰세요."
+                )
+                return True
             if action.get("target_account") == "real":
                 # 실계좌는 조회 전용 — 주문 API 자체가 없다. 게이트가 꺼져 있으면(기본값)
                 # 승인해도 아무것도 실행되지 않는다는 걸 명시적으로 알리기만 하고,

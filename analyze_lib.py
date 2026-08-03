@@ -51,6 +51,25 @@ CLAUDE_API_KEY = os.environ.get("CLAUDE_API_KEY", "")
 # 만들지 않는다 — 아직 실주문 코드 자체가 없어서 그 스위치가 가리킬 대상이 없다.
 AI_SUGGESTION_DRY_RUN = os.environ.get("AI_SUGGESTION_DRY_RUN", "true").lower() == "true"
 
+# ─────────────────────────────────────────────────────────────────────────────
+# v3.2 전환 (2026-08-03) — 예측 경로 마스터 스위치.
+#
+# **기각된 연구 결과, 활성 기능 제외.** 가격 신호(entry_score/scan_* 계열)와 뉴스
+# 방향 판단이 둘 다 §2.1 게이트를 통과하지 못했다. 특히 뉴스 방향 판단은 단순
+# 다수클래스 baseline보다도 적중률이 낮았고, 방향별 적중률이 기저비율과 사실상
+# 동일해(D+1 호재 40.0% vs 기저 40.1%) 방향 판단에 정보가 없다는 결론이 나왔다.
+# 근거: Phase2_과거뉴스백테스트_설계.md §8, CLAUDE.md 최상단 v3.2 절.
+#
+# 이 값이 False인 동안:
+#   - 후보 스캔(scan_crypto/scan_stocks)과 ask_claude_decision을 호출하지 않는다.
+#   - AI 기반 매수/매도/비중조정 결정이 생성되지 않는다(가상·실계좌 양쪽 모두).
+#   - 하드 손절 등 **규칙 기반 가드레일은 계속 동작한다** — 그건 예측이 아니라
+#     사전에 정해진 규칙의 산술 판정이라 이번 기각과 무관하다.
+#
+# **코드는 삭제하지 않았다.** 재개하려면 다시 §2.1 게이트를 통과해야 하고, 그때
+# 이 스위치를 되돌린다. 프롬프트를 고쳤다거나 이번엔 될 것 같다는 이유로 켜지 마라.
+PREDICTION_ENABLED = os.environ.get("PREDICTION_ENABLED", "false").lower() == "true"
+
 
 def calc_ma(prices, window):
     return sum(prices[-window:]) / window

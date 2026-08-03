@@ -1,4 +1,10 @@
 name: Daily Analysis
+# [v3.2, 2026-08-03] 이 워크플로는 계속 돈다 — 다만 하는 일이 바뀌었다.
+# 예측(매수/매도 방향 판단) 경로는 §2.1 게이트 미통과로 중단됐고, 남은 활성 기능은
+# 규칙 기반 가드레일(하드 손절 자동 실행, 비중 상한/현금 비율 위반 점검)뿐이다.
+# 실행 경로는 analyze_lib.PREDICTION_ENABLED(기본 false)로 끊어져 있으며, 아래
+# env에 명시적으로 false를 박아 진입점에서도 의도가 드러나게 했다.
+# 예측을 재개하려면 다시 §2.1 게이트를 통과해야 한다(CLAUDE.md 최상단 v3.2 절).
 on:
   schedule:
     - cron: '0 11 * * *'
@@ -14,6 +20,7 @@ jobs:
       TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
       TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
       CLAUDE_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
+      PREDICTION_ENABLED: "false"   # v3.2 - 예측 경로 중단 (기본값과 동일, 진입점에 명시)
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
