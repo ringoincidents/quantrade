@@ -1,13 +1,13 @@
 {
-  "date": "2026-08-02",
-  "market_summary": "AI 판단 실패: Expecting ',' delimiter: line 87 column 6 (char 2457)",
+  "date": "2026-08-03",
+  "market_summary": "AI 판단 실패: Expecting ',' delimiter: line 93 column 6 (char 2571)",
   "positions": [
     {
       "market": "KRW-USDE",
       "asset_class": "crypto",
       "strategy_type": "스윙",
       "amount_krw": 33333.333333333336,
-      "current_return": 0.5578800557880056,
+      "current_return": 0.0,
       "conviction": false
     },
     {
@@ -15,7 +15,7 @@
       "asset_class": "crypto",
       "strategy_type": "스윙",
       "amount_krw": 4354,
-      "current_return": 6.650544135429272,
+      "current_return": 4.594921402660227,
       "conviction": false
     },
     {
@@ -23,7 +23,7 @@
       "asset_class": "crypto",
       "strategy_type": "스윙",
       "amount_krw": 3557,
-      "current_return": -0.9900990099009901,
+      "current_return": -2.9702970297029703,
       "conviction": false
     },
     {
@@ -31,7 +31,7 @@
       "asset_class": "crypto",
       "strategy_type": "스윙",
       "amount_krw": 5775,
-      "current_return": -1.9144144144144177,
+      "current_return": -4.391891891891882,
       "conviction": false
     },
     {
@@ -39,7 +39,7 @@
       "asset_class": "crypto",
       "strategy_type": "스윙",
       "amount_krw": 3272,
-      "current_return": 0.20533880903490323,
+      "current_return": -1.6427104722792623,
       "conviction": false
     },
     {
@@ -47,7 +47,7 @@
       "asset_class": "crypto",
       "strategy_type": "단타",
       "amount_krw": 1953,
-      "current_return": 1.456310679611641,
+      "current_return": -1.4563106796116625,
       "conviction": false
     },
     {
@@ -55,7 +55,7 @@
       "asset_class": "crypto",
       "strategy_type": "스윙",
       "amount_krw": 879,
-      "current_return": 0.0,
+      "current_return": -0.4878048780487805,
       "conviction": false
     },
     {
@@ -63,7 +63,7 @@
       "asset_class": "crypto",
       "strategy_type": "스윙",
       "amount_krw": 835,
-      "current_return": 0.5376344086021511,
+      "current_return": -4.8387096774193585,
       "conviction": false
     }
   ],

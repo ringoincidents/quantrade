@@ -7,8 +7,8 @@
       "entry_date": "2026-07-29",
       "expected_days": 7,
       "amount_krw": 33333.333333333336,
-      "current_price": 1442.0,
-      "current_return": 0.5578800557880056
+      "current_price": 1434.0,
+      "current_return": 0.0
     },
     {
       "market": "KRW-PENGU",
@@ -18,8 +18,8 @@
       "entry_date": "2026-07-30",
       "expected_days": 11,
       "amount_krw": 4354,
-      "current_price": 8.82,
-      "current_return": 6.650544135429272
+      "current_price": 8.65,
+      "current_return": 4.594921402660227
     },
     {
       "market": "KRW-WIF",
@@ -29,8 +29,8 @@
       "entry_date": "2026-07-31",
       "expected_days": 11,
       "amount_krw": 3557,
-      "current_price": 200.0,
-      "current_return": -0.9900990099009901
+      "current_price": 196.0,
+      "current_return": -2.9702970297029703
     },
     {
       "market": "KRW-LAYER",
@@ -40,8 +40,8 @@
       "entry_date": "2026-07-31",
       "expected_days": 11,
       "amount_krw": 5775,
-      "current_price": 87.1,
-      "current_return": -1.9144144144144177
+      "current_price": 84.9,
+      "current_return": -4.391891891891882
     },
     {
       "market": "KRW-ANKR",
@@ -51,8 +51,8 @@
       "entry_date": "2026-08-01",
       "expected_days": 11,
       "amount_krw": 3272,
-      "current_price": 4.88,
-      "current_return": 0.20533880903490323
+      "current_price": 4.79,
+      "current_return": -1.6427104722792623
     },
     {
       "market": "KRW-BEAM",
@@ -62,8 +62,8 @@
       "entry_date": "2026-08-01",
       "expected_days": 4,
       "amount_krw": 1953,
-      "current_price": 2.09,
-      "current_return": 1.456310679611641
+      "current_price": 2.03,
+      "current_return": -1.4563106796116625
     },
     {
       "market": "KRW-USD1",
@@ -73,8 +73,8 @@
       "entry_date": "2026-08-02",
       "expected_days": 11,
       "amount_krw": 879,
-      "current_price": 1435.0,
-      "current_return": 0.0
+      "current_price": 1428.0,
+      "current_return": -0.4878048780487805
     },
     {
       "market": "KRW-DOOD",
@@ -84,8 +84,8 @@
       "entry_date": "2026-08-02",
       "expected_days": 11,
       "amount_krw": 835,
-      "current_price": 1.87,
-      "current_return": 0.5376344086021511
+      "current_price": 1.77,
+      "current_return": -4.8387096774193585
     }
   ]
 }
