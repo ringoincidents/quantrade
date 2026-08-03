@@ -8,6 +8,60 @@ TOTAL_BUDGET = 100000
 MIN_CASH_RESERVE_RATIO = 0.3  # 리스크자산 노출 상한 70% (2026-08-01: 0.2->0.3, Phase 1 게이트 미통과 반영)
 
 
+def check_risk_guardrails(portfolio, total_assets):
+    """[v3.2 신규 — 활성 기능] 규칙 기반 가드레일 위반 점검.
+
+    **결정론적이다. AI 판단이 전혀 개입하지 않는다** — 사전에 정해진 상수
+    (POSITION_WEIGHT_HARD_CAP, MIN_CASH_RESERVE_RATIO, HARD_STOP_LOSS)와 현재
+    보유 상태를 산술 비교할 뿐이다. 그래서 §2.1 통계 게이트 적용 대상이 아니다.
+
+    **반환 항목에는 "무엇이 어떤 규칙을 얼마나 넘었나"라는 사실만 담는다.**
+    어떤 종목을 사라/팔라는 제안 문구는 절대 넣지 않는다(CLAUDE.md v3.2 (b) 원칙).
+    구조적으로도 제안 필드를 두지 않아, 나중에 예측성 내용이 슬쩍 끼어드는 걸
+    스키마 수준에서 막는다."""
+    violations = []
+    if total_assets <= 0:
+        return violations
+
+    for p in portfolio["positions"]:
+        weight = p["amount_krw"] / total_assets
+        if weight >= POSITION_WEIGHT_HARD_CAP:
+            violations.append({
+                "rule": "종목별 비중 상한",
+                "market": p["market"],
+                "limit_pct": round(POSITION_WEIGHT_HARD_CAP * 100, 1),
+                "actual_pct": round(weight * 100, 1),
+                "fact": (f"{p['market']} 비중이 총자산의 {weight*100:.1f}%로 "
+                         f"상한 {POSITION_WEIGHT_HARD_CAP*100:.0f}%를 초과"),
+            })
+
+    cash_ratio = portfolio["cash"] / total_assets
+    if cash_ratio < MIN_CASH_RESERVE_RATIO:
+        violations.append({
+            "rule": "최소 현금 비율",
+            "market": None,
+            "limit_pct": round(MIN_CASH_RESERVE_RATIO * 100, 1),
+            "actual_pct": round(cash_ratio * 100, 1),
+            "fact": (f"현금 비율이 {cash_ratio*100:.1f}%로 "
+                     f"하한 {MIN_CASH_RESERVE_RATIO*100:.0f}% 미만"),
+        })
+
+    # 가격 조회 실패 시 손절 판정 자체가 불가능하다 — 손절이 "안 걸린" 게 아니라
+    # "평가되지 못한" 상태이므로, 조용히 넘어가지 않고 가드레일 공백으로 보고한다.
+    for p in portfolio["positions"]:
+        if p.get("price_lookup_failed"):
+            strat = p.get("strategy_type", "스윙")
+            violations.append({
+                "rule": "손절 판정 불가",
+                "market": p["market"],
+                "limit_pct": HARD_STOP_LOSS.get(strat, -10),
+                "actual_pct": None,
+                "fact": (f"{p['market']} 현재가 조회 실패로 손절선"
+                         f"({HARD_STOP_LOSS.get(strat, -10)}%) 판정을 수행하지 못함"),
+            })
+    return violations
+
+
 def needs_approval(pos, total_assets):
     if pos.get("strategy_type") == "장기":
         return True
@@ -34,44 +88,60 @@ def run():
         except Exception as e:
             pos["current_price"] = pos.get("entry_price", 0)
             pos["current_return"] = 0
+            pos["price_lookup_failed"] = True  # 가드레일 점검에서 "손절 판정 불가"로 보고
             report.append(f"⚠️ {pos['market']} 가격 조회 실패: {e}")
 
     total_assets = portfolio["cash"] + sum(p["amount_krw"] for p in portfolio["positions"])
 
-    held_all = [p["market"] for p in portfolio["positions"]]
-    crypto_cands = scan_crypto(exclude=held_all, top_n=3)
-    stock_cands = scan_stocks(exclude=held_all, top_n=2)
-    all_cands = crypto_cands + stock_cands
-
-    news_by_market = {}
-    for c in all_cands:
-        c["expected_days"] = estimate_holding_period(c["raw_closes"])
-        c["strategy_type"] = classify_strategy(c["expected_days"])
-        news_by_market[c["market"]] = get_news_sentiment(c["market"].replace("KRW-", ""))
-
-    # 실계좌(토스, 조회전용) 보유종목 — 계좌번호 등 식별정보는 절대 넘기지 않는다.
     real_portfolio = load_json("real_portfolio.json", {"positions": []})
     real_positions = real_portfolio.get("positions", [])
-    real_positions_for_ai = [
-        {
-            "symbol": p["symbol"], "name": p.get("name", p["symbol"]),
-            "quantity": p.get("quantity"), "current_price": p.get("current_price"),
-            "return_pct": p.get("return_pct", 0),
-        }
-        for p in real_positions
-    ]
 
-    ai_result = ask_claude_decision(portfolio["positions"], all_cands, news_by_market, real_positions_for_ai)
-    report.append("🤖 AI 시장 요약")
-    report.append(ai_result.get("market_summary", "요약 없음"))
-    report.append("")
+    # ─────────────────────────────────────────────────────────────────────
+    # [기각된 연구 결과, 활성 기능 제외 — v3.2] 예측 경로.
+    # entry_score 기반 후보 스캔 + ask_claude_decision의 BUY/SELL 방향 판단은
+    # §2.1 게이트 미통과로 비활성이다(analyze_lib.PREDICTION_ENABLED, 기본 False).
+    # 코드는 재개 대비 + 기각 사유 재구성 목적으로 보존한다 — 삭제 금지.
+    # ─────────────────────────────────────────────────────────────────────
+    all_cands, decision_map, ai_result = [], {}, {}
+    if PREDICTION_ENABLED:
+        held_all = [p["market"] for p in portfolio["positions"]]
+        crypto_cands = scan_crypto(exclude=held_all, top_n=3)
+        stock_cands = scan_stocks(exclude=held_all, top_n=2)
+        all_cands = crypto_cands + stock_cands
 
-    decisions = ai_result.get("decisions", [])
-    decision_map = {d["market"]: d for d in decisions}
+        news_by_market = {}
+        for c in all_cands:
+            c["expected_days"] = estimate_holding_period(c["raw_closes"])
+            c["strategy_type"] = classify_strategy(c["expected_days"])
+            news_by_market[c["market"]] = get_news_sentiment(c["market"].replace("KRW-", ""))
 
-    # 실계좌 매도/비중조정 제안 — AI_SUGGESTION_DRY_RUN 무관하게 항상 참고는 하되,
-    # 기본값(true)인 동안은 dry_run으로만 기록한다. 자동실행 경로는 절대 없음 —
-    # 실계좌엔 애초에 주문 함수가 없다(CLAUDE.md 조회전용 원칙).
+        # 실계좌(토스, 조회전용) 보유종목 — 계좌번호 등 식별정보는 절대 넘기지 않는다.
+        real_positions_for_ai = [
+            {
+                "symbol": p["symbol"], "name": p.get("name", p["symbol"]),
+                "quantity": p.get("quantity"), "current_price": p.get("current_price"),
+                "return_pct": p.get("return_pct", 0),
+            }
+            for p in real_positions
+        ]
+
+        ai_result = ask_claude_decision(portfolio["positions"], all_cands, news_by_market, real_positions_for_ai)
+        report.append("🤖 AI 시장 요약")
+        report.append(ai_result.get("market_summary", "요약 없음"))
+        report.append("")
+
+        decisions = ai_result.get("decisions", [])
+        decision_map = {d["market"]: d for d in decisions}
+    else:
+        decisions = []
+        report.append("🔬 예측 경로 비활성 (v3.2) — 매수/매도 방향 판단은 §2.1 게이트 "
+                      "미통과로 중단된 연구입니다. 아래는 규칙 기반 점검 결과만입니다.")
+        report.append("")
+
+    # [기각된 연구 결과, 활성 기능 제외 — v3.2] 실계좌 매도/비중조정 제안.
+    # PREDICTION_ENABLED=False면 decisions가 비어 있어 이 루프는 한 바퀴도 돌지
+    # 않는다 — 즉 실계좌 대상 AI 제안도 더 이상 생성되지 않는다. 뉴스 방향 판단이
+    # baseline 미달로 기각된 이상 실계좌 제안의 근거도 같이 사라졌기 때문이다.
     real_by_symbol = {p["symbol"]: p for p in real_positions}
     for d in decisions:
         market = d.get("market", "")
@@ -224,16 +294,28 @@ def run():
                 report.append(f"🆕 자동 매수 [{c['strategy_type']}]: {c['market']} (비중 {weight_pct}%, {amount:,.0f}원)")
                 report.append(f"   이유: {decision.get('reasoning','-')}")
 
+    # [v3.2 활성 기능] 규칙 기반 가드레일 점검 — 예측 비활성과 무관하게 항상 돈다.
+    guardrail_violations = check_risk_guardrails(portfolio, total_assets)
+    report.append("")
+    if guardrail_violations:
+        report.append(f"🛡️ 규칙 위반 {len(guardrail_violations)}건")
+        for v in guardrail_violations:
+            report.append(f"   · [{v['rule']}] {v['fact']}")
+    else:
+        report.append("🛡️ 규칙 위반 없음")
+
     report.append("")
     report.append(f"💰 현금: {portfolio['cash']:,.0f}원 / 보유 {len(portfolio['positions'])}개")
     waiting_count = len([a for a in pending["actions"] if a["status"] == "waiting"])
     if waiting_count:
-        report.append(f"⏳ 승인 대기 중 {waiting_count}건")
-    if real_positions:
-        report.append(f"🏦 실계좌 제안: {'dry-run(모의)' if AI_SUGGESTION_DRY_RUN else '실행 가능 상태(실주문 코드는 아직 없음)'}")
+        report.append(f"⏳ 승인 대기 {waiting_count}건 (v3.2: 예측 경로 중단으로 신규 생성 없음)")
 
     last_report = {
         "date": today,
+        "schema_version": "v3.2",
+        # 예측 비활성 상태를 대시보드가 판별할 수 있게 명시적으로 싣는다.
+        "prediction_enabled": PREDICTION_ENABLED,
+        "guardrail_violations": guardrail_violations,
         "market_summary": ai_result.get("market_summary", ""),
         "positions": [
             {
