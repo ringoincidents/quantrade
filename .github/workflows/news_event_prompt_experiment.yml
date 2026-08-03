@@ -1,0 +1,64 @@
+name: News Event Prompt A/B Experiment
+
+# Phase 2 프롬프트 A/B 실험(news_event_prompt_experiment.py) 전용.
+# **workflow_dispatch 전용 — schedule 없음.** 1회성 재판단 실험이라 주기 실행할
+# 이유가 없다.
+#
+# 건드리는 파일은 news_event_backtest_log_promptB.json 하나뿐이다.
+# 원본(news_event_backtest_log.json)은 읽기만 하고, 실시간 트랙
+# (news_event_calibration_log.json)과 daily.yml/poll.yml 상태 파일에는 접근하지
+# 않는다. 이 스크립트는 어떤 매매도 실행하지 않는다.
+#
+# RSS 호출이 전혀 없다 — 헤드라인을 원본에서 그대로 읽어 쓰므로 Google News
+# 레이트리밋과 무관하고, Anthropic API 호출만 발생한다.
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: '이번 실행 최대 재판단 건수(비우면 전량 706건). 시험 실행은 20 정도'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      CLAUDE_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+      - name: Self-test (network-free logic check)
+        run: python news_event_prompt_experiment.py --self-test
+      - name: Re-judge with prompt B
+        run: |
+          ARGS=""
+          if [ -n "${{ inputs.limit }}" ]; then ARGS="--limit ${{ inputs.limit }}"; fi
+          echo "실행 인자: $ARGS"
+          python news_event_prompt_experiment.py $ARGS
+      - name: Verify original dataset untouched
+        run: |
+          git diff --quiet -- news_event_backtest_log.json news_event_calibration_log.json \
+            || { echo "원본/실시간 트랙 파일이 변경됨 - 실험 설계 위반"; exit 1; }
+          echo "원본 및 실시간 트랙 파일 무변경 확인"
+      # poll.yml(15분마다)/daily.yml과 push가 겹칠 수 있어 rebase 재시도.
+      - name: Commit prompt B dataset
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add news_event_backtest_log_promptB.json
+          git diff --quiet && git diff --staged --quiet && echo "변경 없음" && exit 0
+          git commit -m "News event prompt B experiment dataset update"
+          for attempt in 1 2 3 4 5; do
+            if git push; then echo "push 성공 (시도 $attempt)"; exit 0; fi
+            echo "push 거부됨 - rebase 후 재시도 ($attempt/5)"
+            git pull --rebase origin main || exit 1
+            sleep $((attempt * 5))
+          done
+          echo "5회 시도 후에도 push 실패"; exit 1
