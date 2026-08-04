@@ -2583,6 +2583,1298 @@
           "return_pct": null
         }
       }
+    },
+    {
+      "id": "005930_2026-08-04",
+      "market": "005930",
+      "judged_at": "2026-08-04",
+      "headlines": [
+        "아직은 큰 변동성…삼전닉스, 급등락 끝에 간신히 상승마감(종합) - 연합뉴스",
+        "삼성전자(005930)밀릴때마다 물량 모아둘 기회로 보이며 이후 전망 및 대응전략. - 씽크풀 AI",
+        "삼성전자, 아마존 프라임 비디오에 'HDR10+ 어드밴스드' 기술 선봬 - 인포스탁데일리",
+        "Samsung Electronics Co Ltd (005930) 회사 프로필 - Investing.com 한국어",
+        "삼성전자, 프라임 비디오에 ‘HDR10+ 어드밴스드’ 적용 - NSP통신"
+      ],
+      "event_type": "기타",
+      "direction": "중립",
+      "confidence": 45,
+      "reasoning": "급등락 후 간신히 상승마감으로 변동성 지속되나 HDR10+ 어드밴스드 기술의 아마존 프라임 비디오 적용은 소폭 긍정적 신호. 전반적으로 방향성 불명확하고 기술 협력 뉴스는 단기 주가 영향 제한적임",
+      "price_at_judgment": 240000.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "000660_2026-08-04",
+      "market": "000660",
+      "judged_at": "2026-08-04",
+      "headlines": [
+        "SK하이닉스(000660) - 매일경제 마켓",
+        "SK하이닉스, HBF 첫 표준 규격 공개…최대 512GB | - 연합인포맥스",
+        "삼성전자·SK하이닉스, 급등 출발후 하락 전환…3%대↓ - 연합뉴스",
+        "\"쉽지 않은 반등\" 삼전닉스 3%대 약세 전환…코스피도 1%대 하락[장중시황] - 뉴스1",
+        "SK하이닉스(000660)밀릴때마다 물량 모아둘 기회로 보이며 이후 전망 및 대응전략. - 씽크풀 AI"
+      ],
+      "event_type": "기타",
+      "direction": "악재",
+      "confidence": 62,
+      "reasoning": "HBF 표준 규격 공개라는 기술 호재가 있으나 실제 장중 3%대 하락 전환이 확인되고 코스피 전반도 약세로 매크로 하방 압력이 더 강하게 작용 중이며 반등이 쉽지 않다는 시장 분위기가 지배적임",
+      "price_at_judgment": 1577000.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "373220_2026-08-04",
+      "market": "373220",
+      "judged_at": "2026-08-04",
+      "headlines": [
+        "LG에너지솔루션 373220 | 관련 기업 - 데일리바이트(DAILY BYTE)",
+        "LG에너지솔루션(373220) - 매일경제 마켓",
+        "LG엔솔 2Q 컨센 하회, 하반기 ESS 흑자전환에 눈길 - 경제타임스",
+        "[1보] LG에너지솔루션 2분기 영업이익 1천133억원…작년 대비 77%↓ - 연합뉴스",
+        "LG에너지솔루션 373220 | 관련 산업 - 데일리바이트(DAILY BYTE)"
+      ],
+      "event_type": "실적발표",
+      "direction": "악재",
+      "confidence": 88,
+      "reasoning": "2분기 영업이익이 전년 대비 77% 급감한 1133억원으로 컨센서스를 하회했으며. 이는 시장 기대치를 크게 밑도는 실적으로 단기 악재로 판단됨. 다만 하반기 ESS 흑자전환 기대감이 일부 하방을 지지할 수 있어 신뢰도를 다소 낮춤",
+      "price_at_judgment": 328500.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "207940_2026-08-04",
+      "market": "207940",
+      "judged_at": "2026-08-04",
+      "headlines": [
+        "[특징주] 삼성바이오로직스(207940), 글로벌 생산망 확장…수주 경쟁력 강화 - v.daum.net",
+        "삼성바이오 2분기 영업이익 5천864억원…22.9%↑ - 연합뉴스",
+        "법원 \"삼성바이오 노조, 일부작업중단 지시 안 돼\"…영향은 - KB Think",
+        "[헷갈리면 손해] “공장 가동률이냐, 신약 특허냐” 삼성바이오로직스 vs 삼성에피스홀딩스 분리 법칙 - theconnectmoney.com",
+        "삼성바이오로직스(KRX:207940)의 주식을 상당수 보유하고 있는 상장사와 함께 기관들이 압박을 받고 있다. (KRX:207940)의 지분을 상당수 보유하고 있는 상장사와 함께 압력을 받고 있으며, 보유 가치의 3.2%를 잃었습니다. - simplywall.st"
+      ],
+      "event_type": "실적발표",
+      "direction": "호재",
+      "confidence": 72,
+      "reasoning": "2분기 영업이익 22.9% 증가라는 강한 실적과 글로벌 생산망 확장으로 수주 경쟁력 강화는 명확한 호재. 다만 노조 관련 법원 판결 리스크와 기관 보유 상장사 지분 가치 하락(-3.2%) 언급이 일부 불확실성을 더함",
+      "price_at_judgment": 1476000.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "005380_2026-08-04",
+      "market": "005380",
+      "judged_at": "2026-08-04",
+      "headlines": [
+        "현대차 005380 | 관련 산업 - 데일리바이트(DAILY BYTE)",
+        "현대차 아이오닉9, 獨 유력 전문지 비교 평가서 볼보 EX90 제쳐 - 뉴스1",
+        "현대차그룹 정의선 회장, 튀르키예 공장 방문해 B 세그먼트 전기차 전략 논의 - 인포스탁데일리",
+        "정의선, 튀르키예 공장 찾아…유럽 첫 소형 전기차 아이오닉3 점검 - KB Think",
+        "현대차·기아, 칠레 '한국의 거리'에 순찰차 기증 - 연합뉴스 한민족센터"
+      ],
+      "event_type": "기타",
+      "direction": "호재",
+      "confidence": 72,
+      "reasoning": "아이오닉9이 독일 전문지 비교평가에서 볼보 EX90을 제치며 제품 경쟁력을 입증했고. 정의선 회장이 튀르키예 공장을 직접 방문해 유럽 소형 전기차 전략을 점검하며 글로벌 EV 확장 의지를 보여줌. 칠레 순찰차 기증은 브랜드 이미지 제고 활동으로 직접적 재무 영향은 제한적이나 전반적으로 긍정적 신호",
+      "price_at_judgment": 392500.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "005490_2026-08-04",
+      "market": "005490",
+      "judged_at": "2026-08-04",
+      "headlines": [
+        "포스코홀딩스 2분기 영업이익 8천200억원…작년 대비 34.4%↑ - 연합뉴스",
+        "포스코홀딩스, 계열사 지분 3.5兆 처분에 배당↓…'4년 뒤 리튬'이 메울까 - KB Think",
+        "POSCO홀딩스(005490) 목표주가 55만원 유지…2분기 영업이익 6879억원 전망, 철강·리튬 회복이 관건 - 한국투데이",
+        "POSCO홀딩스(005490)밀릴때마다 물량 모아둘 기회로 보이며 이후 전망 및 대응전략. - 씽크풀 AI",
+        "키움증권 \"포스코홀딩스 목표가 하향…리튬 가격 약세 반영\" - 파이낸셜뉴스"
+      ],
+      "event_type": "실적발표",
+      "direction": "중립",
+      "confidence": 55,
+      "reasoning": "2분기 영업이익 34.4% 증가로 실적 자체는 호재이나. 계열사 지분 3.5조 처분 및 배당 감소. 키움증권 목표가 하향 및 리튬 가격 약세 반영 등 악재 요인이 혼재되어 방향성이 상충됨",
+      "price_at_judgment": 313000.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "006400_2026-08-04",
+      "market": "006400",
+      "judged_at": "2026-08-04",
+      "headlines": [
+        "삼성SDI 2분기 영업이익 2천38억원…흑자 전환 - 연합뉴스",
+        "삼성SDI 006400 - 데일리바이트(DAILY BYTE)",
+        "[투데이리포트]삼성SDI, \"2Q26 Revie…\" HOLD-LS증권 - 씽크풀 AI",
+        "[삼성SDI] ESS 수주가 2029년까지 찼다…삼성SDI의 반격이 시작됐다(2026년_2Q) - 네이버 프리미엄콘텐츠",
+        "삼성SDI, 美 AMPC 효과에 ESS 출하량 증가까지 -IBK - 인포스탁데일리"
+      ],
+      "event_type": "실적발표",
+      "direction": "호재",
+      "confidence": 82,
+      "reasoning": "2분기 흑자 전환 달성, ESS 수주가 2029년까지 확보된 상황, 美 AMPC 효과 및 ESS 출하량 증가 등 긍정적 요인 다수 확인, 다만 증권사 투자의견이 HOLD로 상향 여지 제한적",
+      "price_at_judgment": 419500.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "051910_2026-08-04",
+      "market": "051910",
+      "judged_at": "2026-08-04",
+      "headlines": [
+        "LG화학 2분기 영업이익 5천996억원…작년 동기 대비 25.8%↑ - 연합뉴스",
+        "[LG화학] 적자 탈출한 LG화학, 하지만 3분기가 더 중요한 이유(2026년_2Q) - 네이버 프리미엄콘텐츠",
+        "[잠정실적]LG화학, 올해 2Q 매출액 14조1759억(+29%) 영업이익 5996억(+26%) (연결) - 씽크풀 AI",
+        "LG화학, 석화·첨단소재 힘입어 2분기 영업익 25% 늘어 - 서울경제",
+        "LG화학 2Q 영익 5996억, 전년比 25.8% 증가…매출 19%↑ - 네이트"
+      ],
+      "event_type": "실적발표",
+      "direction": "호재",
+      "confidence": 72,
+      "reasoning": "2분기 영업이익 전년 대비 25.8% 증가로 외형 성장은 확인되나, 적자 탈출 표현과 3분기 불확실성 언급이 혼재하여 완전한 호재로 보기엔 유보적 요소 존재.",
+      "price_at_judgment": 256500.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "035420_2026-08-04",
+      "market": "035420",
+      "judged_at": "2026-08-04",
+      "headlines": [
+        "[특징주] 'AI 팩토리' 기대감?…네이버, 장중 8%대 급등 - 연합뉴스",
+        "(특징주)네이버, 장 초반 8%대 강세…엔비디아 협력 기대감 - 뉴스토마토",
+        "[ET특징주] 네이버, AI 팩토리 기대감에 주가 9%↑ - 전자신문",
+        "네이버, 크림에 1300억 투입…유상증자 참여 - 네이트",
+        "엔비디아, 1조4800억에 네이버 3대주주 된다? AI가 분석해주는 NAVER (035420) 상승확률은? - 네이버 프리미엄콘텐츠"
+      ],
+      "event_type": "기타",
+      "direction": "호재",
+      "confidence": 82,
+      "reasoning": "엔비디아와의 협력 기대감 및 AI 팩토리 테마로 장중 8~9% 급등 보도가 다수 확인됨. 크림 유상증자 참여는 단기 자금 유출로 중립적이나 전체 흐름은 AI 협력 모멘텀이 주도하는 강한 호재 국면으로 판단됨.",
+      "price_at_judgment": 226500.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "000270_2026-08-04",
+      "market": "000270",
+      "judged_at": "2026-08-04",
+      "headlines": [
+        "기아(000270) - 매일경제 마켓",
+        "현대차·기아, 7월 미국 판매 역대 최대…하이브리드가 견인 - 연합뉴스",
+        "기아(000270), 사상 최대 매출에도 수익성 기대 밑돌아…하반기 신차 믹스가 관건 - 한국투데이",
+        "[기업 이모저모] 이 길 맞겠지…현대차·기아의 전기차 딜레마 - KB Think",
+        "현대차·기아, 7월 美 판매 '역대 최대'…하이브리드 판매 52%↑ - 뉴스1"
+      ],
+      "event_type": "실적발표",
+      "direction": "중립",
+      "confidence": 55,
+      "reasoning": "7월 미국 판매 역대 최대 및 하이브리드 52% 성장은 호재이나. 사상 최대 매출에도 수익성이 기대치 밑돌았고. 전기차 딜레마 언급으로 불확실성 존재. 하반기 신차 믹스가 관건이라는 조건부 시각이 혼재되어 중립으로 판단",
+      "price_at_judgment": 129600.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "105560_2026-08-04",
+      "market": "105560",
+      "judged_at": "2026-08-04",
+      "headlines": [
+        "KB라이프, 65세 이상 상담원 즉시 연결 서비스 도입 - NSP통신",
+        "KB금융 2분기 영업이익 2조7천125억원…작년 동기 대비 27.2%↑ - 연합뉴스",
+        "KB금융, '실적, 자사주 모두 기대를 충족시킬 전망' 증권사 발표에 강세 - 매일경제 마켓",
+        "[특징주] KB금융(105560), 이익·자본·성장 '삼박자'…투자 매력 부각 - 인천일보",
+        "AI주식상승확률분석 : KB금융(105560) 주가 전망과 상승확률 분석 - Investing.com 한국어"
+      ],
+      "event_type": "실적발표",
+      "direction": "호재",
+      "confidence": 88,
+      "reasoning": "KB금융 2분기 영업이익이 전년 동기 대비 27.2% 증가하며 어닝서프라이즈 수준의 실적을 기록했고. 증권사들이 실적과 자사주 기대치 충족을 언급하며 긍정적 전망을 제시했으며. 이익·자본·성장 삼박자 부각으로 투자 매력이 높아진 복합 호재 상황임",
+      "price_at_judgment": 168800.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "055550_2026-08-04",
+      "market": "055550",
+      "judged_at": "2026-08-04",
+      "headlines": [
+        "신한은행, ‘감정평가서 AI 점검 Agen’ 도입…점검 시간 70% 단축 - NSP통신",
+        "[MK 골든크로스 돌파종목 : 시프트업(462870) & 신한지주(055550)] - 매일경제 마켓",
+        "20일, 기관 거래소에서 KODEX 200선물인버스2X(+9.00%), S-Oil(+1.24%) 등 순매수 - 씽크풀 AI",
+        "신한지주 2분기 실적 발표…신한은행 영업이익 상승, 매출은 감소세 - 공감신문",
+        "신한지주 1분기 영업이익 2조1천545억원…작년 대비 10.8%↑ - 연합뉴스"
+      ],
+      "event_type": "실적발표",
+      "direction": "호재",
+      "confidence": 78,
+      "reasoning": "1분기 영업이익 10.8% 증가로 실적 호조 확인. 2분기는 은행 영업이익 상승했으나 매출 감소로 혼재. AI 기술 도입으로 업무 효율화 긍정적. 골든크로스 돌파 신호도 기술적 매수 신호로 작용.",
+      "price_at_judgment": 102300.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "012330_2026-08-04",
+      "market": "012330",
+      "judged_at": "2026-08-04",
+      "headlines": [
+        "하나증권 \"현대모비스, 2분기 실적 시장 예상치 부합 전망\" - 연합뉴스",
+        "현대모비스(012330), 제조부문 흑자 전환…전장 믹스 개선과 로봇 부품이 성장축 - 한국투데이",
+        "투자정보 - 매일경제 마켓",
+        "현대모비스(012330)저점을 줄때마다 물량 모아둘 기회로 보이며 이후 전망 및 대응전략. - 씽크풀 AI",
+        "현대모비스, 2분기 실적은 기대치 상회·중장기 성장성에 대한 확인 필요 -신한 - 인포스탁데일리"
+      ],
+      "event_type": "실적발표",
+      "direction": "호재",
+      "confidence": 72,
+      "reasoning": "2분기 실적이 시장 예상치 부합 또는 기대치 상회 전망이 복수 증권사에서 언급됨. 제조부문 흑자 전환과 전장 믹스 개선 등 긍정적 사업 모멘텀도 확인됨. 다만 중장기 성장성 확인 필요라는 신중론도 병존해 완전한 호재로 보기엔 다소 유보적 시각 존재.",
+      "price_at_judgment": 481500.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "035720_2026-08-04",
+      "market": "035720",
+      "judged_at": "2026-08-04",
+      "headlines": [
+        "블랙록, 카카오 지분 5.01% 확보…'단순투자' 목적 | - 연합인포맥스",
+        "카카오, 1만명 규모 러닝 페스티벌 ‘카카오프렌즈 런’ 개최 - 인더뉴스",
+        "[카드] \"사투리로 읽어줘\"…카카오, 카나나-오 음성 생성 고도화 - 네이트",
+        "카카오톡 친구탭 이번주 업데이트…이전으로 복구 예정 - 매일경제 마켓",
+        "네카오, 2분기 실적 전망 엇갈려…AI 수익화 시험대 - 연합뉴스"
+      ],
+      "event_type": "기타",
+      "direction": "중립",
+      "confidence": 45,
+      "reasoning": "블랙록의 5% 지분 확보는 단순투자 목적으로 수급 측면 긍정적. 카카오톡 친구탭 UI 복구는 사용자 반발 인정으로 다소 부정적. AI 수익화 불확실성과 2분기 실적 전망 엇갈림은 중립적. 전반적으로 호악재가 혼재하여 방향성 불분명",
+      "price_at_judgment": 37900.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "068270_2026-08-04",
+      "market": "068270",
+      "judged_at": "2026-08-04",
+      "headlines": [
+        "[MK 골든크로스 돌파종목 : 롯데칠성(005300) & 셀트리온(068270)] - 매일경제 마켓",
+        "셀트리온 \"미국 처방약급여관리업체 처방집에 제품 잇단 등재\" - 연합뉴스",
+        "[투데이리포트]셀트리온, \"신규 제품이 바꾼 …\" 매수-신한투자증권 - 씽크풀 AI",
+        "로보인베스팅 골든크로스 돌파종목 : 롯데칠성(005300) & 셀트리온(068270) - Investing.com 한국어",
+        "[투데이리포트]셀트리온, \"2Q26 Re: 기…\" BUY-DS투자증권 - 씽크풀 AI"
+      ],
+      "event_type": "기타",
+      "direction": "호재",
+      "confidence": 72,
+      "reasoning": "미국 PBM 처방집 등재는 바이오시밀러 판매 확대를 의미하는 긍정적 신호이며. 신한투자증권과 DS투자증권 모두 매수 의견을 제시하고 있고. 골든크로스 돌파 신호까지 겹쳐 기술적·펀더멘털 양면에서 긍정적 흐름이 확인됨",
+      "price_at_judgment": 185800.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "028260_2026-08-04",
+      "market": "028260",
+      "judged_at": "2026-08-04",
+      "headlines": [
+        "삼성물산(028260) 주가 및 뉴스 - Google Finance - Google",
+        "[종목상담] 삼성물산(028260) - 매일경제TV",
+        "삼성물산(028260)저점을 줄때마다 물량 모아둘 기회로 보이며 이후 전망 및 대응전략. - 씽크풀 AI",
+        "삼성물산 2분기 영업이익 1조317억원…작년 동기 대비 37.1%↑ - 연합뉴스",
+        "삼성물산 2분기 영업이익 1조317억원…작년 동기 대비 37.1%↑(종합) - 매일경제 마켓"
+      ],
+      "event_type": "실적발표",
+      "direction": "호재",
+      "confidence": 85,
+      "reasoning": "삼성물산 2분기 영업이익 1조317억원으로 전년 동기 대비 37.1% 급증. 어닝 서프라이즈 수준의 이익 성장이며 저점 매수 기회 언급 등 긍정적 시각 다수 존재",
+      "price_at_judgment": 322500.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "066570_2026-08-04",
+      "market": "066570",
+      "judged_at": "2026-08-04",
+      "headlines": [
+        "가전서 희비 갈린 삼성·LG…영업익 2분기째 1조원 격차 - 연합뉴스",
+        "[투데이리포트]LG전자, \"튼튼한 체력이 곧 …\" BUY-DB금융투자 - 씽크풀 AI",
+        "[기업실적]LG전자, 2Q 실적 ‘상승’…영업이익 전년比 147%↑ - NSP통신",
+        "LG전자, 증권사 목표가 상향에 강세…15.63% - 매일경제 마켓",
+        "LG전자(066570) 7월 3주차 리포트 - 데일리바이트(DAILY BYTE)"
+      ],
+      "event_type": "실적발표",
+      "direction": "호재",
+      "confidence": 90,
+      "reasoning": "2Q 영업이익 전년 대비 147% 증가로 실적 대폭 상승. 증권사 목표가 상향 및 BUY 의견 제시. 주가 15.63% 강세 반응 확인",
+      "price_at_judgment": 165500.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "096770_2026-08-04",
+      "market": "096770",
+      "judged_at": "2026-08-04",
+      "headlines": [
+        "[투데이리포트]SK이노베이션, \"실적 추가 상향 대…\" BUY-DB금융투자 - 씽크풀 AI",
+        "SK이노베이션 2분기 영업이익 3조4천873억원…흑자 전환 - 연합뉴스",
+        "SK이노, 2Q 영업익 3.5조 서프라이즈…SK온은 7분기만에 흑자(종합) - KB Think",
+        "[SK이노베이션] 영업이익 3.5조인데 순이익은 735억…SK이노베이션 실적의 두 얼굴(2026년_2Q) - 네이버 프리미엄콘텐츠",
+        "[리포트 브리핑]SK이노베이션, '2Q26 Review' 목표가 175,000원 - LS증권 - 뉴스핌"
+      ],
+      "event_type": "실적발표",
+      "direction": "호재",
+      "confidence": 85,
+      "reasoning": "2Q 영업이익 3.5조 서프라이즈로 흑자 전환 달성. SK온 7분기만에 흑자 기록. DB금융투자 BUY 의견 및 실적 추가 상향 기대. 다만 순이익이 735억으로 영업이익 대비 크게 낮아 일회성 비용 우려 존재하나 전반적 방향은 긍정적",
+      "price_at_judgment": 111300.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "032830_2026-08-04",
+      "market": "032830",
+      "judged_at": "2026-08-04",
+      "headlines": [
+        "[업앤다운]보험 업종 희비 엇갈려…인카금융서비스↑·삼성생명↓ - NSP통신",
+        "[투데이리포트]삼성생명, \"환경은 힘들어도 최...\"매수(유지)_유진 - 씽크풀 AI",
+        "삼성생명(032830) - 매일경제 마켓",
+        "삼성생명, 금융결제원 안면·바이오인증 도입…\"보험업계 최초\" - 연합뉴스 한민족센터",
+        "[투데이리포트]삼성생명, \"예상된 서프라이즈,...\"매수(유지)_신한금융투자 - 씽크풀 AI"
+      ],
+      "event_type": "실적발표",
+      "direction": "호재",
+      "confidence": 65,
+      "reasoning": "신한금융투자의 예상된 서프라이즈 표현과 유진증권의 매수 유지 의견이 긍정적 실적을 시사하며. 보험업계 최초 바이오인증 도입은 기술 혁신 이미지 강화. 다만 환경이 힘들다는 언급과 업종 내 희비 엇갈림은 일부 불확실성을 내포함",
+      "price_at_judgment": 278000.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "003550_2026-08-04",
+      "market": "003550",
+      "judged_at": "2026-08-04",
+      "headlines": [
+        "LG - 씽크풀 AI",
+        "iM증권 \"LG, 피지컬AI 밸류체인·개정 상법 수혜 기대\" - 연합뉴스",
+        "LG CNS, AI 투자로 숨 고르기…전 사업부 성장 모멘텀 유효-LS - edaily.co.kr",
+        "독파모 4강, 글로벌 개발자 검증대 올랐다 - 네이트",
+        "교실로 간 LG 엑사원, 3만 AI인재 양성 - 서울경제"
+      ],
+      "event_type": "기타",
+      "direction": "호재",
+      "confidence": 72,
+      "reasoning": "피지컬AI 밸류체인 수혜 기대와 개정 상법 수혜 언급. LG CNS AI 투자 모멘텀 유효. LG 엑사원 기반 AI 인재 양성 등 AI 사업 전반에 걸친 긍정적 성장 내러티브가 복수 헤드라인에서 확인됨",
+      "price_at_judgment": 102000.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "015760_2026-08-04",
+      "market": "015760",
+      "judged_at": "2026-08-04",
+      "headlines": [
+        "김성환 기후장관 \"지방 산업용 전기료, 4개 권역 나눠 차등 인하\" - KB Think",
+        "한국전력 - 씽크풀 AI",
+        "KB증권 \"한국전력, 2분기 실적 기대치 밑돌 것…목표가↓\" - 연합뉴스",
+        "[종목상담] 한국전력(015760) - 매일경제TV",
+        "[뉴스락 주식네비 2월 25일] 한국전력(015760), 원전 수출 모멘텀 타고 기업가치 재평가 - 뉴스락"
+      ],
+      "event_type": "규제",
+      "direction": "중립",
+      "confidence": 45,
+      "reasoning": "전기료 차등 인하 정책은 수익성에 악재 가능성이 있으나 원전 수출 모멘텀과 기업가치 재평가 기대감이 공존하고, KB증권의 목표가 하향과 2분기 실적 우려는 단기 악재로 작용해 방향성이 혼재된 상황임",
+      "price_at_judgment": 35150.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "034730_2026-08-04",
+      "market": "034730",
+      "judged_at": "2026-08-04",
+      "headlines": [
+        "SK, 주당 1천500원 중간 배당…87억 전환사채도 발행 | - 연합인포맥스",
+        "29일, 기관 거래소에서 KODEX 레버리지(+2.2%), SK(+9.93%) 등 순매수 - 씽크풀 AI",
+        "SK, 국내 유일 웨이퍼 제조사 SK실트론 왜 팔았나 - KB Think",
+        "최태원 회장, SK하이닉스 주식 3620주 장내매수 - 인포스탁데일리",
+        "두산, SK실트론 2.3조에 인수…최태원 지분은 제외 [시그널] - 서울경제"
+      ],
+      "event_type": "M&A",
+      "direction": "호재",
+      "confidence": 72,
+      "reasoning": "SK실트론을 두산에 2.3조에 매각하여 유동성 확보 기대, 중간 배당 실시로 주주환원 긍정적, 기관 순매수 및 최태원 회장 하이닉스 장내매수로 그룹 신뢰도 유지, 다만 핵심 자산 매각은 장기 성장성 측면에서 불확실성 존재",
+      "price_at_judgment": 518000.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "086790_2026-08-04",
+      "market": "086790",
+      "judged_at": "2026-08-04",
+      "headlines": [
+        "하나금융지주, '환율 환경과 밸류에이션 매력 모두 부각' 증권사 발표에 강세 - 매일경제 마켓",
+        "하나금융지주(086790) 7월 3주차 리포트 - 데일리바이트(DAILY BYTE)",
+        "[투데이리포트]하나금융지주, \"새로운 프레임워크로…\" BUY-흥국증권 - 씽크풀 AI",
+        "하나증권 2분기 영업이익 2천37억원…작년 동기 대비 783.3%↑ - 연합뉴스",
+        "하나금융, 잠실 스포츠·마이스 복합공간 4조 PF 금융주관 맡는다 - NSP통신"
+      ],
+      "event_type": "실적발표",
+      "direction": "호재",
+      "confidence": 82,
+      "reasoning": "하나증권 2분기 영업이익이 전년 동기 대비 783% 급증하며 실적 서프라이즈 기록. 증권사 BUY 리포트와 밸류에이션 매력 부각. 4조원 규모 PF 금융주관 수주로 사업 확장 기대감까지 복합적 호재 작용",
+      "price_at_judgment": 127600.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "010130_2026-08-04",
+      "market": "010130",
+      "judged_at": "2026-08-04",
+      "headlines": [
+        "MBK·영풍, 고려아연 임시주총 결의 취소소송 취하…\"소제기 목적 달성\" - 연합뉴스",
+        "고려아연, 2분기 영업익 6000억 육박 전망…은값 하락 구리로 버텨 - 뉴스1",
+        "창립52주년 맞은 고려아연…최윤범 “글로벌 핵심광물 플랫폼으로 도약” - 서울경제",
+        "2100억 상속세 현실화…고려아연 최씨 일가 ‘우군’ 변수되나 - 마켓인",
+        "[투데이리포트]고려아연, \"비철금속 귀금속 가…\" BUY-현대차증권 - 씽크풀 AI"
+      ],
+      "event_type": "기타",
+      "direction": "호재",
+      "confidence": 72,
+      "reasoning": "MBK·영풍과의 소송 취하로 경영권 분쟁 리스크 일부 해소. 2분기 영업익 6000억 전망으로 실적 견조. 최윤범 회장의 글로벌 플랫폼 도약 비전 제시. 상속세 변수는 우군 확보 가능성으로 불확실하나 긍정적 해석 여지 있음. 현대차증권 BUY 의견 유지로 투자심리 지지.",
+      "price_at_judgment": 1044000.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "009150_2026-08-04",
+      "market": "009150",
+      "judged_at": "2026-08-04",
+      "headlines": [
+        "삼성전기(009150)저점을 줄때마다 물량 모아둘 기회로 보이며 이후 전망 및 대응전략. - 씽크풀 AI",
+        "삼성전기(009150) - 매일경제 마켓",
+        "[실적 발표] 삼성전기(009150) 2Q26 반도체가 오를수록 웃는 회사 - 네이버 프리미엄콘텐츠",
+        "삼성전기(009150), 엔비디아 납품 기판 양산…수요 대응 본격화 - 인천일보",
+        "삼성전기 2분기 영업이익 4천404억원…작년 동기 대비 106.7%↑ - 연합뉴스"
+      ],
+      "event_type": "실적발표",
+      "direction": "호재",
+      "confidence": 92,
+      "reasoning": "2Q 영업이익 전년 동기 대비 106.7% 증가로 어닝 서프라이즈 수준의 실적 달성. 엔비디아 납품 기판 양산 개시로 AI 수혜 본격화. 저점 매수 추천 및 긍정적 전망 헤드라인 다수 확인",
+      "price_at_judgment": 1185000.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "042660_2026-08-04",
+      "market": "042660",
+      "judged_at": "2026-08-04",
+      "headlines": [
+        "[실적 발표] 한화오션(042660) 2Q26 사상 최대 실적, 주가는 고점 대비 (근)반토막 - 네이버 프리미엄콘텐츠",
+        "대우조선해양(042660) - 매일경제 마켓",
+        "상장사는 한화오션(KRX:042660)의 최대주주이며 시가총액이 2.0조 원 하락한 후 타격을 입었습니다. - simplywall.st",
+        "한화오션, KDDX 본계약 체결…7.8조원 차기구축함 사업 본격화 - KB Think",
+        "30일, 거래소 외국인 순매수상위에 전기,전자 업종 8종목 - 씽크풀 AI"
+      ],
+      "event_type": "실적발표",
+      "direction": "호재",
+      "confidence": 72,
+      "reasoning": "2Q26 사상 최대 실적 달성과 KDDX 7.8조원 본계약 체결은 강력한 호재이나. 주가가 고점 대비 근반토막 수준이며 시가총액 2조원 하락 언급이 있어 시장 반응은 엇갈린 상황임. 실적과 수주 펀더멘털 자체는 긍정적으로 판단.",
+      "price_at_judgment": 87500.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "196170_2026-08-04",
+      "market": "196170",
+      "judged_at": "2026-08-04",
+      "headlines": [
+        "알테오젠(196170) - 매일경제 마켓",
+        "AI가 분석해주는 알테오젠(196170) 상승확률은? - 네이버 프리미엄콘텐츠",
+        "[서울데이터랩]코스닥 시총 상위주 강세…바이오·2차전지 동반 상승 - 네이트",
+        "알테오젠(196170)밀릴때마다 물량 모아둘 기회로 보이며 이후 전망 및 대응전략. - 씽크풀 AI",
+        "알테오젠, 증권사 목표가 상향에 강세…8.33% - 매일경제 마켓"
+      ],
+      "event_type": "기타",
+      "direction": "호재",
+      "confidence": 72,
+      "reasoning": "증권사 목표가 상향으로 8.33% 강세 기록. 코스닥 바이오 동반 상승 흐름 속 수급 매집 전략 언급. 단 실적·공시 등 구체적 모멘텀 부재로 신뢰도는 중간 수준",
+      "price_at_judgment": 347000.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "000810_2026-08-04",
+      "market": "000810",
+      "judged_at": "2026-08-04",
+      "headlines": [
+        "[MK 골든크로스 돌파종목 : 기아(000270) & 삼성화재(000810)] - 매일경제 마켓",
+        "[투데이리포트]삼성화재, \"나도 삼성전자 주식…\" 매수-신한투자증권 - 씽크풀 AI",
+        "삼성화재 3분기 누적 순이익 1조7천836억원…작년 대비 4.4%↓(종합) - 연합뉴스",
+        "[생생한 주식쇼 생쇼] 삼성화재 (000810) 정책 수혜 기대감에 가치주 부각 - 매일경제TV",
+        "삼성화재, S&P 신용등급 'AA' 획득…국내 민간기업서 최초 - 연합뉴스"
+      ],
+      "event_type": "실적발표",
+      "direction": "호재",
+      "confidence": 72,
+      "reasoning": "3분기 누적 순이익 4.4% 감소로 실적 자체는 소폭 부진하나. S&P AA 신용등급 최초 획득이라는 강력한 호재. 골든크로스 돌파 및 가치주 부각. 매수 리포트 등 전반적 긍정 신호가 우세함",
+      "price_at_judgment": 620000.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "316140_2026-08-04",
+      "market": "316140",
+      "judged_at": "2026-08-04",
+      "headlines": [
+        "우리은행, 고객패널 간담회 개최…금융위·금감원 소통반과 현장 의견 공유 - NSP통신",
+        "우리금융지주(316140) - 매일경제 마켓",
+        "[특징주] 우리금융, 1천500억원 자사주 매입·소각에 7%대 상승(종합) - 연합뉴스",
+        "동양 \"우리금융지주 지분가치만 약 1000억원\" - 파이낸셜뉴스",
+        "우리은행 2분기 영업이익 1조829억원…작년 동기 대비 1.7%↓ - 연합뉴스"
+      ],
+      "event_type": "공시",
+      "direction": "호재",
+      "confidence": 78,
+      "reasoning": "1500억원 자사주 매입 및 소각 공시로 주가 7%대 상승이 확인되며 주주환원 강화 신호로 호재. 다만 2분기 영업이익이 전년 동기 대비 1.7% 감소하여 실적 측면은 소폭 부정적. 동양의 지분가치 1000억원 언급은 우리금융 가치 재조명으로 긍정적. 전반적으로 주주환원 이벤트가 실적 부진을 상쇄하며 호재 우위.",
+      "price_at_judgment": 33200.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "024110_2026-08-04",
+      "market": "024110",
+      "judged_at": "2026-08-04",
+      "headlines": [
+        "IBK기업은행, 현대기아차·기보와 중소기업 금융지원 업무협약 - 연합뉴스 한민족센터",
+        "기업은행 '1Q26 Preview' 증권사 발표에 강세…3.28% - 매일경제 마켓",
+        "[카드] 기업은행, IBK 착한금리 포용대출 출시 - 네이트",
+        "기업은행, 은행주 고ROE+저PER+저PBR 1위 - 버핏연구소",
+        "IBK기업은행, AI 불완전판매 탐지 시스템 도입 - 연합뉴스"
+      ],
+      "event_type": "실적발표",
+      "direction": "호재",
+      "confidence": 78,
+      "reasoning": "1Q26 Preview 긍정적 전망으로 주가 강세. 은행주 중 고ROE 저PER 저PBR 1위 평가로 밸류에이션 매력 부각. 중소기업 금융지원 협약 및 AI 불완전판매 탐지 도입 등 사업 확장과 리스크 관리 강화로 전반적 긍정적 흐름",
+      "price_at_judgment": 20350.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "247540_2026-08-04",
+      "market": "247540",
+      "judged_at": "2026-08-04",
+      "headlines": [
+        "에코프로비엠(247540) - 매일경제 마켓",
+        "IBK증권, 에코프로비엠 목표가↓…\"2분기 실적 컨센서스 하회\" - 연합뉴스",
+        "[기업실적] 에코프로, 수익성 ‘개선’…2분기 영업익 329억 흑자 기조 - NSP통신",
+        "[잠정실적]에코프로비엠, 올해 2Q 매출액 5767억(-26%) 영업이익 180억(-63%) (연결) - 씽크풀 AI",
+        "유진證 “에코프로비엠, 과도한 주가 하락에도 시장 가치 반영… 목표가 25만→20만원 하향” - 조선비즈 - Chosunbiz"
+      ],
+      "event_type": "실적발표",
+      "direction": "악재",
+      "confidence": 85,
+      "reasoning": "2Q 매출액 26% 감소. 영업이익 63% 급감으로 컨센서스 하회. IBK증권과 유진증권 모두 목표가 하향 조정. 실적 부진이 명확하게 확인됨",
+      "price_at_judgment": 102500.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "086520_2026-08-04",
+      "market": "086520",
+      "judged_at": "2026-08-04",
+      "headlines": [
+        "에코프로, 2Q 영업익 329억원…전년비 102%↑ - 연합인포맥스",
+        "에코프로 2분기 영업이익 329억원, 전년比 102.7%↑…매출 8208억원 - 뉴스1",
+        "[기업실적] 에코프로, 수익성 ‘개선’…2분기 영업익 329억 흑자 기조 - NSP통신",
+        "[잠정실적]에코프로, 올해 2Q 매출액 8208억(-12%) 영업이익 329억(+103%) (연결) - 씽크풀 AI",
+        "AI주식상승확률분석 : 에코프로(086520) 주가 전망과 상승확률 분석 - Investing.com 한국어"
+      ],
+      "event_type": "실적발표",
+      "direction": "호재",
+      "confidence": 72,
+      "reasoning": "2분기 영업이익이 전년 대비 103% 증가하며 흑자 기조 유지는 긍정적. 다만 매출액은 전년 대비 12% 감소하여 외형 축소가 동반되어 있어 완전한 호재로 보기엔 다소 제한적.",
+      "price_at_judgment": 82000.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "328130_2026-08-04",
+      "market": "328130",
+      "judged_at": "2026-08-04",
+      "headlines": [
+        "루닛 (328130) - 씽크풀 AI",
+        "'실적 개선 기대' 루닛·토모큐브↑...'FDA 인증 획득 실패' 뷰노↓[바이오 맥짚기... - 마켓인",
+        "루닛, 英·美 대형 의료기관과 공급 계약…글로벌 고객 확대 - 서울경제",
+        "[생생한 주식쇼 생쇼] 루닛(328130) 투자 포인트 요약 - 매일경제TV",
+        "로보인베스팅 골든크로스 돌파 종목 : 두산에너빌리티(034020) & 루닛(328130) - Investing.com 한국어"
+      ],
+      "event_type": "공시",
+      "direction": "호재",
+      "confidence": 78,
+      "reasoning": "영국·미국 대형 의료기관과 공급 계약 체결로 글로벌 고객 확대 확인. 실적 개선 기대감 언급. 골든크로스 돌파 기술적 신호까지 겹쳐 전반적으로 긍정적 흐름",
+      "price_at_judgment": 10750.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "240810_2026-08-04",
+      "market": "240810",
+      "judged_at": "2026-08-04",
+      "headlines": [
+        "26일, 기관 코스닥에서 원익IPS(+5.88%), 피에스케이(+10.32%) 등 순매수 - 씽크풀 AI",
+        "원익 IPS(KOSDAQ:240810) 매수를 고려하기에는 이미 늦은 걸까요? - simplywall.st",
+        "사모펀드, 코스닥 시장에서 테스 79.38억원 순매수 - 씽크풀 AI",
+        "SK증권 \"원익IPS 급증 수주 3분기부터 실적 체감…목표가↑\" - 매일경제 마켓",
+        "[주목 e-주식] 원익IPS 446%↑…\"코스피 147%↑, AI·반도체 슈퍼사이클 역대급 상승장\" - 이코노미톡뉴스"
+      ],
+      "event_type": "실적발표",
+      "direction": "호재",
+      "confidence": 85,
+      "reasoning": "SK증권이 수주 급증과 3분기 실적 체감을 근거로 목표가를 상향했고. 기관 순매수와 AI·반도체 슈퍼사이클 언급이 겹치며 전반적으로 강한 호재 신호가 복수 헤드라인에서 확인됨",
+      "price_at_judgment": 96500.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "041510_2026-08-04",
+      "market": "041510",
+      "judged_at": "2026-08-04",
+      "headlines": [
+        "KB증권 \"에스엠, 2분기 실적 기대치 밑돌 것…목표가↓\" - 연합뉴스",
+        "[잠정실적]에스엠, 3년 중 최고 매출 달성, 영업이익은 전년동기 대비 262%↑ (연결) - 씽크풀 AI",
+        "엔터株에 부는 찬바람…올해 들어 시총 8조 날아가 - edaily.co.kr",
+        "정국·윈터 열애설에 개미들 \"불안하네\"…에스엠, 주가도 이달 6% '뚝' [이런국장 저런주식] - 서울경제",
+        "에스엠, 결산배당 1주당 1620원 현금배당 결정 - 디지털투데이"
+      ],
+      "event_type": "실적발표",
+      "direction": "악재",
+      "confidence": 65,
+      "reasoning": "잠정실적은 매출 최고치에 영업이익 262% 증가로 긍정적이나, KB증권의 목표가 하향 및 기대치 하회 전망, 엔터주 전반 시총 8조 감소, 열애설로 인한 투자심리 위축과 주가 6% 하락 등 부정적 신호가 우세함. 배당 결정은 중립적 요소이나 전반적 센티먼트는 악재로 판단됨.",
+      "price_at_judgment": 76700.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "112040_2026-08-04",
+      "market": "112040",
+      "judged_at": "2026-08-04",
+      "headlines": [
+        "9200억원 위메이드 인수, 누가 돈 대나…네오펄스 자금 구조 베일에 - 전자신문",
+        "위메이드, 애프터마켓서 10%대 급등 - 매일경제 마켓",
+        "위메이드 위믹스 또 해킹…\"스테이블코인 비정상 발행\" - 연합뉴스",
+        "위메이드, 공식 블로그 ‘WEMADE Stories’ 오픈 - NSP통신",
+        "[잠정실적]위메이드, 올해 1Q 매출액 1533억(+8.1%) 영업이익 84.9억(흑자전환) (연결) - 씽크풀 AI"
+      ],
+      "event_type": "M&A",
+      "direction": "호재",
+      "confidence": 62,
+      "reasoning": "9200억원 규모 인수 재료로 애프터마켓 10%대 급등 확인되나 자금 구조 불투명이 불확실성 유발. 1Q 흑자전환 실적은 긍정적이나 위믹스 해킹 악재가 동시 존재해 방향성 혼재. M&A 기대감이 단기 주도 재료로 작용하나 자금 조달 리스크로 신뢰도 제한",
+      "price_at_judgment": 16380.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "039030_2026-08-04",
+      "market": "039030",
+      "judged_at": "2026-08-04",
+      "headlines": [
+        "사모펀드, 코스닥 시장에서 에코프로 26.28억원 순매수 - 씽크풀 AI",
+        "AI가 분석해주는 이오테크닉스 (039030) 상승확률은? - 네이버 프리미엄콘텐츠",
+        "특징주, 이오테크닉스-반도체 장비 테마 상승세에 6.87% ↑ - 매일경제 마켓",
+        "이오테크닉스, 애프터마켓서 10%대 급락 - 연합뉴스",
+        "이오테크닉스(039030)밀릴때마다 물량 모아둘 기회로 보이며 이후 전망 및 대응전략. - 씽크풀 AI"
+      ],
+      "event_type": "기타",
+      "direction": "중립",
+      "confidence": 45,
+      "reasoning": "반도체 장비 테마 상승으로 6.87% 오른 뒤 애프터마켓에서 10%대 급락이 나타나 단기 변동성이 크고. 사모펀드 순매수 및 저점 매수 추천 의견이 혼재하여 방향성이 불명확한 상태임",
+      "price_at_judgment": 309000.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
+    },
+    {
+      "id": "068760_2026-08-04",
+      "market": "068760",
+      "judged_at": "2026-08-04",
+      "headlines": [
+        "셀트리온제약, 2분기 영업이익 193억원…분기 최대 실적 - 연합뉴스",
+        "셀트리온제약, 2Q 영업익 193억·24%↑…\"분기 역대 최대\" | - 연합인포맥스",
+        "셀트리온제약, 2분기 영업익 ‘분기 최대’…“전사업 성장” - 조선비즈 - Chosunbiz",
+        "셀트리온제약, 1분기 영업이익 129억원…20% 증가 - 매일경제 마켓",
+        "[생생한 주식쇼 생쇼] 셀트리온제약 (068760) - 매일경제TV"
+      ],
+      "event_type": "실적발표",
+      "direction": "호재",
+      "confidence": 90,
+      "reasoning": "2분기 영업이익 193억원으로 분기 역대 최대 실적 달성. 전년 대비 24% 증가. 1분기도 20% 증가로 실적 모멘텀 지속 확인",
+      "price_at_judgment": 41700.0,
+      "outcomes": {
+        "d1": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d5": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        },
+        "d20": {
+          "date": null,
+          "price": null,
+          "return_pct": null
+        }
+      }
     }
   ],
   "notified_30": true
