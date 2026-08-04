@@ -123,6 +123,58 @@ def refresh_last_report(portfolio, pending):
     save_json(LAST_REPORT_FILE, last_report)
 
 
+# ── 규칙 기반 자동실행 킬스위치 (2026-08-04) ────────────────────────────────
+# 자동실행을 즉시 멈추는 수단. autoexec.py는 실행 직전에 매번 이 상태를 확인하며,
+# 한 번 걸리면 /autoexec_start로 명시적으로 풀기 전까지 유지된다 — 재실행이나
+# 워크플로 재시작으로 저절로 풀리지 않는다.
+
+def handle_autoexec_stop():
+    import autoexec
+    st = autoexec.load_state()
+    already = autoexec.kill_switch_engaged(st)
+    st = autoexec.engage_kill_switch(st)
+    autoexec.save_json(autoexec.STATE_FILE, st)
+    send_telegram(
+        ("🛑 자동실행 킬스위치 작동 (이미 작동 중이었음)" if already else "🛑 자동실행 킬스위치 작동")
+        + f"\n중단 시각: {st['stopped_at']}"
+        "\n이후 어떤 규칙도 실행되지 않습니다. 판정과 로깅은 계속됩니다."
+        "\n해제하려면 /autoexec_start 를 보내세요."
+    )
+    return True
+
+
+def handle_autoexec_start():
+    import autoexec
+    st = autoexec.load_state()
+    if not autoexec.kill_switch_engaged(st):
+        send_telegram("ℹ️ 킬스위치는 이미 해제 상태입니다.")
+        return False
+    st = autoexec.release_kill_switch(st)
+    autoexec.save_json(autoexec.STATE_FILE, st)
+    send_telegram("▶️ 자동실행 킬스위치 해제. 규칙 실행이 다시 허용됩니다.\n"
+                  "(RULE_BASED_AUTOEXEC_ENABLED가 false면 여전히 판정만 수행합니다.)")
+    return True
+
+
+def handle_autoexec_status():
+    import autoexec
+    from analyze_lib import RULE_BASED_AUTOEXEC_ENABLED
+    st = autoexec.load_state()
+    log = load_json(autoexec.LOG_FILE, {"decisions": []})
+    today = autoexec.today_kst()
+    todays = [d for d in log["decisions"] if d.get("date") == today]
+    lines = [
+        "🤖 자동실행 상태",
+        f"· 킬스위치: {'🛑 작동 중' if autoexec.kill_switch_engaged(st) else '해제됨'}",
+        f"· 활성 플래그: {'true' if RULE_BASED_AUTOEXEC_ENABLED else 'false (판정만)'}",
+        f"· 유예기간: {'적용 중 (규칙별 1일 1회)' if autoexec.in_grace_period(st) else '해제됨'}",
+        f"· 최초 활성화: {st.get('first_enabled_at') or '없음'}",
+        f"· 오늘 판정 로그: {len(todays)}건 (누적 {len(log['decisions'])}건)",
+    ]
+    send_telegram("\n".join(lines))
+    return True
+
+
 def run():
     offset_data = load_json(OFFSET_FILE, {"last_update_id": 0})
     portfolio = load_json(PORTFOLIO_FILE, {"cash": 100000, "positions": []})
@@ -158,6 +210,12 @@ def run():
         elif cmd == "/unkeep" and len(parts) > 1:
             if handle_unkeep(parts[1], portfolio):
                 changed = True
+        elif cmd == "/autoexec_stop":
+            handle_autoexec_stop()
+        elif cmd == "/autoexec_start":
+            handle_autoexec_start()
+        elif cmd == "/autoexec_status":
+            handle_autoexec_status()
         elif cmd == "/status":
             lines = [f"- {p['market']}: {p.get('current_return',0):+.2f}% {'💎확신' if p.get('conviction') else ''}" for p in portfolio["positions"]]
             send_telegram("📊 현재 포지션\n" + "\n".join(lines) if lines else "보유 포지션 없음")

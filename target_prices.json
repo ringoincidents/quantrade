@@ -1,0 +1,10 @@
+{
+  "_note": "종목별 목표가. 반드시 사람이 수기로 입력한다. AI/코드가 계산하거나 제안하지 않으며, autoexec.py에는 Claude API 호출이 없다(self-test [6]이 검사).",
+  "_fields": {
+    "target_price": "이 가격 이상이면 부분익절 발동 (통화는 해당 종목 표시통화)",
+    "sell_ratio_pct": "도달 시 매도할 보유 수량 비율(%)",
+    "entered_at": "입력한 날짜",
+    "note": "메모(선택)"
+  },
+  "targets": {}
+}

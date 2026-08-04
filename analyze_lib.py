@@ -70,6 +70,27 @@ AI_SUGGESTION_DRY_RUN = os.environ.get("AI_SUGGESTION_DRY_RUN", "true").lower() 
 # 이 스위치를 되돌린다. 프롬프트를 고쳤다거나 이번엔 될 것 같다는 이유로 켜지 마라.
 PREDICTION_ENABLED = os.environ.get("PREDICTION_ENABLED", "false").lower() == "true"
 
+# ─────────────────────────────────────────────────────────────────────────────
+# 규칙 기반 포지션 관리 자동실행 (2026-08-04, 방향성 세션 정식 승인).
+#
+# **TRACK_B_ENABLED와는 별개의 플래그이며, 코드 상 두 플래그 사이에 어떤 참조
+# 관계도 없다** — 한쪽 값이 다른 쪽을 읽거나 바꾸지 않고, 서로의 조건문에
+# 등장하지도 않는다. (TRACK_B_ENABLED는 아직 정의돼 있지도 않은 예약된 이름이다.)
+# 혼동 방지를 위해 명시해 둔다.
+#
+# 이 플래그가 켜지면 autoexec.py의 세 규칙(집중도 리밸런싱 / 손실 지속 손절 /
+# 목표가 부분익절)이 **매도만** 실행한다. 매수 경로는 코드 구조상 없다.
+#
+# 활성화 순서(방향성 세션 지시, 건너뛰지 말 것):
+#   1) /autoexec_stop 킬스위치 테스트 통과
+#   2) 안전장치(전량 로깅/사후 통보/유예기간 레이트리밋) 전부 검증
+#   3) 그 다음에만 이 값을 true로
+#
+# 현재 주문 실행 계층(autoexec.place_sell_order)은 토스 주문 API 스펙이 없어
+# 미구현이다. 따라서 이 값을 true로 바꿔도 주문은 나가지 않고 "실행 불가"로
+# 로깅된다.
+RULE_BASED_AUTOEXEC_ENABLED = os.environ.get("RULE_BASED_AUTOEXEC_ENABLED", "false").lower() == "true"
+
 
 def calc_ma(prices, window):
     return sum(prices[-window:]) / window
