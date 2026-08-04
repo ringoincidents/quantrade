@@ -1,0 +1,75 @@
+name: Portfolio Report (weekly)
+
+# [v3.2 활성 기능] 정기 포트폴리오 리포트 — 현황 계산 + 사전 정의 규칙 해당 여부.
+# 예측이 아니다: 출력 스키마에 direction/confidence/action이 없고, 텍스트에도
+# 매매 지시 표현을 넣지 않는다(portfolio_report.py self-test가 검사).
+#
+# 읽기 전용: real_portfolio.json을 읽기만 하고 쓰지 않는다. 승인/주문 경로와
+# 연결되지 않으며, 실계좌 데이터를 사람이 보도록 표시하는 용도는 CLAUDE.md에서
+# 이미 승인된 범주다.
+on:
+  schedule:
+    # 일요일 23:10 UTC = 월요일 08:10 KST — 사용자가 PC를 쓸 수 있는
+    # 평일 06~09시 창(CLAUDE.md 프로젝트 컨텍스트) 안에 들어오도록 잡았다.
+    # sync_real.yml(:25분)과 분을 어긋나게 해 커밋 경합을 줄인다.
+    - cron: '10 23 * * 0'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+      - name: Self-test (network-free)
+        run: python portfolio_report.py --self-test
+      - name: Generate report and send weekly summary
+        run: python portfolio_report.py --telegram
+      - name: Verify report carries no predictive fields
+        run: |
+          python - <<'PY'
+          import json, sys
+          FORBIDDEN = {"direction","confidence","action","recommendation",
+                       "target_weight_pct","signal","buy","sell","score"}
+          def scan(o, path="report"):
+              bad = []
+              if isinstance(o, dict):
+                  for k, v in o.items():
+                      if k in FORBIDDEN: bad.append(f"{path}.{k}")
+                      bad += scan(v, f"{path}.{k}")
+              elif isinstance(o, list):
+                  for i, v in enumerate(o): bad += scan(v, f"{path}[{i}]")
+              return bad
+          bad = scan(json.load(open("portfolio_report.json", encoding="utf-8")))
+          if bad: print("예측성 필드 발견:", bad); sys.exit(1)
+          print("예측성 필드 없음 확인")
+          PY
+      - name: Verify real_portfolio.json untouched (read-only)
+        run: |
+          git diff --quiet -- real_portfolio.json \
+            || { echo "real_portfolio.json이 변경됨 - 읽기 전용 원칙 위반"; exit 1; }
+          echo "real_portfolio.json 무변경 확인"
+      - name: Commit report
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add portfolio_report.json portfolio_report_state.json
+          git diff --quiet && git diff --staged --quiet && echo "변경 없음" && exit 0
+          git commit -m "Portfolio report update"
+          for attempt in 1 2 3 4 5; do
+            if git push; then echo "push 성공 (시도 $attempt)"; exit 0; fi
+            echo "push 거부됨 - rebase 후 재시도 ($attempt/5)"
+            git pull --rebase origin main || exit 1
+            sleep $((attempt * 5))
+          done
+          echo "5회 시도 후에도 push 실패"; exit 1

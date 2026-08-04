@@ -1,0 +1,102 @@
+{
+  "generated_at": "2026-08-04",
+  "schema": "portfolio_report_v3.2",
+  "note": "현황 계산 + 사전 정의 규칙 해당 여부만 담는다. 매매 판단/방향 예측/확신도 필드는 스키마에 없다 - 누락이 아니라 설계.",
+  "thresholds": {
+    "provisional": true,
+    "concentration_pct": 30.0,
+    "loss_pct": -50.0,
+    "loss_sustained_days": 60
+  },
+  "snapshot": {
+    "synced_at": "2026-08-04T03:46:21.507463+00:00",
+    "total_assets_krw": 4286697.0,
+    "cash_krw": 63.0,
+    "cash_pct": 0.0,
+    "position_count": 8,
+    "positions": [
+      {
+        "symbol": "SCHD",
+        "name": "SCHD",
+        "market_country": "US",
+        "eval_amount_krw": 2611738.0,
+        "weight_pct": 60.93,
+        "return_pct": 2.92
+      },
+      {
+        "symbol": "310200",
+        "name": "애니플러스",
+        "market_country": "KR",
+        "eval_amount_krw": 672500.0,
+        "weight_pct": 15.69,
+        "return_pct": 27.37
+      },
+      {
+        "symbol": "196170",
+        "name": "알테오젠",
+        "market_country": "KR",
+        "eval_amount_krw": 341000.0,
+        "weight_pct": 7.95,
+        "return_pct": -0.43
+      },
+      {
+        "symbol": "NVDA",
+        "name": "엔비디아",
+        "market_country": "US",
+        "eval_amount_krw": 295811.0,
+        "weight_pct": 6.9,
+        "return_pct": 2.32
+      },
+      {
+        "symbol": "042660",
+        "name": "한화오션",
+        "market_country": "KR",
+        "eval_amount_krw": 257400.0,
+        "weight_pct": 6.0,
+        "return_pct": -2.3800000000000003
+      },
+      {
+        "symbol": "AIXI",
+        "name": "샤오아이(ADR)",
+        "market_country": "US",
+        "eval_amount_krw": 99443.0,
+        "weight_pct": 2.32,
+        "return_pct": -94.87
+      },
+      {
+        "symbol": "VTI",
+        "name": "VTI",
+        "market_country": "US",
+        "eval_amount_krw": 7237.0,
+        "weight_pct": 0.17,
+        "return_pct": 2.02
+      },
+      {
+        "symbol": "NXXT",
+        "name": "넥스트NRG",
+        "market_country": "US",
+        "eval_amount_krw": 1505.0,
+        "weight_pct": 0.04,
+        "return_pct": -26.090000000000003
+      }
+    ],
+    "weight_by_country_pct": {
+      "US": 70.36,
+      "KR": 29.64
+    }
+  },
+  "rule_matches": [
+    {
+      "rule": "집중도",
+      "symbol": "SCHD",
+      "name": "SCHD",
+      "threshold": "단일 종목 비중 30% 이상",
+      "observed": "60.93%",
+      "fact": "SCHD(SCHD) 비중이 총자산의 60.93%로 기준 30% 이상"
+    }
+  ],
+  "roadmap": {
+    "status": "미입력",
+    "reason": "income_schedule.json이 placeholder 상태 - 계급별 기간/월급/적금 실제 값 필요"
+  }
+}

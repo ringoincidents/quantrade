@@ -81,7 +81,7 @@
 <div class="page">
 
 <h1>QuanTrade 대시보드</h1>
-<p class="subtitle">실계좌 조회 · 리스크 가드레일 · 뉴스 사건 설명 · Phase 1/2 연구 기록 <b>(v3.2: 매매 예측 비활성)</b></p>
+<p class="subtitle">실계좌 조회 · 포트폴리오 리포트 · 리스크 가드레일 · 뉴스 사건 설명 · Phase 1/2 연구 기록 <b>(v3.2: 매매 예측 비활성)</b></p>
 
 <!-- ===== Block 1: 국내주식 실계좌 현황 ===== -->
 <div class="section-divider">국내주식 실계좌 (토스증권)</div>
@@ -116,8 +116,18 @@
   </div>
 </div>
 
-<!-- ===== Block 2: [v3.2 신규] 보호적 경고 — 규칙 위반 사실만 ===== -->
-<!-- 이 블록은 정보성 카드(Block 3)와 코드/템플릿 레벨에서 분리돼 있다.
+<!-- ===== Block 2: [v3.2 신규] 포트폴리오 리포트 — 현황 + 규칙 해당 여부 ===== -->
+<!-- 읽기 전용. 실행 버튼 없음. 렌더러는 화이트리스트만 읽고, 예측성 필드가
+     섞이면 assertNoPredictiveFields가 렌더를 거부한다(보호적 경고 카드와 동일 규율). -->
+<div class="section-divider">포트폴리오 리포트 (읽기 전용)</div>
+<h2>📋 현황 및 규칙 점검</h2>
+
+<div class="card" id="preport-section">
+  <p class="muted">로딩 중...</p>
+</div>
+
+<!-- ===== Block 3: [v3.2 신규] 보호적 경고 — 규칙 위반 사실만 ===== -->
+<!-- 이 블록은 정보성 카드(Block 4)와 코드/템플릿 레벨에서 분리돼 있다.
      렌더러(renderGuardrailCard)는 허용 필드 화이트리스트만 읽고, 예측성 필드가
      섞여 들어오면 assertNoPredictiveFields가 렌더를 거부한다. -->
 <div class="section-divider">리스크 가드레일 (활성)</div>
@@ -127,7 +137,7 @@
   <p class="muted">로딩 중...</p>
 </div>
 
-<!-- ===== Block 3: [v3.2 신규] 정보성 — 뉴스 사건 설명 (예측 아님) ===== -->
+<!-- ===== Block 4: [v3.2 신규] 정보성 — 뉴스 사건 설명 (예측 아님) ===== -->
 <div class="section-divider">뉴스 사건 설명 (정보성)</div>
 <h2>📄 오늘의 사건 카드</h2>
 
@@ -135,7 +145,7 @@
   <p class="muted">로딩 중...</p>
 </div>
 
-<!-- ===== Block 4: Phase 1 백테스트 게이트 판정 ===== -->
+<!-- ===== Block 5: Phase 1 백테스트 게이트 판정 ===== -->
 <div class="section-divider">Phase 1 백테스트 검증 (완료)</div>
 <h2>📊 게이트 판정 요약</h2>
 
@@ -143,7 +153,7 @@
   <p class="muted">로딩 중...</p>
 </div>
 
-<!-- ===== Block 5: Phase 2 뉴스 이벤트 데이터수집 ===== -->
+<!-- ===== Block 6: Phase 2 뉴스 이벤트 데이터수집 ===== -->
 <div class="section-divider">Phase 2 뉴스 이벤트 실험 (진행 중)</div>
 <h2>📰 데이터수집 진행상황 <span class="badge-phase2">캘리브레이션 대기</span></h2>
 
@@ -291,6 +301,54 @@ async function loadGuardrails(bust) {
   }
 }
 
+// ── [v3.2] 포트폴리오 리포트: 현황 계산 + 규칙 해당 여부. 실행 버튼 없음. ──
+// 보호적 경고 카드와 같은 규율 — 화이트리스트 + 예측성 필드 렌더 거부.
+const PREPORT_MATCH_FIELDS = ['rule', 'symbol', 'name', 'threshold', 'observed', 'fact'];
+
+function renderRuleMatch(rawMatch) {
+  if (!assertNoPredictiveFields(rawMatch, '포트폴리오 규칙')) return '';
+  const m = pick(rawMatch, PREPORT_MATCH_FIELDS);
+  return `<div class="guardrail-card">
+    <div class="guardrail-rule">📐 ${esc(m.rule)}</div>
+    <div class="guardrail-fact">${esc(m.fact)}</div>
+    <div class="guardrail-nums">기준 ${esc(m.threshold)} · 관측 ${esc(m.observed)}</div>
+  </div>`;
+}
+
+async function loadPortfolioReport(bust) {
+  const el = document.getElementById('preport-section');
+  try {
+    const r = await (await fetch('portfolio_report.json' + bust)).json();
+    const s = r.snapshot || {};
+    const byC = Object.entries(s.weight_by_country_pct || {})
+      .map(([k, v]) => `${esc(k)} ${v.toFixed(1)}%`).join(' / ');
+    const rows = (s.positions || []).map(p => `<div class="pos">
+        <div class="pos-main"><span>${esc(p.name)}</span>
+          <span class="pos-sub">${esc(p.symbol)} · 비중 ${p.weight_pct.toFixed(1)}%</span></div>
+        <span class="${p.return_pct >= 0 ? 'positive' : 'negative'}">${fmtPct(p.return_pct)}</span>
+      </div>`).join('');
+    const prov = (r.thresholds && r.thresholds.provisional)
+      ? '<span class="badge-retired">초안 기준</span>' : '';
+    const matches = r.rule_matches || [];
+    const matchHtml = matches.length
+      ? `<h3>규칙 해당 ${matches.length}건 ${prov}</h3>` + matches.map(renderRuleMatch).join('')
+      : `<p class="ok-line">✅ 해당하는 규칙 없음 ${prov}</p>`;
+    const rm = r.roadmap || {};
+    const rmHtml = rm.status === '계산됨'
+      ? `<p class="muted">배분 로드맵: 총 투자가능액 ${Number(rm.total_investable || 0).toLocaleString()}원 기준 산출됨</p>`
+      : `<p class="muted">🗺️ 배분 로드맵: ${esc(rm.status || '미입력')} — ${esc(rm.reason || '')}</p>`;
+    el.innerHTML = `<p class="muted">생성 ${esc(r.generated_at)} · 총자산
+        ${Number(s.total_assets_krw || 0).toLocaleString()}원 · 현금 ${(s.cash_pct || 0).toFixed(1)}%
+        ${byC ? '· ' + byC : ''}</p>
+      ${rows}${matchHtml}${rmHtml}
+      <p class="muted" style="margin-top:10px;">※ 현황과 규칙 해당 여부만 표시합니다.
+        매매 판단은 포함하지 않습니다.</p>`;
+  } catch (e) {
+    el.innerHTML = `<p class="muted">포트폴리오 리포트가 아직 생성되지 않았습니다
+      (portfolio_report.json 없음).</p>`;
+  }
+}
+
 // ── (a) 정보성 카드: 뉴스 사건 설명. 종목별 판단/추천 없음. ──
 const NEWSCARD_FIELDS = ['market', 'name', 'event_type', 'summary', 'headlines'];
 
@@ -426,6 +484,7 @@ async function loadData() {
   // 각 블록을 독립적으로 로드한다 — 하나가 404/파싱 실패해도 나머지는 그려진다.
   await loadRealAccount(bust);
   await loadRetiredPending(bust);
+  await loadPortfolioReport(bust);
   await loadGuardrails(bust);
   await loadNewsCards(bust);
   await loadGate(bust);

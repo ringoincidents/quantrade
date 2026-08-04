@@ -1,0 +1,22 @@
+{
+  "_schema": "income_schedule_v1",
+  "_note": "계급별 기간과 월수입(월급 + 적금). 용돈은 제외한다 - 투자 가능액 산정이 목적이므로 소비 목적 자금은 넣지 않는다.",
+  "_placeholder_warning": "아래 schedule의 금액/날짜는 아직 실제 값이 아니다. placeholder=true인 동안 portfolio_report.py는 로드맵을 계산하지 않고 '미입력'으로 보고한다 - 틀린 숫자를 그럴듯하게 내놓지 않기 위함.",
+  "placeholder": true,
+  "currency": "KRW",
+  "excludes": ["용돈"],
+
+  "schedule": [
+    { "rank": "이병", "start": "", "end": "", "monthly_pay": null, "monthly_savings": null },
+    { "rank": "일병", "start": "", "end": "", "monthly_pay": null, "monthly_savings": null },
+    { "rank": "상병", "start": "", "end": "", "monthly_pay": null, "monthly_savings": null },
+    { "rank": "병장", "start": "", "end": "", "monthly_pay": null, "monthly_savings": null }
+  ],
+
+  "allocation_roadmap": {
+    "_note": "자산군별 배분 로드맵. 누적 투자가능액 구간(tier)별로 목표 비중을 정의한다. 코드는 이 표를 '해석'만 하고 규칙을 내장하지 않는다 - 표가 바뀌면 이 JSON만 고치면 된다.",
+    "_source_pending": "방향성 세션에서 정리한 배분표를 여기에 옮겨야 한다. 이 세션에는 그 표가 전달되지 않아 tiers를 비워 뒀다.",
+    "asset_classes": ["국내주식", "해외주식", "현금성"],
+    "tiers": []
+  }
+}
