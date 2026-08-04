@@ -1,6 +1,6 @@
 {
-  "synced_at": "2026-08-04T10:07:30.187382+00:00",
-  "cash": 63.372,
+  "synced_at": "2026-08-04T13:14:57.739046+00:00",
+  "cash": 177.76199999999997,
   "positions": [
     {
       "symbol": "196170",
@@ -9,10 +9,10 @@
       "currency": "KRW",
       "quantity": "1",
       "avg_price": "342500",
-      "current_price": "347500",
-      "eval_amount": 347500.0,
-      "eval_amount_krw": 347500.0,
-      "return_pct": 1.4500000000000002
+      "current_price": "347000",
+      "eval_amount": 347000.0,
+      "eval_amount_krw": 347000.0,
+      "return_pct": 1.31
     },
     {
       "symbol": "310200",
@@ -33,34 +33,34 @@
       "currency": "KRW",
       "quantity": "3",
       "avg_price": "87900",
-      "current_price": "87200",
-      "eval_amount": 261600.0,
-      "eval_amount_krw": 261600.0,
-      "return_pct": -0.79
+      "current_price": "87600",
+      "eval_amount": 262800.0,
+      "eval_amount_krw": 262800.0,
+      "return_pct": -0.33999999999999997
     },
     {
-      "symbol": "NXXT",
-      "name": "넥스트NRG",
+      "symbol": "NOK",
+      "name": "노키아(ADR)",
       "market_country": "US",
       "currency": "USD",
-      "quantity": "4",
-      "avg_price": "0.356",
-      "current_price": "0.27",
-      "eval_amount": 1.08,
-      "eval_amount_krw": 1549.044,
-      "return_pct": -24.15
+      "quantity": "10",
+      "avg_price": "9.82",
+      "current_price": "9.91",
+      "eval_amount": 99.1,
+      "eval_amount_krw": 141846.78499999997,
+      "return_pct": 0.91
     },
     {
       "symbol": "AIXI",
       "name": "샤오아이(ADR)",
       "market_country": "US",
       "currency": "USD",
-      "quantity": "65",
-      "avg_price": "20.870406",
-      "current_price": "1.04",
-      "eval_amount": 67.6,
-      "eval_amount_krw": 96958.68,
-      "return_pct": -95.00999999999999
+      "quantity": "72",
+      "avg_price": "18.944672",
+      "current_price": "1.06",
+      "eval_amount": 76.32,
+      "eval_amount_krw": 109240.63199999998,
+      "return_pct": -94.39999999999999
     },
     {
       "symbol": "NVDA",
@@ -69,10 +69,10 @@
       "currency": "USD",
       "quantity": "1",
       "avg_price": "202.1986",
-      "current_price": "208.52",
-      "eval_amount": 208.52,
-      "eval_amount_krw": 299080.23600000003,
-      "return_pct": 3.1199999999999997
+      "current_price": "210.27",
+      "eval_amount": 210.27,
+      "eval_amount_krw": 300969.9645,
+      "return_pct": 3.9899999999999998
     },
     {
       "symbol": "SCHD",
@@ -81,10 +81,10 @@
       "currency": "USD",
       "quantity": "54.332105",
       "avg_price": "32.664993",
-      "current_price": "33.59",
-      "eval_amount": 1825.015406,
-      "eval_amount_krw": 2617619.5968258,
-      "return_pct": 2.83
+      "current_price": "33.52",
+      "eval_amount": 1821.212159,
+      "eval_amount_krw": 2606792.0237846496,
+      "return_pct": 2.6100000000000003
     },
     {
       "symbol": "VTI",
@@ -93,10 +93,10 @@
       "currency": "USD",
       "quantity": "0.01351",
       "avg_price": "367.228053",
-      "current_price": "374.17",
-      "eval_amount": 5.055036,
-      "eval_amount_krw": 7250.438134800001,
-      "return_pct": 1.8900000000000001
+      "current_price": "375.19",
+      "eval_amount": 5.068816,
+      "eval_amount_krw": 7255.2497816,
+      "return_pct": 2.16
     }
   ]
 }
