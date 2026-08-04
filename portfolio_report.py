@@ -203,27 +203,25 @@ def compute_roadmap(income):
     tier_by_rank = {t["rank"]: t for t in income["allocation"]["tiers"]}
     classes = income["allocation"]["asset_classes"]
 
-    start = income.get("start_month") or ""
-    start_dt = None
-    if start:
-        try:
-            start_dt = datetime.strptime(start, "%Y-%m")
-        except ValueError:
-            start_dt = None
+    dated, discrepancies = derive_months_from_dates(income)
+    basis = income.get("month_basis", "declared")
 
     phases, cumulative, elapsed = [], 0.0, 0
     for r in ranks:
         monthly = float(r["monthly_krw"]) - deduction
-        n = int(r["months"])
+        # 개월수 출처를 명시적으로 고른다. 두 값이 어긋나면 어느 쪽을 골랐든
+        # discrepancies에 남아 리포트에 표시된다 — 조용히 한쪽을 쓰지 않는다.
+        n = int(dated.get(r["rank"], {}).get("months", r["months"])) \
+            if basis == "dates" else int(r["months"])
         subtotal = monthly * n
         cumulative += subtotal
         t = tier_by_rank[r["rank"]]
-        period = f"{elapsed + 1}~{elapsed + n}개월차"
-        if start_dt:
-            a = start_dt.month - 1 + elapsed
-            b = start_dt.month - 1 + elapsed + n - 1
-            period = (f"{start_dt.year + a // 12}-{a % 12 + 1:02d} ~ "
-                      f"{start_dt.year + b // 12}-{b % 12 + 1:02d}")
+        if r.get("start"):
+            s = datetime.strptime(r["start"], "%Y-%m")
+            e = s.month - 1 + n - 1
+            period = (f"{r['start']} ~ {s.year + e // 12}-{e % 12 + 1:02d}")
+        else:
+            period = f"{elapsed + 1}~{elapsed + n}개월차"
         phases.append({
             "rank": r["rank"],
             "period": period,
@@ -236,6 +234,7 @@ def compute_roadmap(income):
         })
         elapsed += n
 
+    has_dates = all(r.get("start") for r in ranks)
     return {
         "status": "계산됨",
         "total_months": elapsed,
@@ -245,10 +244,46 @@ def compute_roadmap(income):
         "allowance_note": ("monthly_krw를 투자가능액으로 간주해 용돈을 추가 차감하지 않았음"
                            if already_excluded else
                            f"monthly_krw에서 용돈 {allowance:,.0f}원을 매달 차감함"),
-        "date_basis": "절대 날짜" if start_dt else "상대(복무 개월차) - start_month 미입력",
+        "date_basis": "절대 날짜" if has_dates else "상대(복무 개월차) - 계급별 start 미입력",
+        "month_basis": basis,
+        "month_basis_note": ("ranks[].months 선언값 사용" if basis == "declared"
+                             else "진급 시점에서 역산한 개월수 사용"),
+        "month_discrepancies": discrepancies,
+        "service": income.get("service", {}),
         "asset_class_labels": income["allocation"].get("labels", {}),
         "phases": phases,
     }
+
+
+def derive_months_from_dates(income):
+    """계급별 start와 전역일에서 개월수를 역산한다. 마지막 계급은 전역일까지.
+
+    선언된 months와 어긋나면 그 사실을 그대로 반환한다 — 둘 중 하나를 조용히
+    이기게 두면 총 투자가능액이 소리 없이 달라진다(실제로 60만원 차이가 났다)."""
+    ranks = income.get("ranks", [])
+    discharge = income.get("service", {}).get("discharge")
+    if not all(r.get("start") for r in ranks) or not discharge:
+        return {}, []
+
+    def m(s):
+        d = datetime.strptime(s, "%Y-%m")
+        return d.year * 12 + d.month
+
+    out, disc = {}, []
+    for i, r in enumerate(ranks):
+        end = ranks[i + 1]["start"] if i + 1 < len(ranks) else discharge
+        # 마지막 계급은 전역월 포함, 그 외는 다음 진급 직전까지
+        n = m(end) - m(r["start"]) + (1 if i + 1 == len(ranks) else 0)
+        out[r["rank"]] = {"months": n, "start": r["start"], "end_exclusive": end}
+        if int(r.get("months", n)) != n:
+            disc.append({
+                "rank": r["rank"],
+                "declared_months": int(r["months"]),
+                "derived_months": n,
+                "note": (f"{r['rank']}: 선언 {r['months']}개월 vs "
+                         f"진급시점 역산 {n}개월 ({r['start']} ~ {end})"),
+            })
+    return out, disc
 
 
 # ── 리포트 조립 ─────────────────────────────────────────────────────────────
@@ -303,6 +338,10 @@ def format_telegram(report):
             lines.append(f"   · {ph['rank']} ({ph['period']}) 누적 "
                          f"{ph['cumulative_krw']:,.0f}원 → {top_s} …")
         lines.append(f"   ※ 용돈 처리: {rm['allowance_note']}")
+        if rm.get("month_discrepancies"):
+            lines.append(f"   ⚠️ 개월수 불일치 ({rm['month_basis_note']} 기준으로 계산됨)")
+            for d in rm["month_discrepancies"]:
+                lines.append(f"      · {d['note']}")
     lines.append("")
     lines.append("※ 현황과 규칙 해당 여부만 알립니다. 매매 판단은 포함하지 않습니다.")
     return "\n".join(lines)
@@ -458,6 +497,25 @@ def run_self_test():
     rm4 = compute_roadmap(mismatch)
     print(f"[7e] 배분표 없는 계급 추가 -> {rm4['status']}: {rm4['reason']}")
     assert rm4["status"] == "배분표 오류" and "이병" in rm4["reason"]
+
+    # 7-f) 진급 날짜와 선언 개월수가 어긋나면 조용히 넘어가지 않는지
+    dated = json.loads(json.dumps(income))
+    dated["service"] = {"enlisted": "2026-04", "discharge": "2027-09"}
+    for r, st in zip(dated["ranks"], ["2026-07", "2027-01", "2027-07"]):
+        r["start"] = st
+    rm5 = compute_roadmap(dated)
+    print(f"[7f] 불일치 {len(rm5['month_discrepancies'])}건, 기준={rm5['month_basis']}")
+    for d in rm5["month_discrepancies"]:
+        print(f"     {d['note']}")
+    assert len(rm5["month_discrepancies"]) == 2, "일병/병장 불일치가 잡혀야 함"
+    assert rm5["total_investable_krw"] == 16950000, "declared 기준이면 총액 불변이어야 함"
+
+    # 기준을 dates로 바꾸면 총액이 실제로 달라지는지 (조용히 같으면 분기가 죽은 것)
+    rm6 = compute_roadmap(dict(dated, month_basis="dates"))
+    print(f"[7f] month_basis=dates -> 총 {rm6['total_investable_krw']:,}원 "
+          f"(declared 대비 {rm6['total_investable_krw'] - rm5['total_investable_krw']:+,})")
+    assert rm6["total_investable_krw"] == 6 * 850000 + 6 * 1150000 + 3 * 1450000 == 16350000
+    assert rm6["month_discrepancies"], "dates 기준이어도 불일치 사실은 계속 표시돼야 함"
 
     # 8) 실계좌 파일을 쓰지 않는지
     src = open("portfolio_report.py", encoding="utf-8").read()

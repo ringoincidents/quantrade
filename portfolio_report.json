@@ -9,8 +9,8 @@
     "loss_sustained_days": 60
   },
   "snapshot": {
-    "synced_at": "2026-08-04T03:46:21.507463+00:00",
-    "total_assets_krw": 4286697.0,
+    "synced_at": "2026-08-04T10:07:30.187382+00:00",
+    "total_assets_krw": 4306621.0,
     "cash_krw": 63.0,
     "cash_pct": 0.0,
     "position_count": 8,
@@ -19,70 +19,70 @@
         "symbol": "SCHD",
         "name": "SCHD",
         "market_country": "US",
-        "eval_amount_krw": 2611738.0,
-        "weight_pct": 60.93,
-        "return_pct": 2.92
+        "eval_amount_krw": 2617620.0,
+        "weight_pct": 60.78,
+        "return_pct": 2.83
       },
       {
         "symbol": "310200",
         "name": "애니플러스",
         "market_country": "KR",
-        "eval_amount_krw": 672500.0,
-        "weight_pct": 15.69,
-        "return_pct": 27.37
+        "eval_amount_krw": 675000.0,
+        "weight_pct": 15.67,
+        "return_pct": 27.839999999999996
       },
       {
         "symbol": "196170",
         "name": "알테오젠",
         "market_country": "KR",
-        "eval_amount_krw": 341000.0,
-        "weight_pct": 7.95,
-        "return_pct": -0.43
+        "eval_amount_krw": 347500.0,
+        "weight_pct": 8.07,
+        "return_pct": 1.4500000000000002
       },
       {
         "symbol": "NVDA",
         "name": "엔비디아",
         "market_country": "US",
-        "eval_amount_krw": 295811.0,
-        "weight_pct": 6.9,
-        "return_pct": 2.32
+        "eval_amount_krw": 299080.0,
+        "weight_pct": 6.94,
+        "return_pct": 3.1199999999999997
       },
       {
         "symbol": "042660",
         "name": "한화오션",
         "market_country": "KR",
-        "eval_amount_krw": 257400.0,
-        "weight_pct": 6.0,
-        "return_pct": -2.3800000000000003
+        "eval_amount_krw": 261600.0,
+        "weight_pct": 6.07,
+        "return_pct": -0.79
       },
       {
         "symbol": "AIXI",
         "name": "샤오아이(ADR)",
         "market_country": "US",
-        "eval_amount_krw": 99443.0,
-        "weight_pct": 2.32,
-        "return_pct": -94.87
+        "eval_amount_krw": 96959.0,
+        "weight_pct": 2.25,
+        "return_pct": -95.00999999999999
       },
       {
         "symbol": "VTI",
         "name": "VTI",
         "market_country": "US",
-        "eval_amount_krw": 7237.0,
+        "eval_amount_krw": 7250.0,
         "weight_pct": 0.17,
-        "return_pct": 2.02
+        "return_pct": 1.8900000000000001
       },
       {
         "symbol": "NXXT",
         "name": "넥스트NRG",
         "market_country": "US",
-        "eval_amount_krw": 1505.0,
+        "eval_amount_krw": 1549.0,
         "weight_pct": 0.04,
-        "return_pct": -26.090000000000003
+        "return_pct": -24.15
       }
     ],
     "weight_by_country_pct": {
-      "US": 70.36,
-      "KR": 29.64
+      "US": 70.18,
+      "KR": 29.81
     }
   },
   "rule_matches": [
@@ -91,8 +91,8 @@
       "symbol": "SCHD",
       "name": "SCHD",
       "threshold": "단일 종목 비중 30% 이상",
-      "observed": "60.93%",
-      "fact": "SCHD(SCHD) 비중이 총자산의 60.93%로 기준 30% 이상"
+      "observed": "60.78%",
+      "fact": "SCHD(SCHD) 비중이 총자산의 60.78%로 기준 30% 이상"
     }
   ],
   "roadmap": {
@@ -102,7 +102,28 @@
     "allowance_krw": 300000,
     "allowance_already_excluded": true,
     "allowance_note": "monthly_krw를 투자가능액으로 간주해 용돈을 추가 차감하지 않았음",
-    "date_basis": "상대(복무 개월차) - start_month 미입력",
+    "date_basis": "절대 날짜",
+    "month_basis": "declared",
+    "month_basis_note": "ranks[].months 선언값 사용",
+    "month_discrepancies": [
+      {
+        "rank": "일병",
+        "declared_months": 5,
+        "derived_months": 6,
+        "note": "일병: 선언 5개월 vs 진급시점 역산 6개월 (2026-07 ~ 2027-01)"
+      },
+      {
+        "rank": "병장",
+        "declared_months": 4,
+        "derived_months": 3,
+        "note": "병장: 선언 4개월 vs 진급시점 역산 3개월 (2027-07 ~ 2027-09)"
+      }
+    ],
+    "service": {
+      "enlisted": "2026-04",
+      "discharge": "2027-09",
+      "_discharge_note": "입대 2026-04 + 18개월(육군 기준) 가정으로 계산한 값. 복무기간이 다르면 이 값을 고쳐야 하고, 고치면 마지막 계급의 개월수가 따라 바뀐다."
+    },
     "asset_class_labels": {
       "bond": "채권",
       "developed_exUS": "선진국(미국 제외)",
@@ -114,7 +135,7 @@
     "phases": [
       {
         "rank": "일병",
-        "period": "1~5개월차",
+        "period": "2026-07 ~ 2026-11",
         "months": 5,
         "monthly_investable_krw": 850000,
         "subtotal_krw": 4250000,
@@ -138,7 +159,7 @@
       },
       {
         "rank": "상병",
-        "period": "6~11개월차",
+        "period": "2027-01 ~ 2027-06",
         "months": 6,
         "monthly_investable_krw": 1150000,
         "subtotal_krw": 6900000,
@@ -162,7 +183,7 @@
       },
       {
         "rank": "병장",
-        "period": "12~15개월차",
+        "period": "2027-07 ~ 2027-10",
         "months": 4,
         "monthly_investable_krw": 1450000,
         "subtotal_krw": 5800000,

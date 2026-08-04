@@ -3,27 +3,43 @@
   "_note": "계급별 복무 개월수와 월수입(월급+적금). 용돈은 투자금이 아니므로 제외한다.",
   "placeholder": false,
   "currency": "KRW",
-
   "_allowance_assumption": "monthly_krw는 이미 용돈을 제외한 '투자 가능액'으로 해석한다. 즉 excluded.allowance_krw를 여기서 또 빼지 않는다. 이 가정이 틀렸다면(= monthly_krw가 용돈을 포함한 총액이라면) allowance_already_excluded를 false로 바꾸면 코드가 매달 차감한다. 15개월 × 30만 = 450만 차이라 총액의 26%가 걸린 가정이므로 리포트에도 항상 표시한다.",
   "allowance_already_excluded": true,
-
   "ranks": [
-    { "rank": "일병", "months": 5, "monthly_krw": 850000 },
-    { "rank": "상병", "months": 6, "monthly_krw": 1150000 },
-    { "rank": "병장", "months": 4, "monthly_krw": 1450000 }
+    {
+      "rank": "일병",
+      "months": 5,
+      "start": "2026-07",
+      "monthly_krw": 850000
+    },
+    {
+      "rank": "상병",
+      "months": 6,
+      "start": "2027-01",
+      "monthly_krw": 1150000
+    },
+    {
+      "rank": "병장",
+      "months": 4,
+      "start": "2027-07",
+      "monthly_krw": 1450000
+    }
   ],
-
   "excluded": {
     "allowance_krw": 300000,
     "note": "생활비, 투자금 아님"
   },
-
-  "_start_month_note": "복무 시작 연월을 알면 절대 날짜로 로드맵을 낼 수 있다. 비어 있으면 '일병 1개월차' 같은 상대 기준으로만 산출한다.",
-  "start_month": "",
-
+  "_start_month_note": "계급별 start가 모두 채워지면 절대 날짜로 로드맵을 낸다. (구 start_month 필드는 계급별 start로 대체됨)",
   "allocation": {
     "_note": "계급 구간별 목표 자산배분(%). 병장으로 갈수록 채권/현금 비중을 올리는 글라이드 패스 구조.",
-    "asset_classes": ["bond", "developed_exUS", "emerging", "healthcare", "reit", "cash"],
+    "asset_classes": [
+      "bond",
+      "developed_exUS",
+      "emerging",
+      "healthcare",
+      "reit",
+      "cash"
+    ],
     "labels": {
       "bond": "채권",
       "developed_exUS": "선진국(미국 제외)",
@@ -33,9 +49,40 @@
       "cash": "현금성"
     },
     "tiers": [
-      { "rank": "일병", "bond": 10, "developed_exUS": 20, "emerging": 15, "healthcare": 25, "reit": 15, "cash": 15 },
-      { "rank": "상병", "bond": 20, "developed_exUS": 20, "emerging": 10, "healthcare": 20, "reit": 10, "cash": 20 },
-      { "rank": "병장", "bond": 40, "developed_exUS": 10, "emerging": 5,  "healthcare": 10, "reit": 10, "cash": 25 }
+      {
+        "rank": "일병",
+        "bond": 10,
+        "developed_exUS": 20,
+        "emerging": 15,
+        "healthcare": 25,
+        "reit": 15,
+        "cash": 15
+      },
+      {
+        "rank": "상병",
+        "bond": 20,
+        "developed_exUS": 20,
+        "emerging": 10,
+        "healthcare": 20,
+        "reit": 10,
+        "cash": 20
+      },
+      {
+        "rank": "병장",
+        "bond": 40,
+        "developed_exUS": 10,
+        "emerging": 5,
+        "healthcare": 10,
+        "reit": 10,
+        "cash": 25
+      }
     ]
-  }
+  },
+  "service": {
+    "enlisted": "2026-04",
+    "discharge": "2027-09",
+    "_discharge_note": "입대 2026-04 + 18개월(육군 기준) 가정으로 계산한 값. 복무기간이 다르면 이 값을 고쳐야 하고, 고치면 마지막 계급의 개월수가 따라 바뀐다."
+  },
+  "_month_basis_note": "months(선언값)와 start 날짜에서 역산한 개월수가 어긋날 수 있다. 어느 쪽으로 계산할지 명시적으로 고른다 - 'declared'는 ranks[].months를 쓰고, 'dates'는 진급 시점에서 역산한다. 불일치는 어느 쪽을 고르든 리포트에 항상 표시된다.",
+  "month_basis": "declared"
 }
