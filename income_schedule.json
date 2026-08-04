@@ -1,22 +1,41 @@
 {
-  "_schema": "income_schedule_v1",
-  "_note": "계급별 기간과 월수입(월급 + 적금). 용돈은 제외한다 - 투자 가능액 산정이 목적이므로 소비 목적 자금은 넣지 않는다.",
-  "_placeholder_warning": "아래 schedule의 금액/날짜는 아직 실제 값이 아니다. placeholder=true인 동안 portfolio_report.py는 로드맵을 계산하지 않고 '미입력'으로 보고한다 - 틀린 숫자를 그럴듯하게 내놓지 않기 위함.",
-  "placeholder": true,
+  "_schema": "income_schedule_v2",
+  "_note": "계급별 복무 개월수와 월수입(월급+적금). 용돈은 투자금이 아니므로 제외한다.",
+  "placeholder": false,
   "currency": "KRW",
-  "excludes": ["용돈"],
 
-  "schedule": [
-    { "rank": "이병", "start": "", "end": "", "monthly_pay": null, "monthly_savings": null },
-    { "rank": "일병", "start": "", "end": "", "monthly_pay": null, "monthly_savings": null },
-    { "rank": "상병", "start": "", "end": "", "monthly_pay": null, "monthly_savings": null },
-    { "rank": "병장", "start": "", "end": "", "monthly_pay": null, "monthly_savings": null }
+  "_allowance_assumption": "monthly_krw는 이미 용돈을 제외한 '투자 가능액'으로 해석한다. 즉 excluded.allowance_krw를 여기서 또 빼지 않는다. 이 가정이 틀렸다면(= monthly_krw가 용돈을 포함한 총액이라면) allowance_already_excluded를 false로 바꾸면 코드가 매달 차감한다. 15개월 × 30만 = 450만 차이라 총액의 26%가 걸린 가정이므로 리포트에도 항상 표시한다.",
+  "allowance_already_excluded": true,
+
+  "ranks": [
+    { "rank": "일병", "months": 5, "monthly_krw": 850000 },
+    { "rank": "상병", "months": 6, "monthly_krw": 1150000 },
+    { "rank": "병장", "months": 4, "monthly_krw": 1450000 }
   ],
 
-  "allocation_roadmap": {
-    "_note": "자산군별 배분 로드맵. 누적 투자가능액 구간(tier)별로 목표 비중을 정의한다. 코드는 이 표를 '해석'만 하고 규칙을 내장하지 않는다 - 표가 바뀌면 이 JSON만 고치면 된다.",
-    "_source_pending": "방향성 세션에서 정리한 배분표를 여기에 옮겨야 한다. 이 세션에는 그 표가 전달되지 않아 tiers를 비워 뒀다.",
-    "asset_classes": ["국내주식", "해외주식", "현금성"],
-    "tiers": []
+  "excluded": {
+    "allowance_krw": 300000,
+    "note": "생활비, 투자금 아님"
+  },
+
+  "_start_month_note": "복무 시작 연월을 알면 절대 날짜로 로드맵을 낼 수 있다. 비어 있으면 '일병 1개월차' 같은 상대 기준으로만 산출한다.",
+  "start_month": "",
+
+  "allocation": {
+    "_note": "계급 구간별 목표 자산배분(%). 병장으로 갈수록 채권/현금 비중을 올리는 글라이드 패스 구조.",
+    "asset_classes": ["bond", "developed_exUS", "emerging", "healthcare", "reit", "cash"],
+    "labels": {
+      "bond": "채권",
+      "developed_exUS": "선진국(미국 제외)",
+      "emerging": "신흥국",
+      "healthcare": "헬스케어",
+      "reit": "리츠",
+      "cash": "현금성"
+    },
+    "tiers": [
+      { "rank": "일병", "bond": 10, "developed_exUS": 20, "emerging": 15, "healthcare": 25, "reit": 15, "cash": 15 },
+      { "rank": "상병", "bond": 20, "developed_exUS": 20, "emerging": 10, "healthcare": 20, "reit": 10, "cash": 20 },
+      { "rank": "병장", "bond": 40, "developed_exUS": 10, "emerging": 5,  "healthcare": 10, "reit": 10, "cash": 25 }
+    ]
   }
 }

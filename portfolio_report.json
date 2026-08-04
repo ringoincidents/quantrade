@@ -96,7 +96,94 @@
     }
   ],
   "roadmap": {
-    "status": "미입력",
-    "reason": "income_schedule.json이 placeholder 상태 - 계급별 기간/월급/적금 실제 값 필요"
+    "status": "계산됨",
+    "total_months": 15,
+    "total_investable_krw": 16950000,
+    "allowance_krw": 300000,
+    "allowance_already_excluded": true,
+    "allowance_note": "monthly_krw를 투자가능액으로 간주해 용돈을 추가 차감하지 않았음",
+    "date_basis": "상대(복무 개월차) - start_month 미입력",
+    "asset_class_labels": {
+      "bond": "채권",
+      "developed_exUS": "선진국(미국 제외)",
+      "emerging": "신흥국",
+      "healthcare": "헬스케어",
+      "reit": "리츠",
+      "cash": "현금성"
+    },
+    "phases": [
+      {
+        "rank": "일병",
+        "period": "1~5개월차",
+        "months": 5,
+        "monthly_investable_krw": 850000,
+        "subtotal_krw": 4250000,
+        "cumulative_krw": 4250000,
+        "target_allocation_pct": {
+          "bond": 10,
+          "developed_exUS": 20,
+          "emerging": 15,
+          "healthcare": 25,
+          "reit": 15,
+          "cash": 15
+        },
+        "target_allocation_krw": {
+          "bond": 425000,
+          "developed_exUS": 850000,
+          "emerging": 637500,
+          "healthcare": 1062500,
+          "reit": 637500,
+          "cash": 637500
+        }
+      },
+      {
+        "rank": "상병",
+        "period": "6~11개월차",
+        "months": 6,
+        "monthly_investable_krw": 1150000,
+        "subtotal_krw": 6900000,
+        "cumulative_krw": 11150000,
+        "target_allocation_pct": {
+          "bond": 20,
+          "developed_exUS": 20,
+          "emerging": 10,
+          "healthcare": 20,
+          "reit": 10,
+          "cash": 20
+        },
+        "target_allocation_krw": {
+          "bond": 2230000,
+          "developed_exUS": 2230000,
+          "emerging": 1115000,
+          "healthcare": 2230000,
+          "reit": 1115000,
+          "cash": 2230000
+        }
+      },
+      {
+        "rank": "병장",
+        "period": "12~15개월차",
+        "months": 4,
+        "monthly_investable_krw": 1450000,
+        "subtotal_krw": 5800000,
+        "cumulative_krw": 16950000,
+        "target_allocation_pct": {
+          "bond": 40,
+          "developed_exUS": 10,
+          "emerging": 5,
+          "healthcare": 10,
+          "reit": 10,
+          "cash": 25
+        },
+        "target_allocation_krw": {
+          "bond": 6780000,
+          "developed_exUS": 1695000,
+          "emerging": 847500,
+          "healthcare": 1695000,
+          "reit": 1695000,
+          "cash": 4237500
+        }
+      }
+    ]
   }
 }

@@ -147,51 +147,108 @@ def evaluate_rules(rows, streaks, today=None):
 
 # ── (3) 수입 스케줄 기반 배분 로드맵 ────────────────────────────────────────
 
+def validate_allocation(income):
+    """배분표 정합성 검사. 여기서 조용히 넘어가면 합이 90%인 표로 로드맵을 내고도
+    아무도 모른다 — 리포트가 자신 있게 틀리는 걸 막는 게 목적이다."""
+    alloc = income.get("allocation", {})
+    classes = alloc.get("asset_classes", [])
+    tiers = alloc.get("tiers", [])
+    ranks = [r["rank"] for r in income.get("ranks", [])]
+    problems = []
+
+    for t in tiers:
+        total = sum(float(t.get(c, 0)) for c in classes)
+        if abs(total - 100.0) > 0.01:
+            problems.append(f"{t.get('rank')} 배분 합계 {total:g}% (100%가 아님)")
+        unknown = [k for k in t if k != "rank" and k not in classes]
+        if unknown:
+            problems.append(f"{t.get('rank')}에 정의되지 않은 자산군 {unknown}")
+
+    tier_ranks = [t.get("rank") for t in tiers]
+    for r in ranks:
+        if r not in tier_ranks:
+            problems.append(f"'{r}' 계급의 배분표가 없음")
+    for r in tier_ranks:
+        if r not in ranks:
+            problems.append(f"배분표의 '{r}'가 수입 스케줄에 없음")
+    return problems
+
+
 def compute_roadmap(income):
-    """수입 스케줄 → 누적 투자가능액 → 구간별 목표 배분.
+    """수입 스케줄 → 계급별 투자가능액 → 계급 구간별 목표 배분.
 
     **배분 규칙을 코드에 내장하지 않는다.** income_schedule.json의
-    allocation_roadmap.tiers를 해석만 한다 — 표가 바뀌면 JSON만 고치면 되고,
-    코드가 표를 '기억'하고 있어서 문서와 어긋나는 일이 생기지 않는다."""
+    allocation.tiers를 해석만 한다 — 표가 바뀌면 JSON만 고치면 되고, 코드가 표를
+    '기억'하고 있어서 문서와 어긋나는 일이 생기지 않는다."""
     if income.get("placeholder"):
         return {"status": "미입력",
-                "reason": "income_schedule.json이 placeholder 상태 - 계급별 기간/월급/적금 실제 값 필요"}
+                "reason": "income_schedule.json이 placeholder 상태 - 계급별 기간/월수입 실제 값 필요"}
 
-    schedule = income.get("schedule", [])
-    missing = [s.get("rank") for s in schedule
-               if not s.get("start") or s.get("monthly_pay") is None or s.get("monthly_savings") is None]
+    ranks = income.get("ranks", [])
+    missing = [r.get("rank") for r in ranks
+               if not r.get("months") or r.get("monthly_krw") is None]
     if missing:
         return {"status": "미입력", "reason": f"수입 정보가 비어 있는 계급: {missing}"}
 
-    months, cumulative = [], 0
-    for s in schedule:
-        start = datetime.strptime(s["start"], "%Y-%m")
-        end = datetime.strptime(s["end"], "%Y-%m")
-        n = (end.year - start.year) * 12 + (end.month - start.month) + 1
-        monthly = float(s["monthly_pay"]) + float(s["monthly_savings"])
-        for i in range(n):
-            m = start.month - 1 + i
-            cumulative += monthly
-            months.append({
-                "month": f"{start.year + m // 12}-{m % 12 + 1:02d}",
-                "rank": s["rank"],
-                "monthly_investable": monthly,
-                "cumulative_investable": cumulative,
-            })
+    problems = validate_allocation(income)
+    if problems:
+        return {"status": "배분표 오류", "reason": " / ".join(problems)}
 
-    tiers = income.get("allocation_roadmap", {}).get("tiers", [])
-    if not tiers:
-        return {"status": "구간표 미입력",
-                "reason": "allocation_roadmap.tiers가 비어 있음 - 방향성 세션에서 정리한 배분표를 옮겨야 함",
-                "months": months, "total_investable": cumulative}
+    # 용돈 처리: monthly_krw가 이미 용돈을 뺀 값인지, 총액이라 빼야 하는지.
+    # 15개월 x 30만 = 450만 차이라 총액의 4분의 1이 걸린 가정이므로 결과에 명시한다.
+    allowance = float(income.get("excluded", {}).get("allowance_krw", 0) or 0)
+    already_excluded = income.get("allowance_already_excluded", True)
+    deduction = 0.0 if already_excluded else allowance
 
-    for m in months:
-        m["target_allocation"] = next(
-            (t.get("allocation") for t in tiers
-             if m["cumulative_investable"] >= t.get("min_cumulative", 0)
-             and (t.get("max_cumulative") is None or m["cumulative_investable"] < t["max_cumulative"])),
-            None)
-    return {"status": "계산됨", "months": months, "total_investable": cumulative}
+    tier_by_rank = {t["rank"]: t for t in income["allocation"]["tiers"]}
+    classes = income["allocation"]["asset_classes"]
+
+    start = income.get("start_month") or ""
+    start_dt = None
+    if start:
+        try:
+            start_dt = datetime.strptime(start, "%Y-%m")
+        except ValueError:
+            start_dt = None
+
+    phases, cumulative, elapsed = [], 0.0, 0
+    for r in ranks:
+        monthly = float(r["monthly_krw"]) - deduction
+        n = int(r["months"])
+        subtotal = monthly * n
+        cumulative += subtotal
+        t = tier_by_rank[r["rank"]]
+        period = f"{elapsed + 1}~{elapsed + n}개월차"
+        if start_dt:
+            a = start_dt.month - 1 + elapsed
+            b = start_dt.month - 1 + elapsed + n - 1
+            period = (f"{start_dt.year + a // 12}-{a % 12 + 1:02d} ~ "
+                      f"{start_dt.year + b // 12}-{b % 12 + 1:02d}")
+        phases.append({
+            "rank": r["rank"],
+            "period": period,
+            "months": n,
+            "monthly_investable_krw": round(monthly),
+            "subtotal_krw": round(subtotal),
+            "cumulative_krw": round(cumulative),
+            "target_allocation_pct": {c: t.get(c, 0) for c in classes},
+            "target_allocation_krw": {c: round(cumulative * t.get(c, 0) / 100) for c in classes},
+        })
+        elapsed += n
+
+    return {
+        "status": "계산됨",
+        "total_months": elapsed,
+        "total_investable_krw": round(cumulative),
+        "allowance_krw": round(allowance),
+        "allowance_already_excluded": already_excluded,
+        "allowance_note": ("monthly_krw를 투자가능액으로 간주해 용돈을 추가 차감하지 않았음"
+                           if already_excluded else
+                           f"monthly_krw에서 용돈 {allowance:,.0f}원을 매달 차감함"),
+        "date_basis": "절대 날짜" if start_dt else "상대(복무 개월차) - start_month 미입력",
+        "asset_class_labels": income["allocation"].get("labels", {}),
+        "phases": phases,
+    }
 
 
 # ── 리포트 조립 ─────────────────────────────────────────────────────────────
@@ -233,9 +290,19 @@ def format_telegram(report):
     else:
         lines.append("📐 해당하는 규칙 없음")
     rm = report["roadmap"]
+    lines.append("")
     if rm.get("status") != "계산됨":
-        lines.append("")
         lines.append(f"🗺️ 배분 로드맵: {rm['status']} — {rm['reason']}")
+    else:
+        labels = rm.get("asset_class_labels", {})
+        lines.append(f"🗺️ 배분 로드맵 ({rm['total_months']}개월, 총 "
+                     f"{rm['total_investable_krw']:,.0f}원 · {rm['date_basis']})")
+        for ph in rm["phases"]:
+            top = sorted(ph["target_allocation_pct"].items(), key=lambda kv: -kv[1])[:3]
+            top_s = " ".join(f"{labels.get(k, k)} {v}%" for k, v in top)
+            lines.append(f"   · {ph['rank']} ({ph['period']}) 누적 "
+                         f"{ph['cumulative_krw']:,.0f}원 → {top_s} …")
+        lines.append(f"   ※ 용돈 처리: {rm['allowance_note']}")
     lines.append("")
     lines.append("※ 현황과 규칙 해당 여부만 알립니다. 매매 판단은 포함하지 않습니다.")
     return "\n".join(lines)
@@ -345,6 +412,52 @@ def run_self_test():
     # 7) 로드맵은 placeholder면 계산하지 않는다 (틀린 숫자 방지)
     print(f"[7] 로드맵 상태: {report['roadmap']['status']} - {report['roadmap']['reason']}")
     assert report["roadmap"]["status"] == "미입력"
+
+    # 7-b) 실제 배분표로 계산이 맞는지 (산술 검산)
+    income = {
+        "placeholder": False, "allowance_already_excluded": True,
+        "ranks": [{"rank": "일병", "months": 5, "monthly_krw": 850000},
+                  {"rank": "상병", "months": 6, "monthly_krw": 1150000},
+                  {"rank": "병장", "months": 4, "monthly_krw": 1450000}],
+        "excluded": {"allowance_krw": 300000},
+        "allocation": {
+            "asset_classes": ["bond", "developed_exUS", "emerging", "healthcare", "reit", "cash"],
+            "tiers": [
+                {"rank": "일병", "bond": 10, "developed_exUS": 20, "emerging": 15,
+                 "healthcare": 25, "reit": 15, "cash": 15},
+                {"rank": "상병", "bond": 20, "developed_exUS": 20, "emerging": 10,
+                 "healthcare": 20, "reit": 10, "cash": 20},
+                {"rank": "병장", "bond": 40, "developed_exUS": 10, "emerging": 5,
+                 "healthcare": 10, "reit": 10, "cash": 25}]}}
+    rm = compute_roadmap(income)
+    print(f"[7b] 총 {rm['total_months']}개월 / 누적 {rm['total_investable_krw']:,}원")
+    for ph in rm["phases"]:
+        print(f"     {ph['rank']}: {ph['months']}개월 x {ph['monthly_investable_krw']:,} "
+              f"= {ph['subtotal_krw']:,} (누적 {ph['cumulative_krw']:,})")
+    assert rm["status"] == "계산됨"
+    assert rm["total_months"] == 15
+    assert rm["total_investable_krw"] == 5 * 850000 + 6 * 1150000 + 4 * 1450000 == 16950000
+    assert rm["phases"][2]["target_allocation_krw"]["bond"] == round(16950000 * 0.40)
+
+    # 7-c) 용돈을 차감하는 설정이면 실제로 줄어드는지
+    rm2 = compute_roadmap(dict(income, allowance_already_excluded=False))
+    print(f"[7c] 용돈 차감 시 누적 {rm2['total_investable_krw']:,}원 "
+          f"(차이 {rm['total_investable_krw'] - rm2['total_investable_krw']:,})")
+    assert rm["total_investable_krw"] - rm2["total_investable_krw"] == 300000 * 15
+
+    # 7-d) 배분표가 100%가 아니면 계산을 거부하는지 (조용히 틀리지 않게)
+    broken = json.loads(json.dumps(income))
+    broken["allocation"]["tiers"][0]["bond"] = 5   # 합계 95%
+    rm3 = compute_roadmap(broken)
+    print(f"[7d] 합계 95% 표 -> {rm3['status']}: {rm3['reason']}")
+    assert rm3["status"] == "배분표 오류" and "95" in rm3["reason"]
+
+    # 7-e) 계급과 배분표가 어긋나면 잡아내는지
+    mismatch = json.loads(json.dumps(income))
+    mismatch["ranks"].append({"rank": "이병", "months": 2, "monthly_krw": 600000})
+    rm4 = compute_roadmap(mismatch)
+    print(f"[7e] 배분표 없는 계급 추가 -> {rm4['status']}: {rm4['reason']}")
+    assert rm4["status"] == "배분표 오류" and "이병" in rm4["reason"]
 
     # 8) 실계좌 파일을 쓰지 않는지
     src = open("portfolio_report.py", encoding="utf-8").read()

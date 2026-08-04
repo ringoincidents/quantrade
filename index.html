@@ -74,6 +74,13 @@
   .progress-fill { background: #6366f1; height: 100%; }
   .waiting-note { font-size: 12.5px; color: #94a3b8; margin-top: 6px; }
 
+  .rm-scroll { overflow-x: auto; max-width: 100%; }
+  .rm-table { border-collapse: collapse; width: 100%; font-size: 12.5px; min-width: 480px; }
+  .rm-table th, .rm-table td { padding: 6px 8px; border-bottom: 1px solid #2a2d35; text-align: left; white-space: nowrap; }
+  .rm-table th { color: #94a3b8; font-weight: 600; font-size: 11px; }
+  .rm-table .rm-num { text-align: right; }
+  .rm-sub { font-size: 11px; color: #64748b; }
+  .rm-note { margin-top: 8px; }
   .muted { color: #64748b; font-size: 13px; }
 </style>
 </head>
@@ -334,9 +341,26 @@ async function loadPortfolioReport(bust) {
       ? `<h3>규칙 해당 ${matches.length}건 ${prov}</h3>` + matches.map(renderRuleMatch).join('')
       : `<p class="ok-line">✅ 해당하는 규칙 없음 ${prov}</p>`;
     const rm = r.roadmap || {};
-    const rmHtml = rm.status === '계산됨'
-      ? `<p class="muted">배분 로드맵: 총 투자가능액 ${Number(rm.total_investable || 0).toLocaleString()}원 기준 산출됨</p>`
-      : `<p class="muted">🗺️ 배분 로드맵: ${esc(rm.status || '미입력')} — ${esc(rm.reason || '')}</p>`;
+    let rmHtml;
+    if (rm.status === '계산됨') {
+      const lb = rm.asset_class_labels || {};
+      const cls = Object.keys((rm.phases[0] || {}).target_allocation_pct || {});
+      const head = cls.map(c => `<th>${esc(lb[c] || c)}</th>`).join('');
+      const body = (rm.phases || []).map(ph => `<tr>
+          <td>${esc(ph.rank)}<div class="rm-sub">${esc(ph.period)}</div></td>
+          <td class="rm-num">${Number(ph.cumulative_krw).toLocaleString()}</td>
+          ${cls.map(c => `<td class="rm-num">${ph.target_allocation_pct[c]}%</td>`).join('')}
+        </tr>`).join('');
+      rmHtml = `<h3>🗺️ 배분 로드맵</h3>
+        <p class="muted">${rm.total_months}개월 · 총 투자가능액
+          ${Number(rm.total_investable_krw).toLocaleString()}원 · ${esc(rm.date_basis)}</p>
+        <div class="rm-scroll"><table class="rm-table">
+          <thead><tr><th>구간</th><th>누적</th>${head}</tr></thead>
+          <tbody>${body}</tbody></table></div>
+        <p class="muted rm-note">※ 용돈 처리: ${esc(rm.allowance_note || '')}</p>`;
+    } else {
+      rmHtml = `<p class="muted">🗺️ 배분 로드맵: ${esc(rm.status || '미입력')} — ${esc(rm.reason || '')}</p>`;
+    }
     el.innerHTML = `<p class="muted">생성 ${esc(r.generated_at)} · 총자산
         ${Number(s.total_assets_krw || 0).toLocaleString()}원 · 현금 ${(s.cash_pct || 0).toFixed(1)}%
         ${byC ? '· ' + byC : ''}</p>
