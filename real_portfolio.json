@@ -1,18 +1,18 @@
 {
-  "synced_at": "2026-08-05T03:42:34.577886+00:00",
-  "cash": 119079.955,
+  "synced_at": "2026-08-05T10:04:35.473552+00:00",
+  "cash": 5797.829999999999,
   "positions": [
     {
       "symbol": "196170",
       "name": "알테오젠",
       "market_country": "KR",
       "currency": "KRW",
-      "quantity": "1",
-      "avg_price": "342500",
-      "current_price": "279500",
-      "eval_amount": 279500.0,
-      "eval_amount_krw": 279500.0,
-      "return_pct": -18.39
+      "quantity": "3",
+      "avg_price": "298333.333333",
+      "current_price": "275500",
+      "eval_amount": 826500.0,
+      "eval_amount_krw": 826500.0,
+      "return_pct": -7.6499999999999995
     },
     {
       "symbol": "310200",
@@ -21,34 +21,22 @@
       "currency": "KRW",
       "quantity": "250",
       "avg_price": "2111.94",
-      "current_price": "2640",
-      "eval_amount": 660000.0,
-      "eval_amount_krw": 660000.0,
-      "return_pct": 25.0
+      "current_price": "2625",
+      "eval_amount": 656250.0,
+      "eval_amount_krw": 656250.0,
+      "return_pct": 24.29
     },
     {
-      "symbol": "042660",
-      "name": "한화오션",
-      "market_country": "KR",
-      "currency": "KRW",
-      "quantity": "3",
-      "avg_price": "87900",
-      "current_price": "91100",
-      "eval_amount": 273300.0,
-      "eval_amount_krw": 273300.0,
-      "return_pct": 3.64
-    },
-    {
-      "symbol": "NOK",
-      "name": "노키아(ADR)",
+      "symbol": "NMR",
+      "name": "노무라 홀딩스(ADR)",
       "market_country": "US",
       "currency": "USD",
-      "quantity": "10",
-      "avg_price": "9.82",
-      "current_price": "9.94",
-      "eval_amount": 99.4,
-      "eval_amount_krw": 141595.30000000002,
-      "return_pct": 1.22
+      "quantity": "6",
+      "avg_price": "9.85",
+      "current_price": "9.9",
+      "eval_amount": 59.4,
+      "eval_amount_krw": 84858.84,
+      "return_pct": 0.5
     },
     {
       "symbol": "NVDA",
@@ -57,22 +45,22 @@
       "currency": "USD",
       "quantity": "1",
       "avg_price": "202.1986",
-      "current_price": "216.46",
-      "eval_amount": 216.46,
-      "eval_amount_krw": 308347.27,
-      "return_pct": 7.049999999999999
+      "current_price": "215.98",
+      "eval_amount": 215.98,
+      "eval_amount_krw": 308549.028,
+      "return_pct": 6.81
     },
     {
       "symbol": "SCHD",
       "name": "SCHD",
       "market_country": "US",
       "currency": "USD",
-      "quantity": "54.332105",
-      "avg_price": "32.664993",
-      "current_price": "33.93",
-      "eval_amount": 1843.488322,
-      "eval_amount_krw": 2626049.114689,
-      "return_pct": 3.8699999999999997
+      "quantity": "56.332105",
+      "avg_price": "32.708131",
+      "current_price": "33.87",
+      "eval_amount": 1907.968396,
+      "eval_amount_krw": 2725723.6505255997,
+      "return_pct": 3.55
     }
   ]
 }
