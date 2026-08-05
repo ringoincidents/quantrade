@@ -175,6 +175,70 @@ def handle_autoexec_status():
     return True
 
 
+# ── 사전 승인 흐름 (2026-08-04) ─────────────────────────────────────────────
+# 규칙이 발동해도 바로 실행하지 않는다. 심층분석 리포트를 보고 사용자가 승인해야
+# 실행 단계로 넘어간다.
+
+def handle_autoexec_report(approval_id):
+    """발동 건의 심층분석 리포트를 다시 보낸다."""
+    import autoexec, rule_trigger_report
+    reports = load_json(autoexec.REPORTS_FILE, {"reports": {}})
+    rep = reports["reports"].get(approval_id)
+    if not rep:
+        send_telegram(f"❓ {approval_id} 리포트를 찾을 수 없습니다.")
+        return False
+    send_telegram(rule_trigger_report.render_text(rep))
+    return True
+
+
+def handle_autoexec_approve(approval_id):
+    import autoexec
+    st = autoexec.load_state()
+    ap = autoexec.find_approval(st, approval_id)
+    if not ap:
+        send_telegram(f"❓ {approval_id} 승인 대기 건을 찾을 수 없습니다.")
+        return False
+    if ap["status"] != "waiting":
+        send_telegram(f"ℹ️ {approval_id}는 이미 '{ap['status']}' 상태입니다.")
+        return False
+    if autoexec.kill_switch_engaged(st):
+        send_telegram("🛑 킬스위치가 작동 중이라 승인해도 실행되지 않습니다. "
+                      "해제하려면 /autoexec_start 를 보내세요.")
+        return False
+
+    try:
+        autoexec.execute({"action": "sell", "symbol": ap["symbol"],
+                          "quantity": ap["quantity"]})
+        ap["status"] = "executed"
+        msg = f"✅ 승인 실행: {ap['name']} {ap['quantity']}주 매도"
+    except autoexec.OrderLayerUnavailable as e:
+        ap["status"] = "approved_not_executed"
+        msg = (f"⏸️ {ap['name']} {ap['quantity']}주 — 승인은 기록됐으나 실행되지 "
+               f"않았습니다.\n{e}")
+    except Exception as e:
+        ap["status"] = "error"
+        msg = f"❌ {ap['name']} 실행 오류: {e}"
+    autoexec.save_json(autoexec.STATE_FILE, st)
+    send_telegram(msg)
+    return True
+
+
+def handle_autoexec_reject(approval_id):
+    import autoexec
+    st = autoexec.load_state()
+    ap = autoexec.find_approval(st, approval_id)
+    if not ap:
+        send_telegram(f"❓ {approval_id} 승인 대기 건을 찾을 수 없습니다.")
+        return False
+    if ap["status"] != "waiting":
+        send_telegram(f"ℹ️ {approval_id}는 이미 '{ap['status']}' 상태입니다.")
+        return False
+    ap["status"] = "rejected"
+    autoexec.save_json(autoexec.STATE_FILE, st)
+    send_telegram(f"🚫 {ap['name']} {ap['quantity']}주 매도 제안을 취소했습니다.")
+    return True
+
+
 def run():
     offset_data = load_json(OFFSET_FILE, {"last_update_id": 0})
     portfolio = load_json(PORTFOLIO_FILE, {"cash": 100000, "positions": []})
@@ -216,6 +280,12 @@ def run():
             handle_autoexec_start()
         elif cmd == "/autoexec_status":
             handle_autoexec_status()
+        elif cmd == "/autoexec_report" and len(parts) > 1:
+            handle_autoexec_report(parts[1])
+        elif cmd == "/autoexec_approve" and len(parts) > 1:
+            handle_autoexec_approve(parts[1])
+        elif cmd == "/autoexec_reject" and len(parts) > 1:
+            handle_autoexec_reject(parts[1])
         elif cmd == "/status":
             lines = [f"- {p['market']}: {p.get('current_return',0):+.2f}% {'💎확신' if p.get('conviction') else ''}" for p in portfolio["positions"]]
             send_telegram("📊 현재 포지션\n" + "\n".join(lines) if lines else "보유 포지션 없음")

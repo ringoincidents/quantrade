@@ -15,11 +15,18 @@
 호출이 없고, self-test가 그 사실을 검사한다. 목표가는 사람이 JSON에 직접 적는
 값이며, 코드는 읽어서 비교만 한다.
 
-**안전장치**(요구사항 4):
+**승인 흐름 (2026-08-04 방향성 세션 수정)**: 원래 "즉시 실행 + 사후 통보"였으나
+**"발동 시 심층분석 리포트 + 사전 승인"**으로 바뀌었다. 규칙이 발동하면 대상
+종목의 리포트(`rule_trigger_report.generate()`)를 만들어 승인 대기로 올리고,
+사용자가 `/autoexec_approve <id>`를 보낸 뒤에만 실행한다. 승인 없이
+APPROVAL_TTL_DAYS가 지나면 만료된다 — 며칠 지난 판정으로 지금 체결하는 건
+근거가 이미 낡았기 때문이다.
+
+**안전장치**:
   - 킬스위치: `/autoexec_stop` 이후에는 어떤 규칙도 실행되지 않는다. 실행 직전에
     매번 확인하며, 해제는 `/autoexec_start`로만 가능하다(사고로 풀리지 않게).
   - 전량 로깅: 발동/미발동을 가리지 않고 모든 트리거 판정을 남긴다.
-  - 사후 통보: 실행 즉시 텔레그램. 사전 승인이 아니라 사후 통보다.
+  - 사전 승인: 위 승인 흐름. 리포트를 보고 사람이 결정한다.
   - 초기 유예: 첫 GRACE_PERIOD_DAYS 동안 규칙별 1일 1회로 제한.
 
 **주문 실행 계층은 아직 없다.** `place_sell_order()`는 토스 주문 API 스펙이
@@ -36,6 +43,7 @@ REAL_PORTFOLIO_FILE = "real_portfolio.json"
 TARGET_PRICES_FILE = "target_prices.json"
 STATE_FILE = "autoexec_state.json"
 LOG_FILE = "autoexec_log.json"
+REPORTS_FILE = "autoexec_reports.json"
 REPORT_STATE_FILE = "portfolio_report_state.json"   # 손실 지속일수 추적(리포트와 공유)
 
 # 규칙 파라미터. 방향성 세션 확정 대상이며 결과를 보고 바꾸지 않는다.
@@ -47,6 +55,13 @@ GRACE_PERIOD_DAYS = 7           # 초기 유예: 규칙별 1일 1회 제한
 KST = timezone(timedelta(hours=9))
 
 RULES = ("집중도리밸런싱", "손실지속손절", "목표가부분익절")
+
+# [2026-08-04 방향성 세션 수정] 발동 시 즉시 실행하지 않고, 심층분석 리포트를
+# 만들어 사용자 승인을 먼저 받는다. 이 값을 False로 되돌리면 예전의
+# "즉시 실행 + 사후 통보"로 돌아가므로, 승인 절차를 우회하려는 변경인지
+# 확인하지 않고 건드리지 말 것.
+REQUIRE_APPROVAL = True
+APPROVAL_TTL_DAYS = 2   # 승인 없이 이 기간이 지나면 만료 - 오래된 판정이 뒤늦게 체결되지 않게
 
 
 def today_kst():
@@ -252,6 +267,53 @@ def eval_target_price(positions, targets):
     return out
 
 
+# ── 승인 대기열 (사전 승인 흐름) ────────────────────────────────────────────
+
+def queue_for_approval(state, rule, decision, today=None):
+    """발동 건을 승인 대기로 올린다. 같은 날 같은 규칙·종목 건은 재등록하지
+    않는다 — 매일 도는 워크플로가 같은 제안을 쌓지 않게."""
+    today = today or today_kst()
+    q = state.setdefault("pending_approvals", [])
+    aid = f"{rule}_{decision['symbol']}_{today}"
+    for p in q:
+        if p["id"] == aid and p["status"] == "waiting":
+            return p
+    entry = {
+        "id": aid, "rule": rule, "symbol": decision["symbol"],
+        "name": decision.get("name", decision["symbol"]),
+        "quantity": int(_num(decision.get("quantity"))),
+        "reason": decision.get("reason", ""),
+        "detail": decision.get("detail", {}),
+        "tax_note": decision.get("tax_note"),
+        "created_at": today, "status": "waiting",
+    }
+    q.append(entry)
+    return entry
+
+
+def expire_stale_approvals(state, today=None):
+    """오래된 승인 대기를 만료시킨다. 며칠 지난 판정으로 지금 체결하는 건
+    근거가 이미 낡은 것이라 위험하다."""
+    today = today or today_kst()
+    t = datetime.strptime(today, "%Y-%m-%d")
+    expired = []
+    for p in state.get("pending_approvals", []):
+        if p["status"] != "waiting":
+            continue
+        age = (t - datetime.strptime(p["created_at"], "%Y-%m-%d")).days
+        if age >= APPROVAL_TTL_DAYS:
+            p["status"] = "expired"
+            expired.append(p)
+    return expired
+
+
+def find_approval(state, approval_id):
+    for p in state.get("pending_approvals", []):
+        if p["id"] == approval_id:
+            return p
+    return None
+
+
 # ── 주문 실행 계층 (미구현 seam) ────────────────────────────────────────────
 
 class OrderLayerUnavailable(Exception):
@@ -318,6 +380,17 @@ def run_rules(portfolio, targets, state, log, loss_since, today=None, enabled=Fa
                              f"유예기간 중 {rule} 당일 1회 제한 초과", d.get("detail"))
                 continue
 
+            # [2026-08-04 방향성 세션 수정] "즉시 실행 + 사후 통보" -> "분석 리포트 +
+            # 사전 승인". 발동해도 바로 실행하지 않고, 심층분석 리포트를 만들어
+            # 승인 대기로 올린다. 실제 실행은 사용자가 /autoexec_approve 한 뒤에만.
+            if REQUIRE_APPROVAL:
+                pend = queue_for_approval(state, rule, d, today)
+                log_decision(log, today, rule, d["symbol"], False,
+                             f"승인 대기 등록 (id={pend['id']}) - 사전 승인 필요", d.get("detail"))
+                results.append({**d, "rule": rule, "executed": False,
+                                "status": "승인 대기", "approval_id": pend["id"]})
+                continue
+
             try:
                 execute(d)
                 state.setdefault("last_fired", {})[rule] = today
@@ -336,13 +409,57 @@ def run_rules(portfolio, targets, state, log, loss_since, today=None, enabled=Fa
     return results, state, log
 
 
+def fetch_market_context(symbol, position):
+    """리포트에 넣을 시세/뉴스를 조회한다. 조회 실패는 리포트 생성을 막지 않고
+    해당 섹션만 '데이터 부족'으로 남는다 — 승인 자료가 아예 안 나오는 것보다
+    일부라도 나오는 편이 낫고, 무엇이 빠졌는지는 리포트에 드러난다."""
+    closes = highs = lows = None
+    headlines = None
+    try:
+        if position.get("market_country") == "KR":
+            from analyze_lib import get_krx_candles
+            candles = get_krx_candles(symbol, count=140)
+            closes = [c["close"] for c in candles]
+            highs = [c["high"] for c in candles]
+            lows = [c["low"] for c in candles]
+        else:
+            from analyze_lib import get_us_closes
+            closes = get_us_closes(symbol, count=140)
+    except Exception as e:
+        print(f"⚠️ {symbol} 시세 조회 실패 - 차트 섹션 생략 ({e})")
+    try:
+        from analyze_lib import get_news_headlines
+        headlines = get_news_headlines(symbol)
+    except Exception as e:
+        print(f"⚠️ {symbol} 뉴스 조회 실패 - 시장 섹션 생략 ({e})")
+    return {"closes": closes, "highs": highs, "lows": lows, "headlines": headlines}
+
+
+def build_trigger_report(approval, position, context=None):
+    """발동 건에 대한 심층분석 리포트를 만든다.
+
+    **리포트 형식/금지어 규율은 rule_trigger_report.generate()가 단독으로
+    책임진다** — 자동실행 플로우와 프록시 세션이 같은 함수를 부르게 해서 두
+    경로의 결과물이 갈라지지 않게 한다(요구사항 4)."""
+    import rule_trigger_report as rtr
+    ctx = context or fetch_market_context(approval["symbol"], position)
+    return rtr.generate(
+        approval["symbol"], position,
+        {"rule": approval["rule"], "quantity": approval["quantity"],
+         "reason": approval["reason"], "detail": approval["detail"]},
+        closes=ctx.get("closes"), highs=ctx.get("highs"), lows=ctx.get("lows"),
+        event_card=ctx.get("event_card"), headlines=ctx.get("headlines"),
+    )
+
+
 def notify(results, state):
-    """실행 즉시 사후 통보. 사전 승인 요청이 아니다."""
+    """판정 결과 통보. 2026-08-04 수정으로 발동 건은 승인 대기로 가므로,
+    이 메시지는 사후 통보가 아니라 승인 요청이다."""
     fired = [r for r in results if r.get("executed")]
     blocked = [r for r in results if not r.get("executed")]
     if not fired and not blocked:
         return None
-    lines = ["🤖 규칙 기반 자동실행 결과 (사후 통보)"]
+    lines = ["🤖 규칙 기반 자동실행 판정 결과 (실행 전 승인 필요)"]
     if kill_switch_engaged(state):
         lines.append("🛑 킬스위치 작동 중 — 실행이 차단되었습니다.")
     for r in fired:
@@ -353,6 +470,9 @@ def notify(results, state):
     for r in blocked:
         lines.append(f"⏸️ [{r['rule']}] {r.get('name', r['symbol'])} {r['quantity']}주 — {r['status']}")
         lines.append(f"   {r['reason']}")
+        if r.get("approval_id"):
+            lines.append(f"   👉 분석 리포트 확인 후 /autoexec_approve {r['approval_id']}")
+            lines.append(f"      취소하려면 /autoexec_reject {r['approval_id']}")
     lines.append("")
     lines.append("중단하려면 /autoexec_stop 을 보내세요.")
     return "\n".join(lines)
@@ -373,8 +493,30 @@ def run(args):
     if enabled and not state.get("first_enabled_at"):
         state["first_enabled_at"] = datetime.now(KST).isoformat()
 
+    expired = expire_stale_approvals(state)
+    for e in expired:
+        print(f"⌛ 승인 대기 만료: {e['id']} ({APPROVAL_TTL_DAYS}일 경과)")
+
     results, state, log = run_rules(portfolio, targets, state, log, loss_since,
                                     enabled=enabled)
+
+    # 승인 대기로 올라간 건에 대해 심층분석 리포트를 만들어 저장한다.
+    pos_by_sym = {p["symbol"]: p for p in portfolio.get("positions", [])}
+    reports = load_json(REPORTS_FILE, {"reports": {}})
+    for r in results:
+        aid = r.get("approval_id")
+        if not aid or aid in reports["reports"]:
+            continue
+        ap = find_approval(state, aid)
+        pos = pos_by_sym.get(r["symbol"], {})
+        try:
+            rep = build_trigger_report(ap, pos)
+            reports["reports"][aid] = rep
+            print("\n" + __import__("rule_trigger_report").render_text(rep))
+        except Exception as e:
+            print(f"⚠️ {aid} 리포트 생성 실패: {e}")
+    save_json(REPORTS_FILE, reports)
+
     save_json(STATE_FILE, state)
     save_json(LOG_FILE, log)
 
@@ -544,6 +686,44 @@ def run_self_test():
     assert c and c[0]["quantity"] == 30, "문자열 입력에서 집중도 수량 계산 실패"
     assert l and l[0]["quantity"] == 100, "문자열 입력에서 손절 수량 계산 실패"
     assert t and t[0]["quantity"] == 50, "문자열 입력에서 목표가 수량 계산 실패"
+
+    # 8-c) 사전 승인 흐름: 발동해도 바로 실행되지 않고 승인 대기로 가는지
+    st4 = load_state()
+    log4 = {"decisions": []}
+    res4, st4, log4 = run_rules(portfolio, targets, st4, log4,
+                                {"LOSS": "2026-01-01"}, "2026-08-04", enabled=True)
+    fired4 = [r for r in res4 if r.get("approval_id")]
+    executed4 = [r for r in res4 if r.get("executed")]
+    print(f"[8c] 발동 {len(fired4)}건 전부 승인대기 / 즉시 실행 {len(executed4)}건")
+    assert fired4, "발동 건이 승인 대기로 올라가지 않음"
+    assert executed4 == [], "사전 승인 없이 실행됨"
+    assert all(r["status"] == "승인 대기" for r in fired4)
+    q = st4.get("pending_approvals", [])
+    assert len(q) == len(fired4) and all(p["status"] == "waiting" for p in q)
+
+    # 같은 날 재실행해도 중복 등록되지 않는지
+    res5, st4, _ = run_rules(portfolio, targets, st4, {"decisions": []},
+                             {"LOSS": "2026-01-01"}, "2026-08-04", enabled=True)
+    assert len(st4["pending_approvals"]) == len(q), "같은 건이 중복 등록됨"
+    print(f"     같은 날 재실행 후에도 대기열 {len(st4['pending_approvals'])}건 (중복 없음)")
+
+    # 승인 없이 TTL 경과하면 만료되는지
+    later = datetime.strptime("2026-08-04", "%Y-%m-%d").toordinal() + APPROVAL_TTL_DAYS
+    exp = expire_stale_approvals(st4, datetime.fromordinal(later).strftime("%Y-%m-%d"))
+    print(f"     {APPROVAL_TTL_DAYS}일 경과 -> 만료 {len(exp)}건")
+    assert len(exp) == len(q), "TTL 경과분이 만료되지 않음"
+
+    # 8-d) 리포트 생성기가 공유되는지 + 금지 내용이 없는지
+    import rule_trigger_report as rtr
+    ap = {"id": "t", "rule": "집중도리밸런싱", "symbol": "BIG", "name": "집중종목",
+          "quantity": 30, "reason": "테스트", "detail": {"weight_pct": 58.8,
+          "excess_krw": 490000, "cap_krw": 300000, "sell_krw": 300000}}
+    rep = build_trigger_report(ap, portfolio["positions"][0],
+                               context={"closes": [100 + i for i in range(140)]})
+    viol = rtr.audit(rep)
+    print(f"[8d] 리포트 생성기={rtr.generate.__module__} / 감사 위반 {viol or '없음'}")
+    assert not viol, f"리포트에 금지 내용: {viol}"
+    assert rep["trigger"]["facts"], "발동 사실이 비어 있음"
 
     # 9) 주문 계층 미구현이 조용히 성공하지 않는지
     try:
