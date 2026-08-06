@@ -7,8 +7,8 @@
       "entry_date": "2026-07-29",
       "expected_days": 7,
       "amount_krw": 33333.333333333336,
-      "current_price": 1428.0,
-      "current_return": -0.41841004184100417
+      "current_price": 1424.0,
+      "current_return": -0.697350069735007
     },
     {
       "market": "KRW-PENGU",
@@ -18,8 +18,8 @@
       "entry_date": "2026-07-30",
       "expected_days": 11,
       "amount_krw": 4354,
-      "current_price": 8.67,
-      "current_return": 4.836759371221286
+      "current_price": 8.7,
+      "current_return": 5.199516324062875
     },
     {
       "market": "KRW-WIF",
@@ -40,8 +40,8 @@
       "entry_date": "2026-07-31",
       "expected_days": 11,
       "amount_krw": 5775,
-      "current_price": 85.7,
-      "current_return": -3.4909909909909844
+      "current_price": 85.8,
+      "current_return": -3.3783783783783785
     },
     {
       "market": "KRW-ANKR",
@@ -51,8 +51,8 @@
       "entry_date": "2026-08-01",
       "expected_days": 11,
       "amount_krw": 3272,
-      "current_price": 4.89,
-      "current_return": 0.41067761806980646
+      "current_price": 4.96,
+      "current_return": 1.8480492813141656
     },
     {
       "market": "KRW-BEAM",
@@ -62,8 +62,8 @@
       "entry_date": "2026-08-01",
       "expected_days": 4,
       "amount_krw": 1953,
-      "current_price": 2.04,
-      "current_return": -0.9708737864077678
+      "current_price": 2.02,
+      "current_return": -1.9417475728155356
     },
     {
       "market": "KRW-USD1",
@@ -73,8 +73,8 @@
       "entry_date": "2026-08-02",
       "expected_days": 11,
       "amount_krw": 879,
-      "current_price": 1418.0,
-      "current_return": -1.1846689895470384
+      "current_price": 1420.0,
+      "current_return": -1.0452961672473868
     },
     {
       "market": "KRW-DOOD",
@@ -84,8 +84,8 @@
       "entry_date": "2026-08-02",
       "expected_days": 11,
       "amount_krw": 835,
-      "current_price": 1.77,
-      "current_return": -4.8387096774193585
+      "current_price": 1.81,
+      "current_return": -2.6881720430107547
     }
   ]
 }
