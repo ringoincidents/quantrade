@@ -1,6 +1,6 @@
 {
-  "synced_at": "2026-08-06T10:06:30.636639+00:00",
-  "cash": 5796.21,
+  "synced_at": "2026-08-06T13:08:51.607754+00:00",
+  "cash": 5791.5525,
   "positions": [
     {
       "symbol": "196170",
@@ -9,10 +9,10 @@
       "currency": "KRW",
       "quantity": "3",
       "avg_price": "298333.333333",
-      "current_price": "292500",
-      "eval_amount": 877500.0,
-      "eval_amount_krw": 877500.0,
-      "return_pct": -1.95
+      "current_price": "291500",
+      "eval_amount": 874500.0,
+      "eval_amount_krw": 874500.0,
+      "return_pct": -2.29
     },
     {
       "symbol": "310200",
@@ -33,10 +33,10 @@
       "currency": "USD",
       "quantity": "6",
       "avg_price": "9.85",
-      "current_price": "9.75",
-      "eval_amount": 58.5,
-      "eval_amount_krw": 83549.7,
-      "return_pct": -1.01
+      "current_price": "9.91",
+      "eval_amount": 59.46,
+      "eval_amount_krw": 84852.393,
+      "return_pct": 0.6
     },
     {
       "symbol": "NVDA",
@@ -45,10 +45,10 @@
       "currency": "USD",
       "quantity": "1",
       "avg_price": "202.1986",
-      "current_price": "219.64",
-      "eval_amount": 219.64,
-      "eval_amount_krw": 313689.848,
-      "return_pct": 8.62
+      "current_price": "221.24",
+      "eval_amount": 221.24,
+      "eval_amount_krw": 315720.542,
+      "return_pct": 9.41
     },
     {
       "symbol": "SCHD",
@@ -57,10 +57,10 @@
       "currency": "USD",
       "quantity": "56.332105",
       "avg_price": "32.708131",
-      "current_price": "33.82",
-      "eval_amount": 1905.151791,
-      "eval_amount_krw": 2720937.7879062,
-      "return_pct": 3.39
+      "current_price": "33.81",
+      "eval_amount": 1904.58847,
+      "eval_amount_krw": 2717942.9761134996,
+      "return_pct": 3.36
     }
   ]
 }
