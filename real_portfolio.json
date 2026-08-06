@@ -1,6 +1,6 @@
 {
-  "synced_at": "2026-08-06T03:48:15.077087+00:00",
-  "cash": 5763.0,
+  "synced_at": "2026-08-06T10:06:30.636639+00:00",
+  "cash": 5796.21,
   "positions": [
     {
       "symbol": "196170",
@@ -9,10 +9,10 @@
       "currency": "KRW",
       "quantity": "3",
       "avg_price": "298333.333333",
-      "current_price": "286500",
-      "eval_amount": 859500.0,
-      "eval_amount_krw": 859500.0,
-      "return_pct": -3.9600000000000004
+      "current_price": "292500",
+      "eval_amount": 877500.0,
+      "eval_amount_krw": 877500.0,
+      "return_pct": -1.95
     },
     {
       "symbol": "310200",
@@ -21,10 +21,10 @@
       "currency": "KRW",
       "quantity": "250",
       "avg_price": "2111.94",
-      "current_price": "2635",
-      "eval_amount": 658750.0,
-      "eval_amount_krw": 658750.0,
-      "return_pct": 24.759999999999998
+      "current_price": "2645",
+      "eval_amount": 661250.0,
+      "eval_amount_krw": 661250.0,
+      "return_pct": 25.240000000000002
     },
     {
       "symbol": "NMR",
@@ -33,10 +33,10 @@
       "currency": "USD",
       "quantity": "6",
       "avg_price": "9.85",
-      "current_price": "9.93",
-      "eval_amount": 59.58,
-      "eval_amount_krw": 84603.59999999999,
-      "return_pct": 0.8099999999999999
+      "current_price": "9.75",
+      "eval_amount": 58.5,
+      "eval_amount_krw": 83549.7,
+      "return_pct": -1.01
     },
     {
       "symbol": "NVDA",
@@ -45,10 +45,10 @@
       "currency": "USD",
       "quantity": "1",
       "avg_price": "202.1986",
-      "current_price": "219.85",
-      "eval_amount": 219.85,
-      "eval_amount_krw": 312187.0,
-      "return_pct": 8.72
+      "current_price": "219.64",
+      "eval_amount": 219.64,
+      "eval_amount_krw": 313689.848,
+      "return_pct": 8.62
     },
     {
       "symbol": "SCHD",
@@ -57,10 +57,10 @@
       "currency": "USD",
       "quantity": "56.332105",
       "avg_price": "32.708131",
-      "current_price": "33.78",
-      "eval_amount": 1902.898506,
-      "eval_amount_krw": 2702115.87852,
-      "return_pct": 3.27
+      "current_price": "33.82",
+      "eval_amount": 1905.151791,
+      "eval_amount_krw": 2720937.7879062,
+      "return_pct": 3.39
     }
   ]
 }
