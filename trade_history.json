@@ -39,6 +39,14 @@
       "entry_date": "2026-07-31",
       "exit_date": "2026-07-31",
       "return_pct": 0.0
+    },
+    {
+      "market": "KRW-BEAM",
+      "asset_class": "crypto",
+      "strategy_type": "단타",
+      "entry_date": "2026-08-01",
+      "exit_date": "2026-08-07",
+      "return_pct": -5.339805825242723
     }
   ]
 }

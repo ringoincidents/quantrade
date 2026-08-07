@@ -1,5 +1,5 @@
 {
-  "date": "2026-08-06",
+  "date": "2026-08-07",
   "schema_version": "v3.2",
   "prediction_enabled": false,
   "guardrail_violations": [
@@ -18,7 +18,7 @@
       "asset_class": "crypto",
       "strategy_type": "스윙",
       "amount_krw": 33333.333333333336,
-      "current_return": -0.697350069735007,
+      "current_return": -1.6039051603905161,
       "conviction": false
     },
     {
@@ -26,7 +26,7 @@
       "asset_class": "crypto",
       "strategy_type": "스윙",
       "amount_krw": 4354,
-      "current_return": 5.199516324062875,
+      "current_return": 3.0229746070133015,
       "conviction": false
     },
     {
@@ -34,7 +34,7 @@
       "asset_class": "crypto",
       "strategy_type": "스윙",
       "amount_krw": 3557,
-      "current_return": -1.9801980198019802,
+      "current_return": -2.4752475247524752,
       "conviction": false
     },
     {
@@ -42,7 +42,7 @@
       "asset_class": "crypto",
       "strategy_type": "스윙",
       "amount_krw": 5775,
-      "current_return": -3.3783783783783785,
+      "current_return": -3.603603603603607,
       "conviction": false
     },
     {
@@ -50,15 +50,7 @@
       "asset_class": "crypto",
       "strategy_type": "스윙",
       "amount_krw": 3272,
-      "current_return": 1.8480492813141656,
-      "conviction": false
-    },
-    {
-      "market": "KRW-BEAM",
-      "asset_class": "crypto",
-      "strategy_type": "단타",
-      "amount_krw": 1953,
-      "current_return": -1.9417475728155356,
+      "current_return": 1.2320328542094374,
       "conviction": false
     },
     {
@@ -66,7 +58,7 @@
       "asset_class": "crypto",
       "strategy_type": "스윙",
       "amount_krw": 879,
-      "current_return": -1.0452961672473868,
+      "current_return": -1.6724738675958188,
       "conviction": false
     },
     {
@@ -74,7 +66,7 @@
       "asset_class": "crypto",
       "strategy_type": "스윙",
       "amount_krw": 835,
-      "current_return": -2.6881720430107547,
+      "current_return": -2.1505376344086042,
       "conviction": false
     }
   ],
@@ -120,5 +112,5 @@
       "dry_run": true
     }
   ],
-  "cash": 45784.709684840105
+  "cash": 47633.42327707312
 }
