@@ -29,12 +29,11 @@ APPROVAL_TTL_DAYS가 지나면 만료된다 — 며칠 지난 판정으로 지�
   - 사전 승인: 위 승인 흐름. 리포트를 보고 사람이 결정한다.
   - 초기 유예: 첫 GRACE_PERIOD_DAYS 동안 규칙별 1일 1회로 제한.
 
-**주문 실행 계층은 아직 없다.** 토스증권 Open API에 주문 생성·정정·취소가
-**존재한다는 것은 2026-08-08에 확인됐다**(인증도 기존 OAuth2 + X-Tossinvest-Account
-그대로). 다만 엔드포인트 경로와 요청 본문 필드명을 아직 확보하지 못해
-`place_sell_order()`는 미구현이고, 호출되면 "실행 불가"로 로깅한다.
-필드명을 추측하면 조용히 거부되거나 **다른 뜻으로 해석된 주문이 나갈 수 있어**
-실계좌에서는 할 수 없는 일이다. 필요한 항목 목록은 그 함수 docstring에 있다.
+**주문 실행 계층은 아직 없다.** `place_sell_order()`는 미구현이고, 호출되면
+"실행 불가"로 로깅한다. 2026-08-08에 토스증권 Open API 스펙 전문(OpenAPI 3.1.0
+v1.2.13)이 확보돼 엔드포인트·요청 필드·응답·멱등키·에러 코드가 전부 밝혀졌으므로
+(`토스_주문API_스펙.md`), 남은 것은 정보가 아니라 승인이다 — 실계좌 주문 코드
+추가는 CLAUDE.md상 사전 방향성 세션 승인 대상이다.
 """
 import argparse
 import json
@@ -324,32 +323,35 @@ class OrderLayerUnavailable(Exception):
 
 
 def place_sell_order(symbol, quantity):
-    """**미구현.** 아래 정보가 확보되면 이 함수 하나만 채우면 된다.
+    """**미구현.** 단, 미구현 사유가 2026-08-08부로 바뀌었다.
 
-    2026-08-08 확인된 사실(토스증권 Open API 가이드):
-      - 주문 API가 **존재한다**. 주문 생성·정정·취소, 주문 조회, 판매 가능 수량
-        조회를 제공한다. REST API만 제공.
-      - 조건주문도 별도로 있다(SINGLE/OCO/OTO, 호가유형 LIMIT/MARKET).
-      - 인증은 OAuth2 토큰 + `X-Tossinvest-Account` 헤더 — 둘 다 이미
-        real_portfolio_sync.py가 쓰고 있는 방식이라 그대로 재사용 가능하다.
+    **스펙은 확보됐다.** 토스증권 Open API OpenAPI 3.1.0(v1.2.13) 전문을
+    사용자가 제공했고, 이 함수가 "없어서 못 만든다"고 적어두었던 다섯 항목
+    (엔드포인트/요청 필드/응답 스키마/멱등키/에러 코드)이 전부 채워졌다.
+    정리본은 `토스_주문API_스펙.md`에 있다. 요약:
 
-    아직 없는 것(이게 있어야 구현 가능):
-      1. 주문 생성 엔드포인트 경로와 HTTP 메서드 (예: POST /api/v1/orders ?)
-      2. 요청 본문 필드명과 타입 — 종목코드/수량/매매구분(매도)/호가유형/가격.
-         필드명을 추측하면(symbol vs stockCode vs code, quantity vs qty vs volume)
-         조용히 400을 받거나 **더 나쁘게는 다른 뜻으로 해석된 주문이 나갈 수 있다.**
-      3. 응답 스키마와 주문 식별자 필드 (체결 확인/취소에 필요)
-      4. 멱등키 지원 여부 — 재시도 시 중복 주문을 막을 방법. 없으면 자체 방어를
-         설계해야 한다.
-      5. 에러 코드 목록 (잔량 부족, 장 마감, 거래정지 등 구분)
+      - `POST /api/v1/orders` — body: symbol, side("SELL"), orderType,
+        quantity(문자열), price(LIMIT만), timeInForce, clientOrderId(멱등키,
+        **유효기간 10분**), confirmHighValueOrder(1억↑)
+      - 응답: `{"result": {"orderId": ..., "clientOrderId": ...}}`
+      - 인증은 real_portfolio_sync.py와 동일(Bearer + X-Tossinvest-Account)
+      - 주문 직전 `GET /api/v1/sellable-quantity`로 실수량 확인 권장 —
+        여기 들어오는 수량은 최대 ~8시간 stale한 스냅샷에서 계산된 값이다.
 
-    이 환경에서는 developers.tossinvest.com / openapi.tossinvest.com 이 둘 다
-    네트워크 정책상 차단(403)돼 있어 문서를 직접 읽지 못했다.
+    **그럼에도 구현하지 않은 이유는 정보 부족이 아니라 승인 절차다.** 주문을
+    실제로 넣는 코드를 추가하는 것은 CLAUDE.md가 "실계좌 코드 경로 변경"으로
+    분류하는 작업이고, 자기 세션 포함 사전 방향성 세션 승인을 요구한다.
+    스펙 확보는 그 승인을 대체하지 않는다.
+
+    승인 후 순서는 `토스_주문API_스펙.md` §7에 있다. 핵심은 **실주문이 첫
+    API 호출이 되면 안 된다**는 것 — 이 샌드박스에서는 openapi.tossinvest.com이
+    차단(403)돼 있어 검증이 불가능하므로, Actions에서 조회 엔드포인트로
+    토큰·헤더·프록시 IP 화이트리스트부터 확인한 뒤에 구현을 붙인다.
 
     매수는 이 함수에도, 이 파일 어디에도 없다(요구사항 3)."""
     raise OrderLayerUnavailable(
-        f"주문 실행 계층 미구현 - 엔드포인트/요청 스키마 미확보 "
-        f"(요청: {symbol} {quantity}주 매도)")
+        f"주문 실행 계층 미구현 - 스펙은 확보됐으나 실계좌 주문 코드 추가는 "
+        f"방향성 세션 승인 대기 (요청: {symbol} {quantity}주 매도)")
 
 
 def execute(decision):

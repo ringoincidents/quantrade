@@ -86,9 +86,10 @@ PREDICTION_ENABLED = os.environ.get("PREDICTION_ENABLED", "false").lower() == "t
 #   2) 안전장치(전량 로깅/사후 통보/유예기간 레이트리밋) 전부 검증
 #   3) 그 다음에만 이 값을 true로
 #
-# 현재 주문 실행 계층(autoexec.place_sell_order)은 토스 주문 API 스펙이 없어
-# 미구현이다. 따라서 이 값을 true로 바꿔도 주문은 나가지 않고 "실행 불가"로
-# 로깅된다.
+# 현재 주문 실행 계층(autoexec.place_sell_order)은 미구현이다. 따라서 이 값을
+# true로 바꿔도 주문은 나가지 않고 "실행 불가"로 로깅된다. 2026-08-08에 토스
+# 주문 API 스펙은 확보됐고(`토스_주문API_스펙.md`), 남은 것은 실계좌 주문 코드
+# 추가에 대한 사전 방향성 세션 승인이다.
 RULE_BASED_AUTOEXEC_ENABLED = os.environ.get("RULE_BASED_AUTOEXEC_ENABLED", "false").lower() == "true"
 
 
