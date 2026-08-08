@@ -595,6 +595,15 @@ def run_self_test():
     # 앵커 모드에서는 마지막 구간 역산 불일치를 중복 보고하지 않는다
     assert not rm7["month_discrepancies"], f"중복 경고: {rm7['month_discrepancies']}"
 
+    # 실제 입대일(2026-04-27) 기준 전역월 2027-10이면 초과 경고가 사라지는지.
+    # 이 케이스가 회귀하면 로드맵이 다시 잘못된 경고를 띄우게 된다.
+    fixed = json.loads(json.dumps(anchored))
+    fixed["service"]["discharge"] = "2027-10"
+    rm8 = compute_roadmap(fixed)
+    print(f"[7g] 전역월 2027-10 반영 -> 경고 {len(rm8['schedule_warnings'])}건")
+    assert rm8["schedule_warnings"] == [], f"경고가 남음: {rm8['schedule_warnings']}"
+    assert rm8["total_investable_krw"] == 16950000
+
     # 구간이 끊기면 잡아내는지 (일병만 한 달 앞당김 -> 빈 달 발생)
     broken_chain = json.loads(json.dumps(anchored))
     broken_chain["ranks"][0]["start"] = "2026-07"
