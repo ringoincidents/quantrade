@@ -472,9 +472,12 @@ def build_trigger_report(approval, position, context=None):
     )
 
 
-def notify(results, state):
+def notify(results, state, reports=None):
     """판정 결과 통보. 2026-08-04 수정으로 발동 건은 승인 대기로 가므로,
-    이 메시지는 사후 통보가 아니라 승인 요청이다."""
+    이 메시지는 사후 통보가 아니라 승인 요청이다. reports가 주어지면(요구사항 3:
+    "심층분석 리포트 링크/요약") 승인 대기 건마다 리포트 한 줄 요약을 인라인으로
+    붙인다 — 전체 리포트는 /autoexec_report <id>로 별도 조회(링크 역할)."""
+    reports = reports or {}
     fired = [r for r in results if r.get("executed")]
     blocked = [r for r in results if not r.get("executed")]
     if not fired and not blocked:
@@ -491,8 +494,12 @@ def notify(results, state):
         lines.append(f"⏸️ [{r['rule']}] {r.get('name', r['symbol'])} {r['quantity']}주 — {r['status']}")
         lines.append(f"   {r['reason']}")
         if r.get("approval_id"):
-            lines.append(f"   👉 분석 리포트 확인 후 /autoexec_approve {r['approval_id']}")
-            lines.append(f"      취소하려면 /autoexec_reject {r['approval_id']}")
+            rep = reports.get(r["approval_id"])
+            if rep:
+                import rule_trigger_report as rtr
+                lines.append(f"   📄 {rtr.render_summary(rep)}")
+            lines.append(f"   👉 전체 리포트: /autoexec_report {r['approval_id']}")
+            lines.append(f"      승인: /autoexec_approve {r['approval_id']} / 취소: /autoexec_reject {r['approval_id']}")
     lines.append("")
     lines.append("중단하려면 /autoexec_stop 을 보내세요.")
     return "\n".join(lines)
@@ -540,7 +547,7 @@ def run(args):
     save_json(STATE_FILE, state)
     save_json(LOG_FILE, log)
 
-    msg = notify(results, state)
+    msg = notify(results, state, reports=reports["reports"])
     print(msg or "발동한 규칙 없음")
     print(f"\n판정 로그 누적 {len(log['decisions'])}건 → {LOG_FILE}")
     if msg and args.telegram:
@@ -744,6 +751,16 @@ def run_self_test():
     print(f"[8d] 리포트 생성기={rtr.generate.__module__} / 감사 위반 {viol or '없음'}")
     assert not viol, f"리포트에 금지 내용: {viol}"
     assert rep["trigger"]["facts"], "발동 사실이 비어 있음"
+
+    # 8-e) 승인요청 텔레그램 메시지에 리포트 요약이 실제로 실리는지(요구사항 3)
+    fake_results = [{**ap, "approval_id": "t", "executed": False, "status": "승인 대기"}]
+    msg_no_report = notify(fake_results, load_state())
+    msg_with_report = notify(fake_results, load_state(), reports={"t": rep})
+    print(f"[8e] 리포트 없이 통보: 요약줄 없음={'📄' not in msg_no_report} / "
+          f"리포트 포함 통보: 요약줄 있음={'📄' in msg_with_report}")
+    assert "📄" not in msg_no_report, "리포트가 없는데 요약줄이 나옴"
+    assert "📄" in msg_with_report, "리포트를 넘겼는데 통보 메시지에 요약이 안 실림"
+    assert "/autoexec_report t" in msg_with_report and "/autoexec_approve t" in msg_with_report
 
     # 9) 주문 계층 미구현이 조용히 성공하지 않는지
     try:

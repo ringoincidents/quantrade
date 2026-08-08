@@ -1,7 +1,9 @@
 name: Poll Telegram Commands
+# 2026-08-08: */15 -> */5 (GitHub Actions 스케줄 트리거의 실질 최소 간격 — 이보다
+# 짧게 잡아도 플랫폼 부하 시 지연은 그대로 발생한다, 인수인계 문서 참고).
 on:
   schedule:
-    - cron: '*/15 * * * *'
+    - cron: '*/5 * * * *'
   workflow_dispatch:
 
 permissions:
@@ -21,10 +23,25 @@ jobs:
           python-version: '3.11'
       - run: pip install requests
       - run: python check_updates.py
+      # autoexec_state.json/autoexec_reports.json은 아직 아무 것도 만들지 않은 실행에서는
+      # 파일 자체가 없다(전자는 첫 커밋 전까지, 후자는 autoexec.run()을 도는 워크플로가
+      # 없어 아예 안 만들어짐) - 존재하지 않는 경로에 git add하면(bash -e라서) 이 스텝
+      # 전체가 실패한다. 개별 존재 확인 후 add. autoexec_stop_fast.yml과 같은 파일을
+      # 커밋할 수 있어 push 거부 가능성이 생겨 sync_real.yml의 rebase+재시도 패턴을 쓴다.
       - name: Commit state
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add portfolio.json trade_history.json pending_actions.json telegram_offset.json last_report.json
-          git diff --quiet && git diff --staged --quiet || git commit -m "Poll update"
-          git push
+          git add portfolio.json trade_history.json pending_actions.json telegram_offset.json last_report.json autoexec_log.json
+          for f in autoexec_state.json autoexec_reports.json; do
+            [ -f "$f" ] && git add "$f"
+          done
+          git diff --quiet && git diff --staged --quiet && echo "변경 없음" && exit 0
+          git commit -m "Poll update"
+          for attempt in 1 2 3 4 5; do
+            if git push; then echo "push 성공 (시도 $attempt)"; exit 0; fi
+            echo "push 거부됨 - rebase 후 재시도 ($attempt/5)"
+            git pull --rebase origin main || exit 1
+            sleep $((attempt * 5))
+          done
+          echo "5회 시도 후에도 push 실패"; exit 1

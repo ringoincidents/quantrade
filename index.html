@@ -168,6 +168,18 @@
   <p class="muted">로딩 중...</p>
 </div>
 
+<!-- ===== Block 7: [2026-08-08 신규] 규칙 기반 자동실행 — 킬스위치 상태 ===== -->
+<!-- RULE_BASED_AUTOEXEC_ENABLED는 기본 false이고 이 값을 아직 스케줄로 도는
+     autoexec.run()이 없다(read-only 킬스위치 명령어만 check_updates.py에서 처리).
+     이 카드는 그 사실과, 킬스위치 반영 지연 특성(GitHub Actions 스케줄 트리거의
+     플랫폼 한계, poll.yml/autoexec_stop_fast.yml 둘 다 동일)을 명시한다. -->
+<div class="section-divider">규칙 기반 자동실행 (활성화 전)</div>
+<h2>🛑 킬스위치 상태</h2>
+
+<div class="card" id="autoexec-section">
+  <p class="muted">로딩 중...</p>
+</div>
+
 </div>
 
 
@@ -508,6 +520,35 @@ async function loadPhase2(bust) {
   }
 }
 
+async function loadAutoexecStatus(bust) {
+  const el = document.getElementById('autoexec-section');
+  const LATENCY_NOTE = '킬스위치 반영은 poll.yml(전체 명령 처리)과 autoexec_stop_fast.yml(정지 전용 ' +
+    '빠른경로) 두 경로를 5분 간격으로 돕니다. 다만 GitHub Actions의 schedule 트리거는 ' +
+    '플랫폼 부하 시 지연될 수 있다고 공식 문서에 명시돼 있어(특히 매 시 정각 전후), ' +
+    '두 경로 모두 5분보다 더 걸릴 수 있습니다 — "즉시"를 보장하지 않습니다.';
+  try {
+    const resp = await fetch('autoexec_state.json' + bust);
+    if (!resp.ok) {
+      el.innerHTML = `<p class="muted">아직 킬스위치가 한 번도 조작되지 않아 autoexec_state.json이 없습니다 ` +
+        `(기본값: 해제 상태와 동일). ${LATENCY_NOTE}</p>`;
+      return;
+    }
+    const st = await resp.json();
+    const stopped = !!st.stopped;
+    el.innerHTML = `
+      <div class="gate-banner ${stopped ? 'fail' : 'pass'}">
+        <span class="gate-chip ${stopped ? 'fail' : 'pass'}">${stopped ? '🛑 정지됨' : '▶️ 해제됨'}</span>
+        <p>${stopped ? '규칙 기반 자동실행이 정지된 상태입니다. 판정/로깅은 계속됩니다.' : '규칙 기반 자동실행이 실행 가능한 상태입니다.'}</p>
+      </div>
+      <p class="muted" style="margin-bottom:0;">마지막 상태 변경: ${st.stopped_at || '-'} (KST)
+        · ${LATENCY_NOTE}
+        · RULE_BASED_AUTOEXEC_ENABLED는 GitHub Secrets/워크플로 환경변수에만 있어 대시보드에서 조회할 수 없습니다.</p>
+    `;
+  } catch (e) {
+    el.innerHTML = `<p class="muted">autoexec_state.json을 불러오지 못했습니다. ${LATENCY_NOTE}</p>`;
+  }
+}
+
 async function loadData() {
   const bust = '?t=' + Date.now();
   // 각 블록을 독립적으로 로드한다 — 하나가 404/파싱 실패해도 나머지는 그려진다.
@@ -518,6 +559,7 @@ async function loadData() {
   await loadNewsCards(bust);
   await loadGate(bust);
   await loadPhase2(bust);
+  await loadAutoexecStatus(bust);
 }
 loadData();
 </script>

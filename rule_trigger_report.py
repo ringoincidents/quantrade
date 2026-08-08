@@ -231,6 +231,27 @@ def audit(obj, path="report"):
     return bad
 
 
+def render_summary(report):
+    """승인요청 메시지에 인라인으로 넣는 한 줄 요약 (요구사항 3: "심층분석 리포트
+    링크/요약"). 전체 리포트는 render_text()/`/autoexec_report <id>`로 별도 조회한다
+    — 이건 그 축약판이라 같은 금지어 규율을 물려받는다(값을 report에서만 뽑아 쓰고
+    새로 문구를 만들지 않는다)."""
+    parts = []
+    ch = report.get("chart", {})
+    if ch.get("status") == "산출됨":
+        parts.append(f"현재가 {ch['current_price']:,}")
+        ma20 = ch.get("moving_average", {}).get("MA20")
+        if ma20:
+            parts.append(f"MA20 대비 {ma20['현재가 대비']}")
+    m = report.get("market", {})
+    card = m.get("card")
+    if card and card.get("event_type"):
+        parts.append(f"[{card['event_type']}] {card.get('summary', '')}")
+    elif card and card.get("headlines"):
+        parts.append(card["headlines"][0])
+    return " · ".join(parts) if parts else "차트/뉴스 데이터 부족 - 전체 리포트 참고"
+
+
 def render_text(report):
     """텔레그램/콘솔용 렌더. 승인 요청 문구를 포함하되, 어느 쪽을 택하라는
     권유는 넣지 않는다."""
@@ -340,6 +361,13 @@ def run_self_test():
     print(f"[6] 렌더 텍스트 금지문구: {hits or '없음'} ({len(text)}자)")
     assert not hits, f"렌더 텍스트에 금지 문구: {hits}"
 
+    # 6-b) 승인요청 인라인 요약도 같은 금지어 규율을 따르는지, 내용이 비지 않는지
+    summary = render_summary(r)
+    hits_s = [p for p in FORBIDDEN_PHRASES if p in summary]
+    print(f"[6b] 요약: {summary!r}")
+    assert summary and summary != "차트/뉴스 데이터 부족 - 전체 리포트 참고", "데이터가 있는데 요약이 비어 있음"
+    assert not hits_s, f"요약에 금지 문구: {hits_s}"
+
     # 7) 데이터가 없을 때 조용히 빈 값을 내지 않는지
     r2 = generate("X", {"name": "무데이터"}, {"rule": "손실지속손절", "quantity": 1,
                   "detail": {"return_pct": -55.0, "days": 62, "since": "2026-06-01"}})
@@ -347,6 +375,9 @@ def run_self_test():
     assert r2["chart"]["status"] == "데이터 부족"
     assert r2["market"]["status"] == "관련 뉴스 없음"
     assert not audit(r2)
+    summary_nodata = render_summary(r2)
+    print(f"     데이터 없을 때 요약: {summary_nodata!r}")
+    assert summary_nodata == "차트/뉴스 데이터 부족 - 전체 리포트 참고"
 
     # 8) 세 규칙 모두 발동 사실을 채우는지
     for rule, detail in [
