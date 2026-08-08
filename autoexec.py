@@ -29,9 +29,12 @@ APPROVAL_TTL_DAYS가 지나면 만료된다 — 며칠 지난 판정으로 지�
   - 사전 승인: 위 승인 흐름. 리포트를 보고 사람이 결정한다.
   - 초기 유예: 첫 GRACE_PERIOD_DAYS 동안 규칙별 1일 1회로 제한.
 
-**주문 실행 계층은 아직 없다.** `place_sell_order()`는 토스 주문 API 스펙이
-저장소에 없어 구현되지 않았고, 호출되면 실행하지 않고 "실행 불가"로 로깅한다 —
-추측으로 엔드포인트/스키마를 지어내는 건 실계좌 주문에서 할 수 있는 일이 아니다.
+**주문 실행 계층은 아직 없다.** 토스증권 Open API에 주문 생성·정정·취소가
+**존재한다는 것은 2026-08-08에 확인됐다**(인증도 기존 OAuth2 + X-Tossinvest-Account
+그대로). 다만 엔드포인트 경로와 요청 본문 필드명을 아직 확보하지 못해
+`place_sell_order()`는 미구현이고, 호출되면 "실행 불가"로 로깅한다.
+필드명을 추측하면 조용히 거부되거나 **다른 뜻으로 해석된 주문이 나갈 수 있어**
+실계좌에서는 할 수 없는 일이다. 필요한 항목 목록은 그 함수 docstring에 있다.
 """
 import argparse
 import json
@@ -321,15 +324,32 @@ class OrderLayerUnavailable(Exception):
 
 
 def place_sell_order(symbol, quantity):
-    """**미구현.** 토스 주문 API 스펙이 저장소에 없다 — 현재 연동된 엔드포인트는
-    /accounts, /holdings, /buying-power, /exchange-rate, /oauth2/token 뿐이고
-    주문 엔드포인트·요청 스키마·주문유형 enum·멱등키 처리 방식 중 무엇도 알려져
-    있지 않다. 실계좌 주문에서 이것들을 추측으로 채우는 건 허용될 수 없어
-    구현하지 않고 명시적으로 실패시킨다.
+    """**미구현.** 아래 정보가 확보되면 이 함수 하나만 채우면 된다.
+
+    2026-08-08 확인된 사실(토스증권 Open API 가이드):
+      - 주문 API가 **존재한다**. 주문 생성·정정·취소, 주문 조회, 판매 가능 수량
+        조회를 제공한다. REST API만 제공.
+      - 조건주문도 별도로 있다(SINGLE/OCO/OTO, 호가유형 LIMIT/MARKET).
+      - 인증은 OAuth2 토큰 + `X-Tossinvest-Account` 헤더 — 둘 다 이미
+        real_portfolio_sync.py가 쓰고 있는 방식이라 그대로 재사용 가능하다.
+
+    아직 없는 것(이게 있어야 구현 가능):
+      1. 주문 생성 엔드포인트 경로와 HTTP 메서드 (예: POST /api/v1/orders ?)
+      2. 요청 본문 필드명과 타입 — 종목코드/수량/매매구분(매도)/호가유형/가격.
+         필드명을 추측하면(symbol vs stockCode vs code, quantity vs qty vs volume)
+         조용히 400을 받거나 **더 나쁘게는 다른 뜻으로 해석된 주문이 나갈 수 있다.**
+      3. 응답 스키마와 주문 식별자 필드 (체결 확인/취소에 필요)
+      4. 멱등키 지원 여부 — 재시도 시 중복 주문을 막을 방법. 없으면 자체 방어를
+         설계해야 한다.
+      5. 에러 코드 목록 (잔량 부족, 장 마감, 거래정지 등 구분)
+
+    이 환경에서는 developers.tossinvest.com / openapi.tossinvest.com 이 둘 다
+    네트워크 정책상 차단(403)돼 있어 문서를 직접 읽지 못했다.
 
     매수는 이 함수에도, 이 파일 어디에도 없다(요구사항 3)."""
     raise OrderLayerUnavailable(
-        f"주문 실행 계층 미구현 - 토스 주문 API 스펙 필요 (요청: {symbol} {quantity}주 매도)")
+        f"주문 실행 계층 미구현 - 엔드포인트/요청 스키마 미확보 "
+        f"(요청: {symbol} {quantity}주 매도)")
 
 
 def execute(decision):
