@@ -123,6 +123,18 @@
   </div>
 </div>
 
+<!-- ===== Block 1.5: [2026-08-08 신규] 총손익 추이 — 정적(총손익) + 자동(평가손익) 병합 ===== -->
+<!-- 두 구간은 서로 다른 지표다 (historical_pnl_manual.json §총손익 = 실현+배당+이자,
+     portfolio_pnl_history.json §평가손익 = 미실현만, 토스 API에 배당/이자 조회
+     엔드포인트가 없어 자동구간에서는 채울 수 없다 — CLAUDE.md 2026-08-08 결정).
+     그래서 색상만으로 구분하지 않고 전환 지점에 구분선 + 고정 각주를 둘 다 둔다. -->
+<div class="section-divider">총손익 추이</div>
+<h2>📈 손익 추이 <span class="badge-real">조회/기록전용</span></h2>
+
+<div class="card real-card" id="pnlhistory-section">
+  <p class="muted">로딩 중...</p>
+</div>
+
 <!-- ===== Block 2: [v3.2 신규] 포트폴리오 리포트 — 현황 + 규칙 해당 여부 ===== -->
 <!-- 읽기 전용. 실행 버튼 없음. 렌더러는 화이트리스트만 읽고, 예측성 필드가
      섞이면 assertNoPredictiveFields가 렌더를 거부한다(보호적 경고 카드와 동일 규율). -->
@@ -245,6 +257,118 @@ async function loadRealAccount(bust) {
     });
   } catch (e) {
     document.getElementById('pieChart').replaceWith(
+      Object.assign(document.createElement('p'), { className: 'muted', textContent: '차트를 불러올 수 없습니다.' })
+    );
+  }
+}
+
+// ── [2026-08-08] 총손익 추이: historical_pnl_manual(정적, 총손익) +
+// portfolio_pnl_history(자동, 평가손익) 병합. 두 지표는 baseline이 다르므로
+// (전자는 -3,656,813원에서 끝나는 누적 실현손익, 후자는 2026-08-09에 0에서
+// 시작하는 평가손익) 값을 이어 붙이지 않고 같은 시간축 위에 두 개의 별도
+// 데이터셋으로 그린다 — null로 채운 구간은 Chart.js가 자동으로 비워 둔다.
+async function loadPnlHistory(bust) {
+  const el = document.getElementById('pnlhistory-section');
+  let historical, autoHist;
+  try {
+    historical = await (await fetch('historical_pnl_manual.json' + bust)).json();
+  } catch (e) {
+    el.innerHTML = '<p class="muted">historical_pnl_manual.json을 불러올 수 없습니다.</p>';
+    return;
+  }
+  try {
+    autoHist = await (await fetch('portfolio_pnl_history.json' + bust)).json();
+  } catch (e) {
+    autoHist = { records: [] };
+  }
+
+  // 거래일별로 pnl_amount를 합산한 뒤 누적합을 구한다 (개별 매매 86건 → 날짜별 누적).
+  // 배당/이자/계좌이자(총 +8,461원)는 날짜별 이벤트 데이터가 없어 마지막 지점에
+  // 한 번에 반영한다 — 그래서 끝값은 total_realized_pnl(총손익)과 정확히 일치하지만,
+  // 중간 지점은 매매 손익만 반영한 근사 경로다.
+  const byDate = {};
+  (historical.records || []).forEach(r => { byDate[r.date] = (byDate[r.date] || 0) + r.pnl_amount; });
+  const histDates = Object.keys(byDate).sort();
+  const nonTradeAdjust = (historical.dividend || 0) + (historical.account_interest || 0)
+    + (historical.lending_fee || 0) + (historical.bond_interest || 0);
+  let running = 0;
+  const histPoints = [];
+  if (historical.period && historical.period.start) {
+    histPoints.push({ date: historical.period.start, cum: 0 });
+  }
+  histDates.forEach((d, i) => {
+    running += byDate[d];
+    const cum = (i === histDates.length - 1) ? running + nonTradeAdjust : running;
+    histPoints.push({ date: d, cum });
+  });
+
+  const autoRecords = (autoHist.records || []).slice().sort((a, b) => a.date < b.date ? -1 : 1);
+  const boundaryDate = (historical.period && historical.period.end) || histPoints.at(-1)?.date;
+
+  const labels = [...histPoints.map(p => p.date), ...autoRecords.map(r => r.date)];
+  const histData = [...histPoints.map(p => p.cum), ...autoRecords.map(() => null)];
+  const autoData = [...histPoints.map(() => null), ...autoRecords.map(r => r.valuation_pnl_krw)];
+  const boundaryIdx = histPoints.length - 1; // 마지막 정적 구간 지점 = 구분선 위치
+
+  el.innerHTML = `<canvas id="pnlHistoryChart"></canvas>
+    <p class="muted" style="margin-top:10px; margin-bottom:0;">
+      <b>${esc(boundaryDate)} 이전(회색): 총손익</b>(실현손익+배당+이자, historical_pnl_manual.json 정적 기록) ·
+      <b>${esc(boundaryDate)} 이후(청록): 평가손익</b>(미실현, portfolio_pnl_history.json 매일 자동 갱신) —
+      <b>서로 다른 지표입니다.</b> 배당·이자는 토스 API에 조회 엔드포인트가 없어 자동구간에는 포함되지 않습니다.
+      ${autoRecords.length === 0 ? '<br>자동구간 기록이 아직 없습니다 (2026-08-09부터 시작).' : ''}
+    </p>`;
+
+  try {
+    const boundaryLinePlugin = {
+      id: 'pnlBoundaryLine',
+      afterDraw(chart) {
+        if (boundaryIdx < 0 || boundaryIdx >= labels.length - 1) return; // 자동구간 데이터가 없으면 구분선 생략
+        const xScale = chart.scales.x, yScale = chart.scales.y;
+        const x = xScale.getPixelForValue(boundaryIdx);
+        const ctx = chart.ctx;
+        ctx.save();
+        ctx.beginPath();
+        ctx.setLineDash([4, 4]);
+        ctx.strokeStyle = '#facc15';
+        ctx.lineWidth = 1.5;
+        ctx.moveTo(x, yScale.top);
+        ctx.lineTo(x, yScale.bottom);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#facc15';
+        ctx.font = '10px -apple-system, sans-serif';
+        ctx.fillText('지표 전환', x + 4, yScale.top + 12);
+        ctx.restore();
+      }
+    };
+    new Chart(document.getElementById('pnlHistoryChart'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          { label: '총손익 (정적)', data: histData, borderColor: '#94a3b8', backgroundColor: '#94a3b8', spanGaps: false, pointRadius: 0, tension: 0.1 },
+          { label: '평가손익 (자동)', data: autoData, borderColor: '#2dd4bf', backgroundColor: '#2dd4bf', spanGaps: false, pointRadius: 0, tension: 0.1 },
+        ]
+      },
+      options: {
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { labels: { color: '#eee', font: { size: 11 } } },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y === null ? '-' : Math.round(ctx.parsed.y).toLocaleString()}원`
+            }
+          }
+        },
+        scales: {
+          x: { ticks: { color: '#64748b', maxTicksLimit: 8, font: { size: 10 } } },
+          y: { ticks: { color: '#64748b', font: { size: 10 } } }
+        }
+      },
+      plugins: [boundaryLinePlugin]
+    });
+  } catch (e) {
+    document.getElementById('pnlHistoryChart').replaceWith(
       Object.assign(document.createElement('p'), { className: 'muted', textContent: '차트를 불러올 수 없습니다.' })
     );
   }
@@ -553,6 +677,7 @@ async function loadData() {
   const bust = '?t=' + Date.now();
   // 각 블록을 독립적으로 로드한다 — 하나가 404/파싱 실패해도 나머지는 그려진다.
   await loadRealAccount(bust);
+  await loadPnlHistory(bust);
   await loadRetiredPending(bust);
   await loadPortfolioReport(bust);
   await loadGuardrails(bust);

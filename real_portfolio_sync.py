@@ -17,7 +17,7 @@ OAuth 2.0 Client Credentials Grant로 토큰을 발급받고(`POST /oauth2/token
 """
 import json
 import os
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import requests
 
@@ -32,6 +32,17 @@ TOSS_CLIENT_SECRET = os.environ.get("TOSS_CLIENT_SECRET", "")
 TOSS_API_BASE = "https://openapi.tossinvest.com"
 
 REAL_PORTFOLIO_PATH = "real_portfolio.json"
+
+# 평가손익(자동 스냅샷) 트래킹. 2026-08-08 방향성 세션 결정(CLAUDE.md 참고):
+# - 지표명은 "평가손익"(unrealized/valuation P&L)만 쓴다. 배당·이자·실현손익
+#   근사치는 채우지 않는다 — 토스 Open API에 해당 조회 엔드포인트가 없어서
+#   (`토스_주문API_스펙조사_2026-08-05.md` §2.1) 정확히 계산할 수 없기 때문에,
+#   빈 칸을 틀린 숫자로 채우기보다 아예 다른 지표로 이름을 분리했다.
+# - historical_pnl_manual.json(2023-05-17~2026-08-08, "총손익" 정적 기록)과
+#   겹치지 않도록 이 날짜 이전은 기록하지 않는다.
+PNL_HISTORY_PATH = "portfolio_pnl_history.json"
+PNL_HISTORY_START_DATE = "2026-08-09"
+KST = timezone(timedelta(hours=9))
 
 
 class ProxyConnectionError(Exception):
@@ -183,6 +194,74 @@ def save_real_portfolio(data):
     return payload
 
 
+def _load_pnl_history():
+    if os.path.exists(PNL_HISTORY_PATH):
+        with open(PNL_HISTORY_PATH, encoding="utf-8") as f:
+            return json.load(f)
+    return {
+        "metric": "평가손익",
+        "metric_label_en": "unrealized/valuation P&L",
+        "metric_note": (
+            "배당·이자·실현손익 근사치를 포함하지 않는다 — '총손익'이 아니다. "
+            "토스 Open API에 배당/이자 조회 엔드포인트가 없어 정확히 계산할 수 "
+            "없기 때문에 빈 칸을 틀린 숫자로 채우지 않고 지표 자체를 분리했다 "
+            "(토스_주문API_스펙조사_2026-08-05.md §2.1). "
+            "historical_pnl_manual.json(2023-05-17~2026-08-08, '총손익' 정적 기록)과 "
+            "다른 지표이므로 이어붙여 그릴 때 반드시 구분 표시할 것."
+        ),
+        "formula": (
+            "valuation_pnl_krw = eval_amount_krw(당일) - baseline.eval_amount_krw "
+            "- sum(manual_net_flows[].amount_krw, baseline.date 이후)"
+        ),
+        "start_date": PNL_HISTORY_START_DATE,
+        "baseline": None,
+        "manual_net_flows": [],
+        "records": [],
+    }
+
+
+def update_pnl_history(data, today=None):
+    """실계좌 총 평가금액을 하루 1개 스냅샷으로 portfolio_pnl_history.json에 반영.
+
+    출금/입금(순입출금액)은 토스 Open API에 조회 엔드포인트가 없어 자동으로
+    알 수 없다 — `manual_net_flows`에 사용자가 직접 채워 넣는 값만 반영한다
+    (기본 0). 이 한계는 CLAUDE.md와 metric_note에 명시돼 있다.
+    """
+    today = today or datetime.now(KST).strftime("%Y-%m-%d")
+    if today < PNL_HISTORY_START_DATE:
+        print(f"[평가손익 스냅샷 건너뜀] {today} < 시작일 {PNL_HISTORY_START_DATE}")
+        return None
+
+    history = _load_pnl_history()
+    total_eval_krw = data.get("cash", 0) + sum(
+        p.get("eval_amount_krw", 0) for p in data.get("positions", [])
+    )
+
+    if history["baseline"] is None:
+        history["baseline"] = {"date": today, "eval_amount_krw": total_eval_krw}
+
+    net_flow_krw = sum(
+        f["amount_krw"]
+        for f in history["manual_net_flows"]
+        if history["baseline"]["date"] <= f["date"] <= today
+    )
+    valuation_pnl_krw = total_eval_krw - history["baseline"]["eval_amount_krw"] - net_flow_krw
+
+    record = {
+        "date": today,
+        "eval_amount_krw": total_eval_krw,
+        "net_flow_since_baseline_krw": net_flow_krw,
+        "valuation_pnl_krw": valuation_pnl_krw,
+        "synced_at": datetime.now(timezone.utc).isoformat(),
+    }
+    # 하루 여러 번 도는 스케줄(sync_real.yml 4x/일)이므로 같은 날짜는 최신값으로 덮어쓴다.
+    history["records"] = [r for r in history["records"] if r["date"] != today] + [record]
+
+    with open(PNL_HISTORY_PATH, "w", encoding="utf-8") as f:
+        json.dump(history, f, ensure_ascii=False, indent=2)
+    return history
+
+
 def main():
     check_proxy_ip(expected_ip="141.164.41.178")
     try:
@@ -192,6 +271,7 @@ def main():
         return
     save_real_portfolio(data)
     print(f"실계좌 잔고 저장 완료 → {REAL_PORTFOLIO_PATH}")
+    update_pnl_history(data)
 
 
 if __name__ == "__main__":
