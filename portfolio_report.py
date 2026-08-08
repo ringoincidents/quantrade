@@ -249,10 +249,55 @@ def compute_roadmap(income):
         "month_basis_note": ("ranks[].months 선언값 사용" if basis == "declared"
                              else "진급 시점에서 역산한 개월수 사용"),
         "month_discrepancies": discrepancies,
+        "schedule_warnings": validate_schedule(income),
+        "schedule_anchor": income.get("schedule_anchor", {}),
         "service": income.get("service", {}),
         "asset_class_labels": income["allocation"].get("labels", {}),
         "phases": phases,
     }
+
+
+def validate_schedule(income):
+    """앵커 체이닝 결과가 복무 사실과 맞는지 본다.
+
+    start를 months에서 산출하므로 둘은 어긋날 수 없지만, **체인 종료월이
+    전역월을 넘어서는 경우**는 여전히 생긴다(선언 개월수 합이 남은 복무기간보다
+    길 때). 조용히 넘어가면 전역 이후까지 수입이 잡힌 로드맵이 나온다."""
+    problems = []
+    ranks = income.get("ranks", [])
+    svc = income.get("service", {})
+    if not ranks or not all(r.get("start") for r in ranks):
+        return problems
+
+    def m(s):
+        d = datetime.strptime(s, "%Y-%m")
+        return d.year * 12 + d.month - 1
+
+    # 구간이 연속인지 (앵커 체이닝이면 항상 참이어야 한다)
+    for i in range(len(ranks) - 1):
+        end = m(ranks[i]["start"]) + int(ranks[i]["months"])
+        if end != m(ranks[i + 1]["start"]):
+            nxt = ranks[i + 1]
+            problems.append(
+                f"{ranks[i]['rank']} 구간 종료 다음 달과 {nxt['rank']} 시작({nxt['start']})이 "
+                f"이어지지 않음 — 빈 구간 또는 겹침")
+
+    last = ranks[-1]
+    chain_end = m(last["start"]) + int(last["months"]) - 1
+    discharge = svc.get("discharge")
+    if discharge:
+        over = chain_end - m(discharge)
+        if over > 0:
+            problems.append(
+                f"체인 종료 {chain_end//12}-{chain_end%12+1:02d}가 전역 가정 "
+                f"{discharge}을 {over}개월 초과 — 전역 이후 구간까지 수입이 잡혀 있음 "
+                f"(전역월 가정이 틀렸거나 선언 개월수가 실제와 다름)")
+    enlisted = svc.get("enlisted")
+    if enlisted and ranks:
+        served_at_anchor = m(ranks[0]["start"]) - m(enlisted) + 1
+        if served_at_anchor < 1:
+            problems.append(f"첫 구간 시작({ranks[0]['start']})이 입대월({enlisted})보다 이름")
+    return problems
 
 
 def derive_months_from_dates(income):
@@ -269,11 +314,19 @@ def derive_months_from_dates(income):
         d = datetime.strptime(s, "%Y-%m")
         return d.year * 12 + d.month
 
+    # 앵커 체이닝을 쓰면 마지막 구간의 "역산"은 진급 시점 비교가 아니라 전역월
+    # 가정과의 비교가 된다. 그건 validate_schedule()의 체인 종료 검사가 더
+    # 정확하게 다루므로 여기서 중복 보고하지 않는다.
+    anchored = bool(income.get("schedule_anchor", {}).get("anchor_month"))
+
     out, disc = {}, []
     for i, r in enumerate(ranks):
-        end = ranks[i + 1]["start"] if i + 1 < len(ranks) else discharge
+        is_last = i + 1 == len(ranks)
+        if is_last and anchored:
+            continue
+        end = ranks[i + 1]["start"] if not is_last else discharge
         # 마지막 계급은 전역월 포함, 그 외는 다음 진급 직전까지
-        n = m(end) - m(r["start"]) + (1 if i + 1 == len(ranks) else 0)
+        n = m(end) - m(r["start"]) + (1 if is_last else 0)
         out[r["rank"]] = {"months": n, "start": r["start"], "end_exclusive": end}
         if int(r.get("months", n)) != n:
             disc.append({
@@ -338,6 +391,12 @@ def format_telegram(report):
             lines.append(f"   · {ph['rank']} ({ph['period']}) 누적 "
                          f"{ph['cumulative_krw']:,.0f}원 → {top_s} …")
         lines.append(f"   ※ 용돈 처리: {rm['allowance_note']}")
+        anc = rm.get("schedule_anchor") or {}
+        if anc.get("anchor_month"):
+            lines.append(f"   ※ 기준: {anc['anchor_month']}부터 순차 배정 "
+                         f"(고정값, 매달 밀리지 않음)")
+        for w in rm.get("schedule_warnings", []):
+            lines.append(f"   ⚠️ {w}")
         if rm.get("month_discrepancies"):
             lines.append(f"   ⚠️ 개월수 불일치 ({rm['month_basis_note']} 기준으로 계산됨)")
             for d in rm["month_discrepancies"]:
@@ -516,6 +575,32 @@ def run_self_test():
           f"(declared 대비 {rm6['total_investable_krw'] - rm5['total_investable_krw']:+,})")
     assert rm6["total_investable_krw"] == 6 * 850000 + 6 * 1150000 + 3 * 1450000 == 16350000
     assert rm6["month_discrepancies"], "dates 기준이어도 불일치 사실은 계속 표시돼야 함"
+
+    # 7-g) 앵커 체이닝: 구간이 연속이고, 전역월 초과가 잡히는지
+    anchored = json.loads(json.dumps(income))
+    anchored["schedule_anchor"] = {"anchor_month": "2026-08"}
+    anchored["service"] = {"enlisted": "2026-04", "discharge": "2027-09"}
+    for r, st in zip(anchored["ranks"], ["2026-08", "2027-01", "2027-07"]):
+        r["start"] = st
+    rm7 = compute_roadmap(anchored)
+    periods = [(p["rank"], p["period"]) for p in rm7["phases"]]
+    print(f"[7g] 구간: {periods}")
+    assert rm7["phases"][0]["period"] == "2026-08 ~ 2026-12"
+    assert rm7["phases"][1]["period"] == "2027-01 ~ 2027-06"
+    assert rm7["phases"][2]["period"] == "2027-07 ~ 2027-10"
+    # 구간이 연속이므로 연속성 경고는 없어야 하고, 전역 초과만 잡혀야 한다
+    warns = rm7["schedule_warnings"]
+    print(f"     경고 {len(warns)}건: {warns}")
+    assert len(warns) == 1 and "전역 가정" in warns[0] and "1개월 초과" in warns[0]
+    # 앵커 모드에서는 마지막 구간 역산 불일치를 중복 보고하지 않는다
+    assert not rm7["month_discrepancies"], f"중복 경고: {rm7['month_discrepancies']}"
+
+    # 구간이 끊기면 잡아내는지 (일병만 한 달 앞당김 -> 빈 달 발생)
+    broken_chain = json.loads(json.dumps(anchored))
+    broken_chain["ranks"][0]["start"] = "2026-07"
+    w2 = validate_schedule(broken_chain)
+    print(f"[7g] 구간 끊김 주입 -> {len(w2)}건: {w2[0][:52]}...")
+    assert any("이어지지 않음" in x for x in w2), "구간 불연속이 안 잡힘"
 
     # 8) 실계좌 파일을 쓰지 않는지
     src = open("portfolio_report.py", encoding="utf-8").read()

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-04",
+  "generated_at": "2026-08-08",
   "schema": "portfolio_report_v3.2",
   "note": "현황 계산 + 사전 정의 규칙 해당 여부만 담는다. 매매 판단/방향 예측/확신도 필드는 스키마에 없다 - 누락이 아니라 설계.",
   "thresholds": {
@@ -9,80 +9,48 @@
     "loss_sustained_days": 60
   },
   "snapshot": {
-    "synced_at": "2026-08-04T10:07:30.187382+00:00",
-    "total_assets_krw": 4306621.0,
-    "cash_krw": 63.0,
-    "cash_pct": 0.0,
-    "position_count": 8,
+    "synced_at": "2026-08-07T12:06:41.961800+00:00",
+    "total_assets_krw": 4670617.0,
+    "cash_krw": 664916.0,
+    "cash_pct": 14.24,
+    "position_count": 4,
     "positions": [
       {
         "symbol": "SCHD",
         "name": "SCHD",
         "market_country": "US",
-        "eval_amount_krw": 2617620.0,
-        "weight_pct": 60.78,
-        "return_pct": 2.83
-      },
-      {
-        "symbol": "310200",
-        "name": "애니플러스",
-        "market_country": "KR",
-        "eval_amount_krw": 675000.0,
-        "weight_pct": 15.67,
-        "return_pct": 27.839999999999996
+        "eval_amount_krw": 2694748.0,
+        "weight_pct": 57.7,
+        "return_pct": 3.0300000000000002
       },
       {
         "symbol": "196170",
         "name": "알테오젠",
         "market_country": "KR",
-        "eval_amount_krw": 347500.0,
-        "weight_pct": 8.07,
-        "return_pct": 1.4500000000000002
+        "eval_amount_krw": 915000.0,
+        "weight_pct": 19.59,
+        "return_pct": 2.23
       },
       {
         "symbol": "NVDA",
         "name": "엔비디아",
         "market_country": "US",
-        "eval_amount_krw": 299080.0,
-        "weight_pct": 6.94,
-        "return_pct": 3.1199999999999997
+        "eval_amount_krw": 312487.0,
+        "weight_pct": 6.69,
+        "return_pct": 8.870000000000001
       },
       {
-        "symbol": "042660",
-        "name": "한화오션",
-        "market_country": "KR",
-        "eval_amount_krw": 261600.0,
-        "weight_pct": 6.07,
-        "return_pct": -0.79
-      },
-      {
-        "symbol": "AIXI",
-        "name": "샤오아이(ADR)",
+        "symbol": "NMR",
+        "name": "노무라 홀딩스(ADR)",
         "market_country": "US",
-        "eval_amount_krw": 96959.0,
-        "weight_pct": 2.25,
-        "return_pct": -95.00999999999999
-      },
-      {
-        "symbol": "VTI",
-        "name": "VTI",
-        "market_country": "US",
-        "eval_amount_krw": 7250.0,
-        "weight_pct": 0.17,
-        "return_pct": 1.8900000000000001
-      },
-      {
-        "symbol": "NXXT",
-        "name": "넥스트NRG",
-        "market_country": "US",
-        "eval_amount_krw": 1549.0,
-        "weight_pct": 0.04,
-        "return_pct": -24.15
+        "eval_amount_krw": 83466.0,
+        "weight_pct": 1.79,
+        "return_pct": -0.5
       }
     ],
     "weight_by_country_pct": {
-      "US": 70.18,
-      "KR": 29.81
+      "US": 66.18,
+      "KR": 19.59
     }
   },
   "rule_matches": [
@@ -91,8 +59,8 @@
       "symbol": "SCHD",
       "name": "SCHD",
       "threshold": "단일 종목 비중 30% 이상",
-      "observed": "60.78%",
-      "fact": "SCHD(SCHD) 비중이 총자산의 60.78%로 기준 30% 이상"
+      "observed": "57.70%",
+      "fact": "SCHD(SCHD) 비중이 총자산의 57.70%로 기준 30% 이상"
     }
   ],
   "roadmap": {
@@ -105,24 +73,22 @@
     "date_basis": "절대 날짜",
     "month_basis": "declared",
     "month_basis_note": "ranks[].months 선언값 사용",
-    "month_discrepancies": [
-      {
-        "rank": "일병",
-        "declared_months": 5,
-        "derived_months": 6,
-        "note": "일병: 선언 5개월 vs 진급시점 역산 6개월 (2026-07 ~ 2027-01)"
-      },
-      {
-        "rank": "병장",
-        "declared_months": 4,
-        "derived_months": 3,
-        "note": "병장: 선언 4개월 vs 진급시점 역산 3개월 (2027-07 ~ 2027-09)"
-      }
+    "month_discrepancies": [],
+    "schedule_warnings": [
+      "체인 종료 2027-10가 전역 가정 2027-09을 1개월 초과 — 전역 이후 구간까지 수입이 잡혀 있음 (전역월 가정이 틀렸거나 선언 개월수가 실제와 다름)"
     ],
+    "schedule_anchor": {
+      "mode": "anchor_first_rank",
+      "anchor_month": "2026-08",
+      "anchored_at": "2026-08-08",
+      "_note": "일병 구간 시작을 앵커월에 맞추고 declared months(5/6/4)를 순차로 이어붙여 각 구간의 start를 산출했다. **한 번 고정한 값이며 매달 따라 움직이지 않는다** - 계획이 매달 앞으로 밀리면 로드맵이 아니게 된다. 다시 맞추려면 anchor_month를 바꾸고 재생성할 것."
+    },
     "service": {
       "enlisted": "2026-04",
       "discharge": "2027-09",
-      "_discharge_note": "입대 2026-04 + 18개월(육군 기준) 가정으로 계산한 값. 복무기간이 다르면 이 값을 고쳐야 하고, 고치면 마지막 계급의 개월수가 따라 바뀐다."
+      "_discharge_note": "입대 2026-04 + 18개월(육군 기준) 가정으로 계산한 값. 복무기간이 다르면 이 값을 고쳐야 하고, 고치면 마지막 계급의 개월수가 따라 바뀐다.",
+      "_chain_end": "2027-10",
+      "_chain_note": "앵커 체이닝 결과 마지막 구간이 전역월(discharge)을 넘어설 수 있다. 이 경우 validate_schedule()이 경고로 잡으며, 어느 쪽을 고칠지는 사용자 판단이다 - discharge가 가정값이거나, declared months가 실제와 다르거나 둘 중 하나다."
     },
     "asset_class_labels": {
       "bond": "채권",
@@ -135,7 +101,7 @@
     "phases": [
       {
         "rank": "일병",
-        "period": "2026-07 ~ 2026-11",
+        "period": "2026-08 ~ 2026-12",
         "months": 5,
         "monthly_investable_krw": 850000,
         "subtotal_krw": 4250000,

@@ -357,7 +357,12 @@ async function loadPortfolioReport(bust) {
         <div class="rm-scroll"><table class="rm-table">
           <thead><tr><th>구간</th><th>누적</th>${head}</tr></thead>
           <tbody>${body}</tbody></table></div>
-        <p class="muted rm-note">※ 용돈 처리: ${esc(rm.allowance_note || '')}</p>`;
+        <p class="muted rm-note">※ 용돈 처리: ${esc(rm.allowance_note || '')}</p>
+        ${(rm.schedule_anchor && rm.schedule_anchor.anchor_month)
+          ? `<p class="muted rm-note">※ ${esc(rm.schedule_anchor.anchor_month)}부터 순차 배정 (고정값, 매달 밀리지 않음)</p>` : ''}
+        ${(rm.schedule_warnings || []).map(w =>
+          `<div class="guardrail-card"><div class="guardrail-rule">⚠️ 일정 확인 필요</div>
+           <div class="guardrail-fact">${esc(w)}</div></div>`).join('')}`;
     } else {
       rmHtml = `<p class="muted">🗺️ 배분 로드맵: ${esc(rm.status || '미입력')} — ${esc(rm.reason || '')}</p>`;
     }

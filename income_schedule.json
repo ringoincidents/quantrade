@@ -9,7 +9,7 @@
     {
       "rank": "일병",
       "months": 5,
-      "start": "2026-07",
+      "start": "2026-08",
       "monthly_krw": 850000
     },
     {
@@ -81,8 +81,16 @@
   "service": {
     "enlisted": "2026-04",
     "discharge": "2027-09",
-    "_discharge_note": "입대 2026-04 + 18개월(육군 기준) 가정으로 계산한 값. 복무기간이 다르면 이 값을 고쳐야 하고, 고치면 마지막 계급의 개월수가 따라 바뀐다."
+    "_discharge_note": "입대 2026-04 + 18개월(육군 기준) 가정으로 계산한 값. 복무기간이 다르면 이 값을 고쳐야 하고, 고치면 마지막 계급의 개월수가 따라 바뀐다.",
+    "_chain_end": "2027-10",
+    "_chain_note": "앵커 체이닝 결과 마지막 구간이 전역월(discharge)을 넘어설 수 있다. 이 경우 validate_schedule()이 경고로 잡으며, 어느 쪽을 고칠지는 사용자 판단이다 - discharge가 가정값이거나, declared months가 실제와 다르거나 둘 중 하나다."
   },
-  "_month_basis_note": "months(선언값)와 start 날짜에서 역산한 개월수가 어긋날 수 있다. 어느 쪽으로 계산할지 명시적으로 고른다 - 'declared'는 ranks[].months를 쓰고, 'dates'는 진급 시점에서 역산한다. 불일치는 어느 쪽을 고르든 리포트에 항상 표시된다.",
-  "month_basis": "declared"
+  "_month_basis_note": "앵커 체이닝으로 start를 months에서 산출하므로 둘이 어긋날 수 없다(병장 구간과 전역월 관계만 별도 검증). 기준은 declared 고정.",
+  "month_basis": "declared",
+  "schedule_anchor": {
+    "mode": "anchor_first_rank",
+    "anchor_month": "2026-08",
+    "anchored_at": "2026-08-08",
+    "_note": "일병 구간 시작을 앵커월에 맞추고 declared months(5/6/4)를 순차로 이어붙여 각 구간의 start를 산출했다. **한 번 고정한 값이며 매달 따라 움직이지 않는다** - 계획이 매달 앞으로 밀리면 로드맵이 아니게 된다. 다시 맞추려면 anchor_month를 바꾸고 재생성할 것."
+  }
 }
