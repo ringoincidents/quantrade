@@ -8,10 +8,10 @@
       {
         "symbol": "196170",
         "name": "알테오젠",
-        "volatility_20d_pct": 6.06,
-        "volatility_percentile": 89.6,
-        "adx_14": 56.7,
-        "data_status": null
+        "volatility_20d_pct": null,
+        "volatility_percentile": null,
+        "adx_14": null,
+        "data_status": "시세 조회 실패"
       },
       {
         "symbol": "NMR",
@@ -47,9 +47,9 @@
       }
     ],
     "correlation": {
-      "avg_pairwise_correlation": 0.12,
-      "pair_count": 10,
-      "symbol_count": 5,
+      "avg_pairwise_correlation": 0.139,
+      "pair_count": 6,
+      "symbol_count": 4,
       "window_days": 60
     }
   },
@@ -61,10 +61,10 @@
         "name": "알테오젠",
         "per": null,
         "per_status": "데이터 소스 미연결",
-        "volatility_20d_pct": 6.06,
-        "momentum_20d_pct": 32.13,
-        "adx_14": 56.7,
-        "data_status": null
+        "volatility_20d_pct": null,
+        "momentum_20d_pct": null,
+        "adx_14": null,
+        "data_status": "시세 조회 실패"
       },
       {
         "symbol": "NMR",
