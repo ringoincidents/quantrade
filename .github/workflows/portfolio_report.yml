@@ -7,6 +7,12 @@ name: Portfolio Report (weekly)
 # 읽기 전용: real_portfolio.json을 읽기만 하고 쓰지 않는다. 승인/주문 경로와
 # 연결되지 않으며, 실계좌 데이터를 사람이 보도록 표시하는 용도는 CLAUDE.md에서
 # 이미 승인된 범주다.
+#
+# 2026-08-09: Risk Engine 섹션(포지션 사이징/집중도/MDD예산/상관계수/비용반영후)
+# 추가 — 전부 계산·표시 전용, BUY/SELL/confidence 필드 여전히 없음(self-test가
+# 검사). 보유 종목 변동성·상관계수 계산에 get_krx_candles/get_us_candles(이미
+# backtest.py/analyze.py가 쓰는 기존 가격 데이터 연결, 신규 커넥터 아님)로
+# 일봉을 조회한다 — 이 조회도 real_portfolio.json을 쓰지 않는다.
 on:
   schedule:
     # 일요일 23:10 UTC = 월요일 08:10 KST — 사용자가 PC를 쓸 수 있는

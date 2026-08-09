@@ -1,0 +1,718 @@
+{
+  "period": {
+    "start": "2023-05-17",
+    "end": "2026-08-08"
+  },
+  "sales_pnl": {
+    "total": -3665274,
+    "domestic": 118307,
+    "overseas": -3783581
+  },
+  "dividend": 7841,
+  "account_interest": 620,
+  "lending_fee": 0,
+  "bond_interest": 0,
+  "total_realized_pnl": -3656813,
+  "records": [
+    {
+      "date": "2023-06-05",
+      "market": "해외",
+      "stock_name": "테슬라",
+      "pnl_amount": 1348,
+      "return_pct": 0.158,
+      "note": null
+    },
+    {
+      "date": "2024-02-16",
+      "market": "해외",
+      "stock_name": "바이오엑셀 테라퓨틱스",
+      "pnl_amount": 59456,
+      "return_pct": 0.548,
+      "note": null
+    },
+    {
+      "date": "2024-02-16",
+      "market": "해외",
+      "stock_name": "인튜이티브 머신스",
+      "pnl_amount": 1959,
+      "return_pct": 0.011,
+      "note": null
+    },
+    {
+      "date": "2024-02-16",
+      "market": "해외",
+      "stock_name": "사운드하운드 AI",
+      "pnl_amount": -9178,
+      "return_pct": 0.054,
+      "note": null
+    },
+    {
+      "date": "2024-02-26",
+      "market": "국내",
+      "stock_name": "보령",
+      "pnl_amount": -4837,
+      "return_pct": 0.038,
+      "note": null
+    },
+    {
+      "date": "2024-02-26",
+      "market": "해외",
+      "stock_name": "인튜이티브 머신스",
+      "pnl_amount": -49761,
+      "return_pct": 0.131,
+      "note": null
+    },
+    {
+      "date": "2024-02-28",
+      "market": "해외",
+      "stock_name": "사운드하운드 AI",
+      "pnl_amount": 2423,
+      "return_pct": 0.006,
+      "note": null
+    },
+    {
+      "date": "2024-02-28",
+      "market": "해외",
+      "stock_name": "비바니 메디컬",
+      "pnl_amount": 16,
+      "return_pct": 0,
+      "note": null
+    },
+    {
+      "date": "2024-02-28",
+      "market": "해외",
+      "stock_name": "코카콜라",
+      "pnl_amount": -6119,
+      "return_pct": 0.015,
+      "note": null
+    },
+    {
+      "date": "2024-02-29",
+      "market": "해외",
+      "stock_name": "마라 홀딩스",
+      "pnl_amount": -30611,
+      "return_pct": 0.039,
+      "note": "2건 판매"
+    },
+    {
+      "date": "2024-03-05",
+      "market": "해외",
+      "stock_name": "테라울프",
+      "pnl_amount": 284,
+      "return_pct": 0.022,
+      "note": null
+    },
+    {
+      "date": "2024-03-15",
+      "market": "해외",
+      "stock_name": "선샤인 바이오파머",
+      "pnl_amount": -7813,
+      "return_pct": 0.594,
+      "note": null
+    },
+    {
+      "date": "2024-03-20",
+      "market": "해외",
+      "stock_name": "리사이클 홀딩스",
+      "pnl_amount": -25,
+      "return_pct": 0.005,
+      "note": null
+    },
+    {
+      "date": "2024-03-27",
+      "market": "해외",
+      "stock_name": "코카콜라",
+      "pnl_amount": 20330,
+      "return_pct": 0.025,
+      "note": null
+    },
+    {
+      "date": "2024-03-29",
+      "market": "해외",
+      "stock_name": "PDS 바이오테크놀로지",
+      "pnl_amount": 99732,
+      "return_pct": 0.122,
+      "note": null
+    },
+    {
+      "date": "2024-04-01",
+      "market": "해외",
+      "stock_name": "C4 테라퓨틱스",
+      "pnl_amount": 8171,
+      "return_pct": 0.009,
+      "note": "2건 판매"
+    },
+    {
+      "date": "2024-04-02",
+      "market": "국내",
+      "stock_name": "TIGER 글로벌AI&로보틱스INDXX",
+      "pnl_amount": -360,
+      "return_pct": 0.001,
+      "note": "2건 판매"
+    },
+    {
+      "date": "2024-04-02",
+      "market": "해외",
+      "stock_name": "신젠",
+      "pnl_amount": -909,
+      "return_pct": 0.084,
+      "note": null
+    },
+    {
+      "date": "2024-04-03",
+      "market": "해외",
+      "stock_name": "이스트먼 코닥",
+      "pnl_amount": -29071,
+      "return_pct": 0.082,
+      "note": null
+    },
+    {
+      "date": "2024-04-08",
+      "market": "국내",
+      "stock_name": "알테오젠",
+      "pnl_amount": -11330,
+      "return_pct": 0.065,
+      "note": null
+    },
+    {
+      "date": "2024-04-15",
+      "market": "해외",
+      "stock_name": "바이오엑셀 테라퓨틱스",
+      "pnl_amount": 69895,
+      "return_pct": 0.037,
+      "note": null
+    },
+    {
+      "date": "2024-04-15",
+      "market": "해외",
+      "stock_name": "X4 파머슈티컬",
+      "pnl_amount": 11851,
+      "return_pct": 0.013,
+      "note": null
+    },
+    {
+      "date": "2024-04-16",
+      "market": "해외",
+      "stock_name": "트럼프 미디어 & 테크놀로지 그룹",
+      "pnl_amount": -103867,
+      "return_pct": 0.054,
+      "note": null
+    },
+    {
+      "date": "2024-05-20",
+      "market": "해외",
+      "stock_name": "CN 에너지 그룹",
+      "pnl_amount": 4062,
+      "return_pct": 0.031,
+      "note": null
+    },
+    {
+      "date": "2024-05-20",
+      "market": "해외",
+      "stock_name": "힘스 앤 허스 헬스",
+      "pnl_amount": 951,
+      "return_pct": 0.007,
+      "note": null
+    },
+    {
+      "date": "2024-05-20",
+      "market": "해외",
+      "stock_name": "모빌리콤",
+      "pnl_amount": -66228,
+      "return_pct": 0.341,
+      "note": null
+    },
+    {
+      "date": "2024-05-21",
+      "market": "해외",
+      "stock_name": "힘스 앤 허스 헬스",
+      "pnl_amount": 2915,
+      "return_pct": 0.023,
+      "note": null
+    },
+    {
+      "date": "2024-05-21",
+      "market": "해외",
+      "stock_name": "에이아이",
+      "pnl_amount": -2492,
+      "return_pct": 0.018,
+      "note": null
+    },
+    {
+      "date": "2024-05-22",
+      "market": "해외",
+      "stock_name": "에이아이",
+      "pnl_amount": 8716,
+      "return_pct": 0.065,
+      "note": null
+    },
+    {
+      "date": "2024-05-22",
+      "market": "해외",
+      "stock_name": "큐 헬스",
+      "pnl_amount": 2186,
+      "return_pct": 0.03,
+      "note": null
+    },
+    {
+      "date": "2024-05-22",
+      "market": "해외",
+      "stock_name": "모빌리콤",
+      "pnl_amount": -542418,
+      "return_pct": 0.333,
+      "note": "2건 판매"
+    },
+    {
+      "date": "2024-05-22",
+      "market": "해외",
+      "stock_name": "치타 넷 서플라이 서비스",
+      "pnl_amount": -676418,
+      "return_pct": 0.551,
+      "note": null
+    },
+    {
+      "date": "2024-08-26",
+      "market": "해외",
+      "stock_name": "볼린저 이노베이션스",
+      "pnl_amount": 13250,
+      "return_pct": 0.173,
+      "note": null
+    },
+    {
+      "date": "2024-08-28",
+      "market": "해외",
+      "stock_name": "서브 로보틱스",
+      "pnl_amount": 9877,
+      "return_pct": 0.079,
+      "note": null
+    },
+    {
+      "date": "2024-08-28",
+      "market": "해외",
+      "stock_name": "옵티노우즈",
+      "pnl_amount": 4447,
+      "return_pct": 0.059,
+      "note": null
+    },
+    {
+      "date": "2024-09-17",
+      "market": "해외",
+      "stock_name": "이뮤니어링",
+      "pnl_amount": 220,
+      "return_pct": 0.017,
+      "note": null
+    },
+    {
+      "date": "2024-09-17",
+      "market": "해외",
+      "stock_name": "데이터시",
+      "pnl_amount": 28,
+      "return_pct": 0.002,
+      "note": null
+    },
+    {
+      "date": "2024-09-17",
+      "market": "해외",
+      "stock_name": "리치텍 로보틱스",
+      "pnl_amount": -10202,
+      "return_pct": 0.455,
+      "note": null
+    },
+    {
+      "date": "2024-09-19",
+      "market": "해외",
+      "stock_name": "NVDQ",
+      "pnl_amount": 7718,
+      "return_pct": 0.072,
+      "note": null
+    },
+    {
+      "date": "2024-09-19",
+      "market": "해외",
+      "stock_name": "조비 에비에이션",
+      "pnl_amount": 1899,
+      "return_pct": 0.005,
+      "note": null
+    },
+    {
+      "date": "2024-09-19",
+      "market": "해외",
+      "stock_name": "인스파이어 베터리너리 파트너스",
+      "pnl_amount": -2487,
+      "return_pct": 0.708,
+      "note": null
+    },
+    {
+      "date": "2024-10-03",
+      "market": "해외",
+      "stock_name": "조비 에비에이션",
+      "pnl_amount": 6503,
+      "return_pct": 0.131,
+      "note": "2건 판매"
+    },
+    {
+      "date": "2024-11-04",
+      "market": "해외",
+      "stock_name": "오디세이 마린 익스플로레이션",
+      "pnl_amount": -608778,
+      "return_pct": 0.656,
+      "note": null
+    },
+    {
+      "date": "2024-11-05",
+      "market": "해외",
+      "stock_name": "체인지에이전츠",
+      "pnl_amount": 180,
+      "return_pct": 0.008,
+      "note": null
+    },
+    {
+      "date": "2024-11-05",
+      "market": "해외",
+      "stock_name": "RYTHM INC",
+      "pnl_amount": -95,
+      "return_pct": 0.007,
+      "note": null
+    },
+    {
+      "date": "2024-11-07",
+      "market": "해외",
+      "stock_name": "TSLL",
+      "pnl_amount": 4993,
+      "return_pct": 0.301,
+      "note": null
+    },
+    {
+      "date": "2024-11-07",
+      "market": "해외",
+      "stock_name": "글로벌스타",
+      "pnl_amount": 2813,
+      "return_pct": 0.119,
+      "note": null
+    },
+    {
+      "date": "2024-11-12",
+      "market": "해외",
+      "stock_name": "조비 에비에이션",
+      "pnl_amount": 12823,
+      "return_pct": 0.121,
+      "note": "2건 판매"
+    },
+    {
+      "date": "2024-11-12",
+      "market": "해외",
+      "stock_name": "ETHU",
+      "pnl_amount": 1033,
+      "return_pct": 0.008,
+      "note": null
+    },
+    {
+      "date": "2025-02-15",
+      "market": "해외",
+      "stock_name": "서브 로보틱스",
+      "pnl_amount": -5068,
+      "return_pct": 0.049,
+      "note": null
+    },
+    {
+      "date": "2025-03-05",
+      "market": "해외",
+      "stock_name": "어도비",
+      "pnl_amount": -1036,
+      "return_pct": 0.02,
+      "note": null
+    },
+    {
+      "date": "2025-04-28",
+      "market": "해외",
+      "stock_name": "어도비",
+      "pnl_amount": -2046,
+      "return_pct": 0.086,
+      "note": null
+    },
+    {
+      "date": "2025-04-28",
+      "market": "해외",
+      "stock_name": "SPY",
+      "pnl_amount": -2799,
+      "return_pct": 0.059,
+      "note": null
+    },
+    {
+      "date": "2025-04-28",
+      "market": "해외",
+      "stock_name": "QQQ",
+      "pnl_amount": -3693,
+      "return_pct": 0.069,
+      "note": null
+    },
+    {
+      "date": "2025-04-28",
+      "market": "해외",
+      "stock_name": "엔비디아",
+      "pnl_amount": -3713,
+      "return_pct": 0.094,
+      "note": null
+    },
+    {
+      "date": "2025-04-28",
+      "market": "해외",
+      "stock_name": "SCHD",
+      "pnl_amount": -4248,
+      "return_pct": 0.084,
+      "note": null
+    },
+    {
+      "date": "2025-04-28",
+      "market": "해외",
+      "stock_name": "퍼시픽 바이오사이언시스 캘리포니아",
+      "pnl_amount": -16789,
+      "return_pct": 0.255,
+      "note": null
+    },
+    {
+      "date": "2025-10-16",
+      "market": "국내",
+      "stock_name": "동양",
+      "pnl_amount": -1003,
+      "return_pct": 0.011,
+      "note": null
+    },
+    {
+      "date": "2025-10-16",
+      "market": "국내",
+      "stock_name": "대원미디어",
+      "pnl_amount": -1959,
+      "return_pct": 0.021,
+      "note": null
+    },
+    {
+      "date": "2025-10-28",
+      "market": "국내",
+      "stock_name": "애니플러스",
+      "pnl_amount": -5340,
+      "return_pct": 0.063,
+      "note": null
+    },
+    {
+      "date": "2025-10-28",
+      "market": "국내",
+      "stock_name": "시프트업",
+      "pnl_amount": -7510,
+      "return_pct": 0.059,
+      "note": null
+    },
+    {
+      "date": "2025-10-28",
+      "market": "해외",
+      "stock_name": "인튜이티브 머신스",
+      "pnl_amount": 32300,
+      "return_pct": 0.379,
+      "note": "2건 판매"
+    },
+    {
+      "date": "2025-10-28",
+      "market": "해외",
+      "stock_name": "DZZ",
+      "pnl_amount": 1625,
+      "return_pct": 0.013,
+      "note": null
+    },
+    {
+      "date": "2025-10-28",
+      "market": "해외",
+      "stock_name": "GSI 테크놀로지",
+      "pnl_amount": 338,
+      "return_pct": 0.003,
+      "note": null
+    },
+    {
+      "date": "2026-03-25",
+      "market": "해외",
+      "stock_name": "로빈 에너지",
+      "pnl_amount": 97,
+      "return_pct": 0.088,
+      "note": null
+    },
+    {
+      "date": "2026-04-08",
+      "market": "해외",
+      "stock_name": "샤오아이(ADR)",
+      "pnl_amount": 74214,
+      "return_pct": 0.02,
+      "note": "7건 판매"
+    },
+    {
+      "date": "2026-04-08",
+      "market": "해외",
+      "stock_name": "팔란티어",
+      "pnl_amount": 11116,
+      "return_pct": 0.116,
+      "note": null
+    },
+    {
+      "date": "2026-04-08",
+      "market": "해외",
+      "stock_name": "알파벳 A",
+      "pnl_amount": 9142,
+      "return_pct": 0.036,
+      "note": null
+    },
+    {
+      "date": "2026-04-08",
+      "market": "해외",
+      "stock_name": "엔비디아",
+      "pnl_amount": 6260,
+      "return_pct": 0.059,
+      "note": null
+    },
+    {
+      "date": "2026-04-08",
+      "market": "해외",
+      "stock_name": "VTI",
+      "pnl_amount": -6028,
+      "return_pct": 0.012,
+      "note": "2건 판매"
+    },
+    {
+      "date": "2026-04-08",
+      "market": "해외",
+      "stock_name": "조비 에비에이션",
+      "pnl_amount": -14424,
+      "return_pct": 0.142,
+      "note": null
+    },
+    {
+      "date": "2026-04-14",
+      "market": "해외",
+      "stock_name": "올라잇",
+      "pnl_amount": 494,
+      "return_pct": 0.222,
+      "note": null
+    },
+    {
+      "date": "2026-07-03",
+      "market": "국내",
+      "stock_name": "삼성전자",
+      "pnl_amount": 7799,
+      "return_pct": 0.025,
+      "note": null
+    },
+    {
+      "date": "2026-07-03",
+      "market": "국내",
+      "stock_name": "삼기",
+      "pnl_amount": -5978,
+      "return_pct": 0.06,
+      "note": null
+    },
+    {
+      "date": "2026-07-08",
+      "market": "국내",
+      "stock_name": "한성기업",
+      "pnl_amount": 3985,
+      "return_pct": 0.084,
+      "note": null
+    },
+    {
+      "date": "2026-07-13",
+      "market": "해외",
+      "stock_name": "SCHD",
+      "pnl_amount": -165,
+      "return_pct": 0.0003,
+      "note": null
+    },
+    {
+      "date": "2026-07-13",
+      "market": "해외",
+      "stock_name": "VTI",
+      "pnl_amount": -372,
+      "return_pct": 0.0006,
+      "note": null
+    },
+    {
+      "date": "2026-07-13",
+      "market": "해외",
+      "stock_name": "스페이스X",
+      "pnl_amount": -105308,
+      "return_pct": 0.058,
+      "note": "3건 판매"
+    },
+    {
+      "date": "2026-07-14",
+      "market": "해외",
+      "stock_name": "TSLL",
+      "pnl_amount": 116,
+      "return_pct": 0.003,
+      "note": null
+    },
+    {
+      "date": "2026-07-14",
+      "market": "해외",
+      "stock_name": "피카드 메디컬",
+      "pnl_amount": -55851,
+      "return_pct": 0.063,
+      "note": "2건 판매"
+    },
+    {
+      "date": "2026-08-04",
+      "market": "해외",
+      "stock_name": "VTI",
+      "pnl_amount": -332,
+      "return_pct": 0.043,
+      "note": null
+    },
+    {
+      "date": "2026-08-04",
+      "market": "해외",
+      "stock_name": "넥스트NRG",
+      "pnl_amount": -658,
+      "return_pct": 0.302,
+      "note": null
+    },
+    {
+      "date": "2026-08-04",
+      "market": "해외",
+      "stock_name": "샤오아이(ADR)",
+      "pnl_amount": -1912915,
+      "return_pct": 0.945,
+      "note": null
+    },
+    {
+      "date": "2026-08-05",
+      "market": "국내",
+      "stock_name": "한화오션",
+      "pnl_amount": 8082,
+      "return_pct": 0.03,
+      "note": null
+    },
+    {
+      "date": "2026-08-05",
+      "market": "해외",
+      "stock_name": "노키아(ADR)",
+      "pnl_amount": 2555,
+      "return_pct": 0.018,
+      "note": null
+    },
+    {
+      "date": "2026-08-07",
+      "market": "국내",
+      "stock_name": "애니플러스",
+      "pnl_amount": 136758,
+      "return_pct": 0.259,
+      "note": null
+    }
+  ],
+  "record_count": 86,
+  "source": "사용자 제공 토스 캡처 정리(수동입력)",
+  "verification": {
+    "checked_at": "2026-08-08",
+    "method": "거래내역 시트 86건 pnl_amount 합계를 이 세션이 독립적으로 재계산",
+    "result": "일치",
+    "recalculated_total": -3665274,
+    "recalculated_domestic": 118307,
+    "recalculated_overseas": -3783581,
+    "footnote_status": "파일 내 각주(B20, '거래내역 합계와 앱 전체 판매수익이 다르다')는 이 세션의 재검산 결과 현재 버전에서는 해소됨 — 86건 합계(-3,665,274원)가 요약 시트 판매수익과 정확히 일치함을 확인"
+  },
+  "note": "이 파일은 2026-08-08까지의 과거 실현손익을 사용자가 제공한 앱 캡처 정리본에서 수동으로 옮긴 1회성 정적 기록이다. 자동 수집이 아니며 갱신되지 않는다. source 파일 내 비고에는 '미래에셋증권'이라고 적혀 있으나 사용자 확인 결과 실제로는 토스 계좌 기록이다(라벨 오기, 데이터 자체는 유효) — 그래서 이 필드는 원본 라벨을 그대로 옮기지 않고 사용자 확인값으로 기재한다."
+}

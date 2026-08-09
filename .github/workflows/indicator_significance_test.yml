@@ -1,0 +1,54 @@
+name: Indicator Significance Test
+# 보조지표 실질 우위 검증 (방향성 세션 지시, 2026-08-08). backtest.yml과 동일한
+# 이유로 workflow_dispatch 전용이다 — Upbit/Yahoo/stooq/Naver 데이터 소스가
+# Claude Code 샌드박스 egress 정책에서 막혀 있어 GitHub Actions 러너에서만
+# 실행 가능하다(indicator_significance_test.py 상단 docstring 참고).
+on:
+  workflow_dispatch:
+    inputs:
+      count:
+        description: 'KRX/미국주식 일봉 개수 (backtest.yml과 동일 기본값)'
+        required: false
+        default: '1500'
+      krx:
+        description: 'KRX 종목코드 (공백 구분). 비워두면 KRX_MARKET_CAP_TOP 기본 유니버스 사용'
+        required: false
+        default: ''
+      out_file:
+        description: '리포트 저장 파일명'
+        required: false
+        default: 'indicator_significance_report.json'
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+      - name: Run indicator significance test
+        env:
+          COUNT: ${{ github.event.inputs.count }}
+          KRX: ${{ github.event.inputs.krx }}
+          OUT_FILE: ${{ github.event.inputs.out_file }}
+        run: |
+          if [ -n "$KRX" ]; then
+            python indicator_significance_test.py --count "$COUNT" --krx $KRX --out "$OUT_FILE"
+          else
+            python indicator_significance_test.py --count "$COUNT" --out "$OUT_FILE"
+          fi
+      - name: Commit report
+        env:
+          OUT_FILE: ${{ github.event.inputs.out_file }}
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add "$OUT_FILE"
+          git diff --quiet && git diff --staged --quiet || git commit -m "Indicator significance report update ($OUT_FILE)"
+          git push

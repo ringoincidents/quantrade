@@ -1,0 +1,51 @@
+{
+  "schema": "asset_class_mapping_v1",
+  "generated_at": "2026-08-08",
+  "source": "방향성 세션 지시 (2026-08-08)",
+  "purpose": "보유/이력 종목을 자산군으로 분류하는 매핑표. income_schedule.json의 allocation.asset_classes(신규 6종: bond/developed_exUS/emerging/healthcare/reit/cash) 대비 갭 계산에 쓰일 것을 전제로 한 참조 데이터 — 갭 계산 로직 자체는 아직 어디에도 없다 (consumed_by 참고).",
+  "new_six_classes": ["bond", "developed_exUS", "emerging", "healthcare", "reit", "cash"],
+  "mappings": [
+    {
+      "name": "SCHD",
+      "symbol": "SCHD",
+      "asset_class": "기존_배당",
+      "is_new_six_class": false
+    },
+    {
+      "name": "VTI",
+      "symbol": "VTI",
+      "asset_class": "기존_전체시장",
+      "is_new_six_class": false
+    },
+    {
+      "name": "엔비디아",
+      "symbol": "NVDA",
+      "asset_class": "기존_개별성장주",
+      "is_new_six_class": false
+    },
+    {
+      "name": "노키아(ADR)",
+      "symbol": "NOK",
+      "symbol_note": "저장소 내 다른 파일에 이 종목의 심볼 기록이 없어(historical_pnl_manual.json엔 stock_name만 있음) 이 세션이 통상적인 ADR 티커로 채워 넣었다 — 확인 필요.",
+      "asset_class": "developed_exUS",
+      "asset_class_label": "선진국(미국 제외)",
+      "is_new_six_class": true,
+      "note": "신규 6종 중 이번 매핑표에서 유일하게 채워진 항목."
+    },
+    {
+      "name": "알테오젠",
+      "symbol": "196170",
+      "asset_class": "기존_KR개별",
+      "is_new_six_class": false
+    },
+    {
+      "name": "한화오션",
+      "symbol": "042660",
+      "asset_class": "기존_KR개별",
+      "is_new_six_class": false
+    }
+  ],
+  "unmapped_new_six_classes": ["bond", "emerging", "healthcare", "reit", "cash"],
+  "unmapped_note": "신규 6종 중 위 5개(채권/신흥국/헬스케어/리츠/현금성)는 이번 매핑표에 해당 종목이 없다 — 보유 종목이 없다는 뜻이지 계산 오류가 아니며, 갭 계산 시 0%로 나오는 게 정상이다.",
+  "consumed_by": "미해당 (2026-08-08 기준) — portfolio_report.py를 포함해 이 저장소의 어떤 스크립트도 아직 이 파일을 읽지 않는다. target 배분(income_schedule.json의 allocation.tiers)과 실제 보유 자산군 비중을 비교하는 갭 계산 로직 자체가 코드에 없다. 이 파일을 생성한 것만으로는 portfolio_report.json 등 파생 파일에 자동으로 반영되지 않는다 — 반영하려면 별도로 갭 계산 기능을 만들어 이 파일을 읽게 해야 한다."
+}

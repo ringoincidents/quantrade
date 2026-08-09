@@ -53,6 +53,9 @@ jobs:
           git config user.email "actions@github.com"
           if [ ! -f real_portfolio.json ]; then echo "동기화 산출물 없음"; exit 0; fi
           git add real_portfolio.json
+          # portfolio_pnl_history.json은 2026-08-09 이전엔 생성되지 않는다
+          # (historical_pnl_manual.json과 겹치지 않게 하는 경계일 — real_portfolio_sync.py 참고).
+          if [ -f portfolio_pnl_history.json ]; then git add portfolio_pnl_history.json; fi
           git diff --quiet && git diff --staged --quiet && echo "변경 없음" && exit 0
           git commit -m "Real portfolio sync"
           for attempt in 1 2 3 4 5; do

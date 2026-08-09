@@ -123,6 +123,18 @@
   </div>
 </div>
 
+<!-- ===== Block 1.5: [2026-08-08 신규] 총손익 추이 — 정적(총손익) + 자동(평가손익) 병합 ===== -->
+<!-- 두 구간은 서로 다른 지표다 (historical_pnl_manual.json §총손익 = 실현+배당+이자,
+     portfolio_pnl_history.json §평가손익 = 미실현만, 토스 API에 배당/이자 조회
+     엔드포인트가 없어 자동구간에서는 채울 수 없다 — CLAUDE.md 2026-08-08 결정).
+     그래서 색상만으로 구분하지 않고 전환 지점에 구분선 + 고정 각주를 둘 다 둔다. -->
+<div class="section-divider">총손익 추이</div>
+<h2>📈 손익 추이 <span class="badge-real">조회/기록전용</span></h2>
+
+<div class="card real-card" id="pnlhistory-section">
+  <p class="muted">로딩 중...</p>
+</div>
+
 <!-- ===== Block 2: [v3.2 신규] 포트폴리오 리포트 — 현황 + 규칙 해당 여부 ===== -->
 <!-- 읽기 전용. 실행 버튼 없음. 렌더러는 화이트리스트만 읽고, 예측성 필드가
      섞이면 assertNoPredictiveFields가 렌더를 거부한다(보호적 경고 카드와 동일 규율). -->
@@ -130,6 +142,18 @@
 <h2>📋 현황 및 규칙 점검</h2>
 
 <div class="card" id="preport-section">
+  <p class="muted">로딩 중...</p>
+</div>
+
+<!-- ===== Block 2.5: [2026-08-09 신규] Risk Engine — 계산·표시 전용 ===== -->
+<!-- v3.0 원칙2("AI는 뭘 살지 관여, 얼마나 살지는 Risk Engine이 결정")의 첫 구현.
+     예측/신호 없음 — 포지션 사이징도 "권장 금액"이라는 계산값이지 매수 지시가
+     아니다. 렌더러는 보호적 경고 카드와 같은 규율(화이트리스트 + 예측성 필드
+     렌더 거부)을 쓴다. -->
+<div class="section-divider">Risk Engine (계산·표시 전용)</div>
+<h2>⚖️ 포지션 사이징 · 리스크 · 상관관계</h2>
+
+<div class="card" id="riskengine-section">
   <p class="muted">로딩 중...</p>
 </div>
 
@@ -267,6 +291,118 @@ async function loadRealAccount(bust) {
     });
   } catch (e) {
     document.getElementById('pieChart').replaceWith(
+      Object.assign(document.createElement('p'), { className: 'muted', textContent: '차트를 불러올 수 없습니다.' })
+    );
+  }
+}
+
+// ── [2026-08-08] 총손익 추이: historical_pnl_manual(정적, 총손익) +
+// portfolio_pnl_history(자동, 평가손익) 병합. 두 지표는 baseline이 다르므로
+// (전자는 -3,656,813원에서 끝나는 누적 실현손익, 후자는 2026-08-09에 0에서
+// 시작하는 평가손익) 값을 이어 붙이지 않고 같은 시간축 위에 두 개의 별도
+// 데이터셋으로 그린다 — null로 채운 구간은 Chart.js가 자동으로 비워 둔다.
+async function loadPnlHistory(bust) {
+  const el = document.getElementById('pnlhistory-section');
+  let historical, autoHist;
+  try {
+    historical = await (await fetch('historical_pnl_manual.json' + bust)).json();
+  } catch (e) {
+    el.innerHTML = '<p class="muted">historical_pnl_manual.json을 불러올 수 없습니다.</p>';
+    return;
+  }
+  try {
+    autoHist = await (await fetch('portfolio_pnl_history.json' + bust)).json();
+  } catch (e) {
+    autoHist = { records: [] };
+  }
+
+  // 거래일별로 pnl_amount를 합산한 뒤 누적합을 구한다 (개별 매매 86건 → 날짜별 누적).
+  // 배당/이자/계좌이자(총 +8,461원)는 날짜별 이벤트 데이터가 없어 마지막 지점에
+  // 한 번에 반영한다 — 그래서 끝값은 total_realized_pnl(총손익)과 정확히 일치하지만,
+  // 중간 지점은 매매 손익만 반영한 근사 경로다.
+  const byDate = {};
+  (historical.records || []).forEach(r => { byDate[r.date] = (byDate[r.date] || 0) + r.pnl_amount; });
+  const histDates = Object.keys(byDate).sort();
+  const nonTradeAdjust = (historical.dividend || 0) + (historical.account_interest || 0)
+    + (historical.lending_fee || 0) + (historical.bond_interest || 0);
+  let running = 0;
+  const histPoints = [];
+  if (historical.period && historical.period.start) {
+    histPoints.push({ date: historical.period.start, cum: 0 });
+  }
+  histDates.forEach((d, i) => {
+    running += byDate[d];
+    const cum = (i === histDates.length - 1) ? running + nonTradeAdjust : running;
+    histPoints.push({ date: d, cum });
+  });
+
+  const autoRecords = (autoHist.records || []).slice().sort((a, b) => a.date < b.date ? -1 : 1);
+  const boundaryDate = (historical.period && historical.period.end) || histPoints.at(-1)?.date;
+
+  const labels = [...histPoints.map(p => p.date), ...autoRecords.map(r => r.date)];
+  const histData = [...histPoints.map(p => p.cum), ...autoRecords.map(() => null)];
+  const autoData = [...histPoints.map(() => null), ...autoRecords.map(r => r.valuation_pnl_krw)];
+  const boundaryIdx = histPoints.length - 1; // 마지막 정적 구간 지점 = 구분선 위치
+
+  el.innerHTML = `<canvas id="pnlHistoryChart"></canvas>
+    <p class="muted" style="margin-top:10px; margin-bottom:0;">
+      <b>${esc(boundaryDate)} 이전(회색): 총손익</b>(실현손익+배당+이자, historical_pnl_manual.json 정적 기록) ·
+      <b>${esc(boundaryDate)} 이후(청록): 평가손익</b>(미실현, portfolio_pnl_history.json 매일 자동 갱신) —
+      <b>서로 다른 지표입니다.</b> 배당·이자는 토스 API에 조회 엔드포인트가 없어 자동구간에는 포함되지 않습니다.
+      ${autoRecords.length === 0 ? '<br>자동구간 기록이 아직 없습니다 (2026-08-09부터 시작).' : ''}
+    </p>`;
+
+  try {
+    const boundaryLinePlugin = {
+      id: 'pnlBoundaryLine',
+      afterDraw(chart) {
+        if (boundaryIdx < 0 || boundaryIdx >= labels.length - 1) return; // 자동구간 데이터가 없으면 구분선 생략
+        const xScale = chart.scales.x, yScale = chart.scales.y;
+        const x = xScale.getPixelForValue(boundaryIdx);
+        const ctx = chart.ctx;
+        ctx.save();
+        ctx.beginPath();
+        ctx.setLineDash([4, 4]);
+        ctx.strokeStyle = '#facc15';
+        ctx.lineWidth = 1.5;
+        ctx.moveTo(x, yScale.top);
+        ctx.lineTo(x, yScale.bottom);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#facc15';
+        ctx.font = '10px -apple-system, sans-serif';
+        ctx.fillText('지표 전환', x + 4, yScale.top + 12);
+        ctx.restore();
+      }
+    };
+    new Chart(document.getElementById('pnlHistoryChart'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          { label: '총손익 (정적)', data: histData, borderColor: '#94a3b8', backgroundColor: '#94a3b8', spanGaps: false, pointRadius: 0, tension: 0.1 },
+          { label: '평가손익 (자동)', data: autoData, borderColor: '#2dd4bf', backgroundColor: '#2dd4bf', spanGaps: false, pointRadius: 0, tension: 0.1 },
+        ]
+      },
+      options: {
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { labels: { color: '#eee', font: { size: 11 } } },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y === null ? '-' : Math.round(ctx.parsed.y).toLocaleString()}원`
+            }
+          }
+        },
+        scales: {
+          x: { ticks: { color: '#64748b', maxTicksLimit: 8, font: { size: 10 } } },
+          y: { ticks: { color: '#64748b', font: { size: 10 } } }
+        }
+      },
+      plugins: [boundaryLinePlugin]
+    });
+  } catch (e) {
+    document.getElementById('pnlHistoryChart').replaceWith(
       Object.assign(document.createElement('p'), { className: 'muted', textContent: '차트를 불러올 수 없습니다.' })
     );
   }
@@ -414,6 +550,90 @@ async function loadPortfolioReport(bust) {
   } catch (e) {
     el.innerHTML = `<p class="muted">포트폴리오 리포트가 아직 생성되지 않았습니다
       (portfolio_report.json 없음).</p>`;
+  }
+}
+
+// ── [2026-08-09] Risk Engine: 포지션 사이징/집중도/MDD예산/상관계수/비용반영후.
+// 보호적 경고 카드와 같은 규율 — 화이트리스트 + 예측성 필드 렌더 거부.
+// "권장 금액"은 계산값 표시일 뿐 매수 지시가 아니다(BUY/SELL/confidence 필드 자체가 없음).
+const SIZING_FIELDS = ["recommended_range_krw", "ceiling_krw", "by_strategy_krw", "inputs"];
+
+function renderPositionSizing(item) {
+  if (!assertNoPredictiveFields(item, 'Risk Engine 사이징')) return '';
+  const sz = item.sizing;
+  if (!sz) {
+    return `<div class="pos"><span class="pos-main">${esc(item.name)}</span>
+      <span class="muted" style="font-size:12px;">${esc(item.note || '계산 불가')}</span></div>`;
+  }
+  if (!assertNoPredictiveFields(sz, 'Risk Engine 사이징(값)')) return '';
+  const s = pick(sz, SIZING_FIELDS);
+  return `<div class="pos">
+    <span class="pos-main">${esc(item.name)}
+      <span class="pos-sub">변동성 ${s.inputs.volatility_pct}% (기준 ${s.inputs.reference_vol_pct}%) · 상한 ${Number(s.ceiling_krw).toLocaleString()}원</span>
+    </span>
+    <span>${Number(s.recommended_range_krw.min).toLocaleString()}~${Number(s.recommended_range_krw.max).toLocaleString()}원</span>
+  </div>`;
+}
+
+async function loadRiskEngine(bust) {
+  const el = document.getElementById('riskengine-section');
+  try {
+    const r = await (await fetch('portfolio_report.json' + bust)).json();
+    const re = r.risk_engine;
+    if (!re) { el.innerHTML = '<p class="muted">Risk Engine 데이터가 아직 없습니다.</p>'; return; }
+    if (!assertNoPredictiveFields(re, 'Risk Engine')) {
+      el.innerHTML = '<p class="muted">Risk Engine 데이터 형식 오류(예측성 필드 감지) — 표시 생략.</p>';
+      return;
+    }
+    const tag = re.provisional ? '<span class="badge-retired">초안 기준</span>' : '';
+
+    const mdd = re.mdd_budget;
+    const mddHtml = mdd && mdd.budget_usage_pct !== null
+      ? `<div class="metrics-grid">
+          <div class="metric"><div class="label">MDD 예산 소진율</div><div class="value">${mdd.budget_usage_pct}%</div></div>
+          <div class="metric"><div class="label">현재 미실현손익</div><div class="value">${fmtPct(mdd.portfolio_unrealized_return_pct)}</div></div>
+          <div class="metric"><div class="label">한도</div><div class="value">${mdd.mdd_limit_pct}%</div></div>
+        </div><p class="muted rm-note">${esc(mdd.note)}</p>`
+      : '<p class="muted">MDD 예산 데이터 없음</p>';
+
+    const sizingHtml = (re.position_sizing || []).map(renderPositionSizing).join('')
+      || '<p class="muted">보유 종목 없음</p>';
+
+    const conc = re.concentration || [];
+    const concHtml = conc.length
+      ? conc.map(c => `<div class="pos"><span class="pos-main">${esc(c.name)}</span>
+          <span class="${c.weight_pct >= c.threshold_pct ? 'negative' : ''}">${c.weight_pct.toFixed(1)}% <span class="pos-sub">(기준 ${c.threshold_pct}%)</span></span></div>`).join('')
+      : '<p class="muted">보유 종목 없음</p>';
+
+    const corr = re.correlation || {};
+    const flagged = corr.flagged_pairs || [];
+    const corrHtml = flagged.length
+      ? `<div class="rm-scroll"><table class="rm-table"><thead><tr><th>종목A</th><th>종목B</th><th class="rm-num">상관계수</th></tr></thead>
+          <tbody>${flagged.map(f => `<tr><td>${esc(f.symbol_a)}</td><td>${esc(f.symbol_b)}</td><td class="rm-num">${f.correlation.toFixed(3)}</td></tr>`).join('')}</tbody>
+        </table></div><p class="muted rm-note">기준 ${corr.flag_threshold} 이상, 최근 ${corr.lookback_days}일 수익률 기준. "비슷하게 움직인다"는 사실만 — 매도 제안 아님.</p>`
+      : `<p class="muted">${esc(corr.note || `상관계수 ${corr.flag_threshold || 0.7} 이상인 쌍 없음`)}</p>`;
+
+    const costRows = re.cost_adjusted || [];
+    const costHtml = costRows.length
+      ? costRows.map(c => `<div class="pos"><span class="pos-main">${esc(c.name)}</span>
+          <span>${fmtPct(c.return_pct)} → <b>${fmtPct(c.cost_adjusted_return_pct)}</b> <span class="pos-sub">(비용 ${c.sell_cost_pct}%)</span></span></div>`).join('')
+      : '<p class="muted">보유 종목 없음</p>';
+
+    el.innerHTML = `
+      <p class="muted">${esc(re.note)}</p>
+      <h3>💰 신규매수 권장금액 범위 ${tag}</h3>
+      ${sizingHtml}
+      <h3 style="margin-top:14px;">📉 MDD 예산</h3>
+      ${mddHtml}
+      <h3 style="margin-top:14px;">🎯 집중도</h3>
+      ${concHtml}
+      <h3 style="margin-top:14px;">🔗 상관관계 (0.7 이상)</h3>
+      ${corrHtml}
+      <h3 style="margin-top:14px;">💸 비용 반영 후 수익률</h3>
+      ${costHtml}
+    `;
+  } catch (e) {
+    el.innerHTML = '<p class="muted">Risk Engine 데이터를 불러오지 못했습니다.</p>';
   }
 }
 
@@ -649,8 +869,10 @@ async function loadData() {
   const bust = '?t=' + Date.now();
   // 각 블록을 독립적으로 로드한다 — 하나가 404/파싱 실패해도 나머지는 그려진다.
   await loadRealAccount(bust);
+  await loadPnlHistory(bust);
   await loadRetiredPending(bust);
   await loadPortfolioReport(bust);
+  await loadRiskEngine(bust);
   await loadGuardrails(bust);
   await loadNewsCards(bust);
   await loadMarketIndicators(bust);
