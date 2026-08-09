@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-08",
+  "generated_at": "2026-08-09",
   "schema": "portfolio_report_v3.2",
   "note": "현황 계산 + 사전 정의 규칙 해당 여부만 담는다. 매매 판단/방향 예측/확신도 필드는 스키마에 없다 - 누락이 아니라 설계.",
   "thresholds": {
@@ -9,48 +9,56 @@
     "loss_sustained_days": 60
   },
   "snapshot": {
-    "synced_at": "2026-08-07T12:06:41.961800+00:00",
-    "total_assets_krw": 4670617.0,
+    "synced_at": "2026-08-09T11:53:44.300983+00:00",
+    "total_assets_krw": 4688926.0,
     "cash_krw": 664916.0,
-    "cash_pct": 14.24,
-    "position_count": 4,
+    "cash_pct": 14.18,
+    "position_count": 5,
     "positions": [
       {
         "symbol": "SCHD",
         "name": "SCHD",
         "market_country": "US",
-        "eval_amount_krw": 2694748.0,
-        "weight_pct": 57.7,
-        "return_pct": 3.0300000000000002
+        "eval_amount_krw": 2700448.0,
+        "weight_pct": 57.59,
+        "return_pct": 3.64
       },
       {
         "symbol": "196170",
         "name": "알테오젠",
         "market_country": "KR",
         "eval_amount_krw": 915000.0,
-        "weight_pct": 19.59,
+        "weight_pct": 19.51,
         "return_pct": 2.23
       },
       {
         "symbol": "NVDA",
         "name": "엔비디아",
         "market_country": "US",
-        "eval_amount_krw": 312487.0,
-        "weight_pct": 6.69,
-        "return_pct": 8.870000000000001
+        "eval_amount_krw": 316702.0,
+        "weight_pct": 6.75,
+        "return_pct": 10.76
       },
       {
         "symbol": "NMR",
         "name": "노무라 홀딩스(ADR)",
         "market_country": "US",
-        "eval_amount_krw": 83466.0,
-        "weight_pct": 1.79,
-        "return_pct": -0.5
+        "eval_amount_krw": 84422.0,
+        "weight_pct": 1.8,
+        "return_pct": 1.01
+      },
+      {
+        "symbol": "RIG",
+        "name": "트랜스오션",
+        "market_country": "US",
+        "eval_amount_krw": 7438.0,
+        "weight_pct": 0.16,
+        "return_pct": 1.9300000000000002
       }
     ],
     "weight_by_country_pct": {
-      "US": 66.18,
-      "KR": 19.59
+      "US": 66.3,
+      "KR": 19.51
     }
   },
   "rule_matches": [
@@ -59,10 +67,243 @@
       "symbol": "SCHD",
       "name": "SCHD",
       "threshold": "단일 종목 비중 30% 이상",
-      "observed": "57.70%",
-      "fact": "SCHD(SCHD) 비중이 총자산의 57.70%로 기준 30% 이상"
+      "observed": "57.59%",
+      "fact": "SCHD(SCHD) 비중이 총자산의 57.59%로 기준 30% 이상"
     }
   ],
+  "risk_engine": {
+    "provisional": true,
+    "note": "전부 계산·표시 전용이다 — 예측/신호 없음. \"권장 금액\"은 계산값이지 매수 지시가 아니고, 최종 매수 여부·금액은 항상 사람이 정한다.",
+    "position_sizing": [
+      {
+        "symbol": "SCHD",
+        "name": "SCHD",
+        "sizing": {
+          "recommended_range_krw": {
+            "min": 894438,
+            "max": 937785
+          },
+          "by_strategy_krw": {
+            "단타": 937785,
+            "스윙": 937785,
+            "장기": 894438
+          },
+          "ceiling_krw": 937785,
+          "inputs": {
+            "volatility_pct": 0.839,
+            "reference_vol_pct": 2.0,
+            "per_trade_risk_budget_pct": 2.0
+          }
+        },
+        "note": null
+      },
+      {
+        "symbol": "196170",
+        "name": "알테오젠",
+        "sizing": {
+          "recommended_range_krw": {
+            "min": 120598,
+            "max": 602988
+          },
+          "by_strategy_krw": {
+            "단타": 602988,
+            "스윙": 301494,
+            "장기": 120598
+          },
+          "ceiling_krw": 937785,
+          "inputs": {
+            "volatility_pct": 6.221,
+            "reference_vol_pct": 2.0,
+            "per_trade_risk_budget_pct": 2.0
+          }
+        },
+        "note": null
+      },
+      {
+        "symbol": "NVDA",
+        "name": "엔비디아",
+        "sizing": {
+          "recommended_range_krw": {
+            "min": 281115,
+            "max": 937785
+          },
+          "by_strategy_krw": {
+            "단타": 937785,
+            "스윙": 702787,
+            "장기": 281115
+          },
+          "ceiling_krw": 937785,
+          "inputs": {
+            "volatility_pct": 2.669,
+            "reference_vol_pct": 2.0,
+            "per_trade_risk_budget_pct": 2.0
+          }
+        },
+        "note": null
+      },
+      {
+        "symbol": "NMR",
+        "name": "노무라 홀딩스(ADR)",
+        "sizing": {
+          "recommended_range_krw": {
+            "min": 400333,
+            "max": 937785
+          },
+          "by_strategy_krw": {
+            "단타": 937785,
+            "스윙": 937785,
+            "장기": 400333
+          },
+          "ceiling_krw": 937785,
+          "inputs": {
+            "volatility_pct": 1.874,
+            "reference_vol_pct": 2.0,
+            "per_trade_risk_budget_pct": 2.0
+          }
+        },
+        "note": null
+      },
+      {
+        "symbol": "RIG",
+        "name": "트랜스오션",
+        "sizing": {
+          "recommended_range_krw": {
+            "min": 292410,
+            "max": 937785
+          },
+          "by_strategy_krw": {
+            "단타": 937785,
+            "스윙": 731024,
+            "장기": 292410
+          },
+          "ceiling_krw": 937785,
+          "inputs": {
+            "volatility_pct": 2.566,
+            "reference_vol_pct": 2.0,
+            "per_trade_risk_budget_pct": 2.0
+          }
+        },
+        "note": null
+      }
+    ],
+    "mdd_budget": {
+      "portfolio_unrealized_return_pct": 3.28,
+      "mdd_limit_pct": -20.0,
+      "budget_usage_pct": -16.4,
+      "note": "실제 고점 대비 낙폭(진짜 MDD)이 아니라 현재 미실현손익 기준 소진율 — real_portfolio.json은 스냅샷이라 과거 고점을 모른다."
+    },
+    "concentration": [
+      {
+        "symbol": "SCHD",
+        "name": "SCHD",
+        "weight_pct": 57.59,
+        "threshold_pct": 30.0
+      },
+      {
+        "symbol": "196170",
+        "name": "알테오젠",
+        "weight_pct": 19.51,
+        "threshold_pct": 30.0
+      },
+      {
+        "symbol": "NVDA",
+        "name": "엔비디아",
+        "weight_pct": 6.75,
+        "threshold_pct": 30.0
+      },
+      {
+        "symbol": "NMR",
+        "name": "노무라 홀딩스(ADR)",
+        "weight_pct": 1.8,
+        "threshold_pct": 30.0
+      },
+      {
+        "symbol": "RIG",
+        "name": "트랜스오션",
+        "weight_pct": 0.16,
+        "threshold_pct": 30.0
+      }
+    ],
+    "correlation": {
+      "lookback_days": 90,
+      "matrix": {
+        "SCHD": {
+          "SCHD": 1.0,
+          "196170": -0.033,
+          "NVDA": -0.219,
+          "NMR": 0.147,
+          "RIG": 0.104
+        },
+        "196170": {
+          "SCHD": -0.033,
+          "196170": 1.0,
+          "NVDA": 0.04,
+          "NMR": -0.047,
+          "RIG": 0.173
+        },
+        "NVDA": {
+          "SCHD": -0.219,
+          "196170": 0.04,
+          "NVDA": 1.0,
+          "NMR": 0.259,
+          "RIG": 0.124
+        },
+        "NMR": {
+          "SCHD": 0.147,
+          "196170": -0.047,
+          "NVDA": 0.259,
+          "NMR": 1.0,
+          "RIG": 0.05
+        },
+        "RIG": {
+          "SCHD": 0.104,
+          "196170": 0.173,
+          "NVDA": 0.124,
+          "NMR": 0.05,
+          "RIG": 1.0
+        }
+      },
+      "flagged_pairs": [],
+      "flag_threshold": 0.7
+    },
+    "cost_adjusted": [
+      {
+        "symbol": "SCHD",
+        "name": "SCHD",
+        "return_pct": 3.64,
+        "sell_cost_pct": 0.35,
+        "cost_adjusted_return_pct": 3.29
+      },
+      {
+        "symbol": "196170",
+        "name": "알테오젠",
+        "return_pct": 2.23,
+        "sell_cost_pct": 0.295,
+        "cost_adjusted_return_pct": 1.935
+      },
+      {
+        "symbol": "NVDA",
+        "name": "엔비디아",
+        "return_pct": 10.76,
+        "sell_cost_pct": 0.35,
+        "cost_adjusted_return_pct": 10.41
+      },
+      {
+        "symbol": "NMR",
+        "name": "노무라 홀딩스(ADR)",
+        "return_pct": 1.01,
+        "sell_cost_pct": 0.35,
+        "cost_adjusted_return_pct": 0.66
+      },
+      {
+        "symbol": "RIG",
+        "name": "트랜스오션",
+        "return_pct": 1.9300000000000002,
+        "sell_cost_pct": 0.35,
+        "cost_adjusted_return_pct": 1.58
+      }
+    ]
+  },
   "roadmap": {
     "status": "계산됨",
     "total_months": 15,
