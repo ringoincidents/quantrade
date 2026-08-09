@@ -145,6 +145,18 @@
   <p class="muted">로딩 중...</p>
 </div>
 
+<!-- ===== Block 2.5: [2026-08-09 신규] Risk Engine — 계산·표시 전용 ===== -->
+<!-- v3.0 원칙2("AI는 뭘 살지 관여, 얼마나 살지는 Risk Engine이 결정")의 첫 구현.
+     예측/신호 없음 — 포지션 사이징도 "권장 금액"이라는 계산값이지 매수 지시가
+     아니다. 렌더러는 보호적 경고 카드와 같은 규율(화이트리스트 + 예측성 필드
+     렌더 거부)을 쓴다. -->
+<div class="section-divider">Risk Engine (계산·표시 전용)</div>
+<h2>⚖️ 포지션 사이징 · 리스크 · 상관관계</h2>
+
+<div class="card" id="riskengine-section">
+  <p class="muted">로딩 중...</p>
+</div>
+
 <!-- ===== Block 3: [v3.2 신규] 보호적 경고 — 규칙 위반 사실만 ===== -->
 <!-- 이 블록은 정보성 카드(Block 4)와 코드/템플릿 레벨에서 분리돼 있다.
      렌더러(renderGuardrailCard)는 허용 필드 화이트리스트만 읽고, 예측성 필드가
@@ -514,6 +526,90 @@ async function loadPortfolioReport(bust) {
   }
 }
 
+// ── [2026-08-09] Risk Engine: 포지션 사이징/집중도/MDD예산/상관계수/비용반영후.
+// 보호적 경고 카드와 같은 규율 — 화이트리스트 + 예측성 필드 렌더 거부.
+// "권장 금액"은 계산값 표시일 뿐 매수 지시가 아니다(BUY/SELL/confidence 필드 자체가 없음).
+const SIZING_FIELDS = ["recommended_range_krw", "ceiling_krw", "by_strategy_krw", "inputs"];
+
+function renderPositionSizing(item) {
+  if (!assertNoPredictiveFields(item, 'Risk Engine 사이징')) return '';
+  const sz = item.sizing;
+  if (!sz) {
+    return `<div class="pos"><span class="pos-main">${esc(item.name)}</span>
+      <span class="muted" style="font-size:12px;">${esc(item.note || '계산 불가')}</span></div>`;
+  }
+  if (!assertNoPredictiveFields(sz, 'Risk Engine 사이징(값)')) return '';
+  const s = pick(sz, SIZING_FIELDS);
+  return `<div class="pos">
+    <span class="pos-main">${esc(item.name)}
+      <span class="pos-sub">변동성 ${s.inputs.volatility_pct}% (기준 ${s.inputs.reference_vol_pct}%) · 상한 ${Number(s.ceiling_krw).toLocaleString()}원</span>
+    </span>
+    <span>${Number(s.recommended_range_krw.min).toLocaleString()}~${Number(s.recommended_range_krw.max).toLocaleString()}원</span>
+  </div>`;
+}
+
+async function loadRiskEngine(bust) {
+  const el = document.getElementById('riskengine-section');
+  try {
+    const r = await (await fetch('portfolio_report.json' + bust)).json();
+    const re = r.risk_engine;
+    if (!re) { el.innerHTML = '<p class="muted">Risk Engine 데이터가 아직 없습니다.</p>'; return; }
+    if (!assertNoPredictiveFields(re, 'Risk Engine')) {
+      el.innerHTML = '<p class="muted">Risk Engine 데이터 형식 오류(예측성 필드 감지) — 표시 생략.</p>';
+      return;
+    }
+    const tag = re.provisional ? '<span class="badge-retired">초안 기준</span>' : '';
+
+    const mdd = re.mdd_budget;
+    const mddHtml = mdd && mdd.budget_usage_pct !== null
+      ? `<div class="metrics-grid">
+          <div class="metric"><div class="label">MDD 예산 소진율</div><div class="value">${mdd.budget_usage_pct}%</div></div>
+          <div class="metric"><div class="label">현재 미실현손익</div><div class="value">${fmtPct(mdd.portfolio_unrealized_return_pct)}</div></div>
+          <div class="metric"><div class="label">한도</div><div class="value">${mdd.mdd_limit_pct}%</div></div>
+        </div><p class="muted rm-note">${esc(mdd.note)}</p>`
+      : '<p class="muted">MDD 예산 데이터 없음</p>';
+
+    const sizingHtml = (re.position_sizing || []).map(renderPositionSizing).join('')
+      || '<p class="muted">보유 종목 없음</p>';
+
+    const conc = re.concentration || [];
+    const concHtml = conc.length
+      ? conc.map(c => `<div class="pos"><span class="pos-main">${esc(c.name)}</span>
+          <span class="${c.weight_pct >= c.threshold_pct ? 'negative' : ''}">${c.weight_pct.toFixed(1)}% <span class="pos-sub">(기준 ${c.threshold_pct}%)</span></span></div>`).join('')
+      : '<p class="muted">보유 종목 없음</p>';
+
+    const corr = re.correlation || {};
+    const flagged = corr.flagged_pairs || [];
+    const corrHtml = flagged.length
+      ? `<div class="rm-scroll"><table class="rm-table"><thead><tr><th>종목A</th><th>종목B</th><th class="rm-num">상관계수</th></tr></thead>
+          <tbody>${flagged.map(f => `<tr><td>${esc(f.symbol_a)}</td><td>${esc(f.symbol_b)}</td><td class="rm-num">${f.correlation.toFixed(3)}</td></tr>`).join('')}</tbody>
+        </table></div><p class="muted rm-note">기준 ${corr.flag_threshold} 이상, 최근 ${corr.lookback_days}일 수익률 기준. "비슷하게 움직인다"는 사실만 — 매도 제안 아님.</p>`
+      : `<p class="muted">${esc(corr.note || `상관계수 ${corr.flag_threshold || 0.7} 이상인 쌍 없음`)}</p>`;
+
+    const costRows = re.cost_adjusted || [];
+    const costHtml = costRows.length
+      ? costRows.map(c => `<div class="pos"><span class="pos-main">${esc(c.name)}</span>
+          <span>${fmtPct(c.return_pct)} → <b>${fmtPct(c.cost_adjusted_return_pct)}</b> <span class="pos-sub">(비용 ${c.sell_cost_pct}%)</span></span></div>`).join('')
+      : '<p class="muted">보유 종목 없음</p>';
+
+    el.innerHTML = `
+      <p class="muted">${esc(re.note)}</p>
+      <h3>💰 신규매수 권장금액 범위 ${tag}</h3>
+      ${sizingHtml}
+      <h3 style="margin-top:14px;">📉 MDD 예산</h3>
+      ${mddHtml}
+      <h3 style="margin-top:14px;">🎯 집중도</h3>
+      ${concHtml}
+      <h3 style="margin-top:14px;">🔗 상관관계 (0.7 이상)</h3>
+      ${corrHtml}
+      <h3 style="margin-top:14px;">💸 비용 반영 후 수익률</h3>
+      ${costHtml}
+    `;
+  } catch (e) {
+    el.innerHTML = '<p class="muted">Risk Engine 데이터를 불러오지 못했습니다.</p>';
+  }
+}
+
 // ── (a) 정보성 카드: 뉴스 사건 설명. 종목별 판단/추천 없음. ──
 const NEWSCARD_FIELDS = ['market', 'name', 'event_type', 'summary', 'headlines'];
 
@@ -680,6 +776,7 @@ async function loadData() {
   await loadPnlHistory(bust);
   await loadRetiredPending(bust);
   await loadPortfolioReport(bust);
+  await loadRiskEngine(bust);
   await loadGuardrails(bust);
   await loadNewsCards(bust);
   await loadGate(bust);

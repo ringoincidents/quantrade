@@ -20,9 +20,13 @@ AI에게 넘겨 판단을 받는 경로(ask_claude_decision)와는 무관하다.
 """
 import argparse
 import json
+import math
 from datetime import datetime, timezone
 
-from analyze_lib import load_json, save_json, send_telegram
+from analyze_lib import (
+    HARD_STOP_LOSS, POSITION_WEIGHT_HARD_CAP, TRADING_COSTS,
+    get_krx_candles, get_us_candles, load_json, save_json, send_telegram,
+)
 
 REAL_PORTFOLIO_FILE = "real_portfolio.json"
 INCOME_SCHEDULE_FILE = "income_schedule.json"
@@ -42,6 +46,184 @@ THRESHOLDS = {
 # 리포트 어디에도 들어가면 안 되는 필드. self-test와 대시보드가 함께 검사한다.
 FORBIDDEN_FIELDS = ("direction", "confidence", "action", "recommendation",
                     "target_weight_pct", "signal", "buy", "sell", "score")
+
+# Risk Engine (2026-08-09, 방향성 세션 지시) — v3.0 원칙2("AI는 뭘 살지 관여,
+# 얼마나 살지는 Risk Engine이 결정")의 첫 구현. 여기도 예측/신호가 아니라
+# 산술이다 — "권장 금액"은 계산값이지 "사세요"라는 문장이 아니고, 최종
+# 매수 여부·금액은 항상 사람이 정한다. provisional=True로 두는 이유는
+# THRESHOLDS와 동일 — 사후에 결과 보고 기준을 맞추는 걸 막기 위해서다.
+RISK_ENGINE = {
+    "provisional": True,
+    "portfolio_mdd_limit_pct": -20.0,   # backtest.py SUCCESS_CRITERIA의 mdd_limit_pct와 동일 값 재사용
+    "per_trade_risk_budget_pct": 2.0,   # 1회 신규매수가 감수할 손실 예산(총자산 대비). "위험자산 20% 한도를
+                                          # 대략 10개 포지션에 분산한다"는 가정의 역산값(20%/10) — 문서화된
+                                          # 가정이며 방향성 세션이 확정 전까지 초안.
+    "single_trade_cap_pct": 30.0,       # 지시받은 값 그대로(autoexec.py의 집중도 리밸런싱 매도 상한 30%와
+                                          # 숫자는 같지만 별개 규칙 — 그쪽은 매도 상한, 이쪽은 매수 상한)
+    "position_hard_cap_pct": POSITION_WEIGHT_HARD_CAP * 100,  # 기존 analyze_lib 상한(20%) 재사용
+    "reference_vol_pct": 2.0,           # "보통 변동성"을 일간수익률 표준편차 2%로 정의(문서화된 가정) —
+                                          # 실제 변동성이 이보다 크면 포지션을 줄이고 작으면 늘리는 기준선
+    "correlation_flag_threshold": 0.7,  # 지시받은 값
+    "correlation_lookback_days": 90,    # 지시받은 값
+    "volatility_lookback_days": 20,     # 지시서 "20일 수익률 표준편차"
+}
+
+
+# ── Risk Engine: 순수 계산 (네트워크 없이 self-test 가능) ─────────────────────
+
+def calc_daily_returns(closes):
+    """종가 리스트 -> 일간 수익률(%) 리스트. 첫 봉은 기준이 없어 제외된다."""
+    return [(closes[i] - closes[i - 1]) / closes[i - 1] * 100
+            for i in range(1, len(closes)) if closes[i - 1]]
+
+
+def calc_volatility_pct(closes, window=None):
+    """최근 window일 일간수익률의 표준편차(%) — ATR 대신 이 방식을 썼다(지시서
+    "20일 수익률 표준편차 또는 ATR" 중 표준편차 쪽을 선택, TRADING_COSTS 등
+    이미 % 기반 계산이 많은 이 파일의 기존 관례와 맞춰서)."""
+    window = window or RISK_ENGINE["volatility_lookback_days"]
+    rets = calc_daily_returns(closes)[-window:]
+    if len(rets) < 2:
+        return None
+    mean = sum(rets) / len(rets)
+    var = sum((r - mean) ** 2 for r in rets) / (len(rets) - 1)
+    return math.sqrt(var)
+
+
+def calc_position_sizing(total_assets_krw, vol_pct):
+    """"이 종목을 지금 매수한다면 권장 금액 범위" — 계산값만, 매수 여부/문구 없음.
+
+    범위는 기존 HARD_STOP_LOSS(단타-5%/스윙-10%/장기-25%)별로 손절폭이
+    다르면 같은 손실예산(per_trade_risk_budget_pct)으로 살 수 있는 금액이
+    달라진다는 사실에서 나온다 — 손절이 타이트할수록(단타) 같은 예산으로
+    더 큰 금액을, 손절이 넓을수록(장기) 더 작은 금액을 감당할 수 있다.
+    변동성이 기준치(reference_vol_pct)보다 크면 그만큼 줄이고 작으면 늘린다.
+    모든 경우에 기존 상한(single_trade_cap_pct/position_hard_cap_pct 중
+    낮은 쪽)을 절대 넘지 않는다."""
+    if not total_assets_krw or vol_pct is None:
+        return None
+    ceiling_krw = total_assets_krw * min(
+        RISK_ENGINE["single_trade_cap_pct"], RISK_ENGINE["position_hard_cap_pct"]
+    ) / 100
+    budget_krw = total_assets_krw * RISK_ENGINE["per_trade_risk_budget_pct"] / 100
+    vol_factor = RISK_ENGINE["reference_vol_pct"] / max(vol_pct, 0.1)
+
+    by_strategy = {}
+    for strategy, stop_pct in HARD_STOP_LOSS.items():
+        raw_krw = budget_krw / (abs(stop_pct) / 100) * vol_factor
+        by_strategy[strategy] = round(min(raw_krw, ceiling_krw))
+
+    values = list(by_strategy.values())
+    return {
+        "recommended_range_krw": {"min": min(values), "max": max(values)},
+        "by_strategy_krw": by_strategy,
+        "ceiling_krw": round(ceiling_krw),
+        "inputs": {
+            "volatility_pct": round(vol_pct, 3),
+            "reference_vol_pct": RISK_ENGINE["reference_vol_pct"],
+            "per_trade_risk_budget_pct": RISK_ENGINE["per_trade_risk_budget_pct"],
+        },
+    }
+
+
+def calc_mdd_budget_usage(rows, total_assets_krw):
+    """전체 손실한도(-20% MDD) 대비 현재 소진율(%). 계좌 전체의 평가금액
+    가중평균 수익률을 한도로 나눈 값 — 예: 포트폴리오가 -6%이고 한도가
+    -20%면 소진율 30%. real_portfolio.json은 스냅샷이라 실제 고점 대비
+    낙폭(진짜 MDD)은 알 수 없다 — 그래서 "현재 미실현손익 기준 소진율"이라고
+    명시하고, 진짜 MDD가 아님을 필드명에도 남긴다."""
+    if not total_assets_krw:
+        return None
+    weighted_return_pct = sum(
+        (r["eval_amount_krw"] / total_assets_krw) * r["return_pct"] for r in rows
+    )
+    limit = RISK_ENGINE["portfolio_mdd_limit_pct"]
+    usage_pct = (weighted_return_pct / limit) * 100 if limit else None
+    return {
+        "portfolio_unrealized_return_pct": round(weighted_return_pct, 2),
+        "mdd_limit_pct": limit,
+        "budget_usage_pct": round(usage_pct, 1) if usage_pct is not None else None,
+        "note": ("실제 고점 대비 낙폭(진짜 MDD)이 아니라 현재 미실현손익 기준 "
+                 "소진율 — real_portfolio.json은 스냅샷이라 과거 고점을 모른다."),
+    }
+
+
+def calc_correlation(returns_a, returns_b):
+    """피어슨 상관계수. scipy/numpy 없이 직접 계산(CLAUDE.md 의존성 최소화 원칙)."""
+    n = min(len(returns_a), len(returns_b))
+    if n < 10:
+        return None
+    a, b = returns_a[-n:], returns_b[-n:]
+    mean_a, mean_b = sum(a) / n, sum(b) / n
+    cov = sum((a[i] - mean_a) * (b[i] - mean_b) for i in range(n))
+    var_a = sum((x - mean_a) ** 2 for x in a)
+    var_b = sum((x - mean_b) ** 2 for x in b)
+    denom = math.sqrt(var_a * var_b)
+    if denom == 0:
+        return None
+    return cov / denom
+
+
+def calc_correlation_matrix(returns_by_symbol):
+    """보유 종목 간 상관계수 행렬 + 임계치(0.7) 이상 쌍 목록. "비슷하게
+    움직이는 종목" 사실만 표시 — "이 중 하나 파세요" 같은 문구는 없다."""
+    symbols = list(returns_by_symbol.keys())
+    matrix = {s: {} for s in symbols}
+    flagged = []
+    for i, s1 in enumerate(symbols):
+        for s2 in symbols[i:]:
+            if s1 == s2:
+                matrix[s1][s2] = 1.0
+                continue
+            corr = calc_correlation(returns_by_symbol[s1], returns_by_symbol[s2])
+            matrix[s1][s2] = round(corr, 3) if corr is not None else None
+            matrix[s2][s1] = matrix[s1][s2]
+            if corr is not None and abs(corr) >= RISK_ENGINE["correlation_flag_threshold"]:
+                flagged.append({"symbol_a": s1, "symbol_b": s2, "correlation": round(corr, 3)})
+    flagged.sort(key=lambda f: -abs(f["correlation"]))
+    return {
+        "lookback_days": RISK_ENGINE["correlation_lookback_days"],
+        "matrix": matrix,
+        "flagged_pairs": flagged,
+        "flag_threshold": RISK_ENGINE["correlation_flag_threshold"],
+    }
+
+
+def _round_trip_cost_pct(asset_class):
+    costs = TRADING_COSTS.get(asset_class, TRADING_COSTS["stock"])
+    buy_pct = costs["fee_pct"] + costs["slippage_pct"]
+    sell_pct = costs["fee_pct"] + costs["slippage_pct"] + costs.get("sell_tax_pct", 0)
+    return buy_pct + sell_pct
+
+
+def _asset_class_for(market_country, currency):
+    if market_country == "KR" or currency == "KRW":
+        return "krx"
+    return "stock"
+
+
+def calc_cost_adjusted(rows):
+    """"총손익"/"평가손익" 옆에 병기할 "비용 반영 후" 수치. 국내주식은
+    매매수수료+증권거래세, 해외주식은 매매수수료(+환전수수료는 별도 항목이
+    없어 TRADING_COSTS["stock"]의 slippage_pct에 이미 포함된 가정치로 흡수 —
+    analyze_lib.py 원 주석 "SEC 수수료 등은 미미해 생략" 참고, 환전수수료
+    전용 항목은 이번에 새로 추가하지 않고 기존 가정을 그대로 씀).
+
+    지금 시점에 판다면 나갈 매도비용만 차감한다 — 매수비용은 이미 과거에
+    치른 것으로 보고 return_pct(평가손익률)에 다시 반영하지 않는다."""
+    out = []
+    for r in rows:
+        asset_class = _asset_class_for(r.get("market_country"), r.get("currency"))
+        costs = TRADING_COSTS.get(asset_class, TRADING_COSTS["stock"])
+        sell_cost_pct = costs["fee_pct"] + costs["slippage_pct"] + costs.get("sell_tax_pct", 0)
+        out.append({
+            "symbol": r["symbol"],
+            "name": r["name"],
+            "return_pct": r["return_pct"],
+            "sell_cost_pct": round(sell_cost_pct, 3),
+            "cost_adjusted_return_pct": round(r["return_pct"] - sell_cost_pct, 3),
+        })
+    return out
 
 
 # ── (1) 순수 계산 ────────────────────────────────────────────────────────────
@@ -341,11 +523,82 @@ def derive_months_from_dates(income):
 
 # ── 리포트 조립 ─────────────────────────────────────────────────────────────
 
-def build_report(real, income, state, today=None):
+def fetch_symbol_candles(rows, count=None):
+    """보유 종목별 일봉(종가) 조회 — 변동성/상관계수 계산용. 국내는
+    get_krx_candles(네이버, 실계좌 조회 API와 무관), 해외는 get_us_candles
+    (Yahoo/stooq)를 그대로 재사용한다 — 이미 backtest.py/analyze.py가
+    라이브 스캔·백테스트에 쓰고 있는 기존 가격 데이터 연결이라 CLAUDE.md의
+    "게이트 미통과 상태에서 새 실시간 외부 커넥터 추가 금지" 원칙과는
+    무관하다(신규 뉴스/판단류 커넥터가 아니라 이미 쓰이던 가격 소스).
+
+    조회 실패한 종목은 조용히 건너뛴다(analyze.py의 기존 관례와 동일 —
+    외부 API 장애로 전체 리포트가 죽으면 안 됨)."""
+    count = count or max(RISK_ENGINE["correlation_lookback_days"], RISK_ENGINE["volatility_lookback_days"]) + 10
+    out = {}
+    for r in rows:
+        symbol = r["symbol"]
+        asset_class = _asset_class_for(r.get("market_country"), r.get("currency"))
+        try:
+            candles = get_us_candles(symbol, count) if asset_class == "stock" else get_krx_candles(symbol, count)
+            out[symbol] = [c["close"] for c in candles]
+        except Exception as e:
+            print(f"⚠️ {symbol} 가격 이력 조회 실패(Risk Engine 변동성/상관계수 계산에서 제외): {e}")
+    return out
+
+
+def build_risk_engine(rows, total_assets_krw, symbol_closes):
+    """v3.0 원칙2 Risk Engine 클러스터 — 전부 계산·표시 전용, 예측/신호 없음.
+    symbol_closes가 비어 있으면(네트워크 없는 self-test 등) 계산 가능한
+    부분(집중도/손실률/MDD소진율/비용반영후, real_portfolio.json만으로 되는
+    것들)만 채우고 변동성 의존 항목(포지션 사이징/상관계수)은 빈 값으로
+    남긴다 — "빈 칸이 틀린 숫자보다 낫다" 원칙."""
+    symbol_closes = symbol_closes or {}
+
+    position_sizing = []
+    for r in rows:
+        closes = symbol_closes.get(r["symbol"])
+        vol_pct = calc_volatility_pct(closes) if closes else None
+        sizing = calc_position_sizing(total_assets_krw, vol_pct) if vol_pct is not None else None
+        position_sizing.append({
+            "symbol": r["symbol"], "name": r["name"],
+            "sizing": sizing,
+            "note": None if sizing else "가격 이력 조회 실패로 변동성 계산 불가 — 사이징 계산 생략",
+        })
+
+    concentration = [
+        {"symbol": r["symbol"], "name": r["name"], "weight_pct": r["weight_pct"],
+         "threshold_pct": THRESHOLDS["concentration_pct"]}
+        for r in rows
+    ]
+
+    returns_by_symbol = {
+        sym: calc_daily_returns(closes)[-RISK_ENGINE["correlation_lookback_days"]:]
+        for sym, closes in symbol_closes.items()
+    }
+    correlation = calc_correlation_matrix(returns_by_symbol) if len(returns_by_symbol) >= 2 else {
+        "lookback_days": RISK_ENGINE["correlation_lookback_days"], "matrix": {}, "flagged_pairs": [],
+        "flag_threshold": RISK_ENGINE["correlation_flag_threshold"],
+        "note": "보유 종목이 2개 미만이거나 가격 이력 조회 실패 — 상관계수 계산 생략",
+    }
+
+    return {
+        "provisional": RISK_ENGINE["provisional"],
+        "note": ("전부 계산·표시 전용이다 — 예측/신호 없음. \"권장 금액\"은 계산값이지 "
+                 "매수 지시가 아니고, 최종 매수 여부·금액은 항상 사람이 정한다."),
+        "position_sizing": position_sizing,
+        "mdd_budget": calc_mdd_budget_usage(rows, total_assets_krw),
+        "concentration": concentration,
+        "correlation": correlation,
+        "cost_adjusted": calc_cost_adjusted(rows),
+    }
+
+
+def build_report(real, income, state, today=None, symbol_closes=None):
     today = today or _today()
     snapshot = compute_positions(real)
     streaks = update_loss_streaks(snapshot["positions"], state, today)
     matches = evaluate_rules(snapshot["positions"], streaks, today)
+    risk_engine = build_risk_engine(snapshot["positions"], snapshot["total_assets_krw"], symbol_closes)
     report = {
         "generated_at": today,
         "schema": "portfolio_report_v3.2",
@@ -354,6 +607,7 @@ def build_report(real, income, state, today=None):
         "thresholds": dict(THRESHOLDS),
         "snapshot": snapshot,
         "rule_matches": matches,
+        "risk_engine": risk_engine,
         "roadmap": compute_roadmap(income),
     }
     return report, state
@@ -377,6 +631,24 @@ def format_telegram(report):
             lines.append(f"   · [{m['rule']}] {m['fact']}")
     else:
         lines.append("📐 해당하는 규칙 없음")
+
+    re_ = report.get("risk_engine") or {}
+    lines.append("")
+    tag = " [초안 기준]" if re_.get("provisional") else ""
+    lines.append(f"⚖️ Risk Engine{tag} — 계산값만, 매매 지시 아님")
+    mdd = re_.get("mdd_budget")
+    if mdd and mdd.get("budget_usage_pct") is not None:
+        lines.append(f"   · MDD 예산 소진율 {mdd['budget_usage_pct']:.1f}% "
+                     f"(현재 {mdd['portfolio_unrealized_return_pct']:+.2f}% / 한도 {mdd['mdd_limit_pct']:.0f}%)")
+    over = [c for c in re_.get("concentration", []) if c["weight_pct"] >= c["threshold_pct"]]
+    if over:
+        lines.append("   · 집중도 " + " / ".join(f"{c['name']} {c['weight_pct']:.1f}%" for c in over)
+                     + f" (기준 {THRESHOLDS['concentration_pct']:.0f}%)")
+    flagged = (re_.get("correlation") or {}).get("flagged_pairs", [])
+    if flagged:
+        lines.append(f"   · 상관계수 {re_['correlation']['flag_threshold']} 이상 {len(flagged)}쌍: "
+                     + ", ".join(f"{f['symbol_a']}-{f['symbol_b']}({f['correlation']:+.2f})" for f in flagged[:3]))
+
     rm = report["roadmap"]
     lines.append("")
     if rm.get("status") != "계산됨":
@@ -414,7 +686,10 @@ def run(args):
     income = load_json(INCOME_SCHEDULE_FILE, {"placeholder": True})
     state = load_json(STATE_FILE, {"loss_since": {}})
 
-    report, state = build_report(real, income, state)
+    snapshot_rows = compute_positions(real)["positions"]
+    symbol_closes = fetch_symbol_candles(snapshot_rows)
+
+    report, state = build_report(real, income, state, symbol_closes=symbol_closes)
     save_json(REPORT_FILE, report)
     save_json(STATE_FILE, state)
 
@@ -616,6 +891,69 @@ def run_self_test():
     for w in [f'save_json("{REAL_PORTFOLIO_FILE}', f"save_json('{REAL_PORTFOLIO_FILE}"]:
         assert w not in src, "real_portfolio.json에 쓰면 안 됨(읽기 전용)"
     print("[8] real_portfolio.json 쓰기 코드 없음 확인")
+
+    # 9) Risk Engine — 변동성/포지션 사이징: 변동성이 클수록 권장액이 작아지는지,
+    #    상한(single_trade_cap_pct/position_hard_cap_pct 중 낮은 쪽)을 절대 넘지 않는지
+    low_vol = calc_position_sizing(10_000_000, 1.0)
+    high_vol = calc_position_sizing(10_000_000, 8.0)
+    print(f"[9] 변동성 1%: {low_vol['recommended_range_krw']} / 변동성 8%: {high_vol['recommended_range_krw']}")
+    assert low_vol["recommended_range_krw"]["max"] > high_vol["recommended_range_krw"]["max"], \
+        "변동성이 클수록 권장액이 작아져야 함"
+    ceiling = 10_000_000 * min(RISK_ENGINE["single_trade_cap_pct"], RISK_ENGINE["position_hard_cap_pct"]) / 100
+    assert low_vol["ceiling_krw"] == round(ceiling)
+    assert all(v <= ceiling for v in low_vol["by_strategy_krw"].values()), "상한을 넘으면 안 됨"
+    assert "매수" not in json.dumps(low_vol, ensure_ascii=False), "계산 결과에 매매 지시 문구가 섞이면 안 됨"
+
+    # 10) Risk Engine — MDD 예산 소진율 산술 검산 (가중평균)
+    rows_mdd = [{"eval_amount_krw": 600000, "return_pct": -10.0},
+                {"eval_amount_krw": 400000, "return_pct": 0.0}]
+    budget = calc_mdd_budget_usage(rows_mdd, 1_000_000)
+    print(f"[10] MDD 소진: {budget}")
+    # 가중평균 = 0.6*(-10) + 0.4*0 = -6.0%, 한도 -20% 대비 소진율 = -6/-20*100 = 30%
+    assert budget["portfolio_unrealized_return_pct"] == -6.0
+    assert budget["budget_usage_pct"] == 30.0
+
+    # 11) Risk Engine — 상관계수: 완전 동일 시계열은 +1, 완전 반대는 -1에 가까워야 함
+    base = [1.0, -0.5, 2.0, -1.0, 0.5, 1.5, -2.0, 0.8, -0.3, 1.2, 0.4, -0.6]
+    same = calc_correlation(base, base)
+    inverse = calc_correlation(base, [-x for x in base])
+    print(f"[11] 동일 시계열 상관={same:.3f} / 반대 시계열 상관={inverse:.3f}")
+    assert abs(same - 1.0) < 1e-9
+    assert abs(inverse - (-1.0)) < 1e-9
+    matrix = calc_correlation_matrix({"A": base, "B": base, "C": [-x for x in base]})
+    flagged_syms = {(f["symbol_a"], f["symbol_b"]) for f in matrix["flagged_pairs"]}
+    print(f"[11] 임계치(0.7) 이상 쌍: {flagged_syms}")
+    assert ("A", "B") in flagged_syms and ("A", "C") in flagged_syms
+
+    # 12) Risk Engine — 비용반영후 수치: 두 경우 다 원래 수익률보다 깎이는지.
+    #     KRX(수수료0.015+슬리피지0.1+거래세0.18=0.295%)와 해외(수수료0.25+
+    #     슬리피지0.1=0.35%, 거래세는 없지만 가정 수수료율 자체가 더 높음)를
+    #     실측했더니 이 저장소의 기존 TRADING_COSTS 가정치 기준으로는 해외
+    #     쪽이 오히려 더 많이 깎인다 — "KRX가 거래세 때문에 항상 더 비싸다"는
+    #     직관과 다른 결과라 값 자체를 검산해 남긴다(기존 가정치를 바꾸지 않음).
+    rows_cost = [{"symbol": "K", "name": "국내", "return_pct": 5.0, "market_country": "KR", "currency": "KRW"},
+                 {"symbol": "U", "name": "해외", "return_pct": 5.0, "market_country": "US", "currency": "USD"}]
+    adj = calc_cost_adjusted(rows_cost)
+    krx_row = next(x for x in adj if x["symbol"] == "K")
+    us_row = next(x for x in adj if x["symbol"] == "U")
+    print(f"[12] KRX 비용반영후={krx_row['cost_adjusted_return_pct']} / 해외 비용반영후={us_row['cost_adjusted_return_pct']}")
+    assert krx_row["sell_cost_pct"] == 0.295 and us_row["sell_cost_pct"] == 0.35
+    assert krx_row["cost_adjusted_return_pct"] < krx_row["return_pct"], "비용은 항상 수익률을 깎아야 함(도움되면 버그)"
+    assert us_row["cost_adjusted_return_pct"] < us_row["return_pct"], "비용은 항상 수익률을 깎아야 함(도움되면 버그)"
+
+    # 13) Risk Engine 섹션도 예측성 필드/매매 지시 문구가 없는지(항목 5·6과 같은 규율)
+    report_with_re, _ = build_report(
+        real, {"placeholder": True}, {"loss_since": {}}, "2026-08-04",
+        symbol_closes={"A": [100 + i * 0.3 for i in range(100)], "B": [200 - i * 0.1 for i in range(100)]},
+    )
+    bad2 = scan(report_with_re)
+    print(f"[13] symbol_closes 채운 리포트 예측성 필드: {bad2 or '없음'}")
+    assert not bad2
+    assert report_with_re["risk_engine"]["position_sizing"][0]["sizing"] is not None, \
+        "가격 이력이 있으면 사이징이 계산돼야 함"
+    text2 = format_telegram(report_with_re)
+    for banned in ("매수", "매도", "파세요", "사세요", "추천", "정리하세요"):
+        assert banned not in text2, f"Risk Engine 포함 텔레그램 텍스트에 매매 지시 표현 '{banned}' 있음"
 
     print("\n모든 자체 검증 통과.")
 
