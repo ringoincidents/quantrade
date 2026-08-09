@@ -152,6 +152,28 @@
   <p class="muted">로딩 중...</p>
 </div>
 
+<!-- ===== Block 4.5: [v3.2 신규, 2026-08-09] 시장 상태 수치판 ===== -->
+<!-- "국면 판별"의 재정의 — 변동성 백분위/ADX 원값/상관계수를 값 그대로만
+     나열한다. "상승장 진입" 같은 라벨이나 색상 신호등을 만들지 않는다.
+     market_indicators.py의 audit()가 위반 시 파일 자체를 저장하지 않으므로,
+     이 파일이 존재한다는 사실 자체가 위반 없음의 1차 증거다. -->
+<div class="section-divider">시장 상태 (수치 나열, 판정 아님)</div>
+<h2>📈 현재 시장 상태 수치판</h2>
+
+<div class="card" id="marketstate-section">
+  <p class="muted">로딩 중...</p>
+</div>
+
+<!-- ===== Block 4.6: [v3.2 신규, 2026-08-09] 지표 병렬 표시판 ===== -->
+<!-- "종목 스코어링"의 재정의 — 종목별 객관적 지표를 표로만 나열하고, 합산
+     점수나 순위를 매기지 않는다. 표시 순서는 항상 원본(보유+관심종목) 순서. -->
+<div class="section-divider">종목별 지표 (병렬 나열, 순위 아님)</div>
+<h2>📊 지표 병렬 표시판</h2>
+
+<div class="card" id="indicatorboard-section">
+  <p class="muted">로딩 중...</p>
+</div>
+
 <!-- ===== Block 5: Phase 1 백테스트 게이트 판정 ===== -->
 <div class="section-divider">Phase 1 백테스트 검증 (완료)</div>
 <h2>📊 게이트 판정 요약</h2>
@@ -258,8 +280,13 @@ async function loadRealAccount(bust) {
 // 자체를 거부한다 — 나중에 누군가 경고 카드에 "이 종목 매도 추천" 같은 필드를
 // 슬쩍 얹으면 조용히 표시되는 게 아니라 눈에 띄게 실패한다.
 // 주석만으로 막으면 결국 뚫리기 때문에 런타임 가드로 둔다.
+// 2026-08-09: 시장 상태/지표 표시판 추가로 rank/phase/regime/grade/rating/color
+// 계열 필드도 같은 이유로 금지 목록에 넣는다(market_indicators.py의
+// FORBIDDEN_FIELDS와 같은 집합 — "국면"/"점수"/"순위" 단일 지표·순위 생성 금지).
 const PREDICTIVE_FIELDS = ['direction', 'confidence', 'action', 'recommendation',
-                           'target_weight_pct', 'signal', 'buy', 'sell', 'score'];
+                           'target_weight_pct', 'signal', 'buy', 'sell', 'score',
+                           'rank', 'ranking', 'phase', 'regime', 'grade', 'rating',
+                           'color', 'colour'];
 
 function assertNoPredictiveFields(obj, cardType) {
   const found = PREDICTIVE_FIELDS.filter(f => Object.prototype.hasOwnProperty.call(obj, f));
@@ -425,6 +452,75 @@ async function loadNewsCards(bust) {
   }
 }
 
+// ── [v3.2 신규, 2026-08-09] 시장 상태 수치판 + 지표 병렬 표시판 ──
+// 둘 다 화이트리스트 + assertNoPredictiveFields 이중 차단을 그대로 물려받는다.
+// 렌더러는 정렬하지 않는다 — market_indicators.json의 원본 순서(보유+관심종목
+// 순서)를 그대로 표에 옮길 뿐이다.
+const STATEBOARD_ROW_FIELDS = ['symbol', 'name', 'volatility_20d_pct',
+                               'volatility_percentile', 'adx_14', 'data_status'];
+const INDICATORBOARD_ROW_FIELDS = ['symbol', 'name', 'per', 'per_status',
+                                   'volatility_20d_pct', 'momentum_20d_pct', 'adx_14', 'data_status'];
+
+function fmtNum(v, digits, suffix) {
+  return (v === null || v === undefined) ? '-' : `${Number(v).toFixed(digits)}${suffix || ''}`;
+}
+
+async function loadMarketIndicators(bust) {
+  const stateEl = document.getElementById('marketstate-section');
+  const indEl = document.getElementById('indicatorboard-section');
+  try {
+    const d = await (await fetch('market_indicators.json' + bust)).json();
+    const sb = d.state_board || {};
+    const srows = (sb.rows || []).filter(r => assertNoPredictiveFields(r, '시장상태'));
+    const sbody = srows.map(r => {
+      const x = pick(r, STATEBOARD_ROW_FIELDS);
+      return `<tr>
+        <td>${esc(x.name)}<div class="rm-sub">${esc(x.symbol)}</div></td>
+        <td class="rm-num">${fmtNum(x.volatility_20d_pct, 2, '%')}</td>
+        <td class="rm-num">${fmtNum(x.volatility_percentile, 1)}</td>
+        <td class="rm-num">${fmtNum(x.adx_14, 1)}</td>
+        <td class="rm-sub">${esc(x.data_status || '')}</td>
+      </tr>`;
+    }).join('');
+    const corr = sb.correlation || {};
+    const corrText = (corr.avg_pairwise_correlation === null || corr.avg_pairwise_correlation === undefined)
+      ? `보유 종목 간 평균 상관계수: 계산 불가 (표본 ${corr.pair_count || 0}쌍)`
+      : `보유 종목 간 평균 상관계수: ${Number(corr.avg_pairwise_correlation).toFixed(3)} (${corr.pair_count}쌍, 최근 ${corr.window_days}거래일)`;
+    stateEl.innerHTML = `<p class="muted">생성 ${esc(d.generated_at || '-')} · ${esc(sb.note || '')}</p>
+      <div class="rm-scroll"><table class="rm-table">
+        <thead><tr><th>종목</th><th>20일 변동성</th><th>변동성 백분위</th><th>ADX(14)</th><th>비고</th></tr></thead>
+        <tbody>${sbody}</tbody></table></div>
+      <p class="muted" style="margin-top:8px;">${esc(corrText)}</p>
+      <p class="muted rm-note">※ 값의 나열이며 시장 국면에 대한 라벨이나 결론을 담지 않습니다.</p>`;
+
+    const ib = d.indicator_board || {};
+    const irows = (ib.rows || []).filter(r => assertNoPredictiveFields(r, '지표표시판'));
+    const ibody = irows.map(r => {
+      const x = pick(r, INDICATORBOARD_ROW_FIELDS);
+      const perCell = (x.per === null || x.per === undefined) ? esc(x.per_status) : esc(x.per);
+      return `<tr>
+        <td>${esc(x.name)}<div class="rm-sub">${esc(x.symbol)}</div></td>
+        <td class="rm-num">${perCell}</td>
+        <td class="rm-num">${fmtNum(x.volatility_20d_pct, 2, '%')}</td>
+        <td class="rm-num">${fmtNum(x.momentum_20d_pct, 2, '%')}</td>
+        <td class="rm-num">${fmtNum(x.adx_14, 1)}</td>
+        <td class="rm-sub">${esc(x.data_status || '')}</td>
+      </tr>`;
+    }).join('');
+    indEl.innerHTML = `<p class="muted">${esc(ib.note || '')}</p>
+      <div class="rm-scroll"><table class="rm-table">
+        <thead><tr><th>종목</th><th>PER</th><th>20일 변동성</th><th>20일 모멘텀</th><th>ADX(14)</th><th>비고</th></tr></thead>
+        <tbody>${ibody}</tbody></table></div>
+      <p class="muted rm-note">※ 나열 순서는 보유+관심종목 원본 순서이며, 합산해 하나의 값으로
+        만들거나 종목 간 우열을 매기지 않습니다. 화면에서 열 제목으로 정렬하는 건 보는 사람의 선택입니다.</p>`;
+  } catch (e) {
+    stateEl.innerHTML = `<p class="muted">시장 상태 수치판이 아직 생성되지 않았습니다
+      (market_indicators.json 없음).</p>`;
+    indEl.innerHTML = `<p class="muted">지표 병렬 표시판이 아직 생성되지 않았습니다
+      (market_indicators.json 없음).</p>`;
+  }
+}
+
 // [v3.2] 연구 종료된 매매 제안 — 기록용 표시, 상호작용 불가.
 // 승인/거절 버튼을 렌더링하지 않는다: 예측 경로가 중단돼 승인해도 집행되지
 // 않으므로, 누를 수 있게 두면 동작할 것처럼 오해를 준다.
@@ -557,6 +653,7 @@ async function loadData() {
   await loadPortfolioReport(bust);
   await loadGuardrails(bust);
   await loadNewsCards(bust);
+  await loadMarketIndicators(bust);
   await loadGate(bust);
   await loadPhase2(bust);
   await loadAutoexecStatus(bust);

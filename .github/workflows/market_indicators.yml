@@ -1,0 +1,57 @@
+name: Market State/Indicator Boards
+
+# [v3.2 활성 기능] 시장 상태 수치판 + 지표 병렬 표시판 — 국면 판별도 스코어링도
+# 아니다. 개별 계산값 나열이며, market_indicators.py의 audit()가 금지 필드/문구를
+# 발견하면 저장 자체를 거부하고(SystemExit 1) 이 잡을 실패시킨다 — "위반 시 전체
+# 반려"가 스키마 수준이 아니라 파이프라인 수준에서도 강제된다.
+#
+# news_event_cards.yml과 별개 워크플로/별개 출력 파일(market_indicators.json)이다.
+on:
+  schedule:
+    # 10:10 UTC = 19:10 KST — news_event_cards.yml(09:50 UTC)보다 20분 뒤라
+    # 커밋이 겹치지 않는다.
+    - cron: '10 10 * * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+      - name: Self-test (network-free)
+        run: python market_indicators.py --self-test
+      - name: Compute state/indicator boards
+        run: python market_indicators.py
+      - name: Verify no forbidden fields/phrases leaked
+        run: |
+          python - <<'PY'
+          import json, sys
+          from market_indicators import audit
+          d = json.load(open("market_indicators.json", encoding="utf-8"))
+          violations = audit(d)
+          if violations:
+              print("금지 필드/문구가 출력에 남아 있음:", violations); sys.exit(1)
+          print("market_indicators.json - 감사 위반 없음 확인")
+          PY
+      - name: Commit boards
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add market_indicators.json
+          git diff --quiet && git diff --staged --quiet && echo "변경 없음" && exit 0
+          git commit -m "Market state/indicator boards update"
+          for attempt in 1 2 3 4 5; do
+            if git push; then echo "push 성공 (시도 $attempt)"; exit 0; fi
+            echo "push 거부됨 - rebase 후 재시도 ($attempt/5)"
+            git pull --rebase origin main || exit 1
+            sleep $((attempt * 5))
+          done
+          echo "5회 시도 후에도 push 실패"; exit 1
