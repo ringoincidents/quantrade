@@ -23,7 +23,12 @@ def check_risk_guardrails(portfolio, total_assets):
     if total_assets <= 0:
         return violations
 
-    for p in portfolio["positions"]:
+    # 2026-08-09 방향성 세션 지시: 폐기된 코인 모의투자(asset_class == "crypto")는
+    # 대시보드 "리스크 가드레일" 경고에 노출하지 않는다. 시뮬레이션 자체(보유·손절
+    # 집행)는 건드리지 않고, 이 함수가 만드는 사용자 노출용 위반 목록에서만 뺀다.
+    non_crypto = [p for p in portfolio["positions"] if p.get("asset_class", "crypto") != "crypto"]
+
+    for p in non_crypto:
         weight = p["amount_krw"] / total_assets
         if weight >= POSITION_WEIGHT_HARD_CAP:
             violations.append({
@@ -48,7 +53,7 @@ def check_risk_guardrails(portfolio, total_assets):
 
     # 가격 조회 실패 시 손절 판정 자체가 불가능하다 — 손절이 "안 걸린" 게 아니라
     # "평가되지 못한" 상태이므로, 조용히 넘어가지 않고 가드레일 공백으로 보고한다.
-    for p in portfolio["positions"]:
+    for p in non_crypto:
         if p.get("price_lookup_failed"):
             strat = p.get("strategy_type", "스윙")
             violations.append({
@@ -89,7 +94,11 @@ def run():
             pos["current_price"] = pos.get("entry_price", 0)
             pos["current_return"] = 0
             pos["price_lookup_failed"] = True  # 가드레일 점검에서 "손절 판정 불가"로 보고
-            report.append(f"⚠️ {pos['market']} 가격 조회 실패: {e}")
+            # 2026-08-09 방향성 세션 지시: 폐기된 코인 모의투자 관련 출력은 텔레그램에
+            # 노출하지 않는다 — 시뮬레이션 상태(포지션 보유·손절 집행)는 그대로 두고
+            # "출력"만 억제한다.
+            if pos.get("asset_class", "crypto") != "crypto":
+                report.append(f"⚠️ {pos['market']} 가격 조회 실패: {e}")
 
     total_assets = portfolio["cash"] + sum(p["amount_krw"] for p in portfolio["positions"])
 
@@ -181,9 +190,13 @@ def run():
     still_holding = []
     for pos in portfolio["positions"]:
         market = pos["market"]
+        # 2026-08-09 방향성 세션 지시: 폐기된 코인 모의투자는 시뮬레이션(보유·손절
+        # 집행)은 그대로 두되, 텔레그램/대시보드에 노출되는 출력에서는 전부 뺀다.
+        is_dead_crypto = pos.get("asset_class", "crypto") == "crypto"
 
         if pos.get("conviction"):
-            report.append(f"💎 확신 보유: {market} {pos['current_return']:+.2f}% (자동매매 대상 아님)")
+            if not is_dead_crypto:
+                report.append(f"💎 확신 보유: {market} {pos['current_return']:+.2f}% (자동매매 대상 아님)")
             still_holding.append(pos)
             continue
 
@@ -199,7 +212,8 @@ def run():
                 "strategy_type": strat, "entry_date": pos["entry_date"],
                 "exit_date": today, "return_pct": ret
             })
-            report.append(f"🛑 하드손절 자동실행: {market} ({ret:+.2f}%, {strat} 기준 {threshold}% 이하)")
+            if not is_dead_crypto:
+                report.append(f"🛑 하드손절 자동실행: {market} ({ret:+.2f}%, {strat} 기준 {threshold}% 이하)")
             continue
 
         decision = decision_map.get(market)
@@ -216,9 +230,10 @@ def run():
                         "reasoning": decision.get("reasoning", "-"), "status": "waiting"
                     })
                     reason_tag = "장기전략" if strat == "장기" else ("주식" if pos.get("asset_class") in ("stock", "krx") else "대형비중")
-                    report.append(f"⏳ 매도 승인 대기 [{reason_tag}]: {market} ({pos['current_return']:+.2f}%)")
-                    report.append(f"   AI 이유: {decision.get('reasoning','-')}")
-                    report.append(f"   👉 승인 /approve {action_id} / 거절 /reject {action_id}")
+                    if not is_dead_crypto:
+                        report.append(f"⏳ 매도 승인 대기 [{reason_tag}]: {market} ({pos['current_return']:+.2f}%)")
+                        report.append(f"   AI 이유: {decision.get('reasoning','-')}")
+                        report.append(f"   👉 승인 /approve {action_id} / 거절 /reject {action_id}")
                 still_holding.append(pos)
             else:
                 # 단타/스윙(소형 비중, 코인) → 즉시 자동 매도
@@ -229,12 +244,14 @@ def run():
                     "strategy_type": strat, "entry_date": pos["entry_date"],
                     "exit_date": today, "return_pct": ret
                 })
-                report.append(f"✅ 자동 매도 [{strat}]: {market} ({ret:+.2f}%)")
-                report.append(f"   이유: {decision.get('reasoning','-')}")
+                if not is_dead_crypto:
+                    report.append(f"✅ 자동 매도 [{strat}]: {market} ({ret:+.2f}%)")
+                    report.append(f"   이유: {decision.get('reasoning','-')}")
         else:
-            report.append(f"📌 보유 유지: {market} ({days_held}일) {pos['current_return']:+.2f}%")
-            if decision:
-                report.append(f"   AI 코멘트: {decision.get('reasoning','-')}")
+            if not is_dead_crypto:
+                report.append(f"📌 보유 유지: {market} ({days_held}일) {pos['current_return']:+.2f}%")
+                if decision:
+                    report.append(f"   AI 코멘트: {decision.get('reasoning','-')}")
             still_holding.append(pos)
 
     portfolio["positions"] = still_holding
@@ -305,7 +322,9 @@ def run():
         report.append("🛡️ 규칙 위반 없음")
 
     report.append("")
-    report.append(f"💰 현금: {portfolio['cash']:,.0f}원 / 보유 {len(portfolio['positions'])}개")
+    # 보유 개수도 위에서 숨긴 코인 포지션을 빼고 세야 숫자와 실제 표시 내용이 어긋나지 않는다.
+    visible_position_count = len([p for p in portfolio["positions"] if p.get("asset_class", "crypto") != "crypto"])
+    report.append(f"💰 현금: {portfolio['cash']:,.0f}원 / 보유 {visible_position_count}개")
     waiting_count = len([a for a in pending["actions"] if a["status"] == "waiting"])
     if waiting_count:
         report.append(f"⏳ 승인 대기 {waiting_count}건 (v3.2: 예측 경로 중단으로 신규 생성 없음)")

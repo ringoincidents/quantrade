@@ -1,0 +1,7 @@
+{
+  "_note": "관심종목 목록. 사람이 수기로 입력한다(target_prices.json과 같은 패턴) — AI/코드가 채우지 않는다. news_event_cards.py가 보유종목(real_portfolio.json)과 이 목록을 합쳐 카드 생성 대상 종목을 정한다.",
+  "_fields": {
+    "symbols": "종목코드 배열. KRX는 6자리 숫자(예: '005930'), 해외는 티커(예: 'AAPL')."
+  },
+  "symbols": []
+}

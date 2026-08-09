@@ -287,7 +287,10 @@ def run():
         elif cmd == "/autoexec_reject" and len(parts) > 1:
             handle_autoexec_reject(parts[1])
         elif cmd == "/status":
-            lines = [f"- {p['market']}: {p.get('current_return',0):+.2f}% {'💎확신' if p.get('conviction') else ''}" for p in portfolio["positions"]]
+            # 2026-08-09 방향성 세션 지시: 폐기된 코인 모의투자 포지션은 /status
+            # 출력에서 제외한다 — 시뮬레이션 자체는 손대지 않고 출력만 뺀다.
+            lines = [f"- {p['market']}: {p.get('current_return',0):+.2f}% {'💎확신' if p.get('conviction') else ''}"
+                     for p in portfolio["positions"] if p.get("asset_class", "crypto") != "crypto"]
             send_telegram("📊 현재 포지션\n" + "\n".join(lines) if lines else "보유 포지션 없음")
 
     if changed:
