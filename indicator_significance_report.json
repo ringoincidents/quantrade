@@ -1,0 +1,94 @@
+{
+  "generated_at": "2026-08-09 08:35:38",
+  "instruments_used": 110,
+  "n_forward_days": 5,
+  "alpha": 0.05,
+  "bonferroni_n": 7,
+  "methodology_note": "신호일 vs 비신호일 N일 순수익률(거래비용 반영) 비교, Welch's t-test 정규근사(erf 기반, scipy 미사용). 방향 혼재 신호는 direction*forward_return 정합수익률로 단일검정. 훈련구간 보정후 유의(p<0.05)한 신호만 검증구간 재적용, 같은 방향+검증구간도 유의해야 '채택'. n<10인 구간은 표본부족으로 p값 미계산. 후보7번(캔들패턴)의 '다음날 수익률'은 방법론 통일을 위해 N=5로 일반화 — 지시서 표현과의 편차.",
+  "results": [
+    {
+      "signal": "거래량 동반 가격변동",
+      "train_n_instruments": 109,
+      "train_p_raw": 0.7146,
+      "train_p_corrected": 1.0,
+      "train_mean_diff_pct": -0.0936,
+      "val_n_instruments": null,
+      "val_p_raw": null,
+      "val_p_corrected": null,
+      "val_mean_diff_pct": null,
+      "verdict": "우위 없음(폐기)"
+    },
+    {
+      "signal": "추세선 이탈",
+      "train_n_instruments": 107,
+      "train_p_raw": 0.23547,
+      "train_p_corrected": 1.0,
+      "train_mean_diff_pct": 0.4022,
+      "val_n_instruments": null,
+      "val_p_raw": null,
+      "val_p_corrected": null,
+      "val_mean_diff_pct": null,
+      "verdict": "우위 없음(폐기)"
+    },
+    {
+      "signal": "이동평균선 배열(정배열/역배열)",
+      "train_n_instruments": 110,
+      "train_p_raw": 0.01283,
+      "train_p_corrected": 0.08984,
+      "train_mean_diff_pct": 0.7261,
+      "val_n_instruments": null,
+      "val_p_raw": null,
+      "val_p_corrected": null,
+      "val_mean_diff_pct": null,
+      "verdict": "우위 없음(폐기)"
+    },
+    {
+      "signal": "볼린저밴드 상/하단 터치+밴드폭",
+      "train_n_instruments": 107,
+      "train_p_raw": 0.8499,
+      "train_p_corrected": 1.0,
+      "train_mean_diff_pct": -0.0624,
+      "val_n_instruments": null,
+      "val_p_raw": null,
+      "val_p_corrected": null,
+      "val_mean_diff_pct": null,
+      "verdict": "우위 없음(폐기)"
+    },
+    {
+      "signal": "RSI 다이버전스",
+      "train_n_instruments": 109,
+      "train_p_raw": 0.00787,
+      "train_p_corrected": 0.05511,
+      "train_mean_diff_pct": -0.7881,
+      "val_n_instruments": null,
+      "val_p_raw": null,
+      "val_p_corrected": null,
+      "val_mean_diff_pct": null,
+      "verdict": "우위 없음(폐기)"
+    },
+    {
+      "signal": "피보나치 되돌림 레벨 근접도",
+      "train_n_instruments": 109,
+      "train_p_raw": 0.53863,
+      "train_p_corrected": 1.0,
+      "train_mean_diff_pct": -0.148,
+      "val_n_instruments": null,
+      "val_p_raw": null,
+      "val_p_corrected": null,
+      "val_mean_diff_pct": null,
+      "verdict": "우위 없음(폐기)"
+    },
+    {
+      "signal": "캔들 패턴(장대양봉/음봉,긴꼬리도지)",
+      "train_n_instruments": 110,
+      "train_p_raw": 0.2484,
+      "train_p_corrected": 1.0,
+      "train_mean_diff_pct": 0.21,
+      "val_n_instruments": null,
+      "val_p_raw": null,
+      "val_p_corrected": null,
+      "val_mean_diff_pct": null,
+      "verdict": "우위 없음(폐기)"
+    }
+  ]
+}
