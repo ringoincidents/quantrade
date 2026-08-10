@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from analyze_lib import *
 
 PORTFOLIO_FILE = "portfolio.json"
@@ -331,6 +331,13 @@ def run():
 
     last_report = {
         "date": today,
+        # 2026-08-10 방향성 세션 지시: 대시보드 기준시점 불일치 최소 조치.
+        # "date"는 날짜만이라 가드레일 판정이 이 daily 실행(1일 1회) 기준인지
+        # 구분이 안 된다 — check_updates.py의 refresh_last_report()는 이 필드를
+        # 갱신하지 않는다(positions/cash/pending만 갱신) — guardrail_violations는
+        # 여기 analyze.py의 daily 실행에서만 계산되므로, 이 값이 곧 그 판정
+        # 시점이다. real_portfolio.json의 synced_at과 같은 ISO+UTC 패턴.
+        "generated_at": datetime.now(timezone.utc).isoformat(),
         "schema_version": "v3.2",
         # 예측 비활성 상태를 대시보드가 판별할 수 있게 명시적으로 싣는다.
         "prediction_enabled": PREDICTION_ENABLED,

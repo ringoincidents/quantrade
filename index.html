@@ -249,6 +249,27 @@ function fmtPct(v) {
   return `${n >= 0 ? '+' : ''}${n.toFixed(2)}%`;
 }
 
+// ── [2026-08-10 방향성 세션 지시] 대시보드 기준시점 불일치 최소 조치 ──
+// 패널마다 데이터 소스/갱신 주기가 다르다(예: real_portfolio.json은 4x/일,
+// portfolio_report.json은 주 1회) — 값을 맞추려 하지 않고 "기준: YYYY-MM-DD
+// HH:MM"으로 각자의 실제 시점을 그대로 보여주는 게 이 조치의 목표다. 판단
+// 문구 없이 타임스탬프 사실만 표시한다.
+function fmtBasis(v) {
+  if (!v) return '-';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return `${v} (시각 미기록)`;
+  let s = v;
+  // "YYYY-MM-DD HH:MM[:SS]"(오프셋 없음)은 이 저장소 관례상 UTC naive 값이다
+  // (GitHub Actions 러너 기본 시간대) — 브라우저 로컬로 잘못 해석되지 않도록
+  // 명시적으로 UTC로 파싱한다.
+  if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}(:\d{2})?$/.test(s)) {
+    s = s.replace(' ', 'T') + 'Z';
+  }
+  const d = new Date(s);
+  if (isNaN(d.getTime())) return String(v);
+  const pad = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
 async function loadRealAccount(bust) {
   try {
     const realResp = await fetch('real_portfolio.json' + bust);
@@ -262,10 +283,11 @@ async function loadRealAccount(bust) {
     document.getElementById('real-section').style.display = 'block';
 
     const realTotal = (real.cash || 0) + positions.reduce((s, p) => s + (p.eval_amount_krw || 0), 0);
-    const syncedAt = real.synced_at ? new Date(real.synced_at).toLocaleString('ko-KR') : '-';
     document.getElementById('real-summary').innerHTML =
       `💰 총자산 약 ${Math.round(realTotal).toLocaleString()}원 &nbsp;|&nbsp; 현금 ${Math.round(real.cash || 0).toLocaleString()}원` +
-      `<div class="sync-note">마지막 동기화: ${syncedAt} (수동 실행 시에만 갱신됨)</div>`;
+      // sync_real.yml이 2026-08-02부터 4x/일 스케줄로도 도므로 "수동 실행 시에만"은
+      // 더 이상 사실이 아니다 — 실제 갱신 방식을 정확히 적는다.
+      `<div class="sync-note">기준: ${fmtBasis(real.synced_at)} (4x/일 자동 동기화 + 수동 실행 시)</div>`;
 
     // 종목 리스트는 데이터만 있으면 항상 렌더링한다 - 아래 Chart.js 렌더링이
     // (CDN 차단 등으로) 실패해도 이 목록까지 같이 사라지면 안 되므로 먼저 그린다.
@@ -358,13 +380,16 @@ async function loadPnlHistory(bust) {
   const autoData = [...histPoints.map(() => null), ...autoRecords.map(r => r.valuation_pnl_krw)];
   const boundaryIdx = histPoints.length - 1; // 마지막 정적 구간 지점 = 구분선 위치
 
+  const latestAuto = autoRecords.at(-1);
+  const pnlBasis = latestAuto ? fmtBasis(latestAuto.synced_at || latestAuto.date) : fmtBasis(boundaryDate);
   el.innerHTML = `<canvas id="pnlHistoryChart"></canvas>
     <p class="muted" style="margin-top:10px; margin-bottom:0;">
       <b>${esc(boundaryDate)} 이전(회색): 총손익</b>(실현손익+배당+이자, historical_pnl_manual.json 정적 기록) ·
       <b>${esc(boundaryDate)} 이후(청록): 평가손익</b>(미실현, portfolio_pnl_history.json 매일 자동 갱신) —
       <b>서로 다른 지표입니다.</b> 배당·이자는 토스 API에 조회 엔드포인트가 없어 자동구간에는 포함되지 않습니다.
       ${autoRecords.length === 0 ? '<br>자동구간 기록이 아직 없습니다 (2026-08-09부터 시작).' : ''}
-    </p>`;
+    </p>
+    <p class="muted sync-note" style="margin-bottom:0;">기준(자동구간 최신 지점): ${pnlBasis}</p>`;
 
   try {
     const boundaryLinePlugin = {
@@ -484,14 +509,16 @@ async function loadGuardrails(bust) {
         (다음 daily 실행 후 표시됩니다)</p>`;
       return;
     }
+    const basisLine = `<p class="muted sync-note">기준: ${fmtBasis(lastReport.generated_at)}
+      (daily 실행 1일 1회 — 텔레그램 승인/거절로 보유종목이 바뀌어도 이 판정 자체는 다음 daily 실행 때 갱신)</p>`;
     if (violations.length === 0) {
       el.innerHTML = `<p class="ok-line">✅ 규칙 위반 없음</p>
-        <p class="muted">점검 항목: 종목별 비중 상한, 최소 현금 비율, 손절 판정 가능 여부</p>`;
+        <p class="muted">점검 항목: 종목별 비중 상한, 최소 현금 비율, 손절 판정 가능 여부</p>${basisLine}`;
       return;
     }
     el.innerHTML = `<p class="muted">규칙 위반 ${violations.length}건 — 사실만 표시하며,
       어떤 종목을 사거나 팔라는 제안은 포함하지 않습니다.</p>`
-      + violations.map(renderGuardrailCard).join('');
+      + violations.map(renderGuardrailCard).join('') + basisLine;
   } catch (e) {
     el.innerHTML = `<p class="muted">가드레일 점검 결과를 불러오지 못했습니다.</p>`;
   }
@@ -555,11 +582,14 @@ async function loadPortfolioReport(bust) {
     } else {
       rmHtml = `<p class="muted">🗺️ 배분 로드맵: ${esc(rm.status || '미입력')} — ${esc(rm.reason || '')}</p>`;
     }
-    el.innerHTML = `<p class="muted">생성 ${esc(r.generated_at)} · 총자산
+    el.innerHTML = `<p class="muted">총자산
         ${Number(s.total_assets_krw || 0).toLocaleString()}원 · 현금 ${(s.cash_pct || 0).toFixed(1)}%
         ${byC ? '· ' + byC : ''}</p>
       ${rows}${matchHtml}${rmHtml}
-      <p class="muted" style="margin-top:10px;">※ 현황과 규칙 해당 여부만 표시합니다.
+      <p class="muted sync-note" style="margin-top:10px; margin-bottom:0;">기준: ${fmtBasis(r.generated_at)}
+        (이 리포트는 주 1회 갱신) · 계좌 스냅샷 기준: ${fmtBasis(s.synced_at)}
+        (real_portfolio.json, 4x/일) — 두 시각은 갱신 주기가 달라 서로 다른 게 정상입니다.</p>
+      <p class="muted" style="margin-top:4px;">※ 현황과 규칙 해당 여부만 표시합니다.
         매매 판단은 포함하지 않습니다.</p>`;
   } catch (e) {
     el.innerHTML = `<p class="muted">포트폴리오 리포트가 아직 생성되지 않았습니다
@@ -635,6 +665,8 @@ async function loadRiskEngine(bust) {
 
     el.innerHTML = `
       <p class="muted">${esc(re.note)}</p>
+      <p class="muted sync-note" style="margin-bottom:10px;">기준: ${fmtBasis(r.generated_at)}
+        (portfolio_report.json과 같은 파일, 주 1회 갱신 — 변동성/상관계수도 이 시점에 조회한 값)</p>
       <h3>💰 신규매수 권장금액 범위 ${tag}</h3>
       ${sizingHtml}
       <h3 style="margin-top:14px;">📉 MDD 예산</h3>
@@ -684,7 +716,8 @@ async function loadIndicatorLearning(bust) {
     el.innerHTML = `
       <p class="muted">118티커 유니버스, 훈련/검증 분리, 본페로니 보정(×${d.bonferroni_n || 7}).
         신뢰도 낮음 — 이 표는 매매 신호가 아니라 통계 검증 결과의 학습 기록입니다.
-        ${esc(d.generated_at || '')} 기준, ${d.instruments_used || 0}개 종목 반영.</p>
+        ${d.instruments_used || 0}개 종목 반영.</p>
+      <p class="muted sync-note">기준: ${fmtBasis(d.generated_at)} (workflow_dispatch 수동 실행 전용 — 스케줄 없음, 오래됐을 수 있음)</p>
       <div class="rm-scroll"><table class="rm-table">
         <thead><tr><th>지표</th><th class="rm-num">훈련 p(보정후)</th><th class="rm-num">검증 p(보정후)</th><th>결과</th></tr></thead>
         <tbody>${rows}</tbody>
@@ -721,11 +754,13 @@ async function loadNewsCards(bust) {
     const data = await (await fetch('news_event_cards.json' + bust)).json();
     const cards = data.cards || [];
     if (cards.length === 0) {
-      el.innerHTML = `<p class="muted">오늘 생성된 사건 카드가 없습니다.</p>`;
+      el.innerHTML = `<p class="muted">오늘 생성된 사건 카드가 없습니다.</p>
+        <p class="muted sync-note">기준: ${fmtBasis(data.generated_at)} (1일 1회 갱신)</p>`;
       return;
     }
-    el.innerHTML = `<p class="muted">생성일 ${esc(data.generated_at || '-')} · ${cards.length}건 —
-      <b>사실 설명이며 매매 판단이 아닙니다.</b> 방향 예측/확신도는 제공하지 않습니다.</p>`
+    el.innerHTML = `<p class="muted">${cards.length}건 —
+      <b>사실 설명이며 매매 판단이 아닙니다.</b> 방향 예측/확신도는 제공하지 않습니다.</p>
+      <p class="muted sync-note">기준: ${fmtBasis(data.generated_at)} (1일 1회 갱신)</p>`
       + cards.map(renderNewsInfoCard).join('');
   } catch (e) {
     el.innerHTML = `<p class="muted">사건 카드가 아직 생성되지 않았습니다
@@ -767,7 +802,8 @@ async function loadMarketIndicators(bust) {
     const corrText = (corr.avg_pairwise_correlation === null || corr.avg_pairwise_correlation === undefined)
       ? `보유 종목 간 평균 상관계수: 계산 불가 (표본 ${corr.pair_count || 0}쌍)`
       : `보유 종목 간 평균 상관계수: ${Number(corr.avg_pairwise_correlation).toFixed(3)} (${corr.pair_count}쌍, 최근 ${corr.window_days}거래일)`;
-    stateEl.innerHTML = `<p class="muted">생성 ${esc(d.generated_at || '-')} · ${esc(sb.note || '')}</p>
+    stateEl.innerHTML = `<p class="muted">${esc(sb.note || '')}</p>
+      <p class="muted sync-note">기준: ${fmtBasis(d.generated_at)} (1일 1회 갱신)</p>
       <div class="rm-scroll"><table class="rm-table">
         <thead><tr><th>종목</th><th>20일 변동성</th><th>변동성 백분위</th><th>ADX(14)</th><th>비고</th></tr></thead>
         <tbody>${sbody}</tbody></table></div>
@@ -789,6 +825,7 @@ async function loadMarketIndicators(bust) {
       </tr>`;
     }).join('');
     indEl.innerHTML = `<p class="muted">${esc(ib.note || '')}</p>
+      <p class="muted sync-note">기준: ${fmtBasis(d.generated_at)} (1일 1회 갱신, 시장 상태 수치판과 같은 파일)</p>
       <div class="rm-scroll"><table class="rm-table">
         <thead><tr><th>종목</th><th>PER</th><th>20일 변동성</th><th>20일 모멘텀</th><th>ADX(14)</th><th>비고</th></tr></thead>
         <tbody>${ibody}</tbody></table></div>
@@ -852,7 +889,8 @@ async function loadGate(bust) {
         <div class="metric"><div class="label">검증 샤프</div><div class="value">${val.sharpe_like ?? '-'}</div></div>
         <div class="metric"><div class="label">훈련 샤프</div><div class="value">${train.sharpe_like ?? '-'}</div></div>
       </div>
-      <p class="muted" style="margin-top:10px; margin-bottom:0;">백테스트 실행: ${bt.generated_at || '-'} · MDD는 참고용 수치(날짜축 시뮬레이션 근사치)이며 게이트 판정에는 포함되지 않음</p>
+      <p class="muted sync-note" style="margin-top:10px; margin-bottom:0;">기준(백테스트 실행): ${fmtBasis(bt.generated_at)}
+        (Phase 1 완료된 연구 — 재실행 전까지 고정값) · MDD는 참고용 수치(날짜축 시뮬레이션 근사치)이며 게이트 판정에는 포함되지 않음</p>
     `;
   } catch (e) {
     el.innerHTML = '<p class="muted">backtest_report.json을 아직 불러올 수 없습니다.</p>';
@@ -882,6 +920,7 @@ async function loadPhase2(bust) {
     }
 
     const pct = total > 0 ? Math.round((withOutcome / total) * 100) : 0;
+    const latestJudged = total > 0 ? records.map(r => r.judged_at).sort().at(-1) : null;
 
     el.innerHTML = `
       <div class="metrics-grid">
@@ -890,6 +929,7 @@ async function loadPhase2(bust) {
       </div>
       <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;"></div></div>
       <p class="waiting-note">${waitingNote}</p>
+      ${latestJudged ? `<p class="muted sync-note">기준(최근 판단 기록일): ${fmtBasis(latestJudged)} (1일 1회 갱신)</p>` : ''}
       <p class="muted" style="margin-bottom:0;">캘리브레이션 판정(고확신군 승률 비교)은 D+20 도달 후 별도 스크립트(news_event_calibration_analysis.py)로 계산 — 이 화면은 진행 상황만 보여줍니다.</p>
     `;
   } catch (e) {
@@ -917,7 +957,8 @@ async function loadAutoexecStatus(bust) {
         <span class="gate-chip ${stopped ? 'fail' : 'pass'}">${stopped ? '🛑 정지됨' : '▶️ 해제됨'}</span>
         <p>${stopped ? '규칙 기반 자동실행이 정지된 상태입니다. 판정/로깅은 계속됩니다.' : '규칙 기반 자동실행이 실행 가능한 상태입니다.'}</p>
       </div>
-      <p class="muted" style="margin-bottom:0;">마지막 상태 변경: ${st.stopped_at || '-'} (KST)
+      <p class="muted sync-note" style="margin-bottom:0;">마지막 상태 변경: ${fmtBasis(st.stopped_at)}
+        (이벤트 발생 시각 — 정기 갱신이 아니라 킬스위치를 조작한 시점)
         · ${LATENCY_NOTE}
         · RULE_BASED_AUTOEXEC_ENABLED는 GitHub Secrets/워크플로 환경변수에만 있어 대시보드에서 조회할 수 없습니다.</p>
     `;

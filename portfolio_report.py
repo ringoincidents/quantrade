@@ -270,6 +270,15 @@ def _today():
     return datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
 
+def _now_iso():
+    """생성 시각 표시용 — 날짜만인 _today()와 분리한다. _today()는 손실지속일수
+    등 날짜 산술(strptime "%Y-%m-%d")에 쓰이므로 형식을 바꿀 수 없다(2026-08-10
+    방향성 세션 지시: 대시보드 기준시점 불일치 최소 조치 — 이 리포트는 주 1회만
+    갱신되므로(portfolio_report.yml), 날짜만으론 "이번 주 어느 시점"인지 알 수
+    없다. real_portfolio.json의 synced_at과 같은 ISO+UTC 패턴으로 시:분까지 남긴다."""
+    return datetime.now(timezone.utc).isoformat()
+
+
 def update_loss_streaks(rows, state, today=None):
     """손실 지속일수 추적. real_portfolio.json은 스냅샷이라 '며칠째인지'를 알 수
     없어서, 임계값 이하로 처음 떨어진 날짜를 이 상태파일에 남겨 누적한다.
@@ -600,7 +609,7 @@ def build_report(real, income, state, today=None, symbol_closes=None):
     matches = evaluate_rules(snapshot["positions"], streaks, today)
     risk_engine = build_risk_engine(snapshot["positions"], snapshot["total_assets_krw"], symbol_closes)
     report = {
-        "generated_at": today,
+        "generated_at": _now_iso(),
         "schema": "portfolio_report_v3.2",
         "note": ("현황 계산 + 사전 정의 규칙 해당 여부만 담는다. 매매 판단/방향 예측/"
                  "확신도 필드는 스키마에 없다 - 누락이 아니라 설계."),
@@ -615,7 +624,13 @@ def build_report(real, income, state, today=None, symbol_closes=None):
 
 def format_telegram(report):
     s = report["snapshot"]
-    lines = [f"📋 포트폴리오 리포트 ({report['generated_at']})", ""]
+    # generated_at은 이제 ISO+UTC 풀 타임스탬프(대시보드용) — 텔레그램에는
+    # 사람이 읽기 쉬운 "YYYY-MM-DD HH:MM UTC"로 줄여 보여준다.
+    try:
+        gen_dt = datetime.fromisoformat(report["generated_at"]).strftime("%Y-%m-%d %H:%M UTC")
+    except (ValueError, TypeError):
+        gen_dt = report.get("generated_at", "-")
+    lines = [f"📋 포트폴리오 리포트 ({gen_dt})", ""]
     lines.append(f"총자산 {s['total_assets_krw']:,.0f}원 · 현금 {s['cash_pct']:.1f}% · 보유 {s['position_count']}종목")
     if s["weight_by_country_pct"]:
         lines.append("자산군: " + " / ".join(f"{k} {v:.1f}%" for k, v in s["weight_by_country_pct"].items()))

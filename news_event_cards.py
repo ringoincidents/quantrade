@@ -29,7 +29,7 @@
 import argparse
 import json
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 
 import requests
 
@@ -248,7 +248,10 @@ def build_card(market, name, headlines, judgment):
 # ── 실행 ─────────────────────────────────────────────────────────────────
 
 def run(args):
-    today = datetime.now().strftime("%Y-%m-%d")
+    # 2026-08-10 방향성 세션 지시: 대시보드 기준시점 불일치 최소 조치 — 날짜만으론
+    # 이 파일의 갱신 주기(1일 1회)를 다른 패널과 비교할 수 없다. 시:분까지 담는다
+    # (real_portfolio.json의 synced_at과 같은 ISO+UTC 패턴).
+    generated_at = datetime.now(timezone.utc).isoformat()
     cards, stripped_total = [], []
     universe = build_universe()
     print(f"대상 종목(보유+관심) {len(universe)}건: {[u['symbol'] for u in universe]}")
@@ -284,7 +287,7 @@ def run(args):
         print(f"📄 {symbol} [{card['event_type']}] {card['summary'][:60]}")
 
     out = {
-        "generated_at": today,
+        "generated_at": generated_at,
         "schema": "explanation_only_v3.2",
         "note": ("사실 설명 전용(뉴스 사건 + 정량 이상행동). 방향 예측/확신도/매매 제안 "
                  "필드가 스키마에 없다 - 누락이 아니라 설계(CLAUDE.md v3.2). 대상은 "
