@@ -33,7 +33,7 @@
 명시했기 때문에 더 엄격한 동작을 쓴다).
 """
 import argparse
-from datetime import datetime
+from datetime import datetime, timezone
 
 from analyze_lib import calc_adx, load_json, save_json
 from news_event_cards import build_universe, fetch_candles_for_anomaly as fetch_candles
@@ -224,7 +224,12 @@ def audit(obj, path="report"):
 
 
 def build_report():
-    today = datetime.now().strftime("%Y-%m-%d")
+    # 2026-08-10 방향성 세션 지시: 대시보드 기준시점 불일치 최소 조치 —
+    # 날짜만으론 패널 간 신선도 차이(동기화 4x/일 vs 이 파일 1일 1회)가
+    # 안 보인다. 시:분까지 담아 프런트가 "기준: YYYY-MM-DD HH:MM"으로
+    # 그대로 표시할 수 있게 한다. UTC ISO로 저장하고(real_portfolio.json의
+    # synced_at과 같은 패턴), 타임존 변환은 대시보드(브라우저 로컬)에서 한다.
+    generated_at = datetime.now(timezone.utc).isoformat()
     real = load_json(REAL_PORTFOLIO_FILE, {"positions": []})
     real_positions = real.get("positions", [])
     universe = build_universe()  # 보유 + 관심종목 (news_event_cards와 동일 유니버스)
@@ -234,7 +239,7 @@ def build_report():
         candles_by_symbol[u["symbol"]] = _fetch(u["symbol"], u["market_country"])
 
     return {
-        "generated_at": today,
+        "generated_at": generated_at,
         "schema": "market_indicators_v3.2",
         "note": ("개별 계산값을 항목별로만 나열합니다. 지표들을 하나로 합치지 않고, "
                  "종목 간 우열을 매겨 배열하지 않으며, 색을 이용한 강조도 하지 않습니다. "
