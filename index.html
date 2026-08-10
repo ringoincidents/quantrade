@@ -157,6 +157,20 @@
   <p class="muted">로딩 중...</p>
 </div>
 
+<!-- ===== Block 2.6: [2026-08-09 신규] 보조지표 학습 레이어 — 신호 아님 ===== -->
+<!-- indicator_significance_test.py의 118티커 통계 검증 결과. 지시서 §4
+     "전부 우위 없음 → 대시보드는 전 지표 학습 레이어(숫자+해석+신뢰도 낮음
+     명시)로만 구성, 신호 문구 일체 배제"를 그대로 적용 — "신호"라는 단어
+     자체를 화면 문구에 쓰지 않고, 렌더러도 신호명 필드를 "indicator"로
+     바꿔치기해서 예측성 필드 가드(PREDICTIVE_FIELDS의 "signal")에 우연히
+     걸리는 일이 없게 했다(값은 그저 지표 이름일 뿐 매매 신호가 아니므로). -->
+<div class="section-divider">보조지표 학습 레이어 (신호 아님)</div>
+<h2>📚 118티커 통계 검증 결과</h2>
+
+<div class="card" id="indicatorlearning-section">
+  <p class="muted">로딩 중...</p>
+</div>
+
 <!-- ===== Block 3: [v3.2 신규] 보호적 경고 — 규칙 위반 사실만 ===== -->
 <!-- 이 블록은 정보성 카드(Block 4)와 코드/템플릿 레벨에서 분리돼 있다.
      렌더러(renderGuardrailCard)는 허용 필드 화이트리스트만 읽고, 예측성 필드가
@@ -637,6 +651,53 @@ async function loadRiskEngine(bust) {
   }
 }
 
+// ── [2026-08-09] 보조지표 학습 레이어. indicator_significance_test.py의
+// 118티커 검증 결과를 숫자+해석으로만 보여준다 — "신호"라는 단어를 화면
+// 문구에 쓰지 않고, "채택"이어도 "그러니 사세요/파세요" 문장은 없다.
+// 원본 필드명 "signal"(지표 이름일 뿐)이 PREDICTIVE_FIELDS 가드에 우연히
+// 걸리지 않도록 렌더 전에 "indicator"로 바꿔치기한다.
+const LEARNING_FIELDS = ['indicator', 'train_n_instruments', 'train_p_corrected',
+                         'train_mean_diff_pct', 'val_p_corrected', 'val_mean_diff_pct', 'verdict_label'];
+
+function renderLearningRow(raw) {
+  const remapped = { indicator: raw.signal, train_n_instruments: raw.train_n_instruments,
+    train_p_corrected: raw.train_p_corrected, train_mean_diff_pct: raw.train_mean_diff_pct,
+    val_p_corrected: raw.val_p_corrected, val_mean_diff_pct: raw.val_mean_diff_pct,
+    verdict_label: raw.verdict === '채택' ? '검증구간까지 통과' : '우위 관측 안 됨' };
+  if (!assertNoPredictiveFields(remapped, '보조지표 학습')) return '';
+  const r = pick(remapped, LEARNING_FIELDS);
+  const passedTrain = r.train_p_corrected !== null && r.train_p_corrected < 0.05;
+  return `<tr>
+    <td>${esc(r.indicator)}</td>
+    <td class="rm-num">${r.train_p_corrected === null ? '표본부족' : r.train_p_corrected.toFixed(4)}</td>
+    <td class="rm-num">${r.val_p_corrected === null ? (passedTrain ? '표본부족' : '검증 미실시') : r.val_p_corrected.toFixed(4)}</td>
+    <td class="rm-sub">${esc(r.verdict_label)}</td>
+  </tr>`;
+}
+
+async function loadIndicatorLearning(bust) {
+  const el = document.getElementById('indicatorlearning-section');
+  try {
+    const d = await (await fetch('indicator_significance_report.json' + bust)).json();
+    const rows = (d.results || []).map(renderLearningRow).join('');
+    const anyPassed = (d.results || []).some(r => r.verdict === '채택');
+    el.innerHTML = `
+      <p class="muted">118티커 유니버스, 훈련/검증 분리, 본페로니 보정(×${d.bonferroni_n || 7}).
+        신뢰도 낮음 — 이 표는 매매 신호가 아니라 통계 검증 결과의 학습 기록입니다.
+        ${esc(d.generated_at || '')} 기준, ${d.instruments_used || 0}개 종목 반영.</p>
+      <div class="rm-scroll"><table class="rm-table">
+        <thead><tr><th>지표</th><th class="rm-num">훈련 p(보정후)</th><th class="rm-num">검증 p(보정후)</th><th>결과</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>
+      <p class="muted rm-note">${anyPassed
+        ? '검증구간까지 통과한 지표가 있습니다 — 그 자체로 매매 판단을 의미하지 않습니다.'
+        : '이번 검증에서는 훈련구간 유의 기준을 넘은 지표가 없습니다(본페로니 보정 후 p<0.05 없음) — "우위 없음"도 유효한 결론입니다.'}</p>
+    `;
+  } catch (e) {
+    el.innerHTML = '<p class="muted">보조지표 검증 결과가 아직 없습니다 (indicator_significance_report.json 없음 — workflow_dispatch로 실행 필요).</p>';
+  }
+}
+
 // ── (a) 정보성 카드: 뉴스 사건 설명. 종목별 판단/추천 없음. ──
 const NEWSCARD_FIELDS = ['market', 'name', 'event_type', 'summary', 'headlines'];
 
@@ -873,6 +934,7 @@ async function loadData() {
   await loadRetiredPending(bust);
   await loadPortfolioReport(bust);
   await loadRiskEngine(bust);
+  await loadIndicatorLearning(bust);
   await loadGuardrails(bust);
   await loadNewsCards(bust);
   await loadMarketIndicators(bust);
