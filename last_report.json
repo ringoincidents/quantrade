@@ -18,7 +18,7 @@
       "asset_class": "crypto",
       "strategy_type": "스윙",
       "amount_krw": 4354,
-      "current_return": 13.5429262394196,
+      "current_return": 14.873035066505446,
       "conviction": false
     },
     {
@@ -34,7 +34,7 @@
       "asset_class": "crypto",
       "strategy_type": "스윙",
       "amount_krw": 5775,
-      "current_return": -3.9414414414414414,
+      "current_return": -3.716216216216213,
       "conviction": false
     },
     {
@@ -42,7 +42,7 @@
       "asset_class": "crypto",
       "strategy_type": "스윙",
       "amount_krw": 3272,
-      "current_return": 3.901437371663234,
+      "current_return": 4.722792607802865,
       "conviction": false
     },
     {
@@ -50,7 +50,7 @@
       "asset_class": "crypto",
       "strategy_type": "스윙",
       "amount_krw": 879,
-      "current_return": -1.8815331010452963,
+      "current_return": -1.951219512195122,
       "conviction": false
     },
     {
@@ -58,7 +58,7 @@
       "asset_class": "crypto",
       "strategy_type": "스윙",
       "amount_krw": 835,
-      "current_return": 6.451612903225799,
+      "current_return": 8.602150537634405,
       "conviction": false
     }
   ],
