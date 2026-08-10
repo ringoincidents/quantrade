@@ -1,6 +1,6 @@
 {
-  "synced_at": "2026-08-10T02:40:09.354472+00:00",
-  "cash": 664915.924,
+  "synced_at": "2026-08-10T05:04:27.750858+00:00",
+  "cash": 664915.978,
   "positions": [
     {
       "symbol": "196170",
@@ -9,10 +9,10 @@
       "currency": "KRW",
       "quantity": "3",
       "avg_price": "298333.333333",
-      "current_price": "351500",
-      "eval_amount": 1054500.0,
-      "eval_amount_krw": 1054500.0,
-      "return_pct": 17.82
+      "current_price": "345500",
+      "eval_amount": 1036500.0,
+      "eval_amount_krw": 1036500.0,
+      "return_pct": 15.809999999999999
     },
     {
       "symbol": "NMR",
@@ -23,7 +23,7 @@
       "avg_price": "9.85",
       "current_price": "9.78",
       "eval_amount": 58.68,
-      "eval_amount_krw": 83055.672,
+      "eval_amount_krw": 83108.484,
       "return_pct": -0.7100000000000001
     },
     {
@@ -33,10 +33,10 @@
       "currency": "USD",
       "quantity": "1",
       "avg_price": "202.1986",
-      "current_price": "224.61",
-      "eval_amount": 224.61,
-      "eval_amount_krw": 317912.99400000006,
-      "return_pct": 11.08
+      "current_price": "224.79",
+      "eval_amount": 224.79,
+      "eval_amount_krw": 318370.077,
+      "return_pct": 11.17
     },
     {
       "symbol": "RIG",
@@ -45,10 +45,10 @@
       "currency": "USD",
       "quantity": "1",
       "avg_price": "5.16",
-      "current_price": "5.3",
-      "eval_amount": 5.3,
-      "eval_amount_krw": 7501.62,
-      "return_pct": 2.71
+      "current_price": "5.29",
+      "eval_amount": 5.29,
+      "eval_amount_krw": 7492.227,
+      "return_pct": 2.5100000000000002
     },
     {
       "symbol": "SCHD",
@@ -57,10 +57,10 @@
       "currency": "USD",
       "quantity": "56.332105",
       "avg_price": "32.708131",
-      "current_price": "33.92",
-      "eval_amount": 1910.785001,
-      "eval_amount_krw": 2704525.0904154,
-      "return_pct": 3.6999999999999997
+      "current_price": "33.95",
+      "eval_amount": 1912.474964,
+      "eval_amount_krw": 2708638.2915132,
+      "return_pct": 3.7900000000000005
     }
   ]
 }
