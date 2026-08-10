@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-09",
+  "generated_at": "2026-08-10",
   "schema": "market_indicators_v3.2",
   "note": "개별 계산값을 항목별로만 나열합니다. 지표들을 하나로 합치지 않고, 종목 간 우열을 매겨 배열하지 않으며, 색을 이용한 강조도 하지 않습니다. 표의 나열 순서는 원본(보유+관심종목) 그대로이며 계산값 크기로 다시 배열하지 않습니다.",
   "state_board": {
@@ -8,10 +8,10 @@
       {
         "symbol": "196170",
         "name": "알테오젠",
-        "volatility_20d_pct": null,
-        "volatility_percentile": null,
-        "adx_14": null,
-        "data_status": "시세 조회 실패"
+        "volatility_20d_pct": 6.51,
+        "volatility_percentile": 96.4,
+        "adx_14": 74.6,
+        "data_status": null
       },
       {
         "symbol": "NMR",
@@ -47,9 +47,9 @@
       }
     ],
     "correlation": {
-      "avg_pairwise_correlation": 0.139,
-      "pair_count": 6,
-      "symbol_count": 4,
+      "avg_pairwise_correlation": 0.058,
+      "pair_count": 10,
+      "symbol_count": 5,
       "window_days": 60
     }
   },
@@ -61,10 +61,10 @@
         "name": "알테오젠",
         "per": null,
         "per_status": "데이터 소스 미연결",
-        "volatility_20d_pct": null,
-        "momentum_20d_pct": null,
-        "adx_14": null,
-        "data_status": "시세 조회 실패"
+        "volatility_20d_pct": 6.51,
+        "momentum_20d_pct": 39.59,
+        "adx_14": 74.6,
+        "data_status": null
       },
       {
         "symbol": "NMR",
