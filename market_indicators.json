@@ -1,55 +1,63 @@
 {
-  "generated_at": "2026-08-10",
+  "generated_at": "2026-08-11T11:02:53.763499+00:00",
   "schema": "market_indicators_v3.2",
   "note": "개별 계산값을 항목별로만 나열합니다. 지표들을 하나로 합치지 않고, 종목 간 우열을 매겨 배열하지 않으며, 색을 이용한 강조도 하지 않습니다. 표의 나열 순서는 원본(보유+관심종목) 그대로이며 계산값 크기로 다시 배열하지 않습니다.",
   "state_board": {
     "note": "지금 값 / 과거 분포에서의 위치만 표시합니다. 라벨을 붙이지 않습니다.",
     "rows": [
       {
+        "symbol": "004000",
+        "name": "롯데정밀화학",
+        "volatility_20d_pct": 2.63,
+        "volatility_percentile": 56.4,
+        "adx_14": 22.5,
+        "data_status": null
+      },
+      {
         "symbol": "196170",
         "name": "알테오젠",
-        "volatility_20d_pct": 6.51,
-        "volatility_percentile": 96.4,
-        "adx_14": 74.6,
+        "volatility_20d_pct": 6.67,
+        "volatility_percentile": 100.0,
+        "adx_14": 73.8,
         "data_status": null
       },
       {
         "symbol": "NMR",
         "name": "노무라 홀딩스(ADR)",
-        "volatility_20d_pct": 1.83,
-        "volatility_percentile": 50.7,
-        "adx_14": 12.7,
+        "volatility_20d_pct": 1.85,
+        "volatility_percentile": 55.4,
+        "adx_14": 9.6,
         "data_status": null
       },
       {
         "symbol": "NVDA",
         "name": "엔비디아",
-        "volatility_20d_pct": 2.6,
-        "volatility_percentile": 80.7,
-        "adx_14": 36.6,
+        "volatility_20d_pct": 2.56,
+        "volatility_percentile": 76.8,
+        "adx_14": 25.5,
         "data_status": null
       },
       {
         "symbol": "RIG",
         "name": "트랜스오션",
-        "volatility_20d_pct": 2.5,
-        "volatility_percentile": 11.8,
-        "adx_14": 17.4,
+        "volatility_20d_pct": 3.07,
+        "volatility_percentile": 44.3,
+        "adx_14": 36.2,
         "data_status": null
       },
       {
         "symbol": "SCHD",
         "name": "SCHD",
-        "volatility_20d_pct": 0.82,
-        "volatility_percentile": 85.7,
-        "adx_14": 24.5,
+        "volatility_20d_pct": 0.83,
+        "volatility_percentile": 90.4,
+        "adx_14": 35.1,
         "data_status": null
       }
     ],
     "correlation": {
-      "avg_pairwise_correlation": 0.058,
-      "pair_count": 10,
-      "symbol_count": 5,
+      "avg_pairwise_correlation": 0.056,
+      "pair_count": 15,
+      "symbol_count": 6,
       "window_days": 60
     }
   },
@@ -57,13 +65,23 @@
     "note": "종목별 지표를 병렬로만 나열합니다. 정렬은 표시 화면에서 사람이 합니다.",
     "rows": [
       {
+        "symbol": "004000",
+        "name": "롯데정밀화학",
+        "per": null,
+        "per_status": "데이터 소스 미연결",
+        "volatility_20d_pct": 2.63,
+        "momentum_20d_pct": 5.22,
+        "adx_14": 22.5,
+        "data_status": null
+      },
+      {
         "symbol": "196170",
         "name": "알테오젠",
         "per": null,
         "per_status": "데이터 소스 미연결",
-        "volatility_20d_pct": 6.51,
-        "momentum_20d_pct": 39.59,
-        "adx_14": 74.6,
+        "volatility_20d_pct": 6.67,
+        "momentum_20d_pct": 34.48,
+        "adx_14": 73.8,
         "data_status": null
       },
       {
@@ -71,9 +89,9 @@
         "name": "노무라 홀딩스(ADR)",
         "per": null,
         "per_status": "데이터 소스 미연결",
-        "volatility_20d_pct": 1.83,
-        "momentum_20d_pct": 3.0,
-        "adx_14": 12.7,
+        "volatility_20d_pct": 1.85,
+        "momentum_20d_pct": 2.08,
+        "adx_14": 9.6,
         "data_status": null
       },
       {
@@ -81,9 +99,9 @@
         "name": "엔비디아",
         "per": null,
         "per_status": "데이터 소스 미연결",
-        "volatility_20d_pct": 2.6,
-        "momentum_20d_pct": 6.16,
-        "adx_14": 36.6,
+        "volatility_20d_pct": 2.56,
+        "momentum_20d_pct": 6.89,
+        "adx_14": 25.5,
         "data_status": null
       },
       {
@@ -91,9 +109,9 @@
         "name": "트랜스오션",
         "per": null,
         "per_status": "데이터 소스 미연결",
-        "volatility_20d_pct": 2.5,
-        "momentum_20d_pct": 1.15,
-        "adx_14": 17.4,
+        "volatility_20d_pct": 3.07,
+        "momentum_20d_pct": 6.52,
+        "adx_14": 36.2,
         "data_status": null
       },
       {
@@ -101,9 +119,9 @@
         "name": "SCHD",
         "per": null,
         "per_status": "데이터 소스 미연결",
-        "volatility_20d_pct": 0.82,
-        "momentum_20d_pct": 4.63,
-        "adx_14": 24.5,
+        "volatility_20d_pct": 0.83,
+        "momentum_20d_pct": 5.01,
+        "adx_14": 35.1,
         "data_status": null
       }
     ]
