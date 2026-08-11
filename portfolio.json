@@ -7,8 +7,8 @@
       "entry_date": "2026-07-29",
       "expected_days": 7,
       "amount_krw": 33333.333333333336,
-      "current_price": 1411.0,
-      "current_return": -1.6039051603905161
+      "current_price": 1410.0,
+      "current_return": -1.6736401673640167
     },
     {
       "market": "KRW-PENGU",
@@ -18,8 +18,8 @@
       "entry_date": "2026-07-30",
       "expected_days": 11,
       "amount_krw": 4354,
-      "current_price": 9.5,
-      "current_return": 14.873035066505446
+      "current_price": 9.18,
+      "current_return": 11.003627569528419
     },
     {
       "market": "KRW-WIF",
@@ -29,8 +29,8 @@
       "entry_date": "2026-07-31",
       "expected_days": 11,
       "amount_krw": 3557,
-      "current_price": 201.0,
-      "current_return": -0.49504950495049505
+      "current_price": 197.0,
+      "current_return": -2.4752475247524752
     },
     {
       "market": "KRW-LAYER",
@@ -40,8 +40,8 @@
       "entry_date": "2026-07-31",
       "expected_days": 11,
       "amount_krw": 5775,
-      "current_price": 85.5,
-      "current_return": -3.716216216216213
+      "current_price": 84.2,
+      "current_return": -5.180180180180174
     },
     {
       "market": "KRW-ANKR",
@@ -51,8 +51,8 @@
       "entry_date": "2026-08-01",
       "expected_days": 11,
       "amount_krw": 3272,
-      "current_price": 5.1,
-      "current_return": 4.722792607802865
+      "current_price": 4.92,
+      "current_return": 1.0266940451745343
     },
     {
       "market": "KRW-USD1",
@@ -62,8 +62,8 @@
       "entry_date": "2026-08-02",
       "expected_days": 11,
       "amount_krw": 879,
-      "current_price": 1407.0,
-      "current_return": -1.951219512195122
+      "current_price": 1410.0,
+      "current_return": -1.7421602787456445
     },
     {
       "market": "KRW-DOOD",
@@ -73,8 +73,8 @@
       "entry_date": "2026-08-02",
       "expected_days": 11,
       "amount_krw": 835,
-      "current_price": 2.02,
-      "current_return": 8.602150537634405
+      "current_price": 1.96,
+      "current_return": 5.376344086021498
     }
   ]
 }
