@@ -1,6 +1,6 @@
 {
-  "synced_at": "2026-08-12T05:12:44.933464+00:00",
-  "cash": 31657.155,
+  "synced_at": "2026-08-12T08:44:59.802702+00:00",
+  "cash": 31657.173,
   "positions": [
     {
       "symbol": "004000",
@@ -9,10 +9,10 @@
       "currency": "KRW",
       "quantity": "13",
       "avg_price": "48700",
-      "current_price": "47050",
-      "eval_amount": 611650.0,
-      "eval_amount_krw": 611650.0,
-      "return_pct": -3.38
+      "current_price": "47200",
+      "eval_amount": 613600.0,
+      "eval_amount_krw": 613600.0,
+      "return_pct": -3.08
     },
     {
       "symbol": "196170",
@@ -21,10 +21,10 @@
       "currency": "KRW",
       "quantity": "3",
       "avg_price": "298333.333333",
-      "current_price": "318000",
-      "eval_amount": 954000.0,
-      "eval_amount_krw": 954000.0,
-      "return_pct": 6.59
+      "current_price": "317000",
+      "eval_amount": 951000.0,
+      "eval_amount_krw": 951000.0,
+      "return_pct": 6.25
     },
     {
       "symbol": "NMR",
@@ -33,10 +33,10 @@
       "currency": "USD",
       "quantity": "6",
       "avg_price": "9.85",
-      "current_price": "9.8",
-      "eval_amount": 58.8,
-      "eval_amount_krw": 83231.4,
-      "return_pct": -0.5
+      "current_price": "9.74",
+      "eval_amount": 58.44,
+      "eval_amount_krw": 82827.01199999999,
+      "return_pct": -1.11
     },
     {
       "symbol": "NVDA",
@@ -45,10 +45,10 @@
       "currency": "USD",
       "quantity": "1",
       "avg_price": "202.1986",
-      "current_price": "217.95",
-      "eval_amount": 217.95,
-      "eval_amount_krw": 308508.225,
-      "return_pct": 7.79
+      "current_price": "218.88",
+      "eval_amount": 218.88,
+      "eval_amount_krw": 310218.624,
+      "return_pct": 8.25
     },
     {
       "symbol": "RIG",
@@ -57,10 +57,10 @@
       "currency": "USD",
       "quantity": "40",
       "avg_price": "5.30625",
-      "current_price": "5.81",
-      "eval_amount": 232.4,
-      "eval_amount_krw": 328962.2,
-      "return_pct": 9.49
+      "current_price": "5.79",
+      "eval_amount": 231.6,
+      "eval_amount_krw": 328246.68,
+      "return_pct": 9.11
     },
     {
       "symbol": "SCHD",
@@ -69,10 +69,10 @@
       "currency": "USD",
       "quantity": "56.799361",
       "avg_price": "32.717936",
-      "current_price": "34.28",
-      "eval_amount": 1947.082095,
-      "eval_amount_krw": 2756094.7054725,
-      "return_pct": 4.77
+      "current_price": "34.24",
+      "eval_amount": 1944.81012,
+      "eval_amount_krw": 2756379.383076,
+      "return_pct": 4.65
     }
   ]
 }
