@@ -1,6 +1,6 @@
 {
-  "synced_at": "2026-08-12T08:44:59.802702+00:00",
-  "cash": 31657.173,
+  "synced_at": "2026-08-12T12:06:15.449962+00:00",
+  "cash": 5430.0,
   "positions": [
     {
       "symbol": "004000",
@@ -9,10 +9,10 @@
       "currency": "KRW",
       "quantity": "13",
       "avg_price": "48700",
-      "current_price": "47200",
-      "eval_amount": 613600.0,
-      "eval_amount_krw": 613600.0,
-      "return_pct": -3.08
+      "current_price": "47100",
+      "eval_amount": 612300.0,
+      "eval_amount_krw": 612300.0,
+      "return_pct": -3.2800000000000002
     },
     {
       "symbol": "196170",
@@ -21,10 +21,10 @@
       "currency": "KRW",
       "quantity": "3",
       "avg_price": "298333.333333",
-      "current_price": "317000",
-      "eval_amount": 951000.0,
-      "eval_amount_krw": 951000.0,
-      "return_pct": 6.25
+      "current_price": "318000",
+      "eval_amount": 954000.0,
+      "eval_amount_krw": 954000.0,
+      "return_pct": 6.59
     },
     {
       "symbol": "NMR",
@@ -33,34 +33,10 @@
       "currency": "USD",
       "quantity": "6",
       "avg_price": "9.85",
-      "current_price": "9.74",
-      "eval_amount": 58.44,
-      "eval_amount_krw": 82827.01199999999,
-      "return_pct": -1.11
-    },
-    {
-      "symbol": "NVDA",
-      "name": "엔비디아",
-      "market_country": "US",
-      "currency": "USD",
-      "quantity": "1",
-      "avg_price": "202.1986",
-      "current_price": "218.88",
-      "eval_amount": 218.88,
-      "eval_amount_krw": 310218.624,
-      "return_pct": 8.25
-    },
-    {
-      "symbol": "RIG",
-      "name": "트랜스오션",
-      "market_country": "US",
-      "currency": "USD",
-      "quantity": "40",
-      "avg_price": "5.30625",
-      "current_price": "5.79",
-      "eval_amount": 231.6,
-      "eval_amount_krw": 328246.68,
-      "return_pct": 9.11
+      "current_price": "9.75",
+      "eval_amount": 58.5,
+      "eval_amount_krw": 83136.10500000001,
+      "return_pct": -1.01
     },
     {
       "symbol": "SCHD",
@@ -69,10 +45,22 @@
       "currency": "USD",
       "quantity": "56.799361",
       "avg_price": "32.717936",
-      "current_price": "34.24",
-      "eval_amount": 1944.81012,
-      "eval_amount_krw": 2756379.383076,
-      "return_pct": 4.65
+      "current_price": "34.26",
+      "eval_amount": 1945.946107,
+      "eval_amount_krw": 2765442.39104091,
+      "return_pct": 4.71
+    },
+    {
+      "symbol": "TE",
+      "name": "T1 에너지",
+      "market_country": "US",
+      "currency": "USD",
+      "quantity": "83",
+      "avg_price": "5.62",
+      "current_price": "5.63",
+      "eval_amount": 467.29,
+      "eval_amount_krw": 664079.8377,
+      "return_pct": 0.16999999999999998
     }
   ]
 }
