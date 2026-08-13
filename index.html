@@ -212,6 +212,17 @@
   <p class="muted">로딩 중...</p>
 </div>
 
+<!-- ===== Block 4.7: [v3.2 신규, 2026-08-10] 매매 사후 점검 리포트 (Layer 3) ===== -->
+<!-- 예측이 아니라 사후 검토 — 새 AI/LLM 호출 없이 이미 계산된 값을 재사용한
+     사실 연결만 담는다. 이력(과거형)으로만 축적되는 불변 저널이라 상호작용
+     버튼이 없다 — "지금 사라"가 아니라 "이런 상태였다" 기록 화면. -->
+<div class="section-divider">매매 사후 점검 (기록, 불변)</div>
+<h2>🗒️ Layer 3 — 사후 점검 리포트</h2>
+
+<div class="card" id="postreview-section">
+  <p class="muted">로딩 중...</p>
+</div>
+
 <!-- ===== Block 5: Phase 1 백테스트 게이트 판정 ===== -->
 <div class="section-divider">Phase 1 백테스트 검증 (완료)</div>
 <h2>📊 게이트 판정 요약</h2>
@@ -839,6 +850,68 @@ async function loadMarketIndicators(bust) {
   }
 }
 
+// ── [v3.2 신규, 2026-08-10] 매매 사후 점검 리포트 (Layer 3) ──
+// post_trade_review_log.json은 append-only 저널 — 대시보드는 읽기만 하고
+// 최신순으로 나열한다. 예측성 필드 가드는 그대로 물려받는다.
+const REVIEW_FIELDS = ['id', 'generated_at', 'trigger', 'exposure_change', 'allocation_gap',
+                       'correlation_blind_spots', 'behavior_patterns', 'recent_news_links', 'note'];
+
+function renderReviewCard(raw) {
+  if (!assertNoPredictiveFields(raw, '매매 사후 점검')) return '';
+  const r = pick(raw, REVIEW_FIELDS);
+  const ec = r.exposure_change || {};
+  const ag = r.allocation_gap || {};
+  const spots = (r.correlation_blind_spots || {}).spots || [];
+  const bp = r.behavior_patterns || [];
+  const news = r.recent_news_links || [];
+
+  const changeLines = [];
+  if (ec.has_baseline) {
+    if ((ec.added_symbols || []).length) changeLines.push(`편입: ${ec.added_symbols.join(', ')}`);
+    if ((ec.removed_symbols || []).length) changeLines.push(`편출: ${ec.removed_symbols.join(', ')}`);
+    const curDelta = Object.entries(ec.by_currency_pct_delta || {})
+      .filter(([, v]) => Math.abs(v) >= 0.1).map(([k, v]) => `${k} ${v >= 0 ? '+' : ''}${v.toFixed(1)}%p`).join(', ');
+    if (curDelta) changeLines.push(`통화 노출 변화: ${curDelta}`);
+  } else {
+    changeLines.push('비교 대상 스냅샷 없음(최초 기록) — 현재 상태만 기록');
+  }
+  const curNow = Object.entries(ec.by_currency_pct_now || {}).map(([k, v]) => `${k} ${v.toFixed(1)}%`).join(', ');
+
+  const section = (icon, items, mapFn) => items.length
+    ? `<ul class="newsinfo-heads">${items.map(x => `<li>${icon} ${esc(mapFn(x))}</li>`).join('')}</ul>` : '';
+
+  return `<div class="newsinfo-card">
+    <div class="newsinfo-head">
+      <b>${esc(fmtBasis(r.generated_at))}</b>
+      <span class="newsinfo-type">${r.trigger === 'ondemand' ? '/review 요청' : '배치(변동 감지)'}</span>
+    </div>
+    <div class="newsinfo-summary">${esc(changeLines.join(' · '))}${curNow ? ` · 현재 통화 노출: ${esc(curNow)}` : ''}</div>
+    ${section('📐', ag.concentration_matches || [], m => m.fact)}
+    ${section('🔗', spots, s => s.fact)}
+    ${section('📌', bp, b => b.fact)}
+    ${section('📰', news, n => n.fact)}
+  </div>`;
+}
+
+async function loadPostTradeReview(bust) {
+  const el = document.getElementById('postreview-section');
+  try {
+    const log = await (await fetch('post_trade_review_log.json' + bust)).json();
+    const reports = (log.reports || []).slice().reverse(); // 최신순
+    if (reports.length === 0) {
+      el.innerHTML = `<p class="muted">아직 생성된 리포트가 없습니다. 텔레그램 /review로 요청하거나,
+        배치가 보유종목/비중 변동을 감지하면 자동 생성됩니다.</p>`;
+      return;
+    }
+    el.innerHTML = `<p class="muted">${reports.length}건 — "지금 사라"가 아니라 "이런 상태였다" 형태의
+      사실 기록입니다. 새 매매 판단/제안이 아니며, 생성 시점에 확정되어 이후 수정되지 않습니다.</p>`
+      + reports.map(renderReviewCard).join('');
+  } catch (e) {
+    el.innerHTML = `<p class="muted">매매 사후 점검 리포트가 아직 생성되지 않았습니다
+      (post_trade_review_log.json 없음).</p>`;
+  }
+}
+
 // [v3.2] 연구 종료된 매매 제안 — 기록용 표시, 상호작용 불가.
 // 승인/거절 버튼을 렌더링하지 않는다: 예측 경로가 중단돼 승인해도 집행되지
 // 않으므로, 누를 수 있게 두면 동작할 것처럼 오해를 준다.
@@ -979,6 +1052,7 @@ async function loadData() {
   await loadGuardrails(bust);
   await loadNewsCards(bust);
   await loadMarketIndicators(bust);
+  await loadPostTradeReview(bust);
   await loadGate(bust);
   await loadPhase2(bust);
   await loadAutoexecStatus(bust);

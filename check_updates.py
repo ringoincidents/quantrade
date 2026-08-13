@@ -103,6 +103,18 @@ def handle_unkeep(market, portfolio):
     return False
 
 
+# ── 매매 사후 점검 리포트 (Layer 3, 2026-08-10) ─────────────────────────────
+# 온디맨드 트리거 — 배치(post_trade_review.yml, 변동 있을 때만)와 같은
+# build_report()를 쓰지만, 여기는 변동 여부와 무관하게 항상 생성한다. 응답
+# 메시지는 사람이 요청한 것에 대한 답장이지 자동 푸시가 아니다(지시서 §2).
+
+def handle_review():
+    import post_trade_review
+    report = post_trade_review.run_ondemand()
+    send_telegram(post_trade_review.render_telegram(report))
+    return True
+
+
 def refresh_last_report(portfolio, pending):
     """승인/거절/keep 처리 후 웹 대시보드용 last_report.json도 최신 상태로 갱신"""
     last_report = load_json(LAST_REPORT_FILE, {})
@@ -286,6 +298,8 @@ def run():
             handle_autoexec_approve(parts[1])
         elif cmd == "/autoexec_reject" and len(parts) > 1:
             handle_autoexec_reject(parts[1])
+        elif cmd == "/review":
+            handle_review()
         elif cmd == "/status":
             # 2026-08-09 방향성 세션 지시: 폐기된 코인 모의투자 포지션은 /status
             # 출력에서 제외한다 — 시뮬레이션 자체는 손대지 않고 출력만 뺀다.

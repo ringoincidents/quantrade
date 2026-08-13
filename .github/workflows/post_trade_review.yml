@@ -1,0 +1,66 @@
+name: Post-Trade Review (Layer 3)
+
+# [v3.2 활성 기능] 매매 사후 점검 리포트 — 예측이 아니라 사후 검토. 이미 일어난
+# 매매를 사후에 점검하며, post_trade_review.py 어디에서도 Claude API를 부르지
+# 않는다(순수 산술 + 기존 계산 재사용). 출력 스키마에 direction/confidence/action이
+# 없다(누락이 아니라 설계).
+#
+# 배치 트리거 — real_portfolio.json이 직전 확인 시점 대비 보유종목/비중이
+# 바뀌었을 때만 리포트를 생성한다(post_trade_review.py의 has_material_change).
+# 변동이 없으면 이 워크플로는 아무 것도 커밋하지 않는다. 온디맨드 트리거
+# (텔레그램 /review)는 check_updates.py -> poll.yml 쪽에서 처리하며, 이 워크플로와
+# 별개다.
+on:
+  schedule:
+    # 07:35 UTC = 16:25 KST — sync_real.yml의 07:25 UTC 실행 직후, 그날 최신
+    # 스냅샷을 반영해서 비교하도록 10분 뒤로 잡았다.
+    - cron: '35 7 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+      - name: Self-test (network-free)
+        run: python post_trade_review.py --self-test
+      - name: Run batch trigger (변동 있을 때만 생성)
+        run: python post_trade_review.py --batch
+      - name: Verify no predictive fields leaked (독립 재검사)
+        run: |
+          python - <<'PY'
+          import json, os, sys
+          from post_trade_review import audit
+          if not os.path.exists("post_trade_review_log.json"):
+              print("post_trade_review_log.json 없음 - 이번 실행에서 리포트가 생성되지 않음")
+              sys.exit(0)
+          log = json.load(open("post_trade_review_log.json", encoding="utf-8"))
+          bad = audit(log)
+          if bad:
+              print("금지 필드/문구가 저널에 남아 있음:", bad); sys.exit(1)
+          print(f"post_trade_review_log.json - 총 {len(log.get('reports', []))}건, 감사 위반 없음 확인")
+          PY
+      - name: Commit review journal/state
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          for f in post_trade_review_log.json post_trade_review_state.json; do
+            [ -f "$f" ] && git add "$f"
+          done
+          git diff --quiet && git diff --staged --quiet && echo "변경 없음" && exit 0
+          git commit -m "Post-trade review journal update"
+          for attempt in 1 2 3 4 5; do
+            if git push; then echo "push 성공 (시도 $attempt)"; exit 0; fi
+            echo "push 거부됨 - rebase 후 재시도 ($attempt/5)"
+            git pull --rebase origin main || exit 1
+            sleep $((attempt * 5))
+          done
+          echo "5회 시도 후에도 push 실패"; exit 1
