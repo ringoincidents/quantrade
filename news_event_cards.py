@@ -56,6 +56,19 @@ FORBIDDEN_FIELDS = ("direction", "confidence", "action", "recommendation",
                     "target_weight_pct", "signal", "buy", "sell", "score",
                     "호재", "악재", "판단")
 
+# 2026-08-10: summary "문구" 자체는 지금까지 검사한 적이 없었다 — 프롬프트가
+# "전망/기대감/수혜/호재·악재/매수·매도/목표가 같은 표현을 쓰지 마라"고 요청은
+# 하지만 아무것도 런타임에서 강제하지 않았고, 실제로 모델이 "목표주가를 상향
+# 조정했다"처럼 프롬프트가 막으려던 표현의 동의어를 써서 그대로 커밋된 사례가
+# post_trade_review.py 개발 중 발견됐다(§5 "최근 뉴스 연결"이 이 파일의 summary를
+# 그대로 인용하다가 자체 감사에 걸림). rule_trigger_report.py와 같은 목록을 그대로
+# 재사용한다 — 이 저장소 전체가 이미 합의한 "안전한 사실 서술" 기준이기 때문.
+FORBIDDEN_PHRASES = (
+    "매수", "매도하세요", "사세요", "파세요", "추천", "권장", "권합니다",
+    "유망", "저평가", "고평가", "목표주가", "상승 전망", "하락 전망",
+    "전망됩니다", "예상됩니다", "기대됩니다", "보입니다", "판단됩니다",
+)
+
 # 이상행동 판정 임계값. 방향성 세션 지시로 신설 — 결과를 보고 사후에 맞추지 않는다
 # (autoexec.py의 규칙 파라미터, portfolio_report.py의 THRESHOLDS와 같은 원칙).
 # 초기값이며 튜닝 대상이다.
@@ -231,15 +244,31 @@ def ask_explanation(market, headlines):
     return None
 
 
+def scrub_summary_phrases(summary):
+    """summary 문자열에 금지 문구가 있으면 통째로 안전한 자리표시자로 바꾼다.
+    문구만 잘라내면 남은 문장이 어색하게 이어 붙거나 의미가 왜곡될 수 있어서
+    (예: "...목표주가를 상향 조정했다" 중 "목표주가"만 지우면 비문이 됨),
+    부분 편집 대신 전체 교체를 택한다 — 틀린 요약보다 빈 요약이 낫다는 이
+    저장소의 기존 원칙(PER "데이터 소스 미연결" 등)과 같다.
+    반환: (정제된 summary, 감지된 문구) — 후자가 None이면 위반 없음."""
+    for ph in FORBIDDEN_PHRASES:
+        if ph in summary:
+            return "[요약 생략 - 금지 문구 감지로 검수 실패]", ph
+    return summary, None
+
+
 def build_card(market, name, headlines, judgment):
     """허용 필드만 담은 카드를 만든다. 대시보드 렌더러의 화이트리스트와
     같은 집합이라, 여기서 안 넣으면 저기서도 못 그린다(이중 차단)."""
     cleaned, removed = strip_forbidden(judgment)
+    summary, hit_phrase = scrub_summary_phrases(cleaned.get("summary", ""))
+    if hit_phrase:
+        removed = removed + [f"summary:'{hit_phrase}'"]
     card = {
         "market": market,
         "name": name,
         "event_type": cleaned.get("event_type", "기타"),
-        "summary": cleaned.get("summary", ""),
+        "summary": summary,
         "headlines": headlines,
     }
     return {k: v for k, v in card.items() if k in CARD_FIELDS}, removed
@@ -331,6 +360,22 @@ def run_self_test():
     for f in FORBIDDEN_FIELDS:
         assert f not in card, f"카드에 금지 필드 {f}가 남음"
     assert set(card) <= set(CARD_FIELDS), "허용 필드 밖의 키가 카드에 있음"
+
+    # 2b) [2026-08-10] summary "문구" 자체도 검사하는지 — 필드 제거와 별개로,
+    # post_trade_review.py 개발 중 실제로 "목표주가를 상향 조정했다"가 커밋된
+    # 카드에 남아 있던 걸 발견해 추가한 방어선.
+    dirty_phrase = {"event_type": "공시", "summary": "회사가 목표주가를 상향 조정했다"}
+    card2, removed2 = build_card("005930", "삼성전자", ["h1"], dirty_phrase)
+    print(f"[2b] 금지 문구 포함 summary -> {card2['summary']!r} / 제거 {removed2}")
+    assert card2["summary"] == "[요약 생략 - 금지 문구 감지로 검수 실패]"
+    assert any("목표주가" in r for r in removed2)
+    for ph in FORBIDDEN_PHRASES:
+        assert ph not in card2["summary"], f"교체된 summary에도 금지 문구 '{ph}'가 남음"
+    clean_phrase = {"event_type": "공시", "summary": "회사가 자사주 매입 계획을 발표했다"}
+    card3, removed3 = build_card("005930", "삼성전자", ["h1"], clean_phrase)
+    assert card3["summary"] == clean_phrase["summary"], "정상 문구까지 지워지면 안 됨"
+    assert not any("summary:" in r for r in removed3)
+    print("[2b] 정상 summary는 그대로 유지되는지 확인")
 
     # 3) 카드 필드 집합이 대시보드 화이트리스트와 일치하는지 (이중 차단의 전제)
     html = open("index.html", encoding="utf-8").read()

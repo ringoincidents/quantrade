@@ -33,7 +33,7 @@ jobs:
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add portfolio.json trade_history.json pending_actions.json telegram_offset.json last_report.json autoexec_log.json
-          for f in autoexec_state.json autoexec_reports.json; do
+          for f in autoexec_state.json autoexec_reports.json post_trade_review_state.json post_trade_review_log.json; do
             [ -f "$f" ] && git add "$f"
           done
           git diff --quiet && git diff --staged --quiet && echo "변경 없음" && exit 0
