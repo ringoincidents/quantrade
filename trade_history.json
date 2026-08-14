@@ -47,6 +47,14 @@
       "entry_date": "2026-08-01",
       "exit_date": "2026-08-07",
       "return_pct": -5.339805825242723
+    },
+    {
+      "market": "KRW-DOOD",
+      "asset_class": "crypto",
+      "strategy_type": "스윙",
+      "entry_date": "2026-08-02",
+      "exit_date": "2026-08-14",
+      "return_pct": -13.978494623655912
     }
   ]
 }
