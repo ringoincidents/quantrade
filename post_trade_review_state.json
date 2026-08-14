@@ -1,0 +1,69 @@
+{
+  "loss_since": {},
+  "last_snapshot": {
+    "synced_at": "2026-08-14T08:42:21.379039+00:00",
+    "cash": 2229.0,
+    "positions": [
+      {
+        "symbol": "004000",
+        "name": "롯데정밀화학",
+        "market_country": "KR",
+        "currency": "KRW",
+        "quantity": "13",
+        "avg_price": "48700",
+        "current_price": "47000",
+        "eval_amount": 611000.0,
+        "eval_amount_krw": 611000.0,
+        "return_pct": -3.49
+      },
+      {
+        "symbol": "196170",
+        "name": "알테오젠",
+        "market_country": "KR",
+        "currency": "KRW",
+        "quantity": "3",
+        "avg_price": "298333.333333",
+        "current_price": "313000",
+        "eval_amount": 939000.0,
+        "eval_amount_krw": 939000.0,
+        "return_pct": 4.91
+      },
+      {
+        "symbol": "NMR",
+        "name": "노무라 홀딩스(ADR)",
+        "market_country": "US",
+        "currency": "USD",
+        "quantity": "6",
+        "avg_price": "9.85",
+        "current_price": "10.01",
+        "eval_amount": 60.06,
+        "eval_amount_krw": 84864.78,
+        "return_pct": 1.6199999999999999
+      },
+      {
+        "symbol": "SCHD",
+        "name": "SCHD",
+        "market_country": "US",
+        "currency": "USD",
+        "quantity": "56.799361",
+        "avg_price": "32.717936",
+        "current_price": "34.48",
+        "eval_amount": 1958.441967,
+        "eval_amount_krw": 2767278.499371,
+        "return_pct": 5.38
+      },
+      {
+        "symbol": "TE",
+        "name": "T1 에너지",
+        "market_country": "US",
+        "currency": "USD",
+        "quantity": "95",
+        "avg_price": "4.95",
+        "current_price": "4.82",
+        "eval_amount": 457.9,
+        "eval_amount_krw": 647012.7,
+        "return_pct": -2.62
+      }
+    ]
+  }
+}
