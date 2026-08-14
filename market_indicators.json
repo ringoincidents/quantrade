@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-13T11:09:40.319501+00:00",
+  "generated_at": "2026-08-14T11:07:17.986635+00:00",
   "schema": "market_indicators_v3.2",
   "note": "개별 계산값을 항목별로만 나열합니다. 지표들을 하나로 합치지 않고, 종목 간 우열을 매겨 배열하지 않으며, 색을 이용한 강조도 하지 않습니다. 표의 나열 순서는 원본(보유+관심종목) 그대로이며 계산값 크기로 다시 배열하지 않습니다.",
   "state_board": {
@@ -8,40 +8,48 @@
       {
         "symbol": "004000",
         "name": "롯데정밀화학",
-        "volatility_20d_pct": 2.68,
+        "volatility_20d_pct": 2.69,
         "volatility_percentile": 60.4,
-        "adx_14": 6.3,
+        "adx_14": 7.9,
         "data_status": null
       },
       {
         "symbol": "196170",
         "name": "알테오젠",
-        "volatility_20d_pct": 6.06,
-        "volatility_percentile": 88.6,
+        "volatility_20d_pct": 5.94,
+        "volatility_percentile": 86.4,
         "adx_14": 59.6,
         "data_status": null
       },
       {
         "symbol": "NMR",
         "name": "노무라 홀딩스(ADR)",
-        "volatility_20d_pct": 1.73,
-        "volatility_percentile": 40.0,
+        "volatility_20d_pct": 1.65,
+        "volatility_percentile": 32.9,
         "adx_14": 2.0,
         "data_status": null
       },
       {
         "symbol": "SCHD",
         "name": "SCHD",
-        "volatility_20d_pct": 0.77,
-        "volatility_percentile": 70.0,
-        "adx_14": 37.4,
+        "volatility_20d_pct": 0.64,
+        "volatility_percentile": 36.4,
+        "adx_14": 34.7,
+        "data_status": null
+      },
+      {
+        "symbol": "TE",
+        "name": "T1 에너지",
+        "volatility_20d_pct": 8.46,
+        "volatility_percentile": 77.1,
+        "adx_14": 7.5,
         "data_status": null
       }
     ],
     "correlation": {
-      "avg_pairwise_correlation": 0.075,
-      "pair_count": 6,
-      "symbol_count": 4,
+      "avg_pairwise_correlation": 0.036,
+      "pair_count": 10,
+      "symbol_count": 5,
       "window_days": 60
     }
   },
@@ -53,9 +61,9 @@
         "name": "롯데정밀화학",
         "per": null,
         "per_status": "데이터 소스 미연결",
-        "volatility_20d_pct": 2.68,
-        "momentum_20d_pct": 3.12,
-        "adx_14": 6.3,
+        "volatility_20d_pct": 2.69,
+        "momentum_20d_pct": 3.18,
+        "adx_14": 7.9,
         "data_status": null
       },
       {
@@ -63,8 +71,8 @@
         "name": "알테오젠",
         "per": null,
         "per_status": "데이터 소스 미연결",
-        "volatility_20d_pct": 6.06,
-        "momentum_20d_pct": 43.03,
+        "volatility_20d_pct": 5.94,
+        "momentum_20d_pct": 47.59,
         "adx_14": 59.6,
         "data_status": null
       },
@@ -73,8 +81,8 @@
         "name": "노무라 홀딩스(ADR)",
         "per": null,
         "per_status": "데이터 소스 미연결",
-        "volatility_20d_pct": 1.73,
-        "momentum_20d_pct": -1.29,
+        "volatility_20d_pct": 1.65,
+        "momentum_20d_pct": 2.15,
         "adx_14": 2.0,
         "data_status": null
       },
@@ -83,9 +91,19 @@
         "name": "SCHD",
         "per": null,
         "per_status": "데이터 소스 미연결",
-        "volatility_20d_pct": 0.77,
-        "momentum_20d_pct": 5.94,
-        "adx_14": 37.4,
+        "volatility_20d_pct": 0.64,
+        "momentum_20d_pct": 4.21,
+        "adx_14": 34.7,
+        "data_status": null
+      },
+      {
+        "symbol": "TE",
+        "name": "T1 에너지",
+        "per": null,
+        "per_status": "데이터 소스 미연결",
+        "volatility_20d_pct": 8.46,
+        "momentum_20d_pct": -19.36,
+        "adx_14": 7.5,
         "data_status": null
       }
     ]
