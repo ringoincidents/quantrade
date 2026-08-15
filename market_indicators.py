@@ -35,7 +35,9 @@
 import argparse
 from datetime import datetime, timezone
 
-from analyze_lib import calc_adx, load_json, save_json
+from analyze_lib import (
+    FORBIDDEN_FIELDS_BASE, FORBIDDEN_PHRASES_BASE, calc_adx, load_json, save_json,
+)
 from news_event_cards import build_universe, fetch_candles_for_anomaly as fetch_candles
 
 INDICATORS_FILE = "market_indicators.json"
@@ -56,13 +58,11 @@ INDICATOR_ROW_FIELDS = ("symbol", "name", "per", "per_status",
                          "volatility_20d_pct", "momentum_20d_pct", "adx_14", "data_status")
 
 # 이 리포트 전체(중첩 포함)에 절대 있으면 안 되는 필드/문구. audit()가 재귀 검사한다.
-FORBIDDEN_FIELDS = ("score", "rank", "ranking", "phase", "regime", "국면", "점수", "순위",
-                     "signal", "color", "colour", "grade", "rating", "recommendation",
-                     "direction", "confidence", "action", "buy", "sell", "등급", "신호등")
-FORBIDDEN_PHRASES = (
-    "상승장", "하락장", "국면 전환", "국면 진입", "진입 임박",
-    "매수", "매도하세요", "사세요", "파세요", "추천", "권장", "권합니다",
-    "사도 됨", "팔아야", "1위", "순위",
+# analyze_lib.FORBIDDEN_*_BASE(여러 모듈 공유, 2026-08-10)에 "국면 판별" 특유의
+# 항목(국면/점수/순위/등급/신호등, 상승장/하락장 등)만 더한다.
+FORBIDDEN_FIELDS = FORBIDDEN_FIELDS_BASE + ("국면", "점수", "순위", "등급", "신호등")
+FORBIDDEN_PHRASES = FORBIDDEN_PHRASES_BASE + (
+    "상승장", "하락장", "국면 전환", "국면 진입", "진입 임박", "매수", "사도 됨",
 )
 
 

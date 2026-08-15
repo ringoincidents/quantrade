@@ -24,8 +24,9 @@ import math
 from datetime import datetime, timezone
 
 from analyze_lib import (
-    HARD_STOP_LOSS, POSITION_WEIGHT_HARD_CAP, TRADING_COSTS,
-    get_krx_candles, get_us_candles, load_json, save_json, send_telegram,
+    FORBIDDEN_FIELDS_BASE, FORBIDDEN_PHRASES_BASE, HARD_STOP_LOSS,
+    POSITION_WEIGHT_HARD_CAP, TRADING_COSTS, get_krx_candles, get_us_candles,
+    load_json, save_json, send_telegram,
 )
 
 REAL_PORTFOLIO_FILE = "real_portfolio.json"
@@ -43,9 +44,22 @@ THRESHOLDS = {
     "loss_sustained_days": 60,      # 그 상태가 이 일수 이상 지속되면 플래그 (초안)
 }
 
-# 리포트 어디에도 들어가면 안 되는 필드. self-test와 대시보드가 함께 검사한다.
-FORBIDDEN_FIELDS = ("direction", "confidence", "action", "recommendation",
-                    "target_weight_pct", "signal", "buy", "sell", "score")
+# 리포트 어디에도 들어가면 안 되는 필드/문구. self-test와 대시보드가 함께 검사한다.
+# analyze_lib.FORBIDDEN_*_BASE(여러 모듈 공유, 2026-08-10 "자유텍스트 금지문구
+# 전수 점검" 지시)를 쓴다. 이 파일은 지금까지 FORBIDDEN_FIELDS(필드명)만 있었고
+# summary/note/fact 같은 자유텍스트 "문구" 자체는 self-test에서 몇 개 단어만
+# 수동으로 확인했을 뿐 run() 저장 시점에 실제로 강제된 적이 없었다 — 이번 점검으로
+# 발견해 추가한다("정리하세요"는 이 파일의 기존 self-test가 이미 걱정하던 문구라
+# 그대로 가져옴).
+#
+# "rank"/"ranking"은 base에서 뺀다 — 이 파일의 roadmap.phases[].rank는
+# 종합판단 순위가 아니라 "계급"(일병/상병/병장, 배분 로드맵의 기존 필드,
+# 2026-08-01부터 있었음)이다. 실제로 실계좌 데이터로 감사를 돌려보니 이
+# 충돌이 그대로 걸렸다 — 리네이밍은 index.html 렌더러까지 같이 고쳐야 하는
+# 더 큰 변경이라, 여기서는 이 필드가 가리키는 게 순위가 아니라는 사실이
+# 분명하므로 예외로 뺀다(다른 모듈에는 이 예외를 적용하지 않는다).
+FORBIDDEN_FIELDS = tuple(f for f in FORBIDDEN_FIELDS_BASE if f not in ("rank", "ranking"))
+FORBIDDEN_PHRASES = FORBIDDEN_PHRASES_BASE + ("정리하세요",)
 
 # Risk Engine (2026-08-09, 방향성 세션 지시) — v3.0 원칙2("AI는 뭘 살지 관여,
 # 얼마나 살지는 Risk Engine이 결정")의 첫 구현. 여기도 예측/신호가 아니라
@@ -592,7 +606,12 @@ def build_risk_engine(rows, total_assets_krw, symbol_closes):
 
     return {
         "provisional": RISK_ENGINE["provisional"],
-        "note": ("전부 계산·표시 전용이다 — 예측/신호 없음. \"권장 금액\"은 계산값이지 "
+        # 2026-08-10: 원래 "권장 금액"이라고 썼는데, 이 표현이 audit()의 금지 문구
+        # "권장"에 실제로 걸렸다 — "이건 추천이 아니라 계산값"이라고 설명하는
+        # 문장 자체가 금지어를 문자 그대로 담고 있던 자기지시적 사례
+        # (market_indicators.py가 이전에 겪은 것과 같은 종류). "금액 범위"로 바꿔
+        # 같은 의미를 유지하면서 금지어를 피한다.
+        "note": ("전부 계산·표시 전용이다 — 예측/신호 없음. 아래 금액 범위는 계산값이지 "
                  "매수 지시가 아니고, 최종 매수 여부·금액은 항상 사람이 정한다."),
         "position_sizing": position_sizing,
         "mdd_budget": calc_mdd_budget_usage(rows, total_assets_krw),
@@ -693,6 +712,27 @@ def format_telegram(report):
     return "\n".join(lines)
 
 
+def audit(obj, path="report"):
+    """금지 필드/문구가 섞였는지 재귀 검사(market_indicators.py/rule_trigger_report.py와
+    같은 패턴). 2026-08-10 "자유텍스트 금지문구 전수 점검"으로 발견됨 — 이 파일은
+    FORBIDDEN_FIELDS만 self-test에서 확인했을 뿐, 저장 시점에 실제로 강제한 적이
+    없었다."""
+    bad = []
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            if k.lower() in FORBIDDEN_FIELDS:
+                bad.append(f"{path}.{k} (금지 필드)")
+            bad += audit(v, f"{path}.{k}")
+    elif isinstance(obj, list):
+        for i, v in enumerate(obj):
+            bad += audit(v, f"{path}[{i}]")
+    elif isinstance(obj, str):
+        for ph in FORBIDDEN_PHRASES:
+            if ph in obj:
+                bad.append(f"{path}: 금지 문구 '{ph}'")
+    return bad
+
+
 def run(args):
     real = load_json(REAL_PORTFOLIO_FILE, None)
     if not real:
@@ -705,6 +745,14 @@ def run(args):
     symbol_closes = fetch_symbol_candles(snapshot_rows)
 
     report, state = build_report(real, income, state, symbol_closes=symbol_closes)
+
+    violations = audit(report)
+    if violations:
+        print("❌ 감사 위반 발견 - 저장/전송 거부:")
+        for v in violations:
+            print(f"   - {v}")
+        raise SystemExit(1)
+
     save_json(REPORT_FILE, report)
     save_json(STATE_FILE, state)
 
@@ -774,28 +822,45 @@ def run_self_test():
     print(f"[4] B 회복(-10%) 후 추적: {s2}")
     assert "B" not in s2, "임계값 위로 회복하면 지속 기록이 지워져야 함"
 
-    # 5) 예측성 필드가 리포트 어디에도 없는지 (재귀 검사)
+    # 5) 예측성 필드/금지 문구가 리포트 어디에도 없는지 (재귀 검사, audit() 재사용)
     report, _ = build_report(real, {"placeholder": True}, {"loss_since": {}}, "2026-08-04")
-    def scan(o, path="report"):
-        bad = []
-        if isinstance(o, dict):
-            for k, v in o.items():
-                if k in FORBIDDEN_FIELDS:
-                    bad.append(f"{path}.{k}")
-                bad += scan(v, f"{path}.{k}")
-        elif isinstance(o, list):
-            for i, v in enumerate(o):
-                bad += scan(v, f"{path}[{i}]")
-        return bad
-    found = scan(report)
-    print(f"[5] 리포트 내 예측성 필드: {found or '없음'}")
-    assert not found, f"예측성 필드가 리포트에 있음: {found}"
+    found = audit(report)
+    print(f"[5] 리포트 내 감사 위반: {found or '없음'}")
+    assert not found, f"금지 필드/문구가 리포트에 있음: {found}"
 
-    # 6) 매매 지시성 표현이 텍스트에 없는지
+    # 5b) [2026-08-10] 이 파일은 지금까지 FORBIDDEN_FIELDS만 검사했고 문구
+    # 자체를 저장 시점에 강제한 적이 없었다 — 실제로 audit()가 잡아내는지,
+    # 그리고 run()이 위반 시 저장/전송을 거부하는지 확인한다.
+    dirty = {"rule_matches": [{"rule": "집중도", "fact": "SCHD 비중이 높아 정리하세요"}]}
+    violations = audit(dirty)
+    print(f"[5b] 오염된 리포트 -> 위반 {violations}")
+    assert any("정리하세요" in v for v in violations)
+
+    import sys
+    import unittest.mock as mock
+    mod = sys.modules[__name__]
+    fake_args = type("Args", (), {"telegram": True})()
+    with mock.patch.object(mod, "build_report", return_value=(dirty, {"loss_since": {}})), \
+         mock.patch.object(mod, "load_json", side_effect=lambda path, default: real if path == REAL_PORTFOLIO_FILE else default), \
+         mock.patch.object(mod, "save_json") as mock_save, \
+         mock.patch.object(mod, "send_telegram") as mock_send, \
+         mock.patch.object(mod, "fetch_symbol_candles", return_value={}):
+        try:
+            run(fake_args)
+            raised = False
+        except SystemExit:
+            raised = True
+        print(f"[5b] 오염된 리포트로 run() 호출 -> SystemExit={raised}, "
+              f"save_json 호출됨={mock_save.called}, send_telegram 호출됨={mock_send.called}")
+        assert raised, "위반이 있는데 SystemExit이 발생하지 않음"
+        assert not mock_save.called, "위반이 있는데 save_json이 호출됨"
+        assert not mock_send.called, "위반이 있는데 send_telegram이 호출됨"
+
+    # 6) 매매 지시성 표현이 텍스트에 없는지 (공유 FORBIDDEN_PHRASES 전부 재사용)
     text = format_telegram(report)
-    for banned in ("매수", "매도", "파세요", "사세요", "추천", "권장", "정리하세요"):
-        assert banned not in text, f"리포트 텍스트에 매매 지시 표현 '{banned}'이 있음"
-    print("[6] 텔레그램 텍스트: 매매 지시 표현 없음 확인")
+    for banned in FORBIDDEN_PHRASES:
+        assert banned not in text, f"리포트 텍스트에 금지 문구 '{banned}'이 있음"
+    print("[6] 텔레그램 텍스트: 금지 문구 없음 확인")
 
     # 7) 로드맵은 placeholder면 계산하지 않는다 (틀린 숫자 방지)
     print(f"[7] 로드맵 상태: {report['roadmap']['status']} - {report['roadmap']['reason']}")
@@ -961,8 +1026,8 @@ def run_self_test():
         real, {"placeholder": True}, {"loss_since": {}}, "2026-08-04",
         symbol_closes={"A": [100 + i * 0.3 for i in range(100)], "B": [200 - i * 0.1 for i in range(100)]},
     )
-    bad2 = scan(report_with_re)
-    print(f"[13] symbol_closes 채운 리포트 예측성 필드: {bad2 or '없음'}")
+    bad2 = audit(report_with_re)
+    print(f"[13] symbol_closes 채운 리포트 감사 위반: {bad2 or '없음'}")
     assert not bad2
     assert report_with_re["risk_engine"]["position_sizing"][0]["sizing"] is not None, \
         "가격 이력이 있으면 사이징이 계산돼야 함"

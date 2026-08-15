@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from analyze_lib import *
+from analyze_lib import *  # FORBIDDEN_FIELDS_BASE/FORBIDDEN_PHRASES_BASE도 여기로 들어온다
 
 PORTFOLIO_FILE = "portfolio.json"
 HISTORY_FILE = "trade_history.json"
@@ -65,6 +65,25 @@ def check_risk_guardrails(portfolio, total_assets):
                          f"({HARD_STOP_LOSS.get(strat, -10)}%) 판정을 수행하지 못함"),
             })
     return violations
+
+
+def audit_guardrail_violations(violations):
+    """[2026-08-10 "자유텍스트 금지문구 전수 점검"으로 신설] check_risk_guardrails()의
+    "fact" 문구를 재사용 금지어 세트로 검사한다. market_indicators.py 등과 달리
+    위반 시 전체 실행을 막지 않는다 — 이 함수의 출력은 하드손절 집행 등 실제
+    거래 로직과 무관한 표시용 텍스트뿐이고, daily.yml 전체를 막으면 표시 텍스트
+    문제 때문에 정작 중요한 손절 집행/자산 갱신까지 멈추는 게 더 위험하다.
+    대신 위반이 걸린 항목의 fact만 안전한 문구로 바꾸고 계속 진행한다("빈
+    칸이 틀린 텍스트보다 낫다" 원칙, rule_trigger_report.py 등과 동일)."""
+    clean = []
+    for v in violations:
+        fact = v.get("fact", "")
+        hit = next((ph for ph in FORBIDDEN_PHRASES_BASE if ph in fact), None)
+        if hit:
+            print(f"⚠️ 가드레일 fact 문구가 금지어 검사에 걸림 - 표시용 텍스트만 대체 ('{hit}'): {fact}")
+            v = dict(v, fact="[표시 생략 - 금지 문구 감지로 검수 실패]")
+        clean.append(v)
+    return clean
 
 
 def needs_approval(pos, total_assets):
@@ -312,7 +331,7 @@ def run():
                 report.append(f"   이유: {decision.get('reasoning','-')}")
 
     # [v3.2 활성 기능] 규칙 기반 가드레일 점검 — 예측 비활성과 무관하게 항상 돈다.
-    guardrail_violations = check_risk_guardrails(portfolio, total_assets)
+    guardrail_violations = audit_guardrail_violations(check_risk_guardrails(portfolio, total_assets))
     report.append("")
     if guardrail_violations:
         report.append(f"🛡️ 규칙 위반 {len(guardrail_violations)}건")

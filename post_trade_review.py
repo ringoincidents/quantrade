@@ -35,7 +35,7 @@ import argparse
 from datetime import datetime, timezone
 
 import portfolio_report as pr
-from analyze_lib import load_json, save_json
+from analyze_lib import FORBIDDEN_FIELDS_BASE, FORBIDDEN_PHRASES_BASE, load_json, save_json
 
 REAL_PORTFOLIO_FILE = "real_portfolio.json"
 NEWS_CARDS_FILE = "news_event_cards.json"
@@ -47,15 +47,11 @@ LOG_FILE = "post_trade_review_log.json"
 WEIGHT_CHANGE_THRESHOLD_PCT = 3.0
 
 # 이 리포트 전체(중첩 포함)에 절대 있으면 안 되는 필드/문구. audit()가 재귀 검사한다.
-FORBIDDEN_FIELDS = ("direction", "confidence", "action", "recommendation",
-                    "signal", "buy", "sell", "score", "target_weight_pct", "rating",
-                    "rank", "ranking", "phase", "regime", "grade", "color", "colour")
-FORBIDDEN_PHRASES = (
-    "매수하세요", "매도하세요", "사세요", "파세요", "추천", "권장", "권합니다",
-    "유망", "저평가", "고평가", "목표주가", "상승 전망", "하락 전망",
-    "전망됩니다", "예상됩니다", "기대됩니다", "판단됩니다",
-    "지금이 기회", "그래서 사도", "팔아야 합니다", "1위", "순위",
-)
+# analyze_lib.FORBIDDEN_*_BASE(여러 모듈 공유, 2026-08-10)를 그대로 쓴다 — 이
+# 모듈만의 추가 항목은 없다. 명사형 "매수"/"매도"는 base에 없으므로(§4 "매도
+# 없이 보유가 유지" 같은 사실 서술에 필요) 다른 모듈처럼 따로 더하지 않는다.
+FORBIDDEN_FIELDS = FORBIDDEN_FIELDS_BASE
+FORBIDDEN_PHRASES = FORBIDDEN_PHRASES_BASE
 
 
 # ── 노출 변화 (섹션 1) ───────────────────────────────────────────────────

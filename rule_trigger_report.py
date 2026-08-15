@@ -28,16 +28,16 @@ import argparse
 import json
 from datetime import datetime, timedelta, timezone
 
+from analyze_lib import FORBIDDEN_FIELDS_BASE, FORBIDDEN_PHRASES_BASE
+
 KST = timezone(timedelta(hours=9))
 
-# 리포트 어디에도 들어가면 안 되는 필드/문구.
-FORBIDDEN_FIELDS = ("direction", "confidence", "action", "recommendation",
-                    "signal", "buy", "sell", "score", "target_weight_pct", "rating")
-FORBIDDEN_PHRASES = (
-    "매수", "매도하세요", "사세요", "파세요", "추천", "권장", "권합니다",
-    "유망", "저평가", "고평가", "목표주가", "상승 전망", "하락 전망",
-    "전망됩니다", "예상됩니다", "기대됩니다", "보입니다", "판단됩니다",
-)
+# 리포트 어디에도 들어가면 안 되는 필드/문구. analyze_lib.FORBIDDEN_*_BASE(여러
+# 모듈이 공유하는 기본 세트, 2026-08-10)에 이 리포트 고유 항목만 더한다 —
+# 매수/매도 승인 근거로 쓰이는 리포트라 다른 모듈보다 엄격하게, 명사형("매수")과
+# "보입니다"까지 막는다.
+FORBIDDEN_FIELDS = FORBIDDEN_FIELDS_BASE
+FORBIDDEN_PHRASES = FORBIDDEN_PHRASES_BASE + ("매수", "보입니다")
 
 
 def _num(v, default=0.0):

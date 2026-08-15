@@ -34,8 +34,8 @@ from datetime import datetime, timezone
 import requests
 
 from analyze_lib import (
-    CLAUDE_API_KEY, get_krx_candles, get_news_headlines, get_us_candles,
-    load_json, save_json,
+    CLAUDE_API_KEY, FORBIDDEN_FIELDS_BASE, FORBIDDEN_PHRASES_BASE,
+    get_krx_candles, get_news_headlines, get_us_candles, load_json, save_json,
 )
 from news_event_experiment import JUDGE_MODEL
 
@@ -52,22 +52,17 @@ CARD_FIELDS = ("market", "name", "event_type", "summary", "headlines")
 # 이 필드들이 모델 응답에 섞여 나오면 카드에서 제거한다. 프롬프트에서 요구하지
 # 않지만 모델이 습관적으로 붙일 수 있고, 하나라도 새어나가면 "예측 아님"이라는
 # 이 카드의 전제가 깨진다. 이상행동 카드는 AI를 안 거치므로 이 목록과 무관하다.
-FORBIDDEN_FIELDS = ("direction", "confidence", "action", "recommendation",
-                    "target_weight_pct", "signal", "buy", "sell", "score",
-                    "호재", "악재", "판단")
+# analyze_lib.FORBIDDEN_FIELDS_BASE에 이 카드 고유 필드("호재"/"악재"/"판단")만 더한다.
+FORBIDDEN_FIELDS = FORBIDDEN_FIELDS_BASE + ("호재", "악재", "판단")
 
 # 2026-08-10: summary "문구" 자체는 지금까지 검사한 적이 없었다 — 프롬프트가
 # "전망/기대감/수혜/호재·악재/매수·매도/목표가 같은 표현을 쓰지 마라"고 요청은
 # 하지만 아무것도 런타임에서 강제하지 않았고, 실제로 모델이 "목표주가를 상향
 # 조정했다"처럼 프롬프트가 막으려던 표현의 동의어를 써서 그대로 커밋된 사례가
 # post_trade_review.py 개발 중 발견됐다(§5 "최근 뉴스 연결"이 이 파일의 summary를
-# 그대로 인용하다가 자체 감사에 걸림). rule_trigger_report.py와 같은 목록을 그대로
-# 재사용한다 — 이 저장소 전체가 이미 합의한 "안전한 사실 서술" 기준이기 때문.
-FORBIDDEN_PHRASES = (
-    "매수", "매도하세요", "사세요", "파세요", "추천", "권장", "권합니다",
-    "유망", "저평가", "고평가", "목표주가", "상승 전망", "하락 전망",
-    "전망됩니다", "예상됩니다", "기대됩니다", "보입니다", "판단됩니다",
-)
+# 그대로 인용하다가 자체 감사에 걸림). analyze_lib.FORBIDDEN_PHRASES_BASE에
+# rule_trigger_report.py와 같은 추가 항목("매수"/"보입니다")을 더해 재사용한다.
+FORBIDDEN_PHRASES = FORBIDDEN_PHRASES_BASE + ("매수", "보입니다")
 
 # 이상행동 판정 임계값. 방향성 세션 지시로 신설 — 결과를 보고 사후에 맞추지 않는다
 # (autoexec.py의 규칙 파라미터, portfolio_report.py의 THRESHOLDS와 같은 원칙).
