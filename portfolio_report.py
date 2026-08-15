@@ -31,8 +31,13 @@ from analyze_lib import (
 
 REAL_PORTFOLIO_FILE = "real_portfolio.json"
 INCOME_SCHEDULE_FILE = "income_schedule.json"
+ASSET_CLASS_MAPPING_FILE = "asset_class_mapping.json"
+TARGET_ALLOCATION_FILE = "target_allocation.json"
 REPORT_FILE = "portfolio_report.json"
 STATE_FILE = "portfolio_report_state.json"
+
+# "이번 달" + 다음 N-1개월. 지시서 표현("이번 달 및 다음 1~2개월") 그대로 3개월.
+GAP_FILL_MONTHS_AHEAD = 3
 
 # 사전 확정 대기 중인 초안 임계값.
 # concentration_pct / loss_pct는 지시받은 값이고, loss_sustained_days는
@@ -544,6 +549,163 @@ def derive_months_from_dates(income):
     return out, disc
 
 
+# ── (3b) 자산군 배분 갭 계산 (2026-08-10, 방향성 세션 지시) ─────────────────
+#
+# asset_class_mapping.json(종목→자산군)이 만들어진 뒤로 실제로 이 파일을 읽는
+# 코드가 없었다(그 파일 자체의 consumed_by 필드가 그렇게 명시하고 있었음) —
+# 여기서 처음 연결한다.
+#
+# **목표 비중 규칙은 초안이다(§1, 방향성 세션 확정 전).** target_allocation.json
+# 에 전부 데이터로 뒀다 — 숫자를 코드에 하드코딩하면 나중에 규칙이 바뀔 때마다
+# 이 파일을 고쳐야 하는데, 그러면 "숫자만 바꾸면 재정의 가능"이라는 지시서
+# 요구를 어기게 된다.
+
+def load_symbol_class_map(mapping):
+    """종목코드 -> 자산군 딕셔너리. mapping은 asset_class_mapping.json 내용."""
+    return {m["symbol"]: m["asset_class"] for m in mapping.get("mappings", [])}
+
+
+def compute_class_actual_pct(rows, cash_pct, symbol_to_class):
+    """종목별 weight_pct(portfolio_report.compute_positions 결과)를 자산군별로
+    합산한다. 매핑 안 된 보유종목은 조용히 버리지 않고 별도로 모아 반환한다 —
+    그래야 "안전+위험 비중 합이 100%보다 작아 보이는" 이유를 리포트에서 바로
+    알 수 있다. 현금(cash_pct)은 "현금성" 자산군의 실제 비중에 그대로 더한다 —
+    계좌 현금 잔고 자체가 현금성 자산이라는 사실이지, 별도 매핑이 필요한 보유
+    종목이 아니기 때문이다."""
+    by_class = {}
+    unmapped = []
+    for r in rows:
+        cls = symbol_to_class.get(r["symbol"])
+        if cls is None:
+            unmapped.append({"symbol": r["symbol"], "name": r["name"], "weight_pct": r["weight_pct"]})
+            continue
+        by_class[cls] = round(by_class.get(cls, 0.0) + r["weight_pct"], 2)
+    by_class["cash"] = round(by_class.get("cash", 0.0) + cash_pct, 2)
+    return by_class, unmapped
+
+
+def compute_class_target_pct(target_allocation, populated_classes, rank_name):
+    """계급명 -> 자산군별 목표 비중(%) 딕셔너리. target_allocation.json의
+    risk_distribution_rule에 적은 대로: 그룹(안전/위험) 총비중을, 그 그룹
+    안에서 실제로 비중이 있는(populated) 자산군에만 균등분배한다 — 매핑 안 된
+    자산군은 목표도 0%. 그룹 전체가 미매핑이면(고아 방지) 그룹 전체를
+    균등분배한다."""
+    safe_classes = target_allocation.get("safe_classes", [])
+    risk_classes = target_allocation.get("risk_classes", [])
+    safe_total = (target_allocation.get("safe_total_pct_by_rank") or {}).get(rank_name)
+    if safe_total is None:
+        return None
+    risk_total = 100.0 - safe_total
+
+    def split(classes, total_pct):
+        mapped = [c for c in classes if c in populated_classes]
+        active = mapped if mapped else list(classes)
+        share = round(total_pct / len(active), 3) if active else 0.0
+        return {c: (share if c in active else 0.0) for c in classes}
+
+    target = {}
+    target.update(split(safe_classes, safe_total))
+    target.update(split(risk_classes, risk_total))
+    return target
+
+
+def current_rank_for_month(income, ym):
+    """ym("YYYY-MM")이 속하는 계급을 income_schedule.json의 ranks[].start로
+    찾는다. ranks는 이미 오름차순이라고 가정하지 않고 여기서 정렬한다."""
+    ranks = [r for r in income.get("ranks", []) if r.get("start")]
+    if not ranks:
+        return None
+    ranks = sorted(ranks, key=lambda r: r["start"])
+    current = None
+    for r in ranks:
+        if r["start"] <= ym:
+            current = r
+        else:
+            break
+    return current
+
+
+def compute_asset_class_gap(rows, cash_pct, mapping, target_allocation, rank_name):
+    """자산군별 [목표비중/실제비중/갭(%p)]. 판단 문구 없이 숫자만 담는다."""
+    symbol_to_class = load_symbol_class_map(mapping)
+    actual_by_class, unmapped = compute_class_actual_pct(rows, cash_pct, symbol_to_class)
+    populated = {c for c, pct in actual_by_class.items() if pct > 0}
+    target_by_class = compute_class_target_pct(target_allocation, populated, rank_name)
+    if target_by_class is None:
+        return None
+
+    safe_classes = target_allocation.get("safe_classes", [])
+    risk_classes = target_allocation.get("risk_classes", [])
+    labels = {**target_allocation.get("safe_class_labels", {}), **target_allocation.get("risk_class_labels", {})}
+    is_safe = set(safe_classes)
+
+    rows_out = []
+    for c in list(safe_classes) + list(risk_classes):
+        target_pct = target_by_class.get(c, 0.0)
+        actual_pct = actual_by_class.get(c, 0.0)
+        rows_out.append({
+            "asset_class": c,
+            "label": labels.get(c, c),
+            "group": "안전자산" if c in is_safe else "위험자산",
+            "target_pct": target_pct,
+            "actual_pct": round(actual_pct, 2),
+            "gap_pct": round(target_pct - actual_pct, 2),
+            "currently_mapped": c in populated,
+        })
+
+    return {
+        "provisional": bool(target_allocation.get("provisional", True)),
+        "rank": rank_name,
+        "rows": rows_out,
+        "unmapped_holdings": unmapped,
+        "unmapped_holdings_weight_pct": round(sum(u["weight_pct"] for u in unmapped), 2),
+        "note": ("자산군별 목표/실제 비중과 그 차이(%p)만 나열합니다. 매핑 안 된 "
+                 "자산군의 갭이 0%p인 것은 정상입니다(목표도 0%로 계산). 매핑 안 "
+                 "된 보유종목은 unmapped_holdings에 따로 모았습니다 — 어떤 자산군에도 "
+                 "포함되지 않았다는 사실이며, 판단이 필요하다는 뜻은 아닙니다."),
+    }
+
+
+def compute_monthly_gap_fill(gap, income, start_ym, months=GAP_FILL_MONTHS_AHEAD):
+    """이번 달(+ 다음 N-1개월) 유입 예정액을, 갭이 양수(미달)인 자산군에 갭
+    크기 비례로 배분한다 — "갭이 큰 자산군부터 채운다"(지시서 §3)를 승자독식이
+    아니라 갭 비례 배분으로 구현했다(전액을 갭이 가장 큰 자산군 하나에만 넣는
+    건 실제 재조정 방식으로는 지나치게 쏠린다고 판단).
+
+    **한계**: 매달 같은 갭(현재 스냅샷 기준)을 기준으로 배분액을 계산한다 —
+    이번 달 투자가 실제로 반영된 뒤의 갭을 재계산하지 않는다. 그러려면 미래
+    매매를 시뮬레이션해야 하는데, 이 리포트는 계산과 사실 서술만 한다는 원칙과
+    맞지 않아 하지 않았다. 자산군 단위 산술이며 개별 종목 추천이 아니다."""
+    positive = [r for r in gap["rows"] if r["gap_pct"] > 0]
+    total_gap = sum(r["gap_pct"] for r in positive)
+
+    months_out = []
+    y, m = (int(x) for x in start_ym.split("-"))
+    for _ in range(months):
+        ym = f"{y:04d}-{m:02d}"
+        rank = current_rank_for_month(income, ym)
+        if not rank:
+            months_out.append({"month": ym, "rank": None, "monthly_investable_krw": None, "allocations": []})
+        else:
+            monthly_krw = rank["monthly_krw"]
+            allocations = []
+            if total_gap > 0:
+                for r in positive:
+                    share = r["gap_pct"] / total_gap
+                    allocations.append({
+                        "asset_class": r["asset_class"], "label": r["label"],
+                        "gap_pct": r["gap_pct"], "amount_krw": round(monthly_krw * share),
+                    })
+            months_out.append({
+                "month": ym, "rank": rank["rank"], "monthly_investable_krw": monthly_krw,
+                "allocations": allocations,
+            })
+        m += 1
+        if m > 12:
+            y, m = y + 1, 1
+    return months_out
+
+
 # ── 리포트 조립 ─────────────────────────────────────────────────────────────
 
 def fetch_symbol_candles(rows, count=None):
@@ -621,12 +783,30 @@ def build_risk_engine(rows, total_assets_krw, symbol_closes):
     }
 
 
-def build_report(real, income, state, today=None, symbol_closes=None):
+def build_report(real, income, state, today=None, symbol_closes=None,
+                  asset_class_mapping=None, target_allocation=None):
     today = today or _today()
     snapshot = compute_positions(real)
     streaks = update_loss_streaks(snapshot["positions"], state, today)
     matches = evaluate_rules(snapshot["positions"], streaks, today)
     risk_engine = build_risk_engine(snapshot["positions"], snapshot["total_assets_krw"], symbol_closes)
+
+    # 2026-08-10: 자산군 배분 갭 계산. asset_class_mapping.json/target_allocation.json
+    # 둘 다 있어야 계산할 수 있다 — 하나라도 없으면 계산하지 않는다("데이터 소스
+    # 미연결"류 원칙과 동일, 없는 데이터를 지어내지 않는다).
+    asset_class_gap = None
+    if asset_class_mapping is not None and target_allocation is not None:
+        current_rank = current_rank_for_month(income, today[:7]) if income else None
+        rank_name = current_rank["rank"] if current_rank else None
+        if rank_name:
+            gap = compute_asset_class_gap(
+                snapshot["positions"], snapshot["cash_pct"], asset_class_mapping,
+                target_allocation, rank_name,
+            )
+            if gap:
+                gap["monthly_gap_fill"] = compute_monthly_gap_fill(gap, income, today[:7])
+                asset_class_gap = gap
+
     report = {
         "generated_at": _now_iso(),
         "schema": "portfolio_report_v3.2",
@@ -637,6 +817,7 @@ def build_report(real, income, state, today=None, symbol_closes=None):
         "rule_matches": matches,
         "risk_engine": risk_engine,
         "roadmap": compute_roadmap(income),
+        "asset_class_gap": asset_class_gap,
     }
     return report, state
 
@@ -707,6 +888,29 @@ def format_telegram(report):
             lines.append(f"   ⚠️ 개월수 불일치 ({rm['month_basis_note']} 기준으로 계산됨)")
             for d in rm["month_discrepancies"]:
                 lines.append(f"      · {d['note']}")
+
+    gap = report.get("asset_class_gap")
+    lines.append("")
+    if not gap:
+        lines.append("📊 자산군 배분 갭: 계산 불가 (asset_class_mapping.json/target_allocation.json/계급 시작일 중 하나 없음)")
+    else:
+        tag = " [초안 기준]" if gap.get("provisional") else ""
+        lines.append(f"📊 자산군 배분 갭 ({gap['rank']} 기준){tag} — 자산군 단위 산술이며 개별 종목을 지정하지 않습니다")
+        widest = sorted(gap["rows"], key=lambda r: -r["gap_pct"])[:3]
+        for r in widest:
+            if r["gap_pct"] <= 0:
+                continue
+            lines.append(f"   · {r['label']}: 목표 {r['target_pct']:.1f}% / 실제 {r['actual_pct']:.1f}% "
+                         f"/ 갭 {r['gap_pct']:+.1f}%p")
+        if gap["unmapped_holdings_weight_pct"] > 0:
+            lines.append(f"   ※ 미매핑 보유종목 비중 {gap['unmapped_holdings_weight_pct']:.1f}% "
+                         f"(어떤 자산군에도 포함 안 됨)")
+        fill = (gap.get("monthly_gap_fill") or [None])[0]
+        if fill and fill.get("allocations"):
+            lines.append(f"   · 이번 달({fill['month']}) 유입 {fill['monthly_investable_krw']:,.0f}원 배분:")
+            for a in fill["allocations"][:3]:
+                lines.append(f"      - {a['label']} {a['amount_krw']:,.0f}원")
+
     lines.append("")
     lines.append("※ 현황과 규칙 해당 여부만 알립니다. 매매 판단은 포함하지 않습니다.")
     return "\n".join(lines)
@@ -740,11 +944,15 @@ def run(args):
         return
     income = load_json(INCOME_SCHEDULE_FILE, {"placeholder": True})
     state = load_json(STATE_FILE, {"loss_since": {}})
+    asset_class_mapping = load_json(ASSET_CLASS_MAPPING_FILE, None)
+    target_allocation = load_json(TARGET_ALLOCATION_FILE, None)
 
     snapshot_rows = compute_positions(real)["positions"]
     symbol_closes = fetch_symbol_candles(snapshot_rows)
 
-    report, state = build_report(real, income, state, symbol_closes=symbol_closes)
+    report, state = build_report(real, income, state, symbol_closes=symbol_closes,
+                                  asset_class_mapping=asset_class_mapping,
+                                  target_allocation=target_allocation)
 
     violations = audit(report)
     if violations:
@@ -1034,6 +1242,104 @@ def run_self_test():
     text2 = format_telegram(report_with_re)
     for banned in ("매수", "매도", "파세요", "사세요", "추천", "정리하세요"):
         assert banned not in text2, f"Risk Engine 포함 텔레그램 텍스트에 매매 지시 표현 '{banned}' 있음"
+
+    # ── 14~19) 자산군 배분 갭 계산 (2026-08-10) ──────────────────────────────
+    mapping = {"mappings": [
+        {"symbol": "A", "asset_class": "기존_배당"},
+        {"symbol": "B", "asset_class": "developed_exUS"},
+    ]}
+    target_alloc = {
+        "safe_classes": ["bond", "cash"],
+        "safe_class_labels": {"bond": "채권", "cash": "현금성"},
+        "risk_classes": ["기존_배당", "developed_exUS", "emerging"],
+        "risk_class_labels": {"기존_배당": "배당", "developed_exUS": "선진국(미국 제외)", "emerging": "신흥국"},
+        "safe_total_pct_by_rank": {"일병": 10, "상병": 20, "병장": 30},
+        "provisional": True,
+    }
+    # A(기존_배당) 60%, B(developed_exUS) 30%, 현금 10%, C(미매핑) 없음
+    rows14 = [{"symbol": "A", "name": "가", "weight_pct": 60.0},
+              {"symbol": "B", "name": "나", "weight_pct": 30.0}]
+
+    # 14) 실제 비중 집계 — 현금은 cash 자산군에 그대로 더해지는지
+    actual, unmapped = compute_class_actual_pct(rows14, 10.0, load_symbol_class_map(mapping))
+    print(f"[14] 실제 비중: {actual} / 미매핑: {unmapped}")
+    assert actual["기존_배당"] == 60.0 and actual["developed_exUS"] == 30.0 and actual["cash"] == 10.0
+    assert unmapped == []
+
+    # 15) 목표 비중 — 매핑 안 된 자산군(emerging)은 목표도 0%, 매핑된 것끼리
+    #     안전/위험 총비중을 균등분배해 합이 100%가 되는지
+    target = compute_class_target_pct(target_alloc, {"기존_배당", "developed_exUS", "cash"}, "일병")
+    print(f"[15] 목표 비중(일병): {target}")
+    assert target["emerging"] == 0.0, "매핑 안 된 위험자산군은 목표도 0%여야 함"
+    assert target["bond"] == 0.0, "매핑 안 된 안전자산군(채권)은 목표도 0%여야 함"
+    assert target["cash"] == 10.0, "안전자산 총비중(10%)이 매핑된 cash 하나에 전부 배분돼야 함"
+    assert abs(target["기존_배당"] - 45.0) < 1e-9 and abs(target["developed_exUS"] - 45.0) < 1e-9, \
+        "위험자산 총비중(90%)이 매핑된 두 자산군에 균등분배(45%씩)돼야 함"
+    assert abs(sum(target.values()) - 100.0) < 1e-9, "목표 비중 합은 항상 100%여야 함"
+
+    # 16) 전체 gap 계산 — 미매핑 보유종목(C)이 있으면 별도로 잡히고, 갭 부호가
+    #     맞는지(실제가 목표보다 크면 음수, 작으면 양수)
+    rows16 = rows14 + [{"symbol": "C", "name": "다", "weight_pct": 5.0}]
+    gap = compute_asset_class_gap(rows16, 5.0, mapping, target_alloc, "일병")
+    print(f"[16] 미매핑 보유종목: {gap['unmapped_holdings']} (비중합 {gap['unmapped_holdings_weight_pct']}%)")
+    assert gap["unmapped_holdings"] == [{"symbol": "C", "name": "다", "weight_pct": 5.0}]
+    assert gap["unmapped_holdings_weight_pct"] == 5.0
+    row_배당 = next(r for r in gap["rows"] if r["asset_class"] == "기존_배당")
+    print(f"[16] 배당 자산군: 목표{row_배당['target_pct']} / 실제{row_배당['actual_pct']} / 갭{row_배당['gap_pct']}")
+    assert row_배당["gap_pct"] == round(row_배당["target_pct"] - row_배당["actual_pct"], 2)
+    row_emerging = next(r for r in gap["rows"] if r["asset_class"] == "emerging")
+    assert row_emerging["target_pct"] == 0.0 and row_emerging["actual_pct"] == 0.0 and row_emerging["gap_pct"] == 0.0, \
+        "매핑 안 된 자산군은 갭도 0%p로 나와야 함(지시서 §2 '갭 0%로 나오는 게 정상')"
+
+    # 17) 그룹 전체가 미매핑이면(고아 방지) 그룹 전체를 균등분배하는지
+    target_empty_safe = compute_class_target_pct(target_alloc, {"기존_배당", "developed_exUS"}, "상병")
+    print(f"[17] 안전자산군 전부 미매핑 -> {['bond', 'cash']} 목표: "
+          f"{target_empty_safe['bond']}/{target_empty_safe['cash']}")
+    assert target_empty_safe["bond"] == target_empty_safe["cash"] == 10.0, \
+        "그룹 전체가 미매핑이면 그 그룹을 균등분배해야 함(상병 안전자산 20%/2)"
+
+    # 18) 계급별 월 유입액 조회 — 시작일 경계에서 올바른 계급을 찾는지
+    income18 = {"ranks": [{"rank": "일병", "start": "2026-08", "monthly_krw": 850000},
+                          {"rank": "상병", "start": "2027-01", "monthly_krw": 1150000}]}
+    r_before = current_rank_for_month(income18, "2026-12")
+    r_after = current_rank_for_month(income18, "2027-01")
+    print(f"[18] 2026-12 -> {r_before['rank']} / 2027-01 -> {r_after['rank']}")
+    assert r_before["rank"] == "일병" and r_after["rank"] == "상병"
+
+    # 19) 월별 갭 채우기 — 갭이 양수인 자산군에만, 갭 크기 비례로 배분되고
+    #     합이 그 달 유입액과 일치하는지(반올림 오차 허용)
+    fill = compute_monthly_gap_fill(gap, income18, "2026-08", months=2)
+    print(f"[19] 이번 달 배분: {fill[0]['allocations']}")
+    assert fill[0]["rank"] == "일병" and fill[0]["monthly_investable_krw"] == 850000
+    alloc_sum = sum(a["amount_krw"] for a in fill[0]["allocations"])
+    print(f"[19] 배분액 합계={alloc_sum:,} vs 유입액={fill[0]['monthly_investable_krw']:,}")
+    assert abs(alloc_sum - fill[0]["monthly_investable_krw"]) <= 1, "양수 갭 자산군에만 배분해도 유입액 전액이 소진돼야 함"
+    assert all(a["asset_class"] != "emerging" or a["amount_krw"] == 0 for a in fill[0]["allocations"]) or \
+        not any(a["asset_class"] == "emerging" for a in fill[0]["allocations"]), \
+        "갭이 0인 자산군(emerging)에는 배분되면 안 됨"
+
+    # 20) build_report()에 asset_class_mapping/target_allocation을 넘기면
+    #     asset_class_gap이 채워지고, 안 넘기면(둘 다 None) 조용히 비는지 —
+    #     감사도 통과하는지(자산군 라벨/비고 문구에 금지어가 없는지)
+    real20 = {"synced_at": "2026-08-10T00:00:00+00:00", "cash": 50000.0, "positions": [
+        {"symbol": "A", "name": "가", "market_country": "US", "eval_amount_krw": 600000.0, "return_pct": 1.0},
+        {"symbol": "B", "name": "나", "market_country": "US", "eval_amount_krw": 300000.0, "return_pct": 1.0},
+    ]}
+    income20 = dict(income18, placeholder=False)
+    report20, _ = build_report(real20, income20, {"loss_since": {}}, "2026-08-10",
+                               symbol_closes={}, asset_class_mapping=mapping, target_allocation=target_alloc)
+    print(f"[20] asset_class_gap 존재: {report20['asset_class_gap'] is not None}")
+    assert report20["asset_class_gap"] is not None
+    assert audit(report20) == [], f"자산군 갭 포함 리포트가 감사를 통과 못 함: {audit(report20)}"
+
+    report21, _ = build_report(real20, income20, {"loss_since": {}}, "2026-08-10", symbol_closes={})
+    print(f"[21] mapping/target_allocation 미제공 -> asset_class_gap={report21['asset_class_gap']}")
+    assert report21["asset_class_gap"] is None, "데이터가 없으면 지어내지 말고 None이어야 함"
+
+    text3 = format_telegram(report20)
+    for banned in FORBIDDEN_PHRASES:
+        assert banned not in text3, f"자산군 갭 포함 텔레그램 텍스트에 금지 문구 '{banned}' 있음"
+    print("[20-21] asset_class_gap 포함 리포트/텔레그램 텍스트 검증 통과")
 
     print("\n모든 자체 검증 통과.")
 
