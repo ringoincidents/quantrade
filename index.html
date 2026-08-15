@@ -549,6 +549,62 @@ function renderRuleMatch(rawMatch) {
   </div>`;
 }
 
+// ── [2026-08-10] 자산군 배분 갭 — asset_class_mapping.json/target_allocation.json
+// 기반. portfolio_report.py의 asset_class_gap을 그대로 화이트리스트로 렌더링.
+// 목표 비중 규칙(target_allocation.json)은 초안 — provisional 배지로 표시.
+const GAP_ROW_FIELDS = ['asset_class', 'label', 'group', 'target_pct', 'actual_pct', 'gap_pct', 'currently_mapped'];
+const GAP_FILL_ALLOC_FIELDS = ['asset_class', 'label', 'gap_pct', 'amount_krw'];
+
+function renderAssetClassGap(gap) {
+  if (!gap) return '';
+  // 전체 gap 객체는 통째로 가드하지 않는다 — gap.rank는 "계급"(일병/상병/병장,
+  // portfolio_report.py의 로드맵 rank와 같은 의미)이라 PREDICTIVE_FIELDS의
+  // "rank"(순위)와 이름만 겹친다. 실제로 렌더해보니 이 충돌이 걸렸다 —
+  // portfolio_report.py가 이미 이 필드를 FORBIDDEN_FIELDS에서 뺀 것과 같은
+  // 이유로, 여기서도 전체가 아니라 계산값이 실제로 들어있는 rows/allocations
+  // 배열만 가드한다.
+  const rows = (gap.rows || []).filter(r => assertNoPredictiveFields(r, '자산군 갭 행'));
+  const tag = gap.provisional ? '<span class="badge-retired">초안 기준</span>' : '';
+  const body = rows.map(raw => {
+    const r = pick(raw, GAP_ROW_FIELDS);
+    const gapCls = r.gap_pct > 0 ? 'negative' : '';
+    return `<tr>
+      <td>${esc(r.label)}<div class="rm-sub">${esc(r.group)}${r.currently_mapped ? '' : ' · 미보유'}</div></td>
+      <td class="rm-num">${r.target_pct.toFixed(1)}%</td>
+      <td class="rm-num">${r.actual_pct.toFixed(1)}%</td>
+      <td class="rm-num ${gapCls}">${r.gap_pct >= 0 ? '+' : ''}${r.gap_pct.toFixed(1)}%p</td>
+    </tr>`;
+  }).join('');
+
+  const unmapped = gap.unmapped_holdings || [];
+  const unmappedHtml = unmapped.length
+    ? `<p class="muted rm-note">※ 미매핑 보유종목 비중 합계 ${gap.unmapped_holdings_weight_pct}% (어떤 자산군에도 포함 안 됨): `
+      + esc(unmapped.map(u => `${u.name}(${u.symbol}) ${u.weight_pct}%`).join(', ')) + '</p>'
+    : '';
+
+  const fill = (gap.monthly_gap_fill || [])[0];
+  const fillAllocations = (fill && fill.allocations || []).filter(a => assertNoPredictiveFields(a, '자산군 갭 이번달 배분'));
+  const fillHtml = (fill && fillAllocations.length)
+    ? `<h3 style="margin-top:14px;">💰 이번 달(${esc(fill.month)}) 유입 배분</h3>
+      <p class="muted">유입 예정 ${Number(fill.monthly_investable_krw).toLocaleString()}원(${esc(fill.rank)} 기준) —
+        갭이 큰 자산군에 비례 배분한 계산값입니다. 자산군 단위 산술이며 개별 종목을 지정하지 않습니다.</p>`
+      + fillAllocations.map(raw => {
+          const a = pick(raw, GAP_FILL_ALLOC_FIELDS);
+          return `<div class="pos"><span class="pos-main">${esc(a.label)}
+              <span class="pos-sub">갭 ${a.gap_pct >= 0 ? '+' : ''}${a.gap_pct.toFixed(1)}%p</span></span>
+            <span>${Number(a.amount_krw).toLocaleString()}원</span></div>`;
+        }).join('')
+    : '';
+
+  return `<h3>📊 자산군 배분 갭 ${tag}</h3>
+    <p class="muted">${esc(gap.note || '')}</p>
+    <div class="rm-scroll"><table class="rm-table">
+      <thead><tr><th>자산군</th><th>목표</th><th>실제</th><th>갭</th></tr></thead>
+      <tbody>${body}</tbody></table></div>
+    ${unmappedHtml}
+    ${fillHtml}`;
+}
+
 async function loadPortfolioReport(bust) {
   const el = document.getElementById('preport-section');
   try {
@@ -593,10 +649,13 @@ async function loadPortfolioReport(bust) {
     } else {
       rmHtml = `<p class="muted">🗺️ 배분 로드맵: ${esc(rm.status || '미입력')} — ${esc(rm.reason || '')}</p>`;
     }
+    const gapHtml = r.asset_class_gap
+      ? renderAssetClassGap(r.asset_class_gap)
+      : `<p class="muted">📊 자산군 배분 갭: 계산 불가 (asset_class_mapping.json/target_allocation.json/계급 시작일 중 하나 없음)</p>`;
     el.innerHTML = `<p class="muted">총자산
         ${Number(s.total_assets_krw || 0).toLocaleString()}원 · 현금 ${(s.cash_pct || 0).toFixed(1)}%
         ${byC ? '· ' + byC : ''}</p>
-      ${rows}${matchHtml}${rmHtml}
+      ${rows}${matchHtml}${gapHtml}${rmHtml}
       <p class="muted sync-note" style="margin-top:10px; margin-bottom:0;">기준: ${fmtBasis(r.generated_at)}
         (이 리포트는 주 1회 갱신) · 계좌 스냅샷 기준: ${fmtBasis(s.synced_at)}
         (real_portfolio.json, 4x/일) — 두 시각은 갱신 주기가 달라 서로 다른 게 정상입니다.</p>
