@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-14T11:07:17.986635+00:00",
+  "generated_at": "2026-08-15T10:36:19.500561+00:00",
   "schema": "market_indicators_v3.2",
   "note": "개별 계산값을 항목별로만 나열합니다. 지표들을 하나로 합치지 않고, 종목 간 우열을 매겨 배열하지 않으며, 색을 이용한 강조도 하지 않습니다. 표의 나열 순서는 원본(보유+관심종목) 그대로이며 계산값 크기로 다시 배열하지 않습니다.",
   "state_board": {
@@ -24,30 +24,30 @@
       {
         "symbol": "NMR",
         "name": "노무라 홀딩스(ADR)",
-        "volatility_20d_pct": 1.65,
-        "volatility_percentile": 32.9,
-        "adx_14": 2.0,
+        "volatility_20d_pct": 1.83,
+        "volatility_percentile": 51.8,
+        "adx_14": 11.6,
         "data_status": null
       },
       {
         "symbol": "SCHD",
         "name": "SCHD",
-        "volatility_20d_pct": 0.64,
-        "volatility_percentile": 36.4,
-        "adx_14": 34.7,
+        "volatility_20d_pct": 0.63,
+        "volatility_percentile": 34.6,
+        "adx_14": 28.2,
         "data_status": null
       },
       {
         "symbol": "TE",
         "name": "T1 에너지",
-        "volatility_20d_pct": 8.46,
-        "volatility_percentile": 77.1,
-        "adx_14": 7.5,
+        "volatility_20d_pct": 8.61,
+        "volatility_percentile": 78.9,
+        "adx_14": 0.7,
         "data_status": null
       }
     ],
     "correlation": {
-      "avg_pairwise_correlation": 0.036,
+      "avg_pairwise_correlation": 0.01,
       "pair_count": 10,
       "symbol_count": 5,
       "window_days": 60
@@ -81,9 +81,9 @@
         "name": "노무라 홀딩스(ADR)",
         "per": null,
         "per_status": "데이터 소스 미연결",
-        "volatility_20d_pct": 1.65,
-        "momentum_20d_pct": 2.15,
-        "adx_14": 2.0,
+        "volatility_20d_pct": 1.83,
+        "momentum_20d_pct": 0.72,
+        "adx_14": 11.6,
         "data_status": null
       },
       {
@@ -91,9 +91,9 @@
         "name": "SCHD",
         "per": null,
         "per_status": "데이터 소스 미연결",
-        "volatility_20d_pct": 0.64,
-        "momentum_20d_pct": 4.21,
-        "adx_14": 34.7,
+        "volatility_20d_pct": 0.63,
+        "momentum_20d_pct": 4.89,
+        "adx_14": 28.2,
         "data_status": null
       },
       {
@@ -101,9 +101,9 @@
         "name": "T1 에너지",
         "per": null,
         "per_status": "데이터 소스 미연결",
-        "volatility_20d_pct": 8.46,
-        "momentum_20d_pct": -19.36,
-        "adx_14": 7.5,
+        "volatility_20d_pct": 8.61,
+        "momentum_20d_pct": -12.5,
+        "adx_14": 0.7,
         "data_status": null
       }
     ]
