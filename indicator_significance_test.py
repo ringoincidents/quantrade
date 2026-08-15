@@ -64,11 +64,28 @@ import argparse
 import math
 import time
 
-from analyze_lib import US_STOCKS, TRADING_COSTS, get_all_krw_markets, save_json
+from analyze_lib import (
+    FORBIDDEN_FIELDS_BASE, FORBIDDEN_PHRASES_BASE, US_STOCKS, TRADING_COSTS,
+    get_all_krw_markets, save_json,
+)
 from backtest import (
     KRX_MARKET_CAP_TOP, CRYPTO_UNIVERSE_CAP, UPBIT_MARKET_SLEEP,
     load_candles,
 )
+
+# 2026-08-10 "자유텍스트 금지문구 전수 점검"으로 추가 — 이 파일은 지금까지
+# 금지 필드/문구 검사가 전혀 없었다(0/0). 실제로는 CANDIDATES가 고정 문자열
+# 목록이고 Claude API를 부르지 않아 위험도는 낮지만(market_indicators.py와
+# 같은 "사람이 직접 쓴 템플릿" 위험만 있음), 점검 지시가 "안 걸려있는 곳
+# 있으면 추가"이므로 다른 모듈과 같은 방어선을 둔다.
+#
+# "signal"은 base에서 뺀다 — evaluate()의 결과행이 쓰는 "signal" 필드는
+# 매매 신호가 아니라 CANDIDATES의 지표 이름("거래량 동반 가격변동" 등)이다.
+# index.html의 renderLearningRow가 이미 이 필드를 "indicator"로 바꿔치기해서
+# 렌더링하는 것도 같은 이유(대시보드 쪽 주석 참고) — 여기서도 실제로 self-test를
+# 돌려보니 그대로 걸렸다. portfolio_report.py의 "rank"(계급) 예외와 같은 종류.
+FORBIDDEN_FIELDS = tuple(f for f in FORBIDDEN_FIELDS_BASE if f != "signal")
+FORBIDDEN_PHRASES = FORBIDDEN_PHRASES_BASE
 
 N_FORWARD = 5           # 신호 발생 후 며칠 뒤 수익률을 볼지 (지시서에 N 미지정 - 문서화된 선택)
 ALPHA = 0.05
@@ -453,6 +470,25 @@ def print_report_table(rows):
         print(f"{r['signal']} / {train_str} / {val_str} / {r['verdict']}")
 
 
+def audit(obj, path="report"):
+    """금지 필드/문구가 섞였는지 재귀 검사(market_indicators.py/post_trade_review.py와
+    같은 패턴). 2026-08-10 "자유텍스트 금지문구 전수 점검"으로 신설."""
+    bad = []
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            if k.lower() in FORBIDDEN_FIELDS:
+                bad.append(f"{path}.{k} (금지 필드)")
+            bad += audit(v, f"{path}.{k}")
+    elif isinstance(obj, list):
+        for i, v in enumerate(obj):
+            bad += audit(v, f"{path}[{i}]")
+    elif isinstance(obj, str):
+        for ph in FORBIDDEN_PHRASES:
+            if ph in obj:
+                bad.append(f"{path}: 금지 문구 '{ph}'")
+    return bad
+
+
 def main():
     parser = argparse.ArgumentParser(description="보조지표 실질 우위 검증 — 118티커, 훈련/검증 분리, 본페로니 보정")
     parser.add_argument("--crypto", nargs="*", default=None)
@@ -461,7 +497,11 @@ def main():
     parser.add_argument("--count", type=int, default=1500)
     parser.add_argument("--crypto-count", type=int, default=5000)
     parser.add_argument("--out", default="indicator_significance_report.json")
+    parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args()
+    if args.self_test:
+        run_self_test()
+        return
 
     crypto_markets = args.crypto if args.crypto is not None else get_all_krw_markets()[:CRYPTO_UNIVERSE_CAP]
     krx_tickers = args.krx if args.krx is not None else KRX_MARKET_CAP_TOP
@@ -506,8 +546,63 @@ def main():
         ),
         "results": rows,
     }
+
+    violations = audit(report)
+    if violations:
+        print("❌ 감사 위반 발견 - 저장 거부:")
+        for v in violations:
+            print(f"   - {v}")
+        raise SystemExit(1)
+
     save_json(args.out, report)
     print(f"\n리포트 저장: {args.out}")
+
+
+def run_self_test():
+    """네트워크 미사용 — 이 파일 나머지는 전부 실데이터 조회가 필요해 이
+    세션에서 돌릴 수 없지만(모듈 docstring 참고), audit()는 합성 데이터로
+    독립 검증할 수 있다."""
+    print("=== indicator_significance_test.py 자체 검증 (네트워크 미사용) ===\n")
+
+    # 1) 정상 evaluate() 결과가 감사를 통과하는지 — CANDIDATES 고정 문자열,
+    #    "채택"/"우위 없음(폐기)" 고정 라벨만 쓰므로 위반이 없어야 한다.
+    acc = {name: {"train": [1.0, -0.5, 2.0, -1.0, 1.5, 0.8, -0.3, 1.2, 0.4, -0.6],
+                  "val": [0.5, -0.2, 1.0, -0.3, 0.6]} for name in CANDIDATES}
+    rows = evaluate(acc)
+    report = {
+        "generated_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "instruments_used": 10,
+        "n_forward_days": N_FORWARD,
+        "alpha": ALPHA,
+        "bonferroni_n": N_CANDIDATES,
+        "methodology_note": "테스트용 고정 문구",
+        "results": rows,
+    }
+    violations = audit(report)
+    print(f"[1] 정상 evaluate() 결과 감사 -> 위반 {violations or '없음'}")
+    assert violations == [], f"고정 라벨만 쓰는 정상 리포트인데 위반이 잡힘: {violations}"
+
+    # 2) 오염된 리포트는 실제로 잡히는지
+    dirty = {"results": [{"signal": "테스트", "verdict": "채택", "action": "매수",
+                          "note": "지금이 기회입니다"}]}
+    bad = audit(dirty)
+    print(f"[2] 오염된 리포트 -> 위반 {bad}")
+    assert any("action" in v for v in bad)
+    assert any("지금이 기회" in v for v in bad)
+
+    # 3) main()의 저장 거부 경로 — 오염된 report면 save_json 호출 전에 SystemExit
+    violations2 = audit(dirty)
+    assert violations2, "테스트 픽스처 자체가 깨끗하면 3번 검증이 무의미함"
+    try:
+        if violations2:
+            raise SystemExit(1)
+        raised = False
+    except SystemExit:
+        raised = True
+    print(f"[3] 오염된 리포트 저장 시도 -> SystemExit={raised} (main()과 동일한 분기)")
+    assert raised
+
+    print("\n모든 자체 검증 통과(네트워크 필요한 부분은 GitHub Actions에서만 실행 가능).")
 
 
 if __name__ == "__main__":

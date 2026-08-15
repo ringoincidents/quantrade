@@ -91,6 +91,35 @@ PREDICTION_ENABLED = os.environ.get("PREDICTION_ENABLED", "false").lower() == "t
 # 로깅된다.
 RULE_BASED_AUTOEXEC_ENABLED = os.environ.get("RULE_BASED_AUTOEXEC_ENABLED", "false").lower() == "true"
 
+# ─────────────────────────────────────────────────────────────────────────────
+# 자유텍스트 요약/설명을 만드는 여러 모듈(rule_trigger_report.py, news_event_cards.py,
+# market_indicators.py, post_trade_review.py, portfolio_report.py,
+# indicator_significance_test.py, analyze.py)이 공유하는 금지 필드/문구 기본
+# 세트다(2026-08-10, 방향성 세션 지시 "자유텍스트 금지문구 전수 점검").
+#
+# 각 파일이 이 목록을 따로 복사해 갖고 있다가, news_event_cards.py 한 곳에서만
+# "목표주가"가 빠져 있어 실제로 커밋된 파일에 새어나간 적이 있다(post_trade_review.py
+# 개발 중 발견, 같은 커밋에서 수정) — 반복될 수 있는 종류의 드리프트라 공통 부분만
+# 이라도 한 곳에서 관리한다. **이 목록만으로 충분하다고 가정하지 않는다** — 맥락마다
+# 위험한 문구가 다를 수 있어 각 모듈이 자기 맥락에 맞는 항목을 추가로 더한다(예:
+# market_indicators.py는 "국면 전환"/"상승장" 같은 국면 판별 관련 문구를, post_trade_review.py는
+# 반대로 사실 서술에 필요한 "매수"/"매도" 단독 표현은 기본 세트에서 빼고 쓴다 — 이미
+# 일어난 매매를 "그 사이 매도 없이 보유가 유지" 식으로 서술해야 하는데, 이 기본
+# 세트는 명령형("매도하세요")만 막고 명사형은 각 모듈이 선택하도록 남겨둔다).
+FORBIDDEN_PHRASES_BASE = (
+    "매수하세요", "매도하세요", "사세요", "파세요",
+    "추천", "권장", "권합니다",
+    "유망", "저평가", "고평가", "목표가", "목표주가",
+    "상승 전망", "하락 전망", "전망됩니다", "예상됩니다", "기대됩니다", "판단됩니다",
+    "지금이 기회", "그래서 사도", "팔아야",
+    "1위", "순위",
+)
+FORBIDDEN_FIELDS_BASE = (
+    "direction", "confidence", "action", "recommendation",
+    "signal", "buy", "sell", "score", "target_weight_pct", "rating",
+    "rank", "ranking", "phase", "regime", "grade", "color", "colour",
+)
+
 
 def calc_ma(prices, window):
     return sum(prices[-window:]) / window
