@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-09",
+  "generated_at": "2026-08-16T23:30:05.004260+00:00",
   "schema": "portfolio_report_v3.2",
   "note": "현황 계산 + 사전 정의 규칙 해당 여부만 담는다. 매매 판단/방향 예측/확신도 필드는 스키마에 없다 - 누락이 아니라 설계.",
   "thresholds": {
@@ -9,56 +9,56 @@
     "loss_sustained_days": 60
   },
   "snapshot": {
-    "synced_at": "2026-08-09T11:53:44.300983+00:00",
-    "total_assets_krw": 4688926.0,
-    "cash_krw": 664916.0,
-    "cash_pct": 14.18,
+    "synced_at": "2026-08-16T11:43:07.346508+00:00",
+    "total_assets_krw": 5125702.0,
+    "cash_krw": 2229.0,
+    "cash_pct": 0.04,
     "position_count": 5,
     "positions": [
       {
         "symbol": "SCHD",
         "name": "SCHD",
         "market_country": "US",
-        "eval_amount_krw": 2700448.0,
-        "weight_pct": 57.59,
-        "return_pct": 3.64
+        "eval_amount_krw": 2785782.0,
+        "weight_pct": 54.35,
+        "return_pct": 5.5
       },
       {
         "symbol": "196170",
         "name": "알테오젠",
         "market_country": "KR",
-        "eval_amount_krw": 915000.0,
-        "weight_pct": 19.51,
-        "return_pct": 2.23
+        "eval_amount_krw": 943500.0,
+        "weight_pct": 18.41,
+        "return_pct": 5.41
       },
       {
-        "symbol": "NVDA",
-        "name": "엔비디아",
+        "symbol": "TE",
+        "name": "T1 에너지",
         "market_country": "US",
-        "eval_amount_krw": 316702.0,
-        "weight_pct": 6.75,
-        "return_pct": 10.76
+        "eval_amount_krw": 689727.0,
+        "weight_pct": 13.46,
+        "return_pct": 3.2300000000000004
+      },
+      {
+        "symbol": "004000",
+        "name": "롯데정밀화학",
+        "market_country": "KR",
+        "eval_amount_krw": 620750.0,
+        "weight_pct": 12.11,
+        "return_pct": -1.95
       },
       {
         "symbol": "NMR",
         "name": "노무라 홀딩스(ADR)",
         "market_country": "US",
-        "eval_amount_krw": 84422.0,
-        "weight_pct": 1.8,
-        "return_pct": 1.01
-      },
-      {
-        "symbol": "RIG",
-        "name": "트랜스오션",
-        "market_country": "US",
-        "eval_amount_krw": 7438.0,
-        "weight_pct": 0.16,
-        "return_pct": 1.9300000000000002
+        "eval_amount_krw": 83714.0,
+        "weight_pct": 1.63,
+        "return_pct": -0.3
       }
     ],
     "weight_by_country_pct": {
-      "US": 66.3,
-      "KR": 19.51
+      "US": 69.44,
+      "KR": 30.52
     }
   },
   "rule_matches": [
@@ -67,30 +67,30 @@
       "symbol": "SCHD",
       "name": "SCHD",
       "threshold": "단일 종목 비중 30% 이상",
-      "observed": "57.59%",
-      "fact": "SCHD(SCHD) 비중이 총자산의 57.59%로 기준 30% 이상"
+      "observed": "54.35%",
+      "fact": "SCHD(SCHD) 비중이 총자산의 54.35%로 기준 30% 이상"
     }
   ],
   "risk_engine": {
     "provisional": true,
-    "note": "전부 계산·표시 전용이다 — 예측/신호 없음. \"권장 금액\"은 계산값이지 매수 지시가 아니고, 최종 매수 여부·금액은 항상 사람이 정한다.",
+    "note": "전부 계산·표시 전용이다 — 예측/신호 없음. 아래 금액 범위는 계산값이지 매수 지시가 아니고, 최종 매수 여부·금액은 항상 사람이 정한다.",
     "position_sizing": [
       {
         "symbol": "SCHD",
         "name": "SCHD",
         "sizing": {
           "recommended_range_krw": {
-            "min": 894438,
-            "max": 937785
+            "min": 1025140,
+            "max": 1025140
           },
           "by_strategy_krw": {
-            "단타": 937785,
-            "스윙": 937785,
-            "장기": 894438
+            "단타": 1025140,
+            "스윙": 1025140,
+            "장기": 1025140
           },
-          "ceiling_krw": 937785,
+          "ceiling_krw": 1025140,
           "inputs": {
-            "volatility_pct": 0.839,
+            "volatility_pct": 0.644,
             "reference_vol_pct": 2.0,
             "per_trade_risk_budget_pct": 2.0
           }
@@ -102,17 +102,17 @@
         "name": "알테오젠",
         "sizing": {
           "recommended_range_krw": {
-            "min": 120598,
-            "max": 602988
+            "min": 134661,
+            "max": 673306
           },
           "by_strategy_krw": {
-            "단타": 602988,
-            "스윙": 301494,
-            "장기": 120598
+            "단타": 673306,
+            "스윙": 336653,
+            "장기": 134661
           },
-          "ceiling_krw": 937785,
+          "ceiling_krw": 1025140,
           "inputs": {
-            "volatility_pct": 6.221,
+            "volatility_pct": 6.09,
             "reference_vol_pct": 2.0,
             "per_trade_risk_budget_pct": 2.0
           }
@@ -120,21 +120,43 @@
         "note": null
       },
       {
-        "symbol": "NVDA",
-        "name": "엔비디아",
+        "symbol": "TE",
+        "name": "T1 에너지",
         "sizing": {
           "recommended_range_krw": {
-            "min": 281115,
-            "max": 937785
+            "min": 92859,
+            "max": 464296
           },
           "by_strategy_krw": {
-            "단타": 937785,
-            "스윙": 702787,
-            "장기": 281115
+            "단타": 464296,
+            "스윙": 232148,
+            "장기": 92859
           },
-          "ceiling_krw": 937785,
+          "ceiling_krw": 1025140,
           "inputs": {
-            "volatility_pct": 2.669,
+            "volatility_pct": 8.832,
+            "reference_vol_pct": 2.0,
+            "per_trade_risk_budget_pct": 2.0
+          }
+        },
+        "note": null
+      },
+      {
+        "symbol": "004000",
+        "name": "롯데정밀화학",
+        "sizing": {
+          "recommended_range_krw": {
+            "min": 297621,
+            "max": 1025140
+          },
+          "by_strategy_krw": {
+            "단타": 1025140,
+            "스윙": 744053,
+            "장기": 297621
+          },
+          "ceiling_krw": 1025140,
+          "inputs": {
+            "volatility_pct": 2.756,
             "reference_vol_pct": 2.0,
             "per_trade_risk_budget_pct": 2.0
           }
@@ -146,39 +168,17 @@
         "name": "노무라 홀딩스(ADR)",
         "sizing": {
           "recommended_range_krw": {
-            "min": 400333,
-            "max": 937785
+            "min": 558215,
+            "max": 1025140
           },
           "by_strategy_krw": {
-            "단타": 937785,
-            "스윙": 937785,
-            "장기": 400333
+            "단타": 1025140,
+            "스윙": 1025140,
+            "장기": 558215
           },
-          "ceiling_krw": 937785,
+          "ceiling_krw": 1025140,
           "inputs": {
-            "volatility_pct": 1.874,
-            "reference_vol_pct": 2.0,
-            "per_trade_risk_budget_pct": 2.0
-          }
-        },
-        "note": null
-      },
-      {
-        "symbol": "RIG",
-        "name": "트랜스오션",
-        "sizing": {
-          "recommended_range_krw": {
-            "min": 292410,
-            "max": 937785
-          },
-          "by_strategy_krw": {
-            "단타": 937785,
-            "스윙": 731024,
-            "장기": 292410
-          },
-          "ceiling_krw": 937785,
-          "inputs": {
-            "volatility_pct": 2.566,
+            "volatility_pct": 1.469,
             "reference_vol_pct": 2.0,
             "per_trade_risk_budget_pct": 2.0
           }
@@ -187,40 +187,40 @@
       }
     ],
     "mdd_budget": {
-      "portfolio_unrealized_return_pct": 3.28,
+      "portfolio_unrealized_return_pct": 4.18,
       "mdd_limit_pct": -20.0,
-      "budget_usage_pct": -16.4,
+      "budget_usage_pct": -20.9,
       "note": "실제 고점 대비 낙폭(진짜 MDD)이 아니라 현재 미실현손익 기준 소진율 — real_portfolio.json은 스냅샷이라 과거 고점을 모른다."
     },
     "concentration": [
       {
         "symbol": "SCHD",
         "name": "SCHD",
-        "weight_pct": 57.59,
+        "weight_pct": 54.35,
         "threshold_pct": 30.0
       },
       {
         "symbol": "196170",
         "name": "알테오젠",
-        "weight_pct": 19.51,
+        "weight_pct": 18.41,
         "threshold_pct": 30.0
       },
       {
-        "symbol": "NVDA",
-        "name": "엔비디아",
-        "weight_pct": 6.75,
+        "symbol": "TE",
+        "name": "T1 에너지",
+        "weight_pct": 13.46,
+        "threshold_pct": 30.0
+      },
+      {
+        "symbol": "004000",
+        "name": "롯데정밀화학",
+        "weight_pct": 12.11,
         "threshold_pct": 30.0
       },
       {
         "symbol": "NMR",
         "name": "노무라 홀딩스(ADR)",
-        "weight_pct": 1.8,
-        "threshold_pct": 30.0
-      },
-      {
-        "symbol": "RIG",
-        "name": "트랜스오션",
-        "weight_pct": 0.16,
+        "weight_pct": 1.63,
         "threshold_pct": 30.0
       }
     ],
@@ -229,38 +229,38 @@
       "matrix": {
         "SCHD": {
           "SCHD": 1.0,
-          "196170": -0.033,
-          "NVDA": -0.219,
-          "NMR": 0.147,
-          "RIG": 0.104
+          "196170": 0.005,
+          "TE": -0.206,
+          "004000": 0.032,
+          "NMR": 0.141
         },
         "196170": {
-          "SCHD": -0.033,
+          "SCHD": 0.005,
           "196170": 1.0,
-          "NVDA": 0.04,
-          "NMR": -0.047,
-          "RIG": 0.173
+          "TE": 0.019,
+          "004000": 0.466,
+          "NMR": -0.017
         },
-        "NVDA": {
-          "SCHD": -0.219,
-          "196170": 0.04,
-          "NVDA": 1.0,
-          "NMR": 0.259,
-          "RIG": 0.124
+        "TE": {
+          "SCHD": -0.206,
+          "196170": 0.019,
+          "TE": 1.0,
+          "004000": 0.015,
+          "NMR": 0.143
+        },
+        "004000": {
+          "SCHD": 0.032,
+          "196170": 0.466,
+          "TE": 0.015,
+          "004000": 1.0,
+          "NMR": -0.12
         },
         "NMR": {
-          "SCHD": 0.147,
-          "196170": -0.047,
-          "NVDA": 0.259,
-          "NMR": 1.0,
-          "RIG": 0.05
-        },
-        "RIG": {
-          "SCHD": 0.104,
-          "196170": 0.173,
-          "NVDA": 0.124,
-          "NMR": 0.05,
-          "RIG": 1.0
+          "SCHD": 0.141,
+          "196170": -0.017,
+          "TE": 0.143,
+          "004000": -0.12,
+          "NMR": 1.0
         }
       },
       "flagged_pairs": [],
@@ -270,37 +270,37 @@
       {
         "symbol": "SCHD",
         "name": "SCHD",
-        "return_pct": 3.64,
+        "return_pct": 5.5,
         "sell_cost_pct": 0.35,
-        "cost_adjusted_return_pct": 3.29
+        "cost_adjusted_return_pct": 5.15
       },
       {
         "symbol": "196170",
         "name": "알테오젠",
-        "return_pct": 2.23,
+        "return_pct": 5.41,
         "sell_cost_pct": 0.295,
-        "cost_adjusted_return_pct": 1.935
+        "cost_adjusted_return_pct": 5.115
       },
       {
-        "symbol": "NVDA",
-        "name": "엔비디아",
-        "return_pct": 10.76,
+        "symbol": "TE",
+        "name": "T1 에너지",
+        "return_pct": 3.2300000000000004,
         "sell_cost_pct": 0.35,
-        "cost_adjusted_return_pct": 10.41
+        "cost_adjusted_return_pct": 2.88
+      },
+      {
+        "symbol": "004000",
+        "name": "롯데정밀화학",
+        "return_pct": -1.95,
+        "sell_cost_pct": 0.295,
+        "cost_adjusted_return_pct": -2.245
       },
       {
         "symbol": "NMR",
         "name": "노무라 홀딩스(ADR)",
-        "return_pct": 1.01,
+        "return_pct": -0.3,
         "sell_cost_pct": 0.35,
-        "cost_adjusted_return_pct": 0.66
-      },
-      {
-        "symbol": "RIG",
-        "name": "트랜스오션",
-        "return_pct": 1.9300000000000002,
-        "sell_cost_pct": 0.35,
-        "cost_adjusted_return_pct": 1.58
+        "cost_adjusted_return_pct": -0.65
       }
     ]
   },
@@ -410,6 +410,180 @@
           "reit": 1695000,
           "cash": 4237500
         }
+      }
+    ]
+  },
+  "asset_class_gap": {
+    "provisional": true,
+    "rank": "일병",
+    "rows": [
+      {
+        "asset_class": "bond",
+        "label": "채권",
+        "group": "안전자산",
+        "target_pct": 0.0,
+        "actual_pct": 0.0,
+        "gap_pct": 0.0,
+        "currently_mapped": false
+      },
+      {
+        "asset_class": "cash",
+        "label": "현금성",
+        "group": "안전자산",
+        "target_pct": 10.0,
+        "actual_pct": 0.04,
+        "gap_pct": 9.96,
+        "currently_mapped": true
+      },
+      {
+        "asset_class": "기존_배당",
+        "label": "배당(기존)",
+        "group": "위험자산",
+        "target_pct": 45.0,
+        "actual_pct": 54.35,
+        "gap_pct": -9.35,
+        "currently_mapped": true
+      },
+      {
+        "asset_class": "기존_전체시장",
+        "label": "전체시장(기존)",
+        "group": "위험자산",
+        "target_pct": 0.0,
+        "actual_pct": 0.0,
+        "gap_pct": 0.0,
+        "currently_mapped": false
+      },
+      {
+        "asset_class": "기존_개별성장주",
+        "label": "개별성장주(기존)",
+        "group": "위험자산",
+        "target_pct": 0.0,
+        "actual_pct": 0.0,
+        "gap_pct": 0.0,
+        "currently_mapped": false
+      },
+      {
+        "asset_class": "기존_KR개별",
+        "label": "국내개별(기존)",
+        "group": "위험자산",
+        "target_pct": 45.0,
+        "actual_pct": 18.41,
+        "gap_pct": 26.59,
+        "currently_mapped": true
+      },
+      {
+        "asset_class": "developed_exUS",
+        "label": "선진국(미국 제외)",
+        "group": "위험자산",
+        "target_pct": 0.0,
+        "actual_pct": 0.0,
+        "gap_pct": 0.0,
+        "currently_mapped": false
+      },
+      {
+        "asset_class": "emerging",
+        "label": "신흥국",
+        "group": "위험자산",
+        "target_pct": 0.0,
+        "actual_pct": 0.0,
+        "gap_pct": 0.0,
+        "currently_mapped": false
+      },
+      {
+        "asset_class": "healthcare",
+        "label": "헬스케어",
+        "group": "위험자산",
+        "target_pct": 0.0,
+        "actual_pct": 0.0,
+        "gap_pct": 0.0,
+        "currently_mapped": false
+      },
+      {
+        "asset_class": "reit",
+        "label": "리츠",
+        "group": "위험자산",
+        "target_pct": 0.0,
+        "actual_pct": 0.0,
+        "gap_pct": 0.0,
+        "currently_mapped": false
+      }
+    ],
+    "unmapped_holdings": [
+      {
+        "symbol": "TE",
+        "name": "T1 에너지",
+        "weight_pct": 13.46
+      },
+      {
+        "symbol": "004000",
+        "name": "롯데정밀화학",
+        "weight_pct": 12.11
+      },
+      {
+        "symbol": "NMR",
+        "name": "노무라 홀딩스(ADR)",
+        "weight_pct": 1.63
+      }
+    ],
+    "unmapped_holdings_weight_pct": 27.2,
+    "note": "자산군별 목표/실제 비중과 그 차이(%p)만 나열합니다. 매핑 안 된 자산군의 갭이 0%p인 것은 정상입니다(목표도 0%로 계산). 매핑 안 된 보유종목은 unmapped_holdings에 따로 모았습니다 — 어떤 자산군에도 포함되지 않았다는 사실이며, 판단이 필요하다는 뜻은 아닙니다.",
+    "monthly_gap_fill": [
+      {
+        "month": "2026-08",
+        "rank": "일병",
+        "monthly_investable_krw": 850000,
+        "allocations": [
+          {
+            "asset_class": "cash",
+            "label": "현금성",
+            "gap_pct": 9.96,
+            "amount_krw": 231628
+          },
+          {
+            "asset_class": "기존_KR개별",
+            "label": "국내개별(기존)",
+            "gap_pct": 26.59,
+            "amount_krw": 618372
+          }
+        ]
+      },
+      {
+        "month": "2026-09",
+        "rank": "일병",
+        "monthly_investable_krw": 850000,
+        "allocations": [
+          {
+            "asset_class": "cash",
+            "label": "현금성",
+            "gap_pct": 9.96,
+            "amount_krw": 231628
+          },
+          {
+            "asset_class": "기존_KR개별",
+            "label": "국내개별(기존)",
+            "gap_pct": 26.59,
+            "amount_krw": 618372
+          }
+        ]
+      },
+      {
+        "month": "2026-10",
+        "rank": "일병",
+        "monthly_investable_krw": 850000,
+        "allocations": [
+          {
+            "asset_class": "cash",
+            "label": "현금성",
+            "gap_pct": 9.96,
+            "amount_krw": 231628
+          },
+          {
+            "asset_class": "기존_KR개별",
+            "label": "국내개별(기존)",
+            "gap_pct": 26.59,
+            "amount_krw": 618372
+          }
+        ]
       }
     ]
   }
