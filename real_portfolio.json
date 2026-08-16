@@ -1,5 +1,5 @@
 {
-  "synced_at": "2026-08-16T02:04:07.302727+00:00",
+  "synced_at": "2026-08-16T04:06:56.037280+00:00",
   "cash": 2229.0,
   "positions": [
     {
@@ -35,7 +35,7 @@
       "avg_price": "9.85",
       "current_price": "9.82",
       "eval_amount": 58.92,
-      "eval_amount_krw": 83731.212,
+      "eval_amount_krw": 83713.536,
       "return_pct": -0.3
     },
     {
@@ -47,7 +47,7 @@
       "avg_price": "32.717936",
       "current_price": "34.52",
       "eval_amount": 1960.713941,
-      "eval_amount_krw": 2786370.5815550997,
+      "eval_amount_krw": 2785782.3673727997,
       "return_pct": 5.5
     },
     {
@@ -59,7 +59,7 @@
       "avg_price": "4.95",
       "current_price": "5.11",
       "eval_amount": 485.45,
-      "eval_amount_krw": 689872.995,
+      "eval_amount_krw": 689727.36,
       "return_pct": 3.2300000000000004
     }
   ]
