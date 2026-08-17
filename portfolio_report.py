@@ -33,6 +33,7 @@ REAL_PORTFOLIO_FILE = "real_portfolio.json"
 INCOME_SCHEDULE_FILE = "income_schedule.json"
 ASSET_CLASS_MAPPING_FILE = "asset_class_mapping.json"
 TARGET_ALLOCATION_FILE = "target_allocation.json"
+ROLE_MAPPING_FILE = "portfolio_role_mapping.json"
 REPORT_FILE = "portfolio_report.json"
 STATE_FILE = "portfolio_report_state.json"
 
@@ -317,14 +318,26 @@ def update_loss_streaks(rows, state, today=None):
     return streaks
 
 
-def evaluate_rules(rows, streaks, today=None):
+def evaluate_rules(rows, streaks, today=None, asset_type_map=None):
     """규칙 해당 여부만 판정한다. 반환 항목은 '무엇이 어떤 규칙에 해당하는가'라는
-    사실이며, 어떻게 하라는 제안 필드는 스키마에 없다."""
+    사실이며, 어떻게 하라는 제안 필드는 스키마에 없다.
+
+    2026-08-17: 집중도 규칙은 individual_stock에만 적용한다(asset_type_map으로
+    조회, 없는 종목/맵 미제공 시 individual_stock으로 취급) — ETF는 내부적으로
+    이미 분산된 바스켓이라 "단일 기업 리스크"라는 규칙 취지 자체가 적용되지
+    않는다. 지시서는 Risk Engine의 집중도 목록(build_risk_engine)만 명시했지만,
+    같은 대시보드 안에서 이 함수가 만드는 "규칙 해당" 카드가 ETF를 계속
+    걸어버리면 같은 화면에서 서로 모순된 메시지가 나온다 — 그래서 같은 파일
+    안에서는 일관되게 이 원칙을 적용했다(post_trade_review.py처럼 이 함수를
+    재사용하는 다른 파일까지 범위를 넓히지는 않았다 — 거긴 지시 대상이 아니다)."""
     today = today or _today()
     today_dt = datetime.strptime(today, "%Y-%m-%d")
+    asset_type_map = asset_type_map or {}
     matches = []
 
     for r in rows:
+        if asset_type_map.get(r["symbol"], "individual_stock") != "individual_stock":
+            continue
         if r["weight_pct"] >= THRESHOLDS["concentration_pct"]:
             matches.append({
                 "rule": "집중도",
@@ -561,8 +574,20 @@ def derive_months_from_dates(income):
 # 요구를 어기게 된다.
 
 def load_symbol_class_map(mapping):
-    """종목코드 -> 자산군 딕셔너리. mapping은 asset_class_mapping.json 내용."""
-    return {m["symbol"]: m["asset_class"] for m in mapping.get("mappings", [])}
+    """종목코드 -> 자산군 딕셔너리. mapping은 asset_class_mapping.json 내용.
+    active:false(더 이상 보유하지 않아 과거 기록으로만 남긴 항목, 2026-08-17)는
+    제외한다 — 필드 자체가 없으면(기존 항목) active로 취급한다."""
+    return {m["symbol"]: m["asset_class"] for m in mapping.get("mappings", []) if m.get("active", True)}
+
+
+def load_symbol_asset_type_map(mapping):
+    """종목코드 -> asset_type("individual_stock"|"etf") 딕셔너리(2026-08-17).
+    Risk Engine 집중도 규칙이 individual_stock에만 적용되도록 이 맵을 쓴다 —
+    매핑에 없는 종목은 "나머지 전부 individual_stock"(지시서 §3) 원칙에 따라
+    individual_stock으로 취급한다(보수적 기본값 — 숫자를 지어내는 게 아니라
+    "모르면 규칙을 적용한다"는 안전한 쪽으로 기본값을 둔 것)."""
+    return {m["symbol"]: m.get("asset_type", "individual_stock")
+            for m in mapping.get("mappings", []) if m.get("active", True)}
 
 
 def compute_class_actual_pct(rows, cash_pct, symbol_to_class):
@@ -706,6 +731,174 @@ def compute_monthly_gap_fill(gap, income, start_ym, months=GAP_FILL_MONTHS_AHEAD
     return months_out
 
 
+# ── (3c) 포트폴리오 역할 계층 (2026-08-10, 방향성 세션 지시) ────────────────
+#
+# 자산군 축(위 3b)과 독립된 두 번째 분류 축이다. 종목 하나가 자산군 매핑과
+# 역할 매핑을 동시에 가진다(예: SCHD = 자산군 기존_배당 + 역할 코어).
+# portfolio_role_mapping.json이 별도 파일인 이유도 이 독립성 때문 —
+# asset_class_mapping.json에 필드를 더 얹지 않는다.
+#
+# **risk_bucket_suballocation 원칙**: 역할별 목표비중(코어65/위성15/스윙15%)은
+# 포트폴리오 전체 비중이 아니라 위험자산 총액 대비다. 안전자산 실보유가 0에
+# 가까운 지금은 숫자상 거의 같아 보이지만, 안전자산이 채워지면 달라진다 —
+# 그래서 실제 비중도 항상 "위험자산 총액 × 목표비율"이 아니라
+# "역할의 포트폴리오 전체 비중 ÷ 위험자산 총액 비중"으로 환산해서 비교한다.
+
+def load_symbol_role_map(role_mapping):
+    """종목코드 -> 역할 딕셔너리. active:false 항목은 제외한다(자산군 매핑과
+    같은 규칙)."""
+    return {m["symbol"]: m["role"] for m in role_mapping.get("mappings", []) if m.get("active", True)}
+
+
+def compute_risk_asset_total_pct(actual_class_by_class, target_allocation):
+    """포트폴리오 전체 대비 위험자산 총액 비중(%). 안전자산군(target_allocation.
+    safe_classes) 실제 비중의 합을 100에서 뺀 값 — 매핑 안 된 보유종목도
+    안전자산으로 분류되지 않은 이상 자동으로 위험자산 쪽에 포함된다(자산군을
+    특정하지는 못해도 "안전자산은 아니다"는 사실이므로 지어내는 게 아니다)."""
+    safe_classes = target_allocation.get("safe_classes", [])
+    safe_actual = sum(actual_class_by_class.get(c, 0.0) for c in safe_classes)
+    return round(100.0 - safe_actual, 4)
+
+
+def compute_role_actual_pct(rows, symbol_to_role, risk_asset_total_pct):
+    """역할별 실제 비중 — 위험자산 총액 대비(%)로 환산해서 반환한다."""
+    by_role_of_portfolio = {}
+    unmapped = []
+    for r in rows:
+        role = symbol_to_role.get(r["symbol"])
+        if role is None:
+            unmapped.append({"symbol": r["symbol"], "name": r["name"], "weight_pct": r["weight_pct"]})
+            continue
+        by_role_of_portfolio[role] = by_role_of_portfolio.get(role, 0.0) + r["weight_pct"]
+
+    by_role_of_risk = {}
+    for role, pct_of_portfolio in by_role_of_portfolio.items():
+        by_role_of_risk[role] = (round(pct_of_portfolio / risk_asset_total_pct * 100, 2)
+                                  if risk_asset_total_pct else None)
+    return by_role_of_risk, unmapped
+
+
+def compute_role_members(rows, mapping_role):
+    """역할별 실제 보유종목 상세(비중, note) — mapping_role.mappings[].note
+    (예: "추가매수 중단, 손절 없이 방치")를 계산 결과에 실어 보여준다. 지시서가
+    종목마다 note를 명시한 이상 원본 파일에만 남기지 않고 리포트에도 보여야
+    한다고 판단했다."""
+    row_by_symbol = {r["symbol"]: r for r in rows}
+    note_by_symbol = {m["symbol"]: m.get("note")
+                      for m in mapping_role.get("mappings", []) if m.get("active", True)}
+    symbol_to_role = load_symbol_role_map(mapping_role)
+    by_role = {}
+    for symbol, role in symbol_to_role.items():
+        r = row_by_symbol.get(symbol)
+        if not r:
+            continue
+        by_role.setdefault(role, []).append({
+            "symbol": symbol, "name": r["name"], "weight_pct": r["weight_pct"],
+            "note": note_by_symbol.get(symbol),
+        })
+    return by_role
+
+
+def compute_role_gap(rows, mapping_role, risk_asset_total_pct):
+    """역할별 [목표비중/실제비중/갭(%p)] — 전부 위험자산 총액 대비. 목표 비중이
+    없는 역할(정리대상 등, target_weight_pct: null)은 갭을 계산하지 않고
+    None으로 둔다 — 빈 칸이 틀린 숫자보다 낫다."""
+    symbol_to_role = load_symbol_role_map(mapping_role)
+    actual_by_role, unmapped = compute_role_actual_pct(rows, symbol_to_role, risk_asset_total_pct)
+    members_by_role = compute_role_members(rows, mapping_role)
+    roles = mapping_role.get("roles", {})
+
+    rows_out = []
+    for role_name, cfg in roles.items():
+        target_pct = cfg.get("target_weight_pct")
+        actual_pct = actual_by_role.get(role_name, 0.0 if target_pct is not None else None)
+        gap_pct = (round(target_pct - actual_pct, 2)
+                   if target_pct is not None and actual_pct is not None else None)
+        rows_out.append({
+            "role": role_name,
+            "label": cfg.get("label", role_name),
+            "target_pct": target_pct,
+            "actual_pct": round(actual_pct, 2) if actual_pct is not None else None,
+            "gap_pct": gap_pct,
+            "members": members_by_role.get(role_name, []),
+        })
+
+    return {
+        "risk_asset_total_pct": risk_asset_total_pct,
+        "rows": rows_out,
+        "unmapped_holdings": unmapped,
+        "unmapped_holdings_weight_pct": round(sum(u["weight_pct"] for u in unmapped), 2),
+        # "목표가 없는"(목표+가, 조사)이 금지 문구 "목표가"(target price)와 문자열
+        # 상 겹쳐 감사에 실제로 걸렸다 — "목표 비중이 없는"으로 바꿔 피한다.
+        "note": ("역할별 목표/실제 비중은 포트폴리오 전체가 아니라 위험자산 총액 "
+                 "대비입니다. 목표 비중이 없는 역할은 갭을 계산하지 않습니다 — "
+                 "지어내지 않습니다."),
+    }
+
+
+def compute_role_monthly_fill(role_gap, income, target_allocation, start_ym, months=GAP_FILL_MONTHS_AHEAD):
+    """이번 달(+ 다음 N-1개월) 위험자산 배정분을 역할별로 배분한다(지시서 §4).
+
+    규칙: 위성-장기 + 스윙-전술의 실제 비중 합(위험자산 총액 대비)이 두 역할의
+    목표 합(30%)을 초과하는 동안은, 이번 달 위험자산 배정분 전액을 코어로만
+    배분한다. 초과하지 않으면 asset_class 갭 채우기와 같은 방식(양수 갭 역할에
+    갭 크기 비례)으로 되돌아간다. "위험자산 배정분"은 target_allocation.json의
+    safe_total_pct_by_rank(자산군 축)를 그대로 재사용한다 — 자산군 축과 역할
+    축이 안전/위험을 서로 다른 숫자로 나누면 두 표가 앞뒤가 안 맞게 된다.
+
+    이건 문서화·계산일 뿐이다 — 어떤 매매도 실행하지 않고, place_buy_order()와
+    무관하다(2026-08-10 방향성 세션 확인)."""
+    rows = role_gap["rows"]
+    role_by_name = {r["role"]: r for r in rows}
+    satellite, swing, core = role_by_name.get("위성-장기"), role_by_name.get("스윙-전술"), role_by_name.get("코어")
+
+    trigger = False
+    if (satellite and swing and satellite.get("target_pct") is not None
+            and swing.get("target_pct") is not None):
+        combined_target = satellite["target_pct"] + swing["target_pct"]
+        combined_actual = (satellite.get("actual_pct") or 0) + (swing.get("actual_pct") or 0)
+        trigger = combined_actual > combined_target
+
+    positive = [r for r in rows if r.get("gap_pct") is not None and r["gap_pct"] > 0]
+    total_gap = sum(r["gap_pct"] for r in positive)
+
+    months_out = []
+    y, m = (int(x) for x in start_ym.split("-"))
+    for _ in range(months):
+        ym = f"{y:04d}-{m:02d}"
+        rank = current_rank_for_month(income, ym)
+        if not rank:
+            months_out.append({"month": ym, "rank": None, "risk_bucket_amount_krw": None,
+                               "rule_triggered": trigger, "allocations": []})
+            m += 1
+            if m > 12:
+                y, m = y + 1, 1
+            continue
+
+        safe_pct = (target_allocation.get("safe_total_pct_by_rank") or {}).get(rank["rank"])
+        risk_krw = round(rank["monthly_krw"] * (100 - safe_pct) / 100) if safe_pct is not None else None
+
+        allocations = []
+        if risk_krw is not None:
+            if trigger and core:
+                allocations.append({"role": "코어", "label": core["label"], "amount_krw": risk_krw})
+            elif total_gap > 0:
+                for r in positive:
+                    share = r["gap_pct"] / total_gap
+                    allocations.append({
+                        "role": r["role"], "label": r["label"],
+                        "gap_pct": r["gap_pct"], "amount_krw": round(risk_krw * share),
+                    })
+        months_out.append({
+            "month": ym, "rank": rank["rank"], "risk_bucket_amount_krw": risk_krw,
+            "rule_triggered": trigger, "allocations": allocations,
+        })
+        m += 1
+        if m > 12:
+            y, m = y + 1, 1
+    return months_out
+
+
 # ── 리포트 조립 ─────────────────────────────────────────────────────────────
 
 def fetch_symbol_candles(rows, count=None):
@@ -731,13 +924,14 @@ def fetch_symbol_candles(rows, count=None):
     return out
 
 
-def build_risk_engine(rows, total_assets_krw, symbol_closes):
+def build_risk_engine(rows, total_assets_krw, symbol_closes, asset_type_map=None):
     """v3.0 원칙2 Risk Engine 클러스터 — 전부 계산·표시 전용, 예측/신호 없음.
     symbol_closes가 비어 있으면(네트워크 없는 self-test 등) 계산 가능한
     부분(집중도/손실률/MDD소진율/비용반영후, real_portfolio.json만으로 되는
     것들)만 채우고 변동성 의존 항목(포지션 사이징/상관계수)은 빈 값으로
     남긴다 — "빈 칸이 틀린 숫자보다 낫다" 원칙."""
     symbol_closes = symbol_closes or {}
+    asset_type_map = asset_type_map or {}
 
     position_sizing = []
     for r in rows:
@@ -750,9 +944,17 @@ def build_risk_engine(rows, total_assets_krw, symbol_closes):
             "note": None if sizing else "가격 이력 조회 실패로 변동성 계산 불가 — 사이징 계산 생략",
         })
 
+    # 2026-08-17: 집중도 30% 임계치는 individual_stock에만 적용한다(지시서 §3).
+    # ETF(예: SCHD)는 내부적으로 이미 분산된 바스켓이라 "단일 기업 리스크"라는
+    # 규칙의 취지 자체가 적용되지 않는다 — 그래서 행 자체를 지우지 않고(비중
+    # 정보는 계속 보여줘야 하므로) rule_applies로 임계치 적용 여부만 따로
+    # 표시한다. 대시보드는 rule_applies가 false면 기준 초과여도 경고 스타일을
+    # 넣지 않는다.
     concentration = [
         {"symbol": r["symbol"], "name": r["name"], "weight_pct": r["weight_pct"],
-         "threshold_pct": THRESHOLDS["concentration_pct"]}
+         "threshold_pct": THRESHOLDS["concentration_pct"],
+         "asset_type": asset_type_map.get(r["symbol"], "individual_stock"),
+         "rule_applies": asset_type_map.get(r["symbol"], "individual_stock") == "individual_stock"}
         for r in rows
     ]
 
@@ -784,28 +986,48 @@ def build_risk_engine(rows, total_assets_krw, symbol_closes):
 
 
 def build_report(real, income, state, today=None, symbol_closes=None,
-                  asset_class_mapping=None, target_allocation=None):
+                  asset_class_mapping=None, target_allocation=None, role_mapping=None):
     today = today or _today()
     snapshot = compute_positions(real)
     streaks = update_loss_streaks(snapshot["positions"], state, today)
-    matches = evaluate_rules(snapshot["positions"], streaks, today)
-    risk_engine = build_risk_engine(snapshot["positions"], snapshot["total_assets_krw"], symbol_closes)
+
+    # 2026-08-17: Risk Engine 집중도 규칙(및 "규칙 해당" 카드의 집중도 규칙)은
+    # individual_stock에만 적용 — asset_class_mapping.json이 있어야 조회할 수
+    # 있고, 없으면 전부 individual_stock으로 취급(보수적 기본값).
+    asset_type_map = load_symbol_asset_type_map(asset_class_mapping) if asset_class_mapping is not None else {}
+
+    matches = evaluate_rules(snapshot["positions"], streaks, today, asset_type_map=asset_type_map)
+    risk_engine = build_risk_engine(snapshot["positions"], snapshot["total_assets_krw"], symbol_closes,
+                                     asset_type_map=asset_type_map)
 
     # 2026-08-10: 자산군 배분 갭 계산. asset_class_mapping.json/target_allocation.json
     # 둘 다 있어야 계산할 수 있다 — 하나라도 없으면 계산하지 않는다("데이터 소스
     # 미연결"류 원칙과 동일, 없는 데이터를 지어내지 않는다).
     asset_class_gap = None
-    if asset_class_mapping is not None and target_allocation is not None:
-        current_rank = current_rank_for_month(income, today[:7]) if income else None
-        rank_name = current_rank["rank"] if current_rank else None
-        if rank_name:
-            gap = compute_asset_class_gap(
-                snapshot["positions"], snapshot["cash_pct"], asset_class_mapping,
-                target_allocation, rank_name,
-            )
-            if gap:
-                gap["monthly_gap_fill"] = compute_monthly_gap_fill(gap, income, today[:7])
-                asset_class_gap = gap
+    role_gap = None
+    current_rank = current_rank_for_month(income, today[:7]) if income else None
+    rank_name = current_rank["rank"] if current_rank else None
+    if asset_class_mapping is not None and target_allocation is not None and rank_name:
+        gap = compute_asset_class_gap(
+            snapshot["positions"], snapshot["cash_pct"], asset_class_mapping,
+            target_allocation, rank_name,
+        )
+        if gap:
+            gap["monthly_gap_fill"] = compute_monthly_gap_fill(gap, income, today[:7])
+            asset_class_gap = gap
+
+            # 2026-08-17: 포트폴리오 역할 계층(§2) — 자산군 갭에서 이미 계산한
+            # 자산군별 실제 비중(actual_by_class에 해당하는 값)을 다시 계산해
+            # 위험자산 총액을 구한다. 역할 매핑까지 있어야 계산한다.
+            if role_mapping is not None:
+                symbol_to_class = load_symbol_class_map(asset_class_mapping)
+                actual_by_class, _ = compute_class_actual_pct(
+                    snapshot["positions"], snapshot["cash_pct"], symbol_to_class)
+                risk_total_pct = compute_risk_asset_total_pct(actual_by_class, target_allocation)
+                rgap = compute_role_gap(snapshot["positions"], role_mapping, risk_total_pct)
+                rgap["monthly_gap_fill"] = compute_role_monthly_fill(
+                    rgap, income, target_allocation, today[:7])
+                role_gap = rgap
 
     report = {
         "generated_at": _now_iso(),
@@ -818,6 +1040,7 @@ def build_report(real, income, state, today=None, symbol_closes=None,
         "risk_engine": risk_engine,
         "roadmap": compute_roadmap(income),
         "asset_class_gap": asset_class_gap,
+        "role_gap": role_gap,
     }
     return report, state
 
@@ -855,7 +1078,8 @@ def format_telegram(report):
     if mdd and mdd.get("budget_usage_pct") is not None:
         lines.append(f"   · MDD 예산 소진율 {mdd['budget_usage_pct']:.1f}% "
                      f"(현재 {mdd['portfolio_unrealized_return_pct']:+.2f}% / 한도 {mdd['mdd_limit_pct']:.0f}%)")
-    over = [c for c in re_.get("concentration", []) if c["weight_pct"] >= c["threshold_pct"]]
+    over = [c for c in re_.get("concentration", [])
+            if c.get("rule_applies", True) and c["weight_pct"] >= c["threshold_pct"]]
     if over:
         lines.append("   · 집중도 " + " / ".join(f"{c['name']} {c['weight_pct']:.1f}%" for c in over)
                      + f" (기준 {THRESHOLDS['concentration_pct']:.0f}%)")
@@ -946,13 +1170,15 @@ def run(args):
     state = load_json(STATE_FILE, {"loss_since": {}})
     asset_class_mapping = load_json(ASSET_CLASS_MAPPING_FILE, None)
     target_allocation = load_json(TARGET_ALLOCATION_FILE, None)
+    role_mapping = load_json(ROLE_MAPPING_FILE, None)
 
     snapshot_rows = compute_positions(real)["positions"]
     symbol_closes = fetch_symbol_candles(snapshot_rows)
 
     report, state = build_report(real, income, state, symbol_closes=symbol_closes,
                                   asset_class_mapping=asset_class_mapping,
-                                  target_allocation=target_allocation)
+                                  target_allocation=target_allocation,
+                                  role_mapping=role_mapping)
 
     violations = audit(report)
     if violations:
@@ -1339,7 +1565,113 @@ def run_self_test():
     text3 = format_telegram(report20)
     for banned in FORBIDDEN_PHRASES:
         assert banned not in text3, f"자산군 갭 포함 텔레그램 텍스트에 금지 문구 '{banned}' 있음"
+    assert report20["role_gap"] is None, "role_mapping을 안 넘겼는데 role_gap이 채워지면 안 됨"
     print("[20-21] asset_class_gap 포함 리포트/텔레그램 텍스트 검증 통과")
+
+    # ── 22~27) 역할 계층 + ETF 집중도 예외 (2026-08-17) ──────────────────────
+
+    # 22) 집중도 규칙 — ETF는 대상 제외, individual_stock은 그대로 걸리는지,
+    #     asset_type_map 미제공 시 기존 동작(전부 individual_stock)을 유지하는지
+    rows22 = [{"symbol": "E", "name": "이티에프", "weight_pct": 60.0, "return_pct": 1.0, "eval_amount_krw": 600000.0},
+              {"symbol": "S", "name": "개별주", "weight_pct": 40.0, "return_pct": 1.0, "eval_amount_krw": 400000.0}]
+    asset_type_map22 = {"E": "etf", "S": "individual_stock"}
+    matches22 = evaluate_rules(rows22, {}, "2026-08-17", asset_type_map=asset_type_map22)
+    conc22 = [m for m in matches22 if m["rule"] == "집중도"]
+    print(f"[22] ETF(60%)+개별주(40%) -> 집중도 매치: {[m['symbol'] for m in conc22]}")
+    assert [m["symbol"] for m in conc22] == ["S"], "ETF(E)는 빠지고 individual_stock(S)만 걸려야 함"
+    matches22c = evaluate_rules(rows22, {}, "2026-08-17")
+    print(f"[22] asset_type_map 미제공 -> 집중도 매치 {len([m for m in matches22c if m['rule']=='집중도'])}건")
+    assert len([m for m in matches22c if m["rule"] == "집중도"]) == 2, \
+        "맵을 안 넘기면 기존 동작(전부 individual_stock 취급)을 유지해야 함 - 회귀 방지"
+
+    # 23) Risk Engine 집중도 목록 — rule_applies로 임계치 적용 여부만 표시하고
+    #     행 자체는 지우지 않는지(비중 정보는 계속 보여야 함)
+    re23 = build_risk_engine(rows22, 1000000, {}, asset_type_map=asset_type_map22)
+    conc23 = {c["symbol"]: c for c in re23["concentration"]}
+    print(f"[23] Risk Engine 집중도: {conc23}")
+    assert conc23["E"]["rule_applies"] is False and conc23["E"]["asset_type"] == "etf"
+    assert conc23["S"]["rule_applies"] is True and conc23["S"]["asset_type"] == "individual_stock"
+    assert conc23["E"]["weight_pct"] == 60.0, "ETF도 비중 정보 자체는 계속 보여줘야 함(행을 지우지 않음)"
+
+    # 24) 위험자산 총액 비중 산술 — 안전자산군 실제 비중 합을 100에서 뺀 값인지
+    risk_total24 = compute_risk_asset_total_pct({"cash": 10.0, "bond": 5.0, "기존_배당": 85.0},
+                                                 {"safe_classes": ["bond", "cash"]})
+    print(f"[24] 위험자산 총액: {risk_total24}%")
+    assert risk_total24 == 85.0
+
+    # 25) 역할별 갭 — 위험자산 총액 대비로 환산되는지, 목표 없는 역할(정리대상)은
+    #     갭이 None인지, 미매핑 보유종목은 따로 잡히는지
+    role_mapping25 = {
+        "roles": {
+            "코어": {"label": "코어", "target_weight_pct": 65},
+            "위성-장기": {"label": "위성", "target_weight_pct": 15},
+            "스윙-전술": {"label": "스윙", "target_weight_pct": 15},
+            "정리대상": {"label": "정리대상", "target_weight_pct": None},
+        },
+        "mappings": [
+            {"symbol": "CORE1", "role": "코어", "active": True},
+            {"symbol": "SAT1", "role": "위성-장기", "active": True, "note": "추가매수 중단, 손절 없이 방치"},
+            {"symbol": "SWG1", "role": "스윙-전술", "active": True},
+            {"symbol": "CLR1", "role": "정리대상", "active": True, "note": "코어로 재배치 예정"},
+        ],
+    }
+    rows25 = [
+        {"symbol": "CORE1", "name": "코어종목", "weight_pct": 50.0},
+        {"symbol": "SAT1", "name": "위성종목", "weight_pct": 15.0},
+        {"symbol": "SWG1", "name": "스윙종목", "weight_pct": 15.0},
+        {"symbol": "CLR1", "name": "정리종목", "weight_pct": 10.0},
+        {"symbol": "UNK1", "name": "미매핑", "weight_pct": 10.0},
+    ]
+    rgap25 = compute_role_gap(rows25, role_mapping25, 90.0)
+    by_role25 = {r["role"]: r for r in rgap25["rows"]}
+    print(f"[25] 역할별 갭: {by_role25}")
+    assert abs(by_role25["코어"]["actual_pct"] - 55.56) < 0.1, "50%/위험자산총액90% = 55.56%여야 함"
+    assert by_role25["코어"]["gap_pct"] == round(65 - by_role25["코어"]["actual_pct"], 2)
+    assert by_role25["정리대상"]["target_pct"] is None and by_role25["정리대상"]["gap_pct"] is None, \
+        "목표 없는 역할은 갭도 None이어야 함(빈 칸이 틀린 숫자보다 낫다)"
+    assert by_role25["정리대상"]["actual_pct"] is not None, "실제 비중 자체는 보여줘야 함"
+    assert rgap25["unmapped_holdings"] == [{"symbol": "UNK1", "name": "미매핑", "weight_pct": 10.0}]
+    sat_member = by_role25["위성-장기"]["members"][0]
+    print(f"[25] 위성-장기 멤버: {sat_member}")
+    assert sat_member["symbol"] == "SAT1" and sat_member["note"] == "추가매수 중단, 손절 없이 방치", \
+        "mapping의 note가 역할별 members에 실려야 함"
+
+    # 26) 이번 달 위험자산 배정분 배분 — 위성+스윙 합계가 목표(30%) 초과하면
+    #     전액 코어로, 아니면 갭 비례로 전 역할에 배분되는지
+    income26 = {"ranks": [{"rank": "일병", "start": "2026-08", "monthly_krw": 850000}]}
+    target_alloc26 = {"safe_total_pct_by_rank": {"일병": 10}}
+    role_gap_trigger = {"rows": [
+        {"role": "코어", "label": "코어", "target_pct": 65, "actual_pct": 40.0, "gap_pct": 25.0},
+        {"role": "위성-장기", "label": "위성", "target_pct": 15, "actual_pct": 25.0, "gap_pct": -10.0},
+        {"role": "스윙-전술", "label": "스윙", "target_pct": 15, "actual_pct": 15.0, "gap_pct": 0.0},
+    ]}
+    fill26 = compute_role_monthly_fill(role_gap_trigger, income26, target_alloc26, "2026-08", months=1)
+    print(f"[26] 위성+스윙 40% > 목표30% -> {fill26[0]}")
+    assert fill26[0]["rule_triggered"] is True
+    assert len(fill26[0]["allocations"]) == 1 and fill26[0]["allocations"][0]["role"] == "코어"
+    assert fill26[0]["allocations"][0]["amount_krw"] == fill26[0]["risk_bucket_amount_krw"]
+
+    role_gap_notrigger = {"rows": [
+        {"role": "코어", "label": "코어", "target_pct": 65, "actual_pct": 60.0, "gap_pct": 5.0},
+        {"role": "위성-장기", "label": "위성", "target_pct": 15, "actual_pct": 10.0, "gap_pct": 5.0},
+        {"role": "스윙-전술", "label": "스윙", "target_pct": 15, "actual_pct": 10.0, "gap_pct": 5.0},
+    ]}
+    fill26b = compute_role_monthly_fill(role_gap_notrigger, income26, target_alloc26, "2026-08", months=1)
+    print(f"[26b] 위성+스윙 20% <= 목표30% -> {fill26b[0]}")
+    assert fill26b[0]["rule_triggered"] is False
+    assert len(fill26b[0]["allocations"]) == 3, "미발동이면 갭 비례로 전 역할에 배분돼야 함"
+    alloc_sum26 = sum(a["amount_krw"] for a in fill26b[0]["allocations"])
+    assert abs(alloc_sum26 - fill26b[0]["risk_bucket_amount_krw"]) <= 1
+
+    # 27) build_report()에 role_mapping까지 넘기면 role_gap이 채워지고 감사도
+    #     통과하는지(전부 미매핑이어도 - real20의 A/B는 role_mapping25에 없음)
+    report27, _ = build_report(real20, income20, {"loss_since": {}}, "2026-08-10",
+                               symbol_closes={}, asset_class_mapping=mapping, target_allocation=target_alloc,
+                               role_mapping=role_mapping25)
+    print(f"[27] role_gap 존재: {report27['role_gap'] is not None}, "
+          f"미매핑 보유: {report27['role_gap']['unmapped_holdings'] if report27['role_gap'] else None}")
+    assert report27["role_gap"] is not None
+    assert audit(report27) == [], f"role_gap 포함 리포트가 감사를 통과 못 함: {audit(report27)}"
 
     print("\n모든 자체 검증 통과.")
 

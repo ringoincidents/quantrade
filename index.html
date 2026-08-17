@@ -605,6 +605,62 @@ function renderAssetClassGap(gap) {
     ${fillHtml}`;
 }
 
+// ── [2026-08-17] 포트폴리오 역할 계층 — portfolio_role_mapping.json 기반.
+// 자산군 축(위)과 독립된 두 번째 분류. role_gap.rank는 이 파일엔 없지만
+// monthly_gap_fill[].rank는 있다 — 같은 이유(계급)로 rank는 화이트리스트에
+// 넣지 않고 그대로 문자열로만 쓴다(전체 객체를 가드하지 않는 이유는
+// renderAssetClassGap과 동일).
+const ROLE_ROW_FIELDS = ['role', 'label', 'target_pct', 'actual_pct', 'gap_pct', 'members'];
+const ROLE_MEMBER_FIELDS = ['symbol', 'name', 'weight_pct', 'note'];
+const ROLE_FILL_ALLOC_FIELDS = ['role', 'label', 'gap_pct', 'amount_krw'];
+
+function renderRoleGap(roleGap) {
+  if (!roleGap) return '';
+  const rows = (roleGap.rows || []).filter(r => assertNoPredictiveFields(r, '역할 갭 행'));
+  const body = rows.map(raw => {
+    const r = pick(raw, ROLE_ROW_FIELDS);
+    const hasTarget = r.target_pct !== null && r.target_pct !== undefined;
+    const gapCls = (hasTarget && r.gap_pct > 0) ? 'negative' : '';
+    const members = (r.members || []).filter(m => assertNoPredictiveFields(m, '역할 갭 멤버'));
+    const memberLines = members.map(raw2 => {
+      const m = pick(raw2, ROLE_MEMBER_FIELDS);
+      return `${esc(m.name)}(${m.symbol}) ${m.weight_pct.toFixed(1)}%${m.note ? ' · ' + esc(m.note) : ''}`;
+    }).join('<br>');
+    return `<tr>
+      <td>${esc(r.label)}<div class="rm-sub">${memberLines}</div></td>
+      <td class="rm-num">${hasTarget ? r.target_pct.toFixed(1) + '%' : '목표 없음'}</td>
+      <td class="rm-num">${r.actual_pct === null ? '-' : r.actual_pct.toFixed(1) + '%'}</td>
+      <td class="rm-num ${gapCls}">${hasTarget ? (r.gap_pct >= 0 ? '+' : '') + r.gap_pct.toFixed(1) + '%p' : '-'}</td>
+    </tr>`;
+  }).join('');
+
+  const fill = (roleGap.monthly_gap_fill || [])[0];
+  const fillAllocations = (fill && fill.allocations || []).filter(a => assertNoPredictiveFields(a, '역할 갭 이번달 배분'));
+  const triggerNote = fill && fill.rule_triggered
+    ? `<p class="muted rm-note">위성-장기 + 스윙-전술 실제 비중 합이 목표 합을 초과한 상태입니다 — 규칙에 따라
+        이번 달 위험자산 배정분 전액이 코어로 계산됐습니다.</p>`
+    : '';
+  const fillHtml = (fill && fillAllocations.length)
+    ? `<h3 style="margin-top:14px;">💰 이번 달(${esc(fill.month)}) 위험자산 배정분</h3>
+      <p class="muted">위험자산 배정분 ${Number(fill.risk_bucket_amount_krw).toLocaleString()}원(${esc(fill.rank)} 기준) —
+        역할 단위 산술이며 개별 종목을 지정하지 않습니다.</p>
+      ${triggerNote}`
+      + fillAllocations.map(raw => {
+          const a = pick(raw, ROLE_FILL_ALLOC_FIELDS);
+          return `<div class="pos"><span class="pos-main">${esc(a.label)}
+              ${a.gap_pct !== undefined ? `<span class="pos-sub">갭 ${a.gap_pct >= 0 ? '+' : ''}${a.gap_pct.toFixed(1)}%p</span>` : ''}</span>
+            <span>${Number(a.amount_krw).toLocaleString()}원</span></div>`;
+        }).join('')
+    : '';
+
+  return `<h3 style="margin-top:14px;">🎭 포트폴리오 역할 계층</h3>
+    <p class="muted">${esc(roleGap.note || '')} 위험자산 총액 ${roleGap.risk_asset_total_pct}% 기준.</p>
+    <div class="rm-scroll"><table class="rm-table">
+      <thead><tr><th>역할</th><th>목표</th><th>실제</th><th>갭</th></tr></thead>
+      <tbody>${body}</tbody></table></div>
+    ${fillHtml}`;
+}
+
 async function loadPortfolioReport(bust) {
   const el = document.getElementById('preport-section');
   try {
@@ -652,10 +708,11 @@ async function loadPortfolioReport(bust) {
     const gapHtml = r.asset_class_gap
       ? renderAssetClassGap(r.asset_class_gap)
       : `<p class="muted">📊 자산군 배분 갭: 계산 불가 (asset_class_mapping.json/target_allocation.json/계급 시작일 중 하나 없음)</p>`;
+    const roleHtml = r.role_gap ? renderRoleGap(r.role_gap) : '';
     el.innerHTML = `<p class="muted">총자산
         ${Number(s.total_assets_krw || 0).toLocaleString()}원 · 현금 ${(s.cash_pct || 0).toFixed(1)}%
         ${byC ? '· ' + byC : ''}</p>
-      ${rows}${matchHtml}${gapHtml}${rmHtml}
+      ${rows}${matchHtml}${gapHtml}${roleHtml}${rmHtml}
       <p class="muted sync-note" style="margin-top:10px; margin-bottom:0;">기준: ${fmtBasis(r.generated_at)}
         (이 리포트는 주 1회 갱신) · 계좌 스냅샷 기준: ${fmtBasis(s.synced_at)}
         (real_portfolio.json, 4x/일) — 두 시각은 갱신 주기가 달라 서로 다른 게 정상입니다.</p>
@@ -713,10 +770,18 @@ async function loadRiskEngine(bust) {
     const sizingHtml = (re.position_sizing || []).map(renderPositionSizing).join('')
       || '<p class="muted">보유 종목 없음</p>';
 
+    // 2026-08-17: 집중도 30% 기준은 individual_stock에만 적용한다(ETF는
+    // 내부적으로 이미 분산된 바스켓이라 단일기업 리스크 규칙 취지 자체가
+    // 적용 안 됨, portfolio_report.py 참고). rule_applies가 false인 행은
+    // 비중이 기준을 넘어도 경고 스타일을 넣지 않고, ETF라는 사실만 표시한다.
     const conc = re.concentration || [];
     const concHtml = conc.length
-      ? conc.map(c => `<div class="pos"><span class="pos-main">${esc(c.name)}</span>
-          <span class="${c.weight_pct >= c.threshold_pct ? 'negative' : ''}">${c.weight_pct.toFixed(1)}% <span class="pos-sub">(기준 ${c.threshold_pct}%)</span></span></div>`).join('')
+      ? conc.map(c => {
+          const over = c.rule_applies !== false && c.weight_pct >= c.threshold_pct;
+          const etfNote = c.asset_type === 'etf' ? ' <span class="pos-sub">(ETF — 집중도 규칙 대상 아님)</span>' : '';
+          return `<div class="pos"><span class="pos-main">${esc(c.name)}${etfNote}</span>
+            <span class="${over ? 'negative' : ''}">${c.weight_pct.toFixed(1)}% <span class="pos-sub">(기준 ${c.threshold_pct}%)</span></span></div>`;
+        }).join('')
       : '<p class="muted">보유 종목 없음</p>';
 
     const corr = re.correlation || {};
