@@ -1,0 +1,36 @@
+{
+  "schema": "portfolio_role_mapping_v1",
+  "generated_at": "2026-08-17",
+  "source": "방향성 세션 지시 2026-08-10 — 초안, 확정 아님. 완료 후 반드시 확인받을 것.",
+  "purpose": "자산군 분류(asset_class_mapping.json)와는 독립적인 두 번째 축. 종목 하나가 자산군 매핑과 역할 매핑을 동시에 가진다 — 예: SCHD는 자산군상 '기존_배당', 역할상 '코어'.",
+  "risk_bucket_suballocation_note": "아래 target_weight_pct는 포트폴리오 전체 비중이 아니라 위험자산 총액 대비 비율이다. portfolio_report.py는 반드시 '위험자산 총액 × 목표비율' 공식으로 계산한다 — 포트폴리오 전체값에 직접 곱하지 않는다. 현재 안전자산 실보유가 0%에 가까워 숫자상 전체 비중과 거의 같아 보이지만, 안전자산이 채워지면(예: 전역 후 유입 2천만원 등) 위험자산 총액이 줄어들면서 역할별 실제 비중(위험자산 대비)도 달라진다.",
+  "roles": {
+    "코어": {
+      "label": "코어",
+      "target_weight_pct": 65
+    },
+    "위성-장기": {
+      "label": "위성-장기",
+      "target_weight_pct": 15
+    },
+    "스윙-전술": {
+      "label": "스윙-전술",
+      "target_weight_pct": 15
+    },
+    "정리대상": {
+      "label": "정리대상",
+      "target_weight_pct": null,
+      "note": "정리대상은 목표비중 개념이 없다 — 갭 계산에서 제외한다(target_weight_pct: null)."
+    }
+  },
+  "roles_note": "코어65+위성15+스윙15=95% — 나머지 5%는 정리대상(NMR)이 코어로 재배치되면 채워질 몫으로 남겨둔 것으로 보이나, 이 파일은 그 재배치를 자동으로 반영하지 않는다(재배치는 실제로 매도·재매수가 일어난 뒤 이 파일을 갱신해야 한다).",
+  "mappings": [
+    {"symbol": "SCHD", "name": "SCHD", "role": "코어", "active": true},
+    {"symbol": "196170", "name": "알테오젠", "role": "위성-장기", "active": true,
+     "note": "추가매수 중단, 손절 없이 방치"},
+    {"symbol": "004000", "name": "롯데정밀화학", "role": "스윙-전술", "active": true},
+    {"symbol": "TE", "name": "T1 에너지", "role": "스윙-전술", "active": true},
+    {"symbol": "NMR", "name": "노무라 홀딩스(ADR)", "role": "정리대상", "active": true,
+     "note": "코어로 재배치 예정"}
+  ]
+}
