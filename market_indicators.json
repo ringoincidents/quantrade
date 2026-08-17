@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-16T10:36:45.484711+00:00",
+  "generated_at": "2026-08-17T10:46:16.818073+00:00",
   "schema": "market_indicators_v3.2",
   "note": "개별 계산값을 항목별로만 나열합니다. 지표들을 하나로 합치지 않고, 종목 간 우열을 매겨 배열하지 않으며, 색을 이용한 강조도 하지 않습니다. 표의 나열 순서는 원본(보유+관심종목) 그대로이며 계산값 크기로 다시 배열하지 않습니다.",
   "state_board": {
@@ -24,9 +24,9 @@
       {
         "symbol": "NMR",
         "name": "노무라 홀딩스(ADR)",
-        "volatility_20d_pct": 1.83,
-        "volatility_percentile": 51.8,
-        "adx_14": 11.6,
+        "volatility_20d_pct": 1.43,
+        "volatility_percentile": 18.9,
+        "adx_14": 3.9,
         "data_status": null
       },
       {
@@ -47,7 +47,7 @@
       }
     ],
     "correlation": {
-      "avg_pairwise_correlation": 0.01,
+      "avg_pairwise_correlation": 0.04,
       "pair_count": 10,
       "symbol_count": 5,
       "window_days": 60
@@ -81,9 +81,9 @@
         "name": "노무라 홀딩스(ADR)",
         "per": null,
         "per_status": "데이터 소스 미연결",
-        "volatility_20d_pct": 1.83,
-        "momentum_20d_pct": 0.72,
-        "adx_14": 11.6,
+        "volatility_20d_pct": 1.43,
+        "momentum_20d_pct": 4.47,
+        "adx_14": 3.9,
         "data_status": null
       },
       {
