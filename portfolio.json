@@ -7,8 +7,8 @@
       "entry_date": "2026-07-29",
       "expected_days": 7,
       "amount_krw": 33333.333333333336,
-      "current_price": 1420.0,
-      "current_return": -0.9762900976290098
+      "current_price": 1410.0,
+      "current_return": -1.6736401673640167
     },
     {
       "market": "KRW-PENGU",
@@ -18,8 +18,8 @@
       "entry_date": "2026-07-30",
       "expected_days": 11,
       "amount_krw": 4354,
-      "current_price": 8.48,
-      "current_return": 2.5392986698911835
+      "current_price": 8.41,
+      "current_return": 1.6928657799274556
     },
     {
       "market": "KRW-WIF",
@@ -29,8 +29,8 @@
       "entry_date": "2026-07-31",
       "expected_days": 11,
       "amount_krw": 3557,
-      "current_price": 193.0,
-      "current_return": -4.455445544554455
+      "current_price": 194.0,
+      "current_return": -3.9603960396039604
     },
     {
       "market": "KRW-LAYER",
@@ -40,8 +40,8 @@
       "entry_date": "2026-07-31",
       "expected_days": 11,
       "amount_krw": 5775,
-      "current_price": 86.4,
-      "current_return": -2.7027027027026933
+      "current_price": 86.2,
+      "current_return": -2.9279279279279216
     },
     {
       "market": "KRW-ANKR",
@@ -51,8 +51,8 @@
       "entry_date": "2026-08-01",
       "expected_days": 11,
       "amount_krw": 3272,
-      "current_price": 4.78,
-      "current_return": -1.8480492813141656
+      "current_price": 4.76,
+      "current_return": -2.25872689938399
     },
     {
       "market": "KRW-USD1",
@@ -62,8 +62,8 @@
       "entry_date": "2026-08-02",
       "expected_days": 11,
       "amount_krw": 879,
-      "current_price": 1418.0,
-      "current_return": -1.1846689895470384
+      "current_price": 1411.0,
+      "current_return": -1.6724738675958188
     }
   ]
 }
