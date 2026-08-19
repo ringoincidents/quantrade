@@ -1,5 +1,5 @@
 {
-  "synced_at": "2026-08-18T11:49:10.893986+00:00",
+  "synced_at": "2026-08-19T01:58:31.106581+00:00",
   "cash": 2229.0,
   "positions": [
     {
@@ -9,10 +9,10 @@
       "currency": "KRW",
       "quantity": "13",
       "avg_price": "48700",
-      "current_price": "46200",
-      "eval_amount": 600600.0,
-      "eval_amount_krw": 600600.0,
-      "return_pct": -5.13
+      "current_price": "45200",
+      "eval_amount": 587600.0,
+      "eval_amount_krw": 587600.0,
+      "return_pct": -7.180000000000001
     },
     {
       "symbol": "196170",
@@ -21,10 +21,10 @@
       "currency": "KRW",
       "quantity": "3",
       "avg_price": "298333.333333",
-      "current_price": "295000",
-      "eval_amount": 885000.0,
-      "eval_amount_krw": 885000.0,
-      "return_pct": -1.11
+      "current_price": "305000",
+      "eval_amount": 915000.0,
+      "eval_amount_krw": 915000.0,
+      "return_pct": 2.23
     },
     {
       "symbol": "NMR",
@@ -33,10 +33,10 @@
       "currency": "USD",
       "quantity": "6",
       "avg_price": "9.85",
-      "current_price": "9.57",
-      "eval_amount": 57.42,
-      "eval_amount_krw": 81206.235,
-      "return_pct": -2.8400000000000003
+      "current_price": "9.65",
+      "eval_amount": 57.9,
+      "eval_amount_krw": 81436.34999999999,
+      "return_pct": -2.03
     },
     {
       "symbol": "SCHD",
@@ -45,10 +45,10 @@
       "currency": "USD",
       "quantity": "56.799361",
       "avg_price": "32.717936",
-      "current_price": "34.42",
-      "eval_amount": 1955.034005,
-      "eval_amount_krw": 2764906.84157125,
-      "return_pct": 5.2
+      "current_price": "34.52",
+      "eval_amount": 1960.713941,
+      "eval_amount_krw": 2757744.1580165,
+      "return_pct": 5.5
     },
     {
       "symbol": "TE",
@@ -57,10 +57,10 @@
       "currency": "USD",
       "quantity": "95",
       "avg_price": "4.95",
-      "current_price": "4.75",
-      "eval_amount": 451.25,
-      "eval_amount_krw": 638180.3125,
-      "return_pct": -4.04
+      "current_price": "4.66",
+      "eval_amount": 442.7,
+      "eval_amount_krw": 622657.5499999999,
+      "return_pct": -5.8500000000000005
     }
   ]
 }
