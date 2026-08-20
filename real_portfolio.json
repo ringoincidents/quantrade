@@ -1,5 +1,5 @@
 {
-  "synced_at": "2026-08-20T04:05:55.927931+00:00",
+  "synced_at": "2026-08-20T08:03:33.011474+00:00",
   "cash": 2229.0,
   "positions": [
     {
@@ -9,10 +9,10 @@
       "currency": "KRW",
       "quantity": "13",
       "avg_price": "48700",
-      "current_price": "44750",
-      "eval_amount": 581750.0,
-      "eval_amount_krw": 581750.0,
-      "return_pct": -8.110000000000001
+      "current_price": "44450",
+      "eval_amount": 577850.0,
+      "eval_amount_krw": 577850.0,
+      "return_pct": -8.72
     },
     {
       "symbol": "196170",
@@ -21,10 +21,10 @@
       "currency": "KRW",
       "quantity": "3",
       "avg_price": "298333.333333",
-      "current_price": "338000",
-      "eval_amount": 1014000.0,
-      "eval_amount_krw": 1014000.0,
-      "return_pct": 13.29
+      "current_price": "337500",
+      "eval_amount": 1012500.0,
+      "eval_amount_krw": 1012500.0,
+      "return_pct": 13.120000000000001
     },
     {
       "symbol": "NMR",
@@ -35,7 +35,7 @@
       "avg_price": "9.85",
       "current_price": "9.51",
       "eval_amount": 57.06,
-      "eval_amount_krw": 79553.05200000001,
+      "eval_amount_krw": 79535.93400000001,
       "return_pct": -3.45
     },
     {
@@ -45,10 +45,10 @@
       "currency": "USD",
       "quantity": "56.799361",
       "avg_price": "32.717936",
-      "current_price": "35.1",
-      "eval_amount": 1993.657571,
-      "eval_amount_krw": 2779557.3854882,
-      "return_pct": 7.28
+      "current_price": "35.05",
+      "eval_amount": 1990.817603,
+      "eval_amount_krw": 2775000.6568217003,
+      "return_pct": 7.12
     },
     {
       "symbol": "TE",
@@ -57,10 +57,10 @@
       "currency": "USD",
       "quantity": "95",
       "avg_price": "4.95",
-      "current_price": "4.57",
-      "eval_amount": 434.15,
-      "eval_amount_krw": 605291.9299999999,
-      "return_pct": -7.670000000000001
+      "current_price": "4.56",
+      "eval_amount": 433.2,
+      "eval_amount_krw": 603837.48,
+      "return_pct": -7.870000000000001
     }
   ]
 }
