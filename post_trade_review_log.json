@@ -1,0 +1,96 @@
+{
+  "reports": [
+    {
+      "id": "review-2026-08-21T08:08:59.544286+00:00",
+      "generated_at": "2026-08-21T08:08:59.544286+00:00",
+      "trigger": "batch",
+      "schema": "post_trade_review_v3.2",
+      "note": "매매 이후 사람이 놓쳤을 수 있는 것을 사후에 짚어보는 기록입니다. 새 AI 판단이나 매매 제안이 아니라 이미 계산된 값을 재사용한 사실 연결이며, 생성 시점에 확정되고 이후 수정되지 않습니다.",
+      "exposure_change": {
+        "has_baseline": true,
+        "added_symbols": [],
+        "removed_symbols": [
+          "196170"
+        ],
+        "by_currency_pct_now": {
+          "KRW": 11.48,
+          "USD": 68.41
+        },
+        "by_country_pct_now": {
+          "KR": 11.48,
+          "US": 68.41
+        },
+        "by_currency_pct_delta": {
+          "KRW": -19.2,
+          "USD": -0.86
+        },
+        "by_country_pct_delta": {
+          "KR": -19.2,
+          "US": -0.86
+        },
+        "sector_status": "데이터 소스 미연결"
+      },
+      "allocation_gap": {
+        "concentration_matches": [
+          {
+            "rule": "집중도",
+            "symbol": "SCHD",
+            "name": "SCHD",
+            "threshold": "단일 종목 비중 30% 이상",
+            "observed": "55.11%",
+            "fact": "SCHD(SCHD) 비중이 총자산의 55.11%로 기준 30% 이상"
+          }
+        ],
+        "asset_class_target_status": "데이터 소스 미연결 — 보유 종목을 로드맵의 자산군(bond/developed_exUS/emerging/...)으로 분류할 데이터가 없어 국가/통화 노출만 비교합니다."
+      },
+      "correlation_blind_spots": {
+        "flag_threshold": 0.7,
+        "lookback_days": 90,
+        "spots": []
+      },
+      "behavior_patterns": [],
+      "recent_news_links": [
+        {
+          "symbol": "004000",
+          "name": "롯데정밀화학",
+          "weight_pct": 11.48,
+          "event_type": "실적발표",
+          "summary": "롯데정밀화학의 2024년 2분기 영업이익이 619억원으로 전년 동기 대비 611.5% 증가했다고 보도되었다. 또한 직전 분기(2023년 4분기) 매출액은 4390억원(+2.4%), 영업이익은 193억원(+59%)으로 집계되었으며, TMAC 증설 투자 관련 내용도 함께 보도되었다.",
+          "fact": "롯데정밀화학(004000) 비중이 11.5%인 상태에서 최근 실적발표 관련 사실이 있었습니다: 롯데정밀화학의 2024년 2분기 영업이익이 619억원으로 전년 동기 대비 611.5% 증가했다고 보도되었다. 또한 직전 분기(2023년 4분기) 매출액은 4390억원(+2.4%), 영업이익은 193억원(+59%)으로 집계되었으며, TMAC 증설 투자 관련 내용도 함께 보도되었다."
+        },
+        {
+          "symbol": "NMR",
+          "name": "노무라 홀딩스(ADR)",
+          "weight_pct": 1.58,
+          "event_type": "기타",
+          "summary": "Nomura Holdings(NMR)의 미래 EPS 및 수익 성장 추정치가 보도되었으며, 나머지 헤드라인은 종목코드 NMR과 동일한 약어를 사용하는 핵자기공명(NMR) 분광기 관련 기술 및 시장 보도로 확인되었다.",
+          "fact": "노무라 홀딩스(ADR)(NMR) 비중이 1.6%인 상태에서 최근 기타 관련 사실이 있었습니다: Nomura Holdings(NMR)의 미래 EPS 및 수익 성장 추정치가 보도되었으며, 나머지 헤드라인은 종목코드 NMR과 동일한 약어를 사용하는 핵자기공명(NMR) 분광기 관련 기술 및 시장 보도로 확인되었다."
+        },
+        {
+          "symbol": "SCHD",
+          "name": "SCHD",
+          "weight_pct": 55.11,
+          "event_type": "이상행동",
+          "summary": "당일 +1.7% (최근 20일 변동성 대비 2.5배)",
+          "fact": "SCHD(SCHD) 비중이 55.1%인 상태에서 최근 이상행동 관련 사실이 있었습니다: 당일 +1.7% (최근 20일 변동성 대비 2.5배)"
+        },
+        {
+          "symbol": "SCHD",
+          "name": "SCHD",
+          "weight_pct": 55.11,
+          "event_type": "기타",
+          "summary": "SCHD ETF가 2026 리밸런싱을 실시해 구성 종목이 변경되었으며, 삼성자산운용의 FunETF 플랫폼이 SCHD를 포함한 미국 ETF 정보 서비스를 출시했다는 내용이 보도되었다. 아울러 SCHD와 VIG, VYM 등 미국 배당 ETF 간 비교 분석 기사들이 다수 게재되었다.",
+          "fact": "SCHD(SCHD) 비중이 55.1%인 상태에서 최근 기타 관련 사실이 있었습니다: SCHD ETF가 2026 리밸런싱을 실시해 구성 종목이 변경되었으며, 삼성자산운용의 FunETF 플랫폼이 SCHD를 포함한 미국 ETF 정보 서비스를 출시했다는 내용이 보도되었다. 아울러 SCHD와 VIG, VYM 등 미국 배당 ETF 간 비교 분석 기사들이 다수 게재되었다."
+        },
+        {
+          "symbol": "TE",
+          "name": "T1 에너지",
+          "weight_pct": 11.72,
+          "event_type": "M&A",
+          "summary": "TE 커넥티비티(TEL)가 아스트로다인(Astrodyne) 인수 및 AI 사업 확대를 추진하고 있다고 보도되었다. 또한 TE Connectivity의 현금흐름 및 순이익 대비 주가 수준에 관한 분석이 보도되었다.",
+          "fact": "T1 에너지(TE) 비중이 11.7%인 상태에서 최근 M&A 관련 사실이 있었습니다: TE 커넥티비티(TEL)가 아스트로다인(Astrodyne) 인수 및 AI 사업 확대를 추진하고 있다고 보도되었다. 또한 TE Connectivity의 현금흐름 및 순이익 대비 주가 수준에 관한 분석이 보도되었다."
+        }
+      ]
+    }
+  ]
+}
