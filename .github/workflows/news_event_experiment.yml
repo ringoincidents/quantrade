@@ -1,9 +1,15 @@
 name: News Event Experiment
 
 # Phase 2 뉴스 이벤트 추출 실험(Phase2_뉴스이벤트추출_인수인계.md) 전용 워크플로.
-# daily.yml(11:00 UTC)/poll.yml(15분마다)과 다른 파일(news_event_calibration_log.json)만
-# 건드리므로 커밋 레이스가 없다. analyze.py/ask_claude_decision과는 완전히 분리된
-# 별도 실험이며, 이 스크립트는 어떤 매매도 실행하지 않는다.
+# daily.yml/poll.yml과 다른 파일(news_event_calibration_log.json)만 건드리므로
+# "파일" 레벨 충돌은 없지만, git push는 파일이 아니라 main HEAD 기준 fast-forward라
+# 다른 워크플로(sync_real.yml 등)가 그 사이 아무 파일이나 커밋해도 거부된다 —
+# 2026-08-21 workflow_dispatch 실행에서 실제로 겪음: 759건 판단까지 정상 완료됐는데
+# "Real portfolio sync" 커밋이 끼어들어 push가 "fetch first"로 거부, 재시도가 없어
+# 그 계산 결과가 그대로 유실됨(러너 종료 시 로컬 커밋도 같이 사라짐). sync_real.yml/
+# poll.yml에 이미 있던 rebase+retry 패턴을 여기도 적용해 재발을 막는다.
+# analyze.py/ask_claude_decision과는 완전히 분리된 별도 실험이며, 이 스크립트는
+# 어떤 매매도 실행하지 않는다.
 on:
   schedule:
     - cron: '30 9 * * *'
@@ -31,5 +37,12 @@ jobs:
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add news_event_calibration_log.json
-          git diff --quiet && git diff --staged --quiet || git commit -m "News event experiment log update"
-          git push
+          git diff --quiet && git diff --staged --quiet && echo "변경 없음" && exit 0
+          git commit -m "News event experiment log update"
+          for attempt in 1 2 3 4 5; do
+            if git push; then echo "push 성공 (시도 $attempt)"; exit 0; fi
+            echo "push 거부됨 - rebase 후 재시도 ($attempt/5)"
+            git pull --rebase origin main || exit 1
+            sleep $((attempt * 5))
+          done
+          echo "5회 시도 후에도 push 실패"; exit 1
