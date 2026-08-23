@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-16T23:30:05.004260+00:00",
+  "generated_at": "2026-08-23T23:31:52.928069+00:00",
   "schema": "portfolio_report_v3.2",
   "note": "현황 계산 + 사전 정의 규칙 해당 여부만 담는다. 매매 판단/방향 예측/확신도 필드는 스키마에 없다 - 누락이 아니라 설계.",
   "thresholds": {
@@ -9,68 +9,51 @@
     "loss_sustained_days": 60
   },
   "snapshot": {
-    "synced_at": "2026-08-16T11:43:07.346508+00:00",
-    "total_assets_krw": 5125702.0,
-    "cash_krw": 2229.0,
-    "cash_pct": 0.04,
-    "position_count": 5,
+    "synced_at": "2026-08-23T11:44:01.385108+00:00",
+    "total_assets_krw": 5015604.0,
+    "cash_krw": 1002107.0,
+    "cash_pct": 19.98,
+    "position_count": 4,
     "positions": [
       {
         "symbol": "SCHD",
         "name": "SCHD",
         "market_country": "US",
-        "eval_amount_krw": 2785782.0,
-        "weight_pct": 54.35,
-        "return_pct": 5.5
-      },
-      {
-        "symbol": "196170",
-        "name": "알테오젠",
-        "market_country": "KR",
-        "eval_amount_krw": 943500.0,
-        "weight_pct": 18.41,
-        "return_pct": 5.41
+        "eval_amount_krw": 2772173.0,
+        "weight_pct": 55.27,
+        "return_pct": 7.31
       },
       {
         "symbol": "TE",
         "name": "T1 에너지",
         "market_country": "US",
-        "eval_amount_krw": 689727.0,
-        "weight_pct": 13.46,
-        "return_pct": 3.2300000000000004
+        "eval_amount_krw": 583703.0,
+        "weight_pct": 11.64,
+        "return_pct": -10.7
       },
       {
         "symbol": "004000",
         "name": "롯데정밀화학",
         "market_country": "KR",
-        "eval_amount_krw": 620750.0,
-        "weight_pct": 12.11,
-        "return_pct": -1.95
+        "eval_amount_krw": 576550.0,
+        "weight_pct": 11.5,
+        "return_pct": -8.93
       },
       {
         "symbol": "NMR",
         "name": "노무라 홀딩스(ADR)",
         "market_country": "US",
-        "eval_amount_krw": 83714.0,
-        "weight_pct": 1.63,
-        "return_pct": -0.3
+        "eval_amount_krw": 81071.0,
+        "weight_pct": 1.62,
+        "return_pct": -1.31
       }
     ],
     "weight_by_country_pct": {
-      "US": 69.44,
-      "KR": 30.52
+      "US": 68.53,
+      "KR": 11.5
     }
   },
-  "rule_matches": [
-    {
-      "rule": "집중도",
-      "symbol": "SCHD",
-      "name": "SCHD",
-      "threshold": "단일 종목 비중 30% 이상",
-      "observed": "54.35%",
-      "fact": "SCHD(SCHD) 비중이 총자산의 54.35%로 기준 30% 이상"
-    }
-  ],
+  "rule_matches": [],
   "risk_engine": {
     "provisional": true,
     "note": "전부 계산·표시 전용이다 — 예측/신호 없음. 아래 금액 범위는 계산값이지 매수 지시가 아니고, 최종 매수 여부·금액은 항상 사람이 정한다.",
@@ -80,39 +63,17 @@
         "name": "SCHD",
         "sizing": {
           "recommended_range_krw": {
-            "min": 1025140,
-            "max": 1025140
+            "min": 1003121,
+            "max": 1003121
           },
           "by_strategy_krw": {
-            "단타": 1025140,
-            "스윙": 1025140,
-            "장기": 1025140
+            "단타": 1003121,
+            "스윙": 1003121,
+            "장기": 1003121
           },
-          "ceiling_krw": 1025140,
+          "ceiling_krw": 1003121,
           "inputs": {
-            "volatility_pct": 0.644,
-            "reference_vol_pct": 2.0,
-            "per_trade_risk_budget_pct": 2.0
-          }
-        },
-        "note": null
-      },
-      {
-        "symbol": "196170",
-        "name": "알테오젠",
-        "sizing": {
-          "recommended_range_krw": {
-            "min": 134661,
-            "max": 673306
-          },
-          "by_strategy_krw": {
-            "단타": 673306,
-            "스윙": 336653,
-            "장기": 134661
-          },
-          "ceiling_krw": 1025140,
-          "inputs": {
-            "volatility_pct": 6.09,
+            "volatility_pct": 0.718,
             "reference_vol_pct": 2.0,
             "per_trade_risk_budget_pct": 2.0
           }
@@ -124,17 +85,17 @@
         "name": "T1 에너지",
         "sizing": {
           "recommended_range_krw": {
-            "min": 92859,
-            "max": 464296
+            "min": 94910,
+            "max": 474549
           },
           "by_strategy_krw": {
-            "단타": 464296,
-            "스윙": 232148,
-            "장기": 92859
+            "단타": 474549,
+            "스윙": 237275,
+            "장기": 94910
           },
-          "ceiling_krw": 1025140,
+          "ceiling_krw": 1003121,
           "inputs": {
-            "volatility_pct": 8.832,
+            "volatility_pct": 8.455,
             "reference_vol_pct": 2.0,
             "per_trade_risk_budget_pct": 2.0
           }
@@ -146,17 +107,17 @@
         "name": "롯데정밀화학",
         "sizing": {
           "recommended_range_krw": {
-            "min": 297621,
-            "max": 1025140
+            "min": 298801,
+            "max": 1003121
           },
           "by_strategy_krw": {
-            "단타": 1025140,
-            "스윙": 744053,
-            "장기": 297621
+            "단타": 1003121,
+            "스윙": 747003,
+            "장기": 298801
           },
-          "ceiling_krw": 1025140,
+          "ceiling_krw": 1003121,
           "inputs": {
-            "volatility_pct": 2.756,
+            "volatility_pct": 2.686,
             "reference_vol_pct": 2.0,
             "per_trade_risk_budget_pct": 2.0
           }
@@ -168,17 +129,17 @@
         "name": "노무라 홀딩스(ADR)",
         "sizing": {
           "recommended_range_krw": {
-            "min": 558215,
-            "max": 1025140
+            "min": 592010,
+            "max": 1003121
           },
           "by_strategy_krw": {
-            "단타": 1025140,
-            "스윙": 1025140,
-            "장기": 558215
+            "단타": 1003121,
+            "스윙": 1003121,
+            "장기": 592010
           },
-          "ceiling_krw": 1025140,
+          "ceiling_krw": 1003121,
           "inputs": {
-            "volatility_pct": 1.469,
+            "volatility_pct": 1.356,
             "reference_vol_pct": 2.0,
             "per_trade_risk_budget_pct": 2.0
           }
@@ -187,41 +148,43 @@
       }
     ],
     "mdd_budget": {
-      "portfolio_unrealized_return_pct": 4.18,
+      "portfolio_unrealized_return_pct": 1.75,
       "mdd_limit_pct": -20.0,
-      "budget_usage_pct": -20.9,
+      "budget_usage_pct": -8.7,
       "note": "실제 고점 대비 낙폭(진짜 MDD)이 아니라 현재 미실현손익 기준 소진율 — real_portfolio.json은 스냅샷이라 과거 고점을 모른다."
     },
     "concentration": [
       {
         "symbol": "SCHD",
         "name": "SCHD",
-        "weight_pct": 54.35,
-        "threshold_pct": 30.0
-      },
-      {
-        "symbol": "196170",
-        "name": "알테오젠",
-        "weight_pct": 18.41,
-        "threshold_pct": 30.0
+        "weight_pct": 55.27,
+        "threshold_pct": 30.0,
+        "asset_type": "etf",
+        "rule_applies": false
       },
       {
         "symbol": "TE",
         "name": "T1 에너지",
-        "weight_pct": 13.46,
-        "threshold_pct": 30.0
+        "weight_pct": 11.64,
+        "threshold_pct": 30.0,
+        "asset_type": "individual_stock",
+        "rule_applies": true
       },
       {
         "symbol": "004000",
         "name": "롯데정밀화학",
-        "weight_pct": 12.11,
-        "threshold_pct": 30.0
+        "weight_pct": 11.5,
+        "threshold_pct": 30.0,
+        "asset_type": "individual_stock",
+        "rule_applies": true
       },
       {
         "symbol": "NMR",
         "name": "노무라 홀딩스(ADR)",
-        "weight_pct": 1.63,
-        "threshold_pct": 30.0
+        "weight_pct": 1.62,
+        "threshold_pct": 30.0,
+        "asset_type": "individual_stock",
+        "rule_applies": true
       }
     ],
     "correlation": {
@@ -229,37 +192,26 @@
       "matrix": {
         "SCHD": {
           "SCHD": 1.0,
-          "196170": 0.005,
-          "TE": -0.206,
-          "004000": 0.032,
-          "NMR": 0.141
-        },
-        "196170": {
-          "SCHD": 0.005,
-          "196170": 1.0,
-          "TE": 0.019,
-          "004000": 0.466,
-          "NMR": -0.017
+          "TE": -0.19,
+          "004000": -0.09,
+          "NMR": 0.093
         },
         "TE": {
-          "SCHD": -0.206,
-          "196170": 0.019,
+          "SCHD": -0.19,
           "TE": 1.0,
-          "004000": 0.015,
-          "NMR": 0.143
+          "004000": 0.009,
+          "NMR": 0.149
         },
         "004000": {
-          "SCHD": 0.032,
-          "196170": 0.466,
-          "TE": 0.015,
+          "SCHD": -0.09,
+          "TE": 0.009,
           "004000": 1.0,
-          "NMR": -0.12
+          "NMR": 0.037
         },
         "NMR": {
-          "SCHD": 0.141,
-          "196170": -0.017,
-          "TE": 0.143,
-          "004000": -0.12,
+          "SCHD": 0.093,
+          "TE": 0.149,
+          "004000": 0.037,
           "NMR": 1.0
         }
       },
@@ -270,37 +222,30 @@
       {
         "symbol": "SCHD",
         "name": "SCHD",
-        "return_pct": 5.5,
+        "return_pct": 7.31,
         "sell_cost_pct": 0.35,
-        "cost_adjusted_return_pct": 5.15
-      },
-      {
-        "symbol": "196170",
-        "name": "알테오젠",
-        "return_pct": 5.41,
-        "sell_cost_pct": 0.295,
-        "cost_adjusted_return_pct": 5.115
+        "cost_adjusted_return_pct": 6.96
       },
       {
         "symbol": "TE",
         "name": "T1 에너지",
-        "return_pct": 3.2300000000000004,
+        "return_pct": -10.7,
         "sell_cost_pct": 0.35,
-        "cost_adjusted_return_pct": 2.88
+        "cost_adjusted_return_pct": -11.05
       },
       {
         "symbol": "004000",
         "name": "롯데정밀화학",
-        "return_pct": -1.95,
+        "return_pct": -8.93,
         "sell_cost_pct": 0.295,
-        "cost_adjusted_return_pct": -2.245
+        "cost_adjusted_return_pct": -9.225
       },
       {
         "symbol": "NMR",
         "name": "노무라 홀딩스(ADR)",
-        "return_pct": -0.3,
+        "return_pct": -1.31,
         "sell_cost_pct": 0.35,
-        "cost_adjusted_return_pct": -0.65
+        "cost_adjusted_return_pct": -1.66
       }
     ]
   },
@@ -431,17 +376,17 @@
         "label": "현금성",
         "group": "안전자산",
         "target_pct": 10.0,
-        "actual_pct": 0.04,
-        "gap_pct": 9.96,
+        "actual_pct": 19.98,
+        "gap_pct": -9.98,
         "currently_mapped": true
       },
       {
         "asset_class": "기존_배당",
         "label": "배당(기존)",
         "group": "위험자산",
-        "target_pct": 45.0,
-        "actual_pct": 54.35,
-        "gap_pct": -9.35,
+        "target_pct": 30.0,
+        "actual_pct": 55.27,
+        "gap_pct": -25.27,
         "currently_mapped": true
       },
       {
@@ -457,28 +402,28 @@
         "asset_class": "기존_개별성장주",
         "label": "개별성장주(기존)",
         "group": "위험자산",
-        "target_pct": 0.0,
-        "actual_pct": 0.0,
-        "gap_pct": 0.0,
-        "currently_mapped": false
+        "target_pct": 30.0,
+        "actual_pct": 23.14,
+        "gap_pct": 6.86,
+        "currently_mapped": true
       },
       {
         "asset_class": "기존_KR개별",
         "label": "국내개별(기존)",
         "group": "위험자산",
-        "target_pct": 45.0,
-        "actual_pct": 18.41,
-        "gap_pct": 26.59,
-        "currently_mapped": true
+        "target_pct": 0.0,
+        "actual_pct": 0.0,
+        "gap_pct": 0.0,
+        "currently_mapped": false
       },
       {
         "asset_class": "developed_exUS",
         "label": "선진국(미국 제외)",
         "group": "위험자산",
-        "target_pct": 0.0,
-        "actual_pct": 0.0,
-        "gap_pct": 0.0,
-        "currently_mapped": false
+        "target_pct": 30.0,
+        "actual_pct": 1.62,
+        "gap_pct": 28.38,
+        "currently_mapped": true
       },
       {
         "asset_class": "emerging",
@@ -508,24 +453,8 @@
         "currently_mapped": false
       }
     ],
-    "unmapped_holdings": [
-      {
-        "symbol": "TE",
-        "name": "T1 에너지",
-        "weight_pct": 13.46
-      },
-      {
-        "symbol": "004000",
-        "name": "롯데정밀화학",
-        "weight_pct": 12.11
-      },
-      {
-        "symbol": "NMR",
-        "name": "노무라 홀딩스(ADR)",
-        "weight_pct": 1.63
-      }
-    ],
-    "unmapped_holdings_weight_pct": 27.2,
+    "unmapped_holdings": [],
+    "unmapped_holdings_weight_pct": 0,
     "note": "자산군별 목표/실제 비중과 그 차이(%p)만 나열합니다. 매핑 안 된 자산군의 갭이 0%p인 것은 정상입니다(목표도 0%로 계산). 매핑 안 된 보유종목은 unmapped_holdings에 따로 모았습니다 — 어떤 자산군에도 포함되지 않았다는 사실이며, 판단이 필요하다는 뜻은 아닙니다.",
     "monthly_gap_fill": [
       {
@@ -534,16 +463,16 @@
         "monthly_investable_krw": 850000,
         "allocations": [
           {
-            "asset_class": "cash",
-            "label": "현금성",
-            "gap_pct": 9.96,
-            "amount_krw": 231628
+            "asset_class": "기존_개별성장주",
+            "label": "개별성장주(기존)",
+            "gap_pct": 6.86,
+            "amount_krw": 165465
           },
           {
-            "asset_class": "기존_KR개별",
-            "label": "국내개별(기존)",
-            "gap_pct": 26.59,
-            "amount_krw": 618372
+            "asset_class": "developed_exUS",
+            "label": "선진국(미국 제외)",
+            "gap_pct": 28.38,
+            "amount_krw": 684535
           }
         ]
       },
@@ -553,16 +482,16 @@
         "monthly_investable_krw": 850000,
         "allocations": [
           {
-            "asset_class": "cash",
-            "label": "현금성",
-            "gap_pct": 9.96,
-            "amount_krw": 231628
+            "asset_class": "기존_개별성장주",
+            "label": "개별성장주(기존)",
+            "gap_pct": 6.86,
+            "amount_krw": 165465
           },
           {
-            "asset_class": "기존_KR개별",
-            "label": "국내개별(기존)",
-            "gap_pct": 26.59,
-            "amount_krw": 618372
+            "asset_class": "developed_exUS",
+            "label": "선진국(미국 제외)",
+            "gap_pct": 28.38,
+            "amount_krw": 684535
           }
         ]
       },
@@ -572,16 +501,127 @@
         "monthly_investable_krw": 850000,
         "allocations": [
           {
-            "asset_class": "cash",
-            "label": "현금성",
-            "gap_pct": 9.96,
-            "amount_krw": 231628
+            "asset_class": "기존_개별성장주",
+            "label": "개별성장주(기존)",
+            "gap_pct": 6.86,
+            "amount_krw": 165465
           },
           {
-            "asset_class": "기존_KR개별",
-            "label": "국내개별(기존)",
-            "gap_pct": 26.59,
-            "amount_krw": 618372
+            "asset_class": "developed_exUS",
+            "label": "선진국(미국 제외)",
+            "gap_pct": 28.38,
+            "amount_krw": 684535
+          }
+        ]
+      }
+    ]
+  },
+  "role_gap": {
+    "risk_asset_total_pct": 80.02,
+    "rows": [
+      {
+        "role": "코어",
+        "label": "코어",
+        "target_pct": 65,
+        "actual_pct": 69.07,
+        "gap_pct": -4.07,
+        "members": [
+          {
+            "symbol": "SCHD",
+            "name": "SCHD",
+            "weight_pct": 55.27,
+            "note": null
+          }
+        ]
+      },
+      {
+        "role": "위성-장기",
+        "label": "위성-장기",
+        "target_pct": 15,
+        "actual_pct": 0.0,
+        "gap_pct": 15.0,
+        "members": []
+      },
+      {
+        "role": "스윙-전술",
+        "label": "스윙-전술",
+        "target_pct": 15,
+        "actual_pct": 28.92,
+        "gap_pct": -13.92,
+        "members": [
+          {
+            "symbol": "004000",
+            "name": "롯데정밀화학",
+            "weight_pct": 11.5,
+            "note": null
+          },
+          {
+            "symbol": "TE",
+            "name": "T1 에너지",
+            "weight_pct": 11.64,
+            "note": null
+          }
+        ]
+      },
+      {
+        "role": "정리대상",
+        "label": "정리대상",
+        "target_pct": null,
+        "actual_pct": 2.02,
+        "gap_pct": null,
+        "members": [
+          {
+            "symbol": "NMR",
+            "name": "노무라 홀딩스(ADR)",
+            "weight_pct": 1.62,
+            "note": "코어로 재배치 예정"
+          }
+        ]
+      }
+    ],
+    "unmapped_holdings": [],
+    "unmapped_holdings_weight_pct": 0,
+    "note": "역할별 목표/실제 비중은 포트폴리오 전체가 아니라 위험자산 총액 대비입니다. 목표 비중이 없는 역할은 갭을 계산하지 않습니다 — 지어내지 않습니다.",
+    "monthly_gap_fill": [
+      {
+        "month": "2026-08",
+        "rank": "일병",
+        "risk_bucket_amount_krw": 765000,
+        "rule_triggered": false,
+        "allocations": [
+          {
+            "role": "위성-장기",
+            "label": "위성-장기",
+            "gap_pct": 15.0,
+            "amount_krw": 765000
+          }
+        ]
+      },
+      {
+        "month": "2026-09",
+        "rank": "일병",
+        "risk_bucket_amount_krw": 765000,
+        "rule_triggered": false,
+        "allocations": [
+          {
+            "role": "위성-장기",
+            "label": "위성-장기",
+            "gap_pct": 15.0,
+            "amount_krw": 765000
+          }
+        ]
+      },
+      {
+        "month": "2026-10",
+        "rank": "일병",
+        "risk_bucket_amount_krw": 765000,
+        "rule_triggered": false,
+        "allocations": [
+          {
+            "role": "위성-장기",
+            "label": "위성-장기",
+            "gap_pct": 15.0,
+            "amount_krw": 765000
           }
         ]
       }
