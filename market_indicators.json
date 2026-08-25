@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-24T10:50:51.466518+00:00",
+  "generated_at": "2026-08-25T10:47:00.500329+00:00",
   "schema": "market_indicators_v3.2",
   "note": "개별 계산값을 항목별로만 나열합니다. 지표들을 하나로 합치지 않고, 종목 간 우열을 매겨 배열하지 않으며, 색을 이용한 강조도 하지 않습니다. 표의 나열 순서는 원본(보유+관심종목) 그대로이며 계산값 크기로 다시 배열하지 않습니다.",
   "state_board": {
@@ -8,17 +8,17 @@
       {
         "symbol": "004000",
         "name": "롯데정밀화학",
-        "volatility_20d_pct": 2.72,
-        "volatility_percentile": 62.9,
-        "adx_14": 12.5,
+        "volatility_20d_pct": 2.7,
+        "volatility_percentile": 60.7,
+        "adx_14": 12.9,
         "data_status": null
       },
       {
         "symbol": "NMR",
         "name": "노무라 홀딩스(ADR)",
         "volatility_20d_pct": 1.32,
-        "volatility_percentile": 17.5,
-        "adx_14": 11.6,
+        "volatility_percentile": 18.2,
+        "adx_14": 2.3,
         "data_status": null
       },
       {
@@ -26,15 +26,15 @@
         "name": "SCHD",
         "volatility_20d_pct": 0.7,
         "volatility_percentile": 54.6,
-        "adx_14": 63.5,
+        "adx_14": 77.3,
         "data_status": null
       },
       {
         "symbol": "TE",
         "name": "T1 에너지",
         "volatility_20d_pct": 8.24,
-        "volatility_percentile": 71.4,
-        "adx_14": 9.1,
+        "volatility_percentile": 71.8,
+        "adx_14": 30.9,
         "data_status": null
       }
     ],
@@ -53,9 +53,9 @@
         "name": "롯데정밀화학",
         "per": null,
         "per_status": "데이터 소스 미연결",
-        "volatility_20d_pct": 2.72,
-        "momentum_20d_pct": -3.18,
-        "adx_14": 12.5,
+        "volatility_20d_pct": 2.7,
+        "momentum_20d_pct": -0.76,
+        "adx_14": 12.9,
         "data_status": null
       },
       {
@@ -64,8 +64,8 @@
         "per": null,
         "per_status": "데이터 소스 미연결",
         "volatility_20d_pct": 1.32,
-        "momentum_20d_pct": -0.92,
-        "adx_14": 11.6,
+        "momentum_20d_pct": -0.31,
+        "adx_14": 2.3,
         "data_status": null
       },
       {
@@ -74,8 +74,8 @@
         "per": null,
         "per_status": "데이터 소스 미연결",
         "volatility_20d_pct": 0.7,
-        "momentum_20d_pct": 5.47,
-        "adx_14": 63.5,
+        "momentum_20d_pct": 5.32,
+        "adx_14": 77.3,
         "data_status": null
       },
       {
@@ -84,8 +84,8 @@
         "per": null,
         "per_status": "데이터 소스 미연결",
         "volatility_20d_pct": 8.24,
-        "momentum_20d_pct": -11.6,
-        "adx_14": 9.1,
+        "momentum_20d_pct": -11.84,
+        "adx_14": 30.9,
         "data_status": null
       }
     ]
