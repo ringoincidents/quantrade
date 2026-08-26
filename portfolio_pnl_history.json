@@ -131,10 +131,10 @@
     },
     {
       "date": "2026-08-26",
-      "eval_amount_krw": 5066823.1596003,
+      "eval_amount_krw": 5068167.2890272,
       "net_flow_since_baseline_krw": 0,
-      "valuation_pnl_krw": 377897.6561383996,
-      "synced_at": "2026-08-26T04:08:47.537268+00:00"
+      "valuation_pnl_krw": 379241.7855652999,
+      "synced_at": "2026-08-26T08:06:25.904885+00:00"
     }
   ]
 }
