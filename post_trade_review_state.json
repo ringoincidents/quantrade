@@ -1,8 +1,8 @@
 {
   "loss_since": {},
   "last_snapshot": {
-    "synced_at": "2026-08-21T08:03:54.688251+00:00",
-    "cash": 1002085.0,
+    "synced_at": "2026-08-27T10:04:28.226930+00:00",
+    "cash": 2993.8736,
     "positions": [
       {
         "symbol": "004000",
@@ -11,22 +11,10 @@
         "currency": "KRW",
         "quantity": "13",
         "avg_price": "48700",
-        "current_price": "44000",
-        "eval_amount": 572000.0,
-        "eval_amount_krw": 572000.0,
-        "return_pct": -9.65
-      },
-      {
-        "symbol": "NMR",
-        "name": "노무라 홀딩스(ADR)",
-        "market_country": "US",
-        "currency": "USD",
-        "quantity": "6",
-        "avg_price": "9.85",
-        "current_price": "9.45",
-        "eval_amount": 56.7,
-        "eval_amount_krw": 78512.49,
-        "return_pct": -4.06
+        "current_price": "47200",
+        "eval_amount": 613600.0,
+        "eval_amount_krw": 613600.0,
+        "return_pct": -3.08
       },
       {
         "symbol": "SCHD",
@@ -35,22 +23,22 @@
         "currency": "USD",
         "quantity": "56.799361",
         "avg_price": "32.717936",
-        "current_price": "34.91",
-        "eval_amount": 1982.865692,
-        "eval_amount_krw": 2745674.1237124,
-        "return_pct": 6.69
+        "current_price": "34.87",
+        "eval_amount": 1980.593718,
+        "eval_amount_krw": 2744587.93878132,
+        "return_pct": 6.569999999999999
       },
       {
         "symbol": "TE",
         "name": "T1 에너지",
         "market_country": "US",
         "currency": "USD",
-        "quantity": "95",
-        "avg_price": "4.95",
-        "current_price": "4.44",
-        "eval_amount": 421.8,
-        "eval_amount_krw": 584066.4600000001,
-        "return_pct": -10.299999999999999
+        "quantity": "108",
+        "avg_price": "4.911481",
+        "current_price": "4.61",
+        "eval_amount": 497.88,
+        "eval_amount_krw": 689932.2312,
+        "return_pct": -6.13
       }
     ]
   }
