@@ -1,6 +1,6 @@
 {
-  "synced_at": "2026-08-27T10:04:28.226930+00:00",
-  "cash": 2993.8736,
+  "synced_at": "2026-08-27T21:04:37.254393+00:00",
+  "cash": 1041.375,
   "positions": [
     {
       "symbol": "004000",
@@ -9,34 +9,46 @@
       "currency": "KRW",
       "quantity": "13",
       "avg_price": "48700",
-      "current_price": "47200",
-      "eval_amount": 613600.0,
-      "eval_amount_krw": 613600.0,
-      "return_pct": -3.08
+      "current_price": "47250",
+      "eval_amount": 614250.0,
+      "eval_amount_krw": 614250.0,
+      "return_pct": -2.97
+    },
+    {
+      "symbol": "NCPL",
+      "name": "넷캐피탈",
+      "market_country": "US",
+      "currency": "USD",
+      "quantity": "19",
+      "avg_price": "0.606321",
+      "current_price": "0.5973",
+      "eval_amount": 11.3487,
+      "eval_amount_krw": 15712.27515,
+      "return_pct": -1.48
     },
     {
       "symbol": "SCHD",
       "name": "SCHD",
       "market_country": "US",
       "currency": "USD",
-      "quantity": "56.799361",
-      "avg_price": "32.717936",
-      "current_price": "34.87",
-      "eval_amount": 1980.593718,
-      "eval_amount_krw": 2744587.93878132,
-      "return_pct": 6.569999999999999
+      "quantity": "65.799361",
+      "avg_price": "33.01161",
+      "current_price": "34.86",
+      "eval_amount": 2293.765724,
+      "eval_amount_krw": 3175718.644878,
+      "return_pct": 5.59
     },
     {
       "symbol": "TE",
       "name": "T1 에너지",
       "market_country": "US",
       "currency": "USD",
-      "quantity": "108",
-      "avg_price": "4.911481",
-      "current_price": "4.61",
-      "eval_amount": 497.88,
-      "eval_amount_krw": 689932.2312,
-      "return_pct": -6.13
+      "quantity": "131",
+      "avg_price": "4.862061",
+      "current_price": "4.96",
+      "eval_amount": 649.76,
+      "eval_amount_krw": 899592.72,
+      "return_pct": 2.01
     }
   ]
 }
