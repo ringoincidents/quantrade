@@ -51,6 +51,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ---
 
+## 보안: git history 비밀값 노출 대응 (2026-08-28)
+
+이 저장소는 생성 시점(2026-07-28)부터 지금까지 계속 GitHub Public이다. PM 세션 지시로 shallow clone(50커밋 제한)을 `git fetch --unshallow`로 full clone 전환한 뒤 gitleaks(v8.21.2)+trufflehog(v3.83.7) 교차 검증으로 git history 전수 스캔을 실행했다 — 방법론·상세 발견 내역(레닥션 처리, 원문은 PM 세션에 별도 보고)은 `git_history_scan_result.md` 참고. 과거 커밋(`3aa4116`/`9656148`/`c291b566`, 2026-07-29~30)에 하드코딩된 Telegram Bot Token과 Anthropic API 키 형태 문자열이 발견됐다 — 둘 다 2026-07-31 `analyze_lib.py` 신설 커밋(`7b1bdea`)에서 환경변수 패턴으로 교체돼 현재 워킹트리에는 없다.
+
+- **Anthropic API 키 재발급 (2026-08-28, git history 노출 대응)**: 사용자가 console.anthropic.com에서 기존 키를 Revoke하고 재발급, GitHub Actions 시크릿 `CLAUDE_API_KEY`(주의: 실제 사용되는 시크릿 이름 — `ANTHROPIC_API_KEY`가 아니다)를 새 값으로 교체했다.
+  - **1차 재발급은 identity-linked 키였다** — 기존 코드가 `anthropic-workspace-id` 헤더를 보내지 않아 모든 요청이 HTTP 400(`"anthropic-workspace-id is required when authenticating with an identity-linked API key..."`)으로 실패했다. `news_event_cards.yml` workflow_dispatch 검증 런(#26, run id `33166233954`)에서 4개 종목 전부 설명 생성 실패로 발견 — 당시 `ask_explanation()`이 원인을 로깅하지 않아(`if "content" not in data: return None`) 실패 사유가 보이지 않았다. 진단을 위해 상태코드/에러본문(키 원문 제외)을 로깅하는 커밋을 추가(PR#34, `news_event_cards.py`의 `ask_explanation()`).
+  - **2차로 legacy(비-identity-linked) 키로 재발급 후 재검증** — `news_event_cards.yml` workflow_dispatch 런(#28, run id `33166956825`)에서 4개 종목(004000/NCPL/SCHD/TE) 전부 실제 뉴스 기반 설명 카드가 정상 생성됨을 확인(예: NCPL "[규제] SEC가 넷케피탈 및 개인을 대상으로 민사 소송을...", TE "[실적발표 또는 M&A] TE Connectivity(TEL)가 실적 기대치를 상회..." — 이상행동 카드 2건 + AI 생성 카드 4건, 총 6건). 새 키가 정상 동작함을 확인했다.
+- **Telegram Bot Token**: 이 세션에서는 재발급하지 않았다 — `git_history_scan_result.md` §6에 기록된 대로 재발급 여부는 여전히 PM 판단 대기 상태다.
+- **Private/Public 전환**: 이 세션에서 결정하지 않았다. git history 스캔은 완료됐고 Anthropic 키 재발급도 검증됐지만, 전환 여부 자체는 여전히 PM 판단 몫이다 — `git_history_scan_result.md` §4의 사실을 참고 자료로 쓸 것.
+- **히스토리에서 값 자체를 지우는 작업(`git filter-repo` 등, 강제 푸시 필요)은 이 세션에서 하지 않았다** — 재발급으로 과거 값이 무효화됐다고 보고 히스토리를 그대로 둘지, 완전히 제거할지는 별도 PM 판단 대상이다.
+
+---
+
 ## What this is
 
 **(아래 문단은 v3.1 시절 서술이다. "asks Claude for buy/sell/hold decisions"와 "executes trades"는 v3.2에서 비활성 — 위 전환 절 참조.)**
