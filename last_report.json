@@ -1,6 +1,6 @@
 {
-  "date": "2026-08-27",
-  "generated_at": "2026-08-27T20:54:11.834976+00:00",
+  "date": "2026-08-28",
+  "generated_at": "2026-08-28T21:18:51.228281+00:00",
   "schema_version": "v3.2",
   "prediction_enabled": false,
   "guardrail_violations": [],
@@ -11,7 +11,7 @@
       "asset_class": "crypto",
       "strategy_type": "스윙",
       "amount_krw": 33333.333333333336,
-      "current_return": -4.044630404463041,
+      "current_return": -3.2078103207810322,
       "conviction": false
     },
     {
@@ -19,7 +19,7 @@
       "asset_class": "crypto",
       "strategy_type": "스윙",
       "amount_krw": 4354,
-      "current_return": 60.82224909310764,
+      "current_return": 52.35792019347038,
       "conviction": false
     },
     {
@@ -27,7 +27,7 @@
       "asset_class": "crypto",
       "strategy_type": "스윙",
       "amount_krw": 3557,
-      "current_return": 50.99009900990099,
+      "current_return": 40.099009900990104,
       "conviction": false
     },
     {
@@ -35,7 +35,7 @@
       "asset_class": "crypto",
       "strategy_type": "스윙",
       "amount_krw": 5775,
-      "current_return": 9.346846846846844,
+      "current_return": 10.02252252252253,
       "conviction": false
     },
     {
@@ -43,7 +43,7 @@
       "asset_class": "crypto",
       "strategy_type": "스윙",
       "amount_krw": 3272,
-      "current_return": 15.811088295687876,
+      "current_return": 13.552361396303905,
       "conviction": false
     },
     {
@@ -51,7 +51,7 @@
       "asset_class": "crypto",
       "strategy_type": "스윙",
       "amount_krw": 879,
-      "current_return": -3.902439024390244,
+      "current_return": -3.0662020905923346,
       "conviction": false
     }
   ],
