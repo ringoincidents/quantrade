@@ -175,6 +175,106 @@
           "fact": "T1 에너지(TE) 비중이 17.0%인 상태에서 최근 실적발표 또는 M&A 관련 사실이 있었습니다: TE 커넥티비티(TEL)가 실적 기대치를 상회하는 결과를 발표했으며, 14억 달러 규모의 아스트로다인(Astrodyne) 인수 계약을 체결했다고 보도되었다."
         }
       ]
+    },
+    {
+      "id": "review-2026-08-28T19:34:06.909345+00:00",
+      "generated_at": "2026-08-28T19:34:06.909345+00:00",
+      "trigger": "batch",
+      "schema": "post_trade_review_v3.2",
+      "note": "매매 이후 사람이 놓쳤을 수 있는 것을 사후에 짚어보는 기록입니다. 새 AI 판단이나 매매 제안이 아니라 이미 계산된 값을 재사용한 사실 연결이며, 생성 시점에 확정되고 이후 수정되지 않습니다.",
+      "exposure_change": {
+        "has_baseline": true,
+        "added_symbols": [
+          "NCPL"
+        ],
+        "removed_symbols": [],
+        "by_currency_pct_now": {
+          "KRW": 13.28,
+          "USD": 86.7
+        },
+        "by_country_pct_now": {
+          "KR": 13.28,
+          "US": 86.7
+        },
+        "by_currency_pct_delta": {
+          "KRW": -1.87,
+          "USD": 1.92
+        },
+        "by_country_pct_delta": {
+          "KR": -1.87,
+          "US": 1.92
+        },
+        "sector_status": "데이터 소스 미연결"
+      },
+      "allocation_gap": {
+        "concentration_matches": [
+          {
+            "rule": "집중도",
+            "symbol": "SCHD",
+            "name": "SCHD",
+            "threshold": "단일 종목 비중 30% 이상",
+            "observed": "67.16%",
+            "fact": "SCHD(SCHD) 비중이 총자산의 67.16%로 기준 30% 이상"
+          }
+        ],
+        "asset_class_target_status": "데이터 소스 미연결 — 보유 종목을 로드맵의 자산군(bond/developed_exUS/emerging/...)으로 분류할 데이터가 없어 국가/통화 노출만 비교합니다."
+      },
+      "correlation_blind_spots": {
+        "flag_threshold": 0.7,
+        "lookback_days": 90,
+        "spots": []
+      },
+      "behavior_patterns": [],
+      "recent_news_links": [
+        {
+          "symbol": "004000",
+          "name": "롯데정밀화학",
+          "weight_pct": 13.28,
+          "event_type": "실적발표",
+          "summary": "[요약 생략 - 금지 문구 감지로 검수 실패]",
+          "fact": "롯데정밀화학(004000) 비중이 13.3%인 상태에서 최근 실적발표 관련 사실이 있었습니다: [요약 생략 - 금지 문구 감지로 검수 실패]"
+        },
+        {
+          "symbol": "NCPL",
+          "name": "넷캐피탈",
+          "weight_pct": 0.3,
+          "event_type": "이상행동",
+          "summary": "거래량 20일 평균 대비 3.9배, 전일 종가 대비 시가 갭 +25.7%",
+          "fact": "넷캐피탈(NCPL) 비중이 0.3%인 상태에서 최근 이상행동 관련 사실이 있었습니다: 거래량 20일 평균 대비 3.9배, 전일 종가 대비 시가 갭 +25.7%"
+        },
+        {
+          "symbol": "NCPL",
+          "name": "넷캐피탈",
+          "weight_pct": 0.3,
+          "event_type": "규제",
+          "summary": "SEC가 넷케피탈 및 개인을 대상으로 민사 소송을 제기하였으며, 소송 합의에 따른 법원 승인 후속 조치로 이사가 사임하고 감사인도 사임하였다. 또한 과거 재무제표 신뢰 불가 공시가 이루어졌으며, 나스닥 상장 유지를 위한 180일 추가 유예기간을 획득하고 허드슨 글로벌과 최대 1500만 달러 규모의 주식인수계약을 체결하였다.",
+          "fact": "넷캐피탈(NCPL) 비중이 0.3%인 상태에서 최근 규제 관련 사실이 있었습니다: SEC가 넷케피탈 및 개인을 대상으로 민사 소송을 제기하였으며, 소송 합의에 따른 법원 승인 후속 조치로 이사가 사임하고 감사인도 사임하였다. 또한 과거 재무제표 신뢰 불가 공시가 이루어졌으며, 나스닥 상장 유지를 위한 180일 추가 유예기간을 획득하고 허드슨 글로벌과 최대 1500만 달러 규모의 주식인수계약을 체결하였다."
+        },
+        {
+          "symbol": "SCHD",
+          "name": "SCHD",
+          "weight_pct": 67.16,
+          "event_type": "기타",
+          "summary": "SCHD(Schwab US Dividend Equity ETF)가 정기 리밸런싱을 실시했으며, 배당금이 전년 대비 약 8% 감소한 것으로 보도되었다. 또한 해당 ETF가 Robinhood 플랫폼을 통해 토큰화 ETF 형태로 거래 가능하다는 내용이 보도되었다.",
+          "fact": "SCHD(SCHD) 비중이 67.2%인 상태에서 최근 기타 관련 사실이 있었습니다: SCHD(Schwab US Dividend Equity ETF)가 정기 리밸런싱을 실시했으며, 배당금이 전년 대비 약 8% 감소한 것으로 보도되었다. 또한 해당 ETF가 Robinhood 플랫폼을 통해 토큰화 ETF 형태로 거래 가능하다는 내용이 보도되었다."
+        },
+        {
+          "symbol": "TE",
+          "name": "T1 에너지",
+          "weight_pct": 19.24,
+          "event_type": "이상행동",
+          "summary": "전일 종가 대비 시가 갭 +11.9%",
+          "fact": "T1 에너지(TE) 비중이 19.2%인 상태에서 최근 이상행동 관련 사실이 있었습니다: 전일 종가 대비 시가 갭 +11.9%"
+        },
+        {
+          "symbol": "TE",
+          "name": "T1 에너지",
+          "weight_pct": 19.24,
+          "event_type": "실적발표 또는 M&A",
+          "summary": "TE Connectivity(TEL)가 실적 기대치를 상회하는 결과를 발표하고 14억 달러 규모의 아스트로다인(Astrodyne) 인수 계약을 체결했으며, 같은 날 주가는 5.9% 하락했다고 보도되었다.",
+          "fact": "T1 에너지(TE) 비중이 19.2%인 상태에서 최근 실적발표 또는 M&A 관련 사실이 있었습니다: TE Connectivity(TEL)가 실적 기대치를 상회하는 결과를 발표하고 14억 달러 규모의 아스트로다인(Astrodyne) 인수 계약을 체결했으며, 같은 날 주가는 5.9% 하락했다고 보도되었다."
+        }
+      ]
     }
   ]
 }
