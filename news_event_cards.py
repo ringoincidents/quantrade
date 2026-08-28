@@ -225,6 +225,15 @@ def ask_explanation(market, headlines):
             )
             data = resp.json()
             if "content" not in data:
+                # 2026-08-28: 키 순 형태 원문은 절대 로그에 남기지 않는다 —
+                # 상태 코드/에러 본문만 남겨서 인증 실패인지 다른 원인인지
+                # 구분할 수 있게 한다(git history 노출 대응 키 재발급 검증 중
+                # 이 분기가 아무 단서 없이 조용히 None을 반환해 원인 파악이
+                # 막혔던 사례가 있었다).
+                print(f"⚠️ {market}: Claude API 응답에 content 없음 "
+                      f"(status={resp.status_code}, body={json.dumps(data)[:300]})")
+                if attempt == 0:
+                    continue
                 return None
             text = data["content"][0]["text"].strip()
             text = text.replace("```json", "").replace("```", "").strip()
@@ -232,7 +241,8 @@ def ask_explanation(market, headlines):
             if s != -1 and e != -1:
                 text = text[s:e + 1]
             return json.loads(text)
-        except Exception:
+        except Exception as e:
+            print(f"⚠️ {market}: Claude API 호출 예외 ({type(e).__name__}: {e})")
             if attempt == 0:
                 continue
             return None
