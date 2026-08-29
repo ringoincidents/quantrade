@@ -1,4 +1,4 @@
-"""뉴스 이벤트 캘리브레이션 분석 (Phase2_뉴스이벤트추출_인수인계.md §7 설계를 코드로 구현,
+"""[Alpha Lab — 격리됨, v4.0 §15] 뉴스 이벤트 캘리브레이션 분석 (Phase2_뉴스이벤트추출_인수인계.md §7 설계를 코드로 구현,
 2026-08-02 ECE/MCE + 통계적 유의성 검증 모듈로 확장 — "다운타운 상시 작업 목록 A-4").
 
 **읽기 전용 분석 스크립트다.** `news_event_experiment.py`(매일 판단을 기록하고
@@ -28,6 +28,10 @@ SUCCESS_CRITERIA와 같은 취지(근거 없는 숫자로 성급한 결론을 �
 실행해도 모든 window가 "판단 보류"로만 나온다 — 그게 정상이다. 실제 outcomes가
 채워지면 이 파일을 그대로 실행하면 된다. `--self-test`로 실제 로그 없이도(더미
 데이터로) 모듈 동작 자체는 지금 바로 검증할 수 있다.
+
+[Alpha Lab 격리] Core(v3.2 활성 기능 — analyze.py/analyze_lib.py/news_event_cards.py 등)와
+연결 없음. 재개 절차(v4.0 §15) 완료 전 통합 금지. 물리적 파일 이동 없이 이 태그로만
+격리를 표시한다(옵션 B — 상세는 CLAUDE.md "Alpha Lab 격리" 절 참고).
 """
 import argparse
 import json

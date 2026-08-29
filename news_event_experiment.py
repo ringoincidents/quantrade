@@ -1,4 +1,4 @@
-"""Phase 2 뉴스 이벤트 추출 실험 스크립트 (2026-08-01, Phase2_뉴스이벤트추출_인수인계.md §2).
+"""[Alpha Lab — 격리됨, v4.0 §15] Phase 2 뉴스 이벤트 추출 실험 스크립트 (2026-08-01, Phase2_뉴스이벤트추출_인수인계.md §2).
 
 **analyze.py/ask_claude_decision과 분리된 독립 실험이다.** 이 스크립트는 어떤 매매도
 실행하지 않고, portfolio.json 등 5개 상태 파일도 건드리지 않는다 — 자기 로그 파일
@@ -16,6 +16,14 @@
 캘리브레이션은 전향적으로(prospectively) 기록 후 나중에 결과와 짝짓는 방식으로만
 가능하다. 그래서 이 스크립트는 "한 번 돌려서 과거를 계산"하는 게 아니라 매일 조금씩
 표본을 쌓아가는 방식이다.
+
+[Alpha Lab 격리] Core(v3.2 활성 기능 — analyze.py/analyze_lib.py/news_event_cards.py 등)와
+연결 없음. 재개 절차(v4.0 §15) 완료 전 통합 금지. 물리적 파일 이동 없이 이 태그로만
+격리를 표시한다(옵션 B — 상세는 CLAUDE.md "Alpha Lab 격리" 절 참고).
+
+예외(얕은 의존 1건, 제거하지 않고 사실만 기록): news_event_cards.py(Core, v3.2 활성
+기능)가 이 파일의 JUDGE_MODEL 상수를 import한다 — 격리 대상인 이 파일에서 Core로
+나가는 게 아니라, Core에서 이 파일로 들어오는 역방향 의존이다.
 """
 import time
 from datetime import datetime

@@ -1,4 +1,4 @@
-"""Phase 2 프롬프트 A/B 실험 (2026-08-03) — 같은 헤드라인, 새 프롬프트로 재판단.
+"""[Alpha Lab — 격리됨, v4.0 §15] Phase 2 프롬프트 A/B 실험 (2026-08-03) — 같은 헤드라인, 새 프롬프트로 재판단.
 
 **원본 데이터셋을 절대 건드리지 않는다.** 읽기: `news_event_backtest_log.json`
 (706건, 프롬프트 A = 실시간 트랙과 동일한 `ask_news_event_judgment`).
@@ -25,6 +25,10 @@
     동일하므로 재계산할 이유가 없고, 복사해야 판단 외 요인이 끼어들지 않는다.
   - 모델(`JUDGE_MODEL`)과 도구 미제공(tools 파라미터 없음)은 프롬프트 A와 동일.
     바뀌는 건 프롬프트 문구 하나뿐이다.
+
+[Alpha Lab 격리] Core(v3.2 활성 기능 — analyze.py/analyze_lib.py/news_event_cards.py 등)와
+연결 없음. 재개 절차(v4.0 §15) 완료 전 통합 금지. 물리적 파일 이동 없이 이 태그로만
+격리를 표시한다(옵션 B — 상세는 CLAUDE.md "Alpha Lab 격리" 절 참고).
 """
 import argparse
 import json

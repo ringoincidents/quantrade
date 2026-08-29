@@ -1,4 +1,4 @@
-"""QuanTrade 백테스트 엔진 (Phase 1, 종합계획서 v3 §5) — 추세추종 재설계 버전.
+"""[Alpha Lab — 격리됨, v4.0 §15] QuanTrade 백테스트 엔진 (Phase 1, 종합계획서 v3 §5) — 추세추종 재설계 버전.
 
 메인 신호는 추세추종(20/60일 이동평균 골든크로스 + ADX 25 이상)으로,
 RSI/볼린저는 "진입해도 되는가"가 아니라 "지금 들어가기 좋은 타이밍인가"만
@@ -20,6 +20,10 @@ AI 판단을 재현할 방법이 없다(비용·비결정성 문제). 이 엔진
 같은 종목/같은 기간에 대해 buy_hold_trades()로 단순 매수 후 보유 벤치마크도
 같이 계산해서 전략이 그냥 사서 들고 있는 것보다 나은지 report의
 benchmark_buy_hold/strategy_vs_buy_hold에서 바로 비교할 수 있게 한다.
+
+[Alpha Lab 격리] Core(v3.2 활성 기능 — analyze.py/analyze_lib.py/news_event_cards.py 등)와
+연결 없음. 재개 절차(v4.0 §15) 완료 전 통합 금지. 물리적 파일 이동 없이 이 태그로만
+격리를 표시한다(옵션 B — 상세는 CLAUDE.md "Alpha Lab 격리" 절 참고).
 """
 import argparse
 import time
