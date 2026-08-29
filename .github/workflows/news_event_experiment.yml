@@ -10,9 +10,12 @@ name: News Event Experiment
 # poll.yml에 이미 있던 rebase+retry 패턴을 여기도 적용해 재발을 막는다.
 # analyze.py/ask_claude_decision과는 완전히 분리된 별도 실험이며, 이 스크립트는
 # 어떤 매매도 실행하지 않는다.
+#
+# 2026-08-28: daily cron 중단, workflow_dispatch만 남김. news_event_experiment.py와
+# news_event_calibration_log.json 기존 데이터는 그대로 보존 — Alpha Lab 재개
+# 절차(v4.0 §15) 전까지 신규 코호트 수집을 멈춘다는 뜻일 뿐, 삭제나 코드 변경이
+# 아니다. 재개 시 이 schedule 항목만 되돌리면 된다.
 on:
-  schedule:
-    - cron: '30 9 * * *'
   workflow_dispatch:
 
 permissions:
