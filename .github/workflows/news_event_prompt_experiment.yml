@@ -1,5 +1,8 @@
 name: News Event Prompt A/B Experiment
 
+# promptB 재수집 중단 (인수인계 §18, 2026-08-28) —
+# 재개하려면 이 if 조건 제거 + PM 세션 승인 필요
+#
 # Phase 2 프롬프트 A/B 실험(news_event_prompt_experiment.py) 전용.
 # **workflow_dispatch 전용 — schedule 없음.** 1회성 재판단 실험이라 주기 실행할
 # 이유가 없다.
@@ -24,6 +27,10 @@ permissions:
 
 jobs:
   run:
+    # promptB 재수집 중단 (인수인계 §18, 2026-08-28) — workflow_dispatch로
+    # 수동 실행을 시도해도 여기서 즉시 스킵된다. 재개하려면 이 조건을 지우고
+    # PM 세션(claude.ai 방향성 세션) 승인을 먼저 받을 것.
+    if: false
     runs-on: ubuntu-latest
     timeout-minutes: 120
     env:
