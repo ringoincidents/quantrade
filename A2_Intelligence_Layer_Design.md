@@ -11,6 +11,19 @@
 > 현재 소스. 판정성 서술 없이 사실과 설계안만 담는다 — "이렇게 하면 될 것
 > 같다"는 제안이지 "이게 맞다"는 확정이 아니다.
 
+## 개정 이력
+
+**2026-08-29 PM 확정 반영(1차 초안 → 이 버전)**: PM이 아래 4건을 확정 지시,
+이 버전에 반영했다.
+
+1. Prioritization 공식을 4인자(Reliability × Novelty × Portfolio Relevance ×
+   Magnitude)로 확정 — Importance 인자·event_type 고정가중치표 폐기(§3).
+2. `audit_schema()` 경로 단위 allowlist 설계안 승인 — 변경 없이 그대로 유지(§3-3).
+3. Portfolio Relevance는 "재가중" 해석으로 확정, `watchlist.json`이 비어
+   유니버스가 보유 5종목뿐이라는 제약 명시(§4).
+4. Step 1 스키마 통일에 `rule_trigger_report.py` 정규화 포함 — 스키마 버전
+   `v1`→통일, 타임스탬프 KST naive→ISO 8601 UTC(§1-3/§1-4).
+
 ---
 
 ## Step 1. 공통 스키마 확정
@@ -42,7 +55,7 @@
 | `market_indicators.py`(state_board) | `rows[]`(`symbol`/`name`/`volatility_20d_pct`/`volatility_percentile`/`adx_14`/`data_status`) | 없음 → 최상위만 | `symbol`+`name` | 신규 → `"market_indicators.state_board"` | 없음(이벤트가 아니라 스냅샷) → Change Detection으로 승격 시 부여(§2-2) | `volatility_20d_pct`가 observed에 해당, `baseline`은 과거분포(현재는 백분위만 저장, 원 baseline 값 저장 안 함) | 없음(신규, 산술이므로 1.0) | `correlation`에 종목 쌍 있음(현재 요약 통계뿐, 개별 쌍 목록 아님) |
 | `portfolio_report.py`(rule_matches) | `rule_matches[]`(`rule`/`symbol`/`name`/`threshold`/`observed`/`fact`) | 없음 → 최상위만 | `symbol`+`name` | 신규 → `"portfolio_report.rule_matches"` | 규칙명이 사실상 event_type 역할(예: "집중도리밸런싱") → enum 정리 필요 | `observed`/`threshold`가 각각 observed_value/baseline에 대응(형식 통일 필요 — 현재 문자열) | 없음(신규, 산술이므로 1.0) | 없음(신규) |
 | `post_trade_review.py` | 종합 리포트 1건(`exposure_change`/`allocation_gap`/`correlation_blind_spots`/`behavior_patterns`/`recent_news_links`) | `generated_at`(리포트 단위) | 없음(포트폴리오 전체 단위, 종목 단위 아님) | 신규 → `"post_trade_review.<섹션명>"` | 섹션별로 나눠야 함(현재 5섹션이 한 리포트에 뭉쳐 있음) | 섹션마다 다름(예: `correlation_blind_spots`는 이미 상관계수 값 보유) | 없음(신규) | `correlation_blind_spots`가 이미 종목 쌍 형태 |
-| `rule_trigger_report.py` | 리포트 1건(`trigger`/`company`/`chart`/`market`) | **`"%Y-%m-%d %H:%M"`, 오프셋 없는 KST naive 문자열** — 다른 4개(ISO 8601 UTC)와 형식이 다름 | `symbol`+`name` | 신규 → `"rule_trigger_report.<섹션명>"` | `trigger.rule`이 event_type 역할 | `trigger` 섹션에 수치 있음 | 없음(신규) | 없음(신규) |
+| `rule_trigger_report.py` | 리포트 1건(`trigger`/`company`/`chart`/`market`) | **정규화 대상**(§1-3) — 현재 `"%Y-%m-%d %H:%M"` 오프셋 없는 KST naive 문자열 → 나머지 4개와 같은 ISO 8601 UTC로 통일 | `symbol`+`name` | 신규 → `"rule_trigger_report.<섹션명>"` | `trigger.rule`이 event_type 역할 | `trigger` 섹션에 수치 있음 | 없음(신규) | 없음(신규) |
 
 **요약**: `event_type`은 이미 4/5 생성기가 어떤 형태로든 갖고 있어(뉴스 event_type, 규칙명, trigger.rule) enum 통합이 상대적으로 쉽다. `source`/`reliability`/`related_assets`는 **5개 생성기 전부 신규 추가**가 필요하다. `timestamp`는 항목별로는 전무하다(§1-4).
 
@@ -52,7 +65,12 @@
 
 - 각 생성기 JSON의 최상위 `schema` 필드는 그대로 둔다(무엇이 이 파일을 만들었는지는 여전히 필요한 정보).
 - 공통 스키마를 따르는 이벤트 배열(예: `change_events`)이 생기면, 그 배열 자체에 `schema_version: "intelligence_layer_v4.0"` 같은 별도 태그를 붙여 "이 배열 안의 각 객체는 공통 스키마를 따른다"는 걸 명시한다 — 파일 스키마와 이벤트 스키마를 같은 필드에 욱여넣지 않는다.
-- `rule_trigger_report_v1`이 왜 `v1`인지는 이번 조사에서 원인을 특정하지 못했다(단순 명명 누락으로 보이나 확정 아님) — Step 1과 별개로 정정이 필요하면 별도 처리.
+
+**`rule_trigger_report.py` 정규화 (PM 확정, §개정 이력 4)**: 이 파일만 `schema: "rule_trigger_report_v1"`로 다른 4개(`_v3.2`)와 버전이 다르고, `generated_at`도 `datetime.now(KST).strftime("%Y-%m-%d %H:%M")`(오프셋 없는 naive 문자열)이라 다른 4개(`datetime.now(timezone.utc).isoformat()`)와 형식이 다르다는 사실을 이번 세션에서 재확인했다(§1-2 표). 정규화안:
+
+- `"schema": "rule_trigger_report_v1"` → `"rule_trigger_report_v3.2"`로 변경 — 나머지 4개와 동일한 버전 표기 체계로 통일.
+- `generated_at`을 `datetime.now(KST).strftime(...)` → `datetime.now(timezone.utc).isoformat()`로 변경 — 다른 4개 생성기와 동일한 ISO 8601 UTC로 통일. KST 표시가 필요하면(사람이 읽는 화면 쪽) 저장 시점이 아니라 표시 시점에 변환하는 게 이미 이 저장소의 관례다(`index.html`의 `fmtBasis()`가 UTC를 받아 브라우저 로컬로 변환하는 방식 그대로).
+- **하위 호환 확인(사실)**: `autoexec.py`를 grep한 결과 `rule_trigger_report.py`의 `generated_at`을 파싱(`strptime` 등)하는 코드가 없다 — 이 리포트는 텔레그램 `/autoexec_report <id>` 조회용으로만 쓰이고 시각 문자열을 재파싱하는 소비처가 없다. `index.html`의 `fmtBasis()`도 naive KST 문자열과 ISO 문자열을 이미 둘 다 처리하도록 만들어져 있어(오프셋 없는 `"YYYY-MM-DD HH:MM"` 패턴을 감지해 UTC로 파싱하는 분기가 이미 있음), 이 필드를 직접 fetch해 표시하는 화면이 생기더라도 형식 변경 자체가 기존 코드를 깨뜨리지 않는다. 다만 현재 `index.html`은 `rule_trigger_report.py`의 출력을 직접 fetch하지 않는다(텔레그램 전용 경로) — 이 사실은 참고용이며 정규화의 필요조건은 아니다.
 
 ### 1-4. 항목별 timestamp 부재 문제 — 해결안
 
@@ -137,34 +155,33 @@ if volatility_percentile >= 90:   # 임계값, 사전 등록 필요(v4.0 §5)
 
 ### 3-1. 공식과 인자별 허용 입력 매핑
 
-지시받은 공식: `Importance × Reliability × Novelty × Portfolio Relevance × Magnitude`
+**공식 확정(PM, 2026-08-29): `Reliability × Novelty × Portfolio Relevance × Magnitude`** — Importance 인자를 제거한 4인자 공식이다. 1차 초안의 5인자 공식(Importance 포함)과 그에 딸린 `event_type` 고정가중치표 제안은 **폐기**했다.
 
-| 인자 | 허용 입력(지시 원문) | 이 문서의 계산 제안 | 데이터 소스 |
+**폐기 사유(PM 지시 원문 그대로 기록)**: "event_type별 중요도 사전 부여는 관측 사실이 아닌 사전 신념이며, 근거를 추적하면 '예상 주가 영향도'(§5.1 금지 입력)로 귀결됨." 1차 초안은 §3-2에서 이 위험을 "가중치 정의 문구를 조심하면 피할 수 있다"는 완화책으로 다뤘으나, PM은 완화가 아니라 **인자 자체를 없애는** 결정을 내렸다 — 사건이 일어나기 전에 "이 사건 유형은 중요하다"고 사전 등록하는 행위 자체가, 아무리 문구를 "알림 우선순위"로 순화해도 결국 "이 유형의 사건이 (다른 유형보다) 주가에 더 큰 영향을 준다"는 사전 신념에서 나온 숫자라는 점은 못 피한다는 판단으로 이해했다.
+
+| 인자 | 허용 입력(지시 원문) | 계산 제안 | 데이터 소스 |
 |---|---|---|---|
-| Magnitude(변화 크기) | 평균 대비 배율 | `change` 필드 값 그대로(또는 `abs(change - 1.0)` 등 정규화) | Step 1/2에서 이미 계산된 `change` |
 | Reliability(출처 신뢰도) | 출처 신뢰도 | §1-1의 `reliability` 필드 그대로(소스별 사전 등록 고정값 — 산술 기반은 1.0, AI 기반은 사전 등록값) | `source` 필드 기준 조회 |
 | Novelty(신규성) | 신규성 | 같은 종목·같은 event_type이 최근 N일 내 이미 발생했는지(있으면 감쇠, 없으면 1.0) — 통계적/시간적 정의, "이 정보가 시장에 새로운가"를 예측하지 않음 | 과거 이벤트 로그(신규 축적 필요) |
-| Portfolio Relevance(보유비중·관련도) | 보유 비중·관련도 | Step 4가 채우는 값 그대로 | Step 4 출력 |
-| Magnitude | (위와 중복 표기, 원문 그대로 유지) | | |
+| Portfolio Relevance(보유비중·관련도) | 보유 비중·관련도 | Step 4가 채우는 `relevance_value` 그대로 | Step 4 출력 |
+| Magnitude(변화 크기) | 평균 대비 배율 | `change` 필드 값 그대로(또는 `abs(change - 1.0)` 등 정규화) | Step 1/2에서 이미 계산된 `change` |
 
-**"Importance" 인자에 허용 입력이 지시되지 않음 — PM 확인 필요.** 공식은 5개 인자(Importance × Reliability × Novelty × Portfolio Relevance × Magnitude)인데 "허용 입력" 목록은 4개 항목(변화크기/출처신뢰도/신규성/보유비중·관련도)만 나열돼 있다. Importance가 무엇으로 계산되는지는 원문에 없다. **이 문서는 판단을 대신 내리지 않고 제안만 한다**:
-
-- 제안: `event_type`별 **사전 등록·고정 가중치 표**(예: `실적발표=1.2`, `공시=1.0`, `거래량_급증=0.8` 등, 숫자는 예시일 뿐 확정 아님). `autoexec.py`의 `CONCENTRATION_PCT`/`LOSS_PCT` 같은 "방향성 세션 확정 대상이며 결과를 보고 바꾸지 않는" 규칙 파라미터와 같은 성격 — 사건이 일어난 뒤 값을 보고 가중치를 조정하지 않는다.
-- 이 제안이 맞다면 Importance는 **새 입력 소스가 아니라 `event_type`의 함수**이므로, "허용 입력" 목록에 없는 게 오히려 자연스럽다(이미 있는 `event_type` 필드를 재사용할 뿐이라서). 다만 이건 이 문서의 추정이지 지시받은 사실이 아니라서 **PM 확인 없이 이대로 구현 착수하지 않는다.**
+4개 인자 모두 지시 원문의 "허용 입력" 목록과 1:1로 대응한다 — Importance 제거로 "허용 입력 목록에 없는 인자"라는 불일치 자체가 사라졌다(1차 초안의 §3-1 미확정 항목 해소).
 
 ### 3-2. 금지 입력이 섞이지 않는지 인자별 점검
 
-| 인자 | 금지 입력과 헷갈릴 수 있는 지점 | 이 문서의 경계 설정 |
+| 인자 | 금지 입력과 헷갈릴 수 있는 지점 | 경계 설정 |
 |---|---|---|
 | Reliability | "이 뉴스가 좋은 소식일 확률"(금지: 상승/하락 확률)과 혼동 가능 | Reliability는 **"이 관측이 실제로 일어났다는 사실 자체에 대한 확신"**만 의미. 뉴스의 경우 "헤드라인이 실제로 이 종목에 관한 것인가/AI 요약이 원문을 왜곡하지 않았는가"의 신뢰도이지, "이 소식이 좋은지 나쁜지"가 아니다. |
-| Importance(제안) | `event_type`별 가중치가 사실상 "이 사건 종류가 주가에 미치는 영향도"(금지: 예상 주가 영향도)로 흐를 위험 | 가중치는 **"이 사건 유형을 사람이 얼마나 자주/급하게 확인하고 싶어하는가"**(알림 우선순위)로만 정의하고, "이 사건이 주가를 얼마나 움직일지"로 정의하지 않는다 — 정의 문구 자체가 §5.1 금지 입력을 침범하지 않게 문서화 필요(A5에서 실제 가중치 표 확정 시 이 경계를 다시 명시할 것). |
 | Novelty | "시장이 아직 반영 안 한 정보인가"(예상 주가 영향도의 다른 표현) 로 흐를 위험 | Novelty는 **"이 종목에 같은 event_type 이벤트가 최근 N일 내 몇 번 있었나"**라는 카운트 기반 통계로만 정의. "아직 안 알려진 정보"인지 여부는 판단하지 않는다. |
 | Portfolio Relevance | 없음(§4에서 별도로 산술만 다룸) | |
 | Magnitude | 없음(이미 §1/§2에서 산술로 확정) | |
 
-이 표는 "지금 이렇게 정의하면 안전하다"는 제안이지, 실제 가중치 숫자나 최종 문구는 A5(구현) 단계에서 다시 audit() 대상으로 검증해야 한다.
+Importance 항목은 인자 자체가 폐기되어 이 표에서도 제거했다(§3-1). 이 표는 "지금 이렇게 정의하면 안전하다"는 제안이지, 실제 계산식의 최종 문구는 A5(구현) 단계에서 다시 audit() 대상으로 검증해야 한다.
 
-### 3-3. audit() 충돌과 필드 경로 단위 allowlist 설계
+### 3-3. audit() 충돌과 필드 경로 단위 allowlist 설계 — PM 승인, 변경 없음
+
+**PM이 이 설계안을 그대로 승인(2026-08-29)** — 아래 내용은 1차 초안에서 바뀐 것이 없다. Prioritization 공식이 5인자에서 4인자로 바뀌었어도(§3-1) 출력 필드 이름(`priority_score`)과 그 필드가 audit()과 충돌하는 지점은 동일하므로 이 설계는 그대로 유효하다.
 
 **충돌 확인**: `FORBIDDEN_FIELDS_BASE`(`analyze_lib.py`)에 이미 `score`/`rank`/`ranking`/`rating`/`grade`가 있다(이번 세션에서 재확인, §1-1 인용). Prioritization 결과값의 가장 자연스러운 필드명은 `priority_score`인데, 현재 `audit()`는 **키 이름을 정확히 일치시켜서만** 검사한다(`k.lower() in FORBIDDEN_FIELDS` — 부분일치 아님, `priority_score`는 `score`와 정확히 같지 않아 지금 로직으로는 사실 안 걸린다). 그런데도 이 문서가 "금지어 삭제 금지 + allowlist" 방식을 설계하는 이유:
 
@@ -242,7 +259,14 @@ def compute_portfolio_relevance(change_event, real_portfolio, watchlist):
 
 `relevance_value`(0.0~1.0)가 Step 3 공식의 Portfolio Relevance 인자로 그대로 들어간다. 보유 비중이 높을수록 값이 크고, 관심종목만이면 낮은 고정값(예시 0.3 — 확정 아님, A5에서 결정), 둘 다 아니면 0.
 
-**"필터링"의 실제 의미 — 사실 정정**: 지시 원문은 "Change Detection 전체 출력을 보유·관심종목 관련도로 필터링/재가중"이라고 했는데, `news_event_cards.py`/`market_indicators.py`의 `build_universe()`가 **이미 보유+관심종목으로만 스캔 대상을 좁혀놓은 상태**다(A0 조사에서 확인 — 시장 전체가 아니라 애초에 이 유니버스만 조회함). 즉 Change Detection 출력 자체가 이미 이 범위 밖의 이벤트를 만들지 않는다. 그래서 Portfolio Relevance 단계가 실제로 하는 일은 **집합에서 걸러내는 필터링보다는, 이미 좁은 집합 안에서 보유 vs 관심종목의 비중 차이를 재가중하는 쪽에 가깝다** — "관련 없는 이벤트를 버린다"기보다 "관련도가 다른 이벤트를 다르게 취급한다"는 의미로 읽힌다. 이 해석이 지시 의도와 다르면 정정 필요.
+**"재가중" 해석으로 확정(PM, 2026-08-29).** 지시 원문의 "Change Detection 전체 출력을 보유·관심종목 관련도로 필터링/재가중"에서, `news_event_cards.py`/`market_indicators.py`의 `build_universe()`가 **이미 보유+관심종목으로만 스캔 대상을 좁혀놓은 상태**라(A0 조사에서 확인 — 시장 전체가 아니라 애초에 이 유니버스만 조회함) Change Detection 출력 자체가 이미 이 범위 밖의 이벤트를 만들지 않는다는 사실은 1차 초안 그대로다. PM이 이를 "필터링"이 아니라 **"재가중"**으로 확정 — Portfolio Relevance 단계는 이미 좁은 집합 안에서 보유 vs 관심종목의 비중 차이를 값으로 매기는 역할이지, 집합에서 이벤트를 들어내는 역할이 아니다.
+
+**제약 사항(PM 지시로 명시): `watchlist.json`이 비어 있어 유니버스가 보유 5종목뿐이다.** A0 조사에서 확인한 대로 `watchlist.json`의 `symbols`는 현재 `[]`이고 `target_prices.json`의 `targets`도 `{}`다 — `build_universe()`가 만드는 실제 대상은 `real_portfolio.json`의 보유종목 5개(004000/NCPL/SCHD/TE 등, 인프라 조사 시점 기준)뿐이다. 이게 Portfolio Relevance 설계에 미치는 영향:
+
+- `is_watched`(§4-2)는 현재 **항상 `False`**를 반환한다 — 코드는 맞게 동작해도 이 조건이 실질적으로 한 번도 참이 되지 않는다.
+- 관심종목 전용 고정값(위 `0.3`)이 실제로 쓰이는 사례가 지금은 하나도 없다 — 이 값이 적절한지 검증할 데이터가 없다는 뜻이라, A5에서 관심종목 사례가 생기기 전까지는 이 숫자를 튜닝할 근거 자체가 없다.
+- 보유 5종목 간에는 relevance 값의 **분산이 거의 없다**(전부 `is_held=True`, `weight_pct`만 서로 다름) — Portfolio Relevance가 Step 3 공식에서 실제로 사건 우선순위를 갈라놓는 정도는 `watchlist.json`이 채워지기 전까지 제한적이다(보유 비중 차이만으로 갈릴 뿐, 보유 vs 관심의 큰 격차는 아직 관측되지 않음).
+- 이 제약은 코드 설계를 바꾸지 않는다 — `watchlist.json`을 사람이 채우면 별도 코드 변경 없이 그 즉시 반영된다(§4-2 함수는 이미 두 파일을 다 읽음). 다만 A5 구현 직후 실제로 검증 가능한 것은 "보유 종목 간 비중 재가중"뿐이고 "보유 vs 관심 재가중"은 데이터가 채워질 때까지 미검증 상태로 남는다는 사실을 기록해 둔다.
 
 ### 4-3. Step 3와의 연결
 
@@ -261,12 +285,17 @@ Step 1 (공통 스키마 확정, PM 승인)
 ```
 Step 3과 Step 4는 서로의 출력을 필요로 하므로(Step 3 공식이 Step 4 값을 인자로 쓰지만, Step 4 자체는 Step 3 없이도 독립 계산 가능) **구현 순서는 Step 4 → Step 3** 쪽이 자연스럽다(지시 원문의 Step 번호는 문서 서술 순서이지 구현 순서로 못박은 게 아니라고 이해했다 — 다르면 정정 필요).
 
-## 부록 B. 이 문서가 결정하지 않은 것 (PM 확인 목록)
+## 부록 B. PM 확인 목록
 
-1. **Importance 인자의 정확한 계산식**(§3-1) — 이 문서는 event_type 고정가중치표를 제안만 함.
-2. Novelty의 "최근 N일" N값, Importance 가중치표의 실제 숫자 — 전부 A5에서 사전 등록.
-3. 변동성 급증의 두 계산식(§2-3) 중 어느 쪽을 표준으로 할지.
-4. 환율 급변/뉴스 빈도 급증의 데이터 축적 방식(신규 JSON 파일? 기존 파일 확장?) — 이 문서는 "축적이 없다"는 사실만 확인.
-5. 기존 `signal`/`rank` 파일단위 audit 예외를 새 path 단위 allowlist로 소급 전환할지(§3-3).
-6. `rule_trigger_report_v1`이 다른 4개와 달리 `v3.2`가 아닌 이유/정정 필요 여부(§1-3).
-7. Step 4 "필터링"의 실제 의미 정정(§4-2) — 이미 좁은 유니버스라 재가중에 가깝다는 이 문서의 해석이 맞는지.
+**2026-08-29 확정으로 해소된 항목(1차 초안 기준, 기록용으로 남김)**:
+- ~~Importance 인자의 정확한 계산식~~ → 인자 자체 폐기로 해소(§3-1, §개정 이력 1).
+- ~~`rule_trigger_report_v1`이 다른 4개와 달리 `v3.2`가 아닌 이유/정정 필요 여부~~ → 정규화안 확정으로 해소(§1-3, §개정 이력 4).
+- ~~Step 4 "필터링"의 실제 의미 정정~~ → "재가중" 해석으로 확정(§4-2, §개정 이력 3).
+
+**여전히 열려 있는 항목**:
+
+1. Novelty의 "최근 N일" N값 — A5에서 사전 등록.
+2. 변동성 급증의 두 계산식(§2-3) 중 어느 쪽을 표준으로 할지.
+3. 환율 급변/뉴스 빈도 급증의 데이터 축적 방식(신규 JSON 파일? 기존 파일 확장?) — 이 문서는 "축적이 없다"는 사실만 확인.
+4. 기존 `signal`/`rank` 파일단위 audit 예외를 새 path 단위 allowlist로 소급 전환할지(§3-3) — PM이 §3-3 설계 자체는 승인했으나 기존 두 예외의 소급 전환 여부는 별도 미확인.
+5. Portfolio Relevance의 관심종목 고정값(현재 예시 `0.3`) — §4-2에서 기록한 대로 `watchlist.json`이 비어 있어 검증 데이터가 없는 상태로 A5에 진입하게 됨.
