@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-28T20:59:30.104573+00:00",
+  "generated_at": "2026-08-29T14:42:25.999360+00:00",
   "schema": "explanation_only_v3.2",
   "note": "사실 설명 전용(뉴스 사건 + 정량 이상행동). 방향 예측/확신도/매매 제안 필드가 스키마에 없다 - 누락이 아니라 설계(CLAUDE.md v3.2). 대상은 보유종목+관심종목으로 한정(2026-08-09 스코프 축소).",
   "cards": [
@@ -11,7 +11,7 @@
       "headlines": [
         "롯데정밀화학, 증권사 목표가 상향에 강세…12.37% - 매일경제 마켓",
         "롯데정밀화학 2분기 영업이익 619억원…작년 동기 대비 611.5%↑ - 연합뉴스",
-        "[투데이리포트]롯데정밀화학, \"아픈 손가락까지 나…\" BUY-DB금융투자 - 씽크풀 AI",
+        "[실적속보]롯데정밀화학, 작년 4Q 매출액 4390억(+2.4%) 영업이익 193억(+59%) (연결) - 씽크풀 AI",
         "[0429시황레이더] 롯데정밀화학, 'TMAC' 구조적 성장 기대감 등 - 인포스탁데일리",
         "롯데정밀화학 '반도체 현상액 밸류체인의 숨은 병목, TMAC' 증권사 발표에 강세…7.75% - 매일경제 마켓"
       ]
@@ -20,46 +20,53 @@
       "market": "NCPL",
       "name": "넷캐피탈",
       "event_type": "이상행동",
-      "summary": "거래량 20일 평균 대비 3.3배, 전일 종가 대비 시가 갭 +9.8%",
+      "summary": "거래량 20일 평균 대비 4.0배, 전일 종가 대비 시가 갭 +25.7%",
       "headlines": []
     },
     {
       "market": "NCPL",
       "name": "넷캐피탈",
       "event_type": "규제",
-      "summary": "넷케피털(NCPL)은 10-K 연례보고서 미제출로 나스닥 규정 위반 통지를 받았으며, 이후 180일 추가 유예기간을 획득했다. 또한 감사인이 사임하고 과거 재무제표가 신뢰 불가 판정을 받았으며, SEC 소송 합의에 따른 법원 승인 이후 세실리아 렝 이사가 사임했다.",
+      "summary": "넷케피털(NCPL)은 연례보고서(10-K) 미제출로 나스닥 규정 위반 통지를 받았으며, 이후 180일 추가 유예기간을 획득하였다. 또한 감사인이 사임하고 과거 재무제표의 신뢰 불가 사실이 공시되었으며, 이는 SEC 소송과 관련된 것으로 보도되었다.",
       "headlines": [
         "넷케피털, 10-K 연례보고서 제출 지연으로 나스닥 규정 위반 통지 받아 - 데이터투자",
-        "넷케피털 세실리아 렝 이사 사임…SEC 소송 합의 따른 법원 승인 후속 조치 - 데이터투자",
+        "Netcapital 주식 시세: NCPL 주식 차트, 시가총액 & 오늘의 뉴스 - CoinGecko",
         "넷케피털, 나스닥 상장 유지 위한 180일 추가 유예기간 획득 - 데이터투자",
-        "넷캐피탈, 연차보고서 미제출로 나스닥 규정 위반 통보 - 매일경제 마켓",
-        "넷케피털, 감사인 사임 및 과거 재무제표 신뢰 불가 공시…SEC 소송 여파 - 데이터투자"
+        "넷케피털, 감사인 사임 및 과거 재무제표 신뢰 불가 공시…SEC 소송 여파 - 데이터투자",
+        "넷캐피탈, 연차보고서 미제출로 나스닥 규정 위반 통보 - 매일경제 마켓"
       ]
     },
     {
       "market": "SCHD",
       "name": "SCHD",
       "event_type": "기타",
-      "summary": "SCHD(Schwab US Dividend Equity ETF)가 정기 리밸런싱을 실시해 배당성장 종목 편입 비중이 조정되었다고 보도되었다. 또한 Robinhood 플랫폼을 통한 토큰화 ETF 형태로 거래 가능하다는 내용과, 주가 하락 기간 중 배당금이 증가했다는 내용이 함께 보도되었다.",
+      "summary": "SCHD ETF가 정기 리밸런싱을 실시해 구성 종목을 변경했으며, 토큰화 ETF 형태로 Robinhood 거래소에서 거래 가능하다고 보도되었다. 또한 삼성자산운용의 FunETF 플랫폼이 SCHD를 포함한 미국 ETF 서비스를 출시했다는 내용이 보도되었다.",
       "headlines": [
         "Schwab US Dividend Equity ETF Tokenized ETF (Robinhood) 거래소 SCHD 마켓 | 매수·매도·트레이드 - CryptoRank",
         "[ETF 특징주] '10년간 압도적 수익률' SCHD보다 나은 배당 ETF - 뉴스핌",
+        "“QQQ·SCHD 한눈에”…삼성운용 FunETF, 美 ETF 서비스 출시 - 매일경제 마켓",
         "SCHD '리밸런싱'…배당성장 기대주 더 담았다 - 한국경제",
-        "주가는 -35% 폭락했는데, SCHD 배당은 +17.7% 늘었습니다 [ 재테크/미국주식/배당주식/슈드/노후대책 ] Emily Deschanel (yMm5AEHeMf) - Mshale",
-        "Schwab US Dividend Equity ETF Tokenized ETF (Robinhood) - CryptoRank"
+        "주가는 -35% 폭락했는데, SCHD 배당은 +17.7% 늘었습니다 [ 재테크/미국주식/배당주식/슈드/노후대책 ] Emily Deschanel (yMm5AEHeMf) - Mshale"
       ]
     },
     {
       "market": "TE",
       "name": "T1 에너지",
-      "event_type": "실적발표 또는 M&A",
-      "summary": "TE 커넥티비티(TEL)가 실적 기대치를 상회하고 14억 달러 규모의 아스트로다인(Astrodyne) 인수 계약을 체결했다고 보도되었으며, 해당 기간 중 주가는 5.9% 하락한 것으로 보도되었다.",
+      "event_type": "이상행동",
+      "summary": "전일 종가 대비 시가 갭 +11.9%",
+      "headlines": []
+    },
+    {
+      "market": "TE",
+      "name": "T1 에너지",
+      "event_type": "M&A",
+      "summary": "TE Connectivity(TEL)가 아스트로다인(Astrodyne) 인수 및 AI 사업 확대를 진행 중이라고 보도되었으며, 동시에 TE Connectivity 주식이 하락세를 보였다고 보도되었다.",
       "headlines": [
-        "JDG VS TE - VALORANT Esports",
         "T1 Energy Tokenized Stock (Robinhood) 오늘 Indonesian Rupiah 가격 | 실시간 TE - IDR 변환기 및 환율 - CryptoRank",
-        "실적 기대치를 상회하고 14억 달러 규모의 아스트로다인(Astrodyne) 인수 계약을 체결했음에도 TE 커넥티비티(TEL) 주가가 5.9% 하락한 이유 - simplywall.st",
+        "TE의 아스트로다인(Astrodyne) 인수와 AI 사업 확대가 TE 커넥티비티(TEL) 투자 전망을 바꿀 수도 있다 - simplywall.st",
         "2026.TE KOOP.te huur - EA",
-        "260823 BAEKHYUN Weverse Live - 카페데이...트.... - YouTube"
+        "TE VS AG - VALORANT Esports",
+        "TE Connectivity 주식, 오늘 하락세 보이는 이유는? - Investing.com 한국어"
       ]
     }
   ]
