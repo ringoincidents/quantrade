@@ -2,141 +2,302 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>QuanTrade 대시보드</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
-  * { box-sizing: border-box; }
-  body { font-family: -apple-system, sans-serif; background: #0f1115; color: #eee; margin: 0; padding-bottom: 64px; }
-  .page { max-width: 640px; margin: 0 auto; padding: 12px; }
-  h1 { font-size: 18px; color: #eee; margin: 0; }
-  .subtitle { font-size: 12.5px; color: #64748b; margin: 0 0 8px; }
-  h2 { color: #7dd3fc; font-size: 20px; margin: 0 0 10px; }
-  h3 { color: #a5b4fc; font-size: 15px; margin-bottom: 8px; }
-  .card { background: #1a1d24; border-radius: 12px; padding: 14px; margin-bottom: 14px; }
-  .pos { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #2a2d35; font-size: 14px; cursor: default; }
-  .pos.tappable { cursor: pointer; }
-  .pos.tappable:active { background: #20242c; }
+  /* ═══════════════════════════════════════════════════════════════
+     디자인 개편 v2 (2026-08-29) — 색상/타이포 팔레트 재정비.
+     의미 있는 색만 쓴다: 중립 텍스트 위계(명도 4단계) + 단일 강조색
+     (accent, 탐색/인터랙션 전용) + 손익 2색(초록=이익/positive,
+     빨강=손실·위반/negative). 그 외의 장식적 색(과거 버전의 인디고·
+     틸·퍼플·앰버)은 전부 제거 — 카드/배지 색이 "이 섹션의 브랜드색"이
+     아니라 "이 텍스트가 무슨 의미인가"만 나타내도록 정리했다.
+     이모지도 대부분 제거(하단 탭 아이콘은 CSS로 숨김 처리, 텍스트/JS
+     변경 없이 .tab-icon만 display:none). DOM 구조·id·onclick은 그대로.
+     ═══════════════════════════════════════════════════════════════ */
+  :root {
+    color-scheme: dark;
+    --bg-0: #0a0c11;
+    --glass-1: rgba(255, 255, 255, 0.05);
+    --glass-2: rgba(255, 255, 255, 0.07);
+    --glass-border: rgba(255, 255, 255, 0.09);
+    --glass-border-soft: rgba(255, 255, 255, 0.06);
+    --shadow-card: 0 10px 30px -12px rgba(0, 0, 0, 0.55), 0 1px 0 rgba(255, 255, 255, 0.03) inset;
+    --radius-lg: 20px;
+    --radius-md: 14px;
+    --radius-sm: 10px;
+    --radius-pill: 999px;
+
+    /* 중립 텍스트 위계 4단계 — 헤딩도 이 안에서만 고른다(장식색 없음) */
+    --text-0: #f4f5f7;   /* 제목, 핵심 수치 */
+    --text-1: #b9bfc9;   /* 본문 */
+    --text-2: #868d9a;   /* 라벨, 보조 설명 */
+    --text-3: #5b6170;   /* 세부 각주, 비활성 */
+    --hairline: rgba(255, 255, 255, 0.07);
+
+    /* 단일 강조색 — 탐색/인터랙션 전용(active 탭·칩, 링크, 포커스, 진행바) */
+    --accent: #5b9dfb;
+    --accent-bg: rgba(91, 157, 251, 0.16);
+    --accent-border: rgba(91, 157, 251, 0.4);
+
+    /* 손익/성공-실패 전용 2색 — 그 외 목적으로 쓰지 않는다 */
+    --green: #34d399;
+    --green-bg: rgba(52, 211, 153, 0.14);
+    --green-border: rgba(52, 211, 153, 0.4);
+    --green-solid: #16a34a;
+    --red: #f87171;
+    --red-bg: rgba(248, 113, 113, 0.14);
+    --red-border: rgba(248, 113, 113, 0.4);
+    --red-solid: #dc2626;
+
+    --tab-h: 60px;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: var(--bg-0);
+    background-image:
+      radial-gradient(circle at 15% 8%, rgba(91, 157, 251, 0.08), transparent 42%),
+      radial-gradient(circle at 85% 92%, rgba(91, 157, 251, 0.05), transparent 45%);
+    background-attachment: fixed, fixed;
+    color: var(--text-1);
+    font-size: 16px;
+    line-height: 1.55;
+    margin: 0;
+    padding-bottom: calc(var(--tab-h) + 24px + env(safe-area-inset-bottom));
+    font-variant-numeric: tabular-nums;
+  }
+  .page { max-width: 640px; margin: 0 auto; padding: 16px 14px; }
+  h1 { font-size: 19px; font-weight: 700; color: var(--text-0); margin: 0; letter-spacing: -0.01em; }
+  .subtitle { font-size: 12.5px; color: var(--text-3); line-height: 1.5; margin: 3px 0 8px; }
+  h2 { color: var(--text-0); font-size: 21px; font-weight: 700; margin: 0 0 12px; letter-spacing: -0.01em; }
+  h3 { color: var(--text-0); font-size: 15.5px; margin: 0 0 10px; font-weight: 600; }
+
+  /* ── 글래스 카드 베이스: 모든 카드가 동일한 중립 톤(지원 브라우저: blur,
+     미지원: 아래 @supports 폴백). 색은 카드가 아니라 그 안의 숫자/뱃지가
+     가진다 — 카드 자체를 섹션별로 색칠하던 이전 방식은 제거했다. ── */
+  .card, .guardrail-card, .newsinfo-card, .pending-card, .today-card {
+    background: var(--glass-1);
+    backdrop-filter: blur(24px) saturate(150%);
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: 18px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow-card);
+  }
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .card, .guardrail-card, .newsinfo-card, .pending-card, .today-card { background: #171a21; }
+  }
+
+  .pos { display: flex; justify-content: space-between; align-items: center; gap: 10px;
+         padding: 12px 2px; border-bottom: 1px solid var(--hairline); font-size: 15.5px;
+         color: var(--text-0); line-height: 1.4; cursor: default; min-height: 44px; }
+  .pos.tappable { cursor: pointer; border-radius: var(--radius-sm); margin: 0 -2px; padding: 12px; }
+  .pos.tappable:active { background: rgba(255, 255, 255, 0.05); }
   .pos:last-child { border-bottom: none; }
-  .pos .pos-main { display: flex; flex-direction: column; gap: 2px; }
-  .pos .pos-sub { font-size: 11.5px; color: #64748b; }
-  .positive { color: #4ade80; }
-  .negative { color: #f87171; }
-  .badge { font-size: 11px; padding: 2px 6px; border-radius: 6px; margin-left: 6px; }
-  .pending-card { background: #292116; border: 1px solid #78350f; border-radius: 10px; padding: 12px; margin-bottom: 10px; }
-  .badge-retired { background: #3f4653; color: #cbd5e1; font-size: 11px; padding: 2px 7px;
-                   border-radius: 999px; margin-left: 6px; vertical-align: middle; }
-  .retired-note { border-left: 3px solid #64748b; padding-left: 10px; margin: 8px 0 12px; }
-  .guardrail-card { background: #2a1f1f; border: 1px solid #7f1d1d; border-radius: 10px;
-                    padding: 12px; margin-bottom: 10px; }
-  .guardrail-rule { font-weight: 600; color: #fca5a5; }
-  .guardrail-fact { margin-top: 4px; font-size: 14px; }
-  .guardrail-nums { margin-top: 6px; font-size: 12px; color: #94a3b8; }
-  .ok-line { color: #6ee7b7; font-weight: 600; }
-  .newsinfo-card { background: #16202b; border: 1px solid #1e3a5f; border-radius: 10px;
-                   padding: 12px; margin-bottom: 10px; }
+  .pos .pos-main { display: flex; flex-direction: column; gap: 3px; }
+  .pos .pos-sub { font-size: 12px; color: var(--text-3); line-height: 1.4; font-weight: 400; }
+  .positive { color: var(--green); font-weight: 600; }
+  .negative { color: var(--red); font-weight: 600; }
+
+  /* 태그/배지: 목업·초안·비활성·대기·실계좌·이벤트유형 등 종류와 무관하게
+     전부 동일한 중립 필 스타일 하나로 통일 — 텍스트 내용으로만 구분한다. */
+  .badge, .badge-retired, .badge-mock, .badge-phasec, .badge-phase2, .badge-real, .newsinfo-type {
+    display: inline-block; font-size: 11px; font-weight: 500; padding: 3px 9px;
+    border-radius: var(--radius-pill); margin-left: 6px; vertical-align: middle;
+    background: var(--glass-2); color: var(--text-2); border: 1px solid var(--glass-border-soft);
+    white-space: nowrap;
+  }
+
+  .pending-card { border-radius: var(--radius-md); padding: 16px; margin-bottom: 12px; }
+  .retired-note { border-left: 3px solid var(--text-3); padding-left: 12px; margin: 10px 0 14px; color: var(--text-2); }
+
+  /* 가드레일(규칙 위반) 카드만 유일하게 색 악센트를 가진다 — "위험/주의"라는
+     의미가 실제로 있는 카드이기 때문. 그 외 카드는 위 기본 스타일 그대로. */
+  .guardrail-card { border-left: 3px solid var(--red); border-radius: var(--radius-md); padding: 16px;
+                    margin-bottom: 12px; }
+  .guardrail-rule { font-weight: 600; color: var(--text-0); font-size: 15.5px; }
+  .guardrail-fact { margin-top: 6px; font-size: 15.5px; line-height: 1.55; color: var(--text-1); }
+  .guardrail-nums { margin-top: 8px; font-size: 12.5px; color: var(--text-2); }
+  .ok-line { color: var(--green); font-weight: 600; font-size: 15.5px; }
+
+  .newsinfo-card { border-radius: var(--radius-md); padding: 16px; margin-bottom: 12px; }
   .newsinfo-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-  .newsinfo-type { background: #1e3a5f; color: #93c5fd; font-size: 11px; padding: 2px 7px;
-                   border-radius: 999px; white-space: nowrap; }
-  .newsinfo-summary { margin-top: 6px; font-size: 14px; line-height: 1.5; }
-  .newsinfo-heads { margin: 8px 0 0; padding-left: 18px; font-size: 12px; color: #94a3b8; }
-  .btn { padding: 8px 14px; border-radius: 8px; border: none; font-size: 13px; margin-right: 6px; margin-top: 8px; cursor: pointer; }
-  .cash-line { font-size: 16px; font-weight: bold; }
-  .sync-note { font-size: 11px; font-weight: normal; color: #64748b; margin-top: 4px; }
-  .real-card { border: 1px solid #0d9488; }
-  .badge-real { font-size: 11px; padding: 2px 6px; border-radius: 6px; margin-left: 6px; background: #134e4a; color: #5eead4; }
-  .section-divider { color: #64748b; font-size: 12px; margin: 22px 0 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .newsinfo-head b { color: var(--text-0); font-weight: 600; }
+  .newsinfo-summary { margin-top: 8px; font-size: 15.5px; line-height: 1.55; color: var(--text-1); }
+  .newsinfo-heads { margin: 10px 0 0; padding-left: 18px; font-size: 13px; color: var(--text-2); line-height: 1.6; }
+
+  .btn { display: inline-flex; align-items: center; justify-content: center;
+         min-height: 44px; padding: 10px 18px; border-radius: var(--radius-md); border: 1px solid transparent;
+         font-size: 14.5px; font-weight: 600; margin-right: 6px; margin-top: 8px; cursor: pointer;
+         background: var(--glass-2); color: var(--text-0); }
+  .btn-buy { background: var(--green-bg); color: var(--green); border-color: var(--green-border); }
+  .btn-sell { background: var(--red-bg); color: var(--red); border-color: var(--red-border); }
+  .btn-disabled, .btn[disabled] { background: var(--glass-2); color: var(--text-3); cursor: not-allowed; }
+  .cash-line { font-size: 17px; font-weight: 700; line-height: 1.4; color: var(--text-0); }
+  .sync-note { font-size: 11.5px; font-weight: normal; color: var(--text-3); margin-top: 6px; line-height: 1.5; }
+  .section-divider { color: var(--text-3); font-size: 12px; margin: 26px 0 10px; text-transform: uppercase;
+                      letter-spacing: 0.06em; font-weight: 600; }
   .section-divider:first-of-type { margin-top: 8px; }
 
-  .gate-banner { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; margin-bottom: 12px; }
-  .gate-banner.pass { background: #052e1e; border: 1px solid #16653f; }
-  .gate-banner.fail { background: #2b1512; border: 1px solid #7f2d23; }
-  .gate-chip { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; padding: 3px 9px; border-radius: 999px; color: white; }
-  .gate-chip.pass { background: #16a34a; }
-  .gate-chip.fail { background: #dc2626; }
-  .gate-banner p { margin: 0; font-size: 13px; color: #cbd5e1; }
-  .criteria-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; font-size: 13px; border-bottom: 1px solid #2a2d35; }
+  /* 게이트 배너/칩: 통과·미통과라는 실제 판정 결과라 초록/빨강 사용이
+     타당한 유일한 "배너"류 — 그 외 배너·카드는 색을 넣지 않는다. */
+  .gate-banner { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-radius: var(--radius-md);
+                 margin-bottom: 12px; backdrop-filter: blur(24px) saturate(150%); -webkit-backdrop-filter: blur(24px) saturate(150%); }
+  .gate-banner.pass { background: rgba(52, 211, 153, 0.1); border: 1px solid var(--green-border); }
+  .gate-banner.fail { background: rgba(248, 113, 113, 0.1); border: 1px solid var(--red-border); }
+  .gate-chip { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; padding: 4px 10px;
+               border-radius: var(--radius-pill); color: white; white-space: nowrap; }
+  .gate-chip.pass { background: var(--green-solid); }
+  .gate-chip.fail { background: var(--red-solid); }
+  .gate-banner p { margin: 0; font-size: 14px; color: var(--text-1); line-height: 1.5; }
+  .criteria-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 2px;
+                  font-size: 14.5px; color: var(--text-1); border-bottom: 1px solid var(--hairline); min-height: 44px; }
   .criteria-row:last-child { border-bottom: none; }
-  .criteria-mark { font-size: 13px; }
-  .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
-  .metric { background: #12151b; border-radius: 8px; padding: 8px 10px; }
-  .metric .label { font-size: 10.5px; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em; }
-  .metric .value { font-size: 14px; font-weight: 600; margin-top: 2px; }
+  .criteria-mark { font-size: 15px; }
+  .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(126px, 1fr)); gap: 10px; }
+  .metric { background: var(--glass-2); border: 1px solid var(--glass-border-soft);
+            border-radius: var(--radius-sm); padding: 10px 12px; }
+  .metric .label { font-size: 10.5px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.05em; }
+  .metric .value { font-size: 15px; font-weight: 700; margin-top: 3px; color: var(--text-0); }
 
-  .phase2-card { border: 1px solid #4338ca; }
-  .badge-phase2 { font-size: 11px; padding: 2px 6px; border-radius: 6px; margin-left: 6px; background: #312e81; color: #a5b4fc; }
-  .progress-bar { background: #12151b; border-radius: 999px; height: 8px; overflow: hidden; margin: 8px 0; }
-  .progress-fill { background: #6366f1; height: 100%; }
-  .waiting-note { font-size: 12.5px; color: #94a3b8; margin-top: 6px; }
+  .progress-bar { background: rgba(255, 255, 255, 0.06); border-radius: var(--radius-pill); height: 8px;
+                   overflow: hidden; margin: 10px 0; }
+  .progress-fill { background: var(--accent); height: 100%; }
+  .waiting-note { font-size: 13px; color: var(--text-2); margin-top: 8px; line-height: 1.5; }
 
-  .rm-scroll { overflow-x: auto; max-width: 100%; }
-  .rm-table { border-collapse: collapse; width: 100%; font-size: 12.5px; min-width: 480px; }
-  .rm-table th, .rm-table td { padding: 6px 8px; border-bottom: 1px solid #2a2d35; text-align: left; white-space: nowrap; }
-  .rm-table th { color: #94a3b8; font-weight: 600; font-size: 11px; }
+  /* 긴 표: 480px 이상(태블릿/데스크톱)에서는 가로 스크롤 + 첫 열 sticky.
+     480px 이하(대부분의 휴대폰 세로 화면)에서는 아래 미디어쿼리로 표를
+     카드 목록으로 재배치한다 — 각 <td>의 data-label 속성(JS에서 부여,
+     계산/로딩 로직 변경 없음)을 ::before로 라벨처럼 보여준다. */
+  .rm-scroll { overflow-x: auto; max-width: 100%; -webkit-overflow-scrolling: touch;
+               border-radius: var(--radius-sm); }
+  .rm-table { border-collapse: collapse; width: 100%; font-size: 13.5px; min-width: 480px; color: var(--text-1); }
+  .rm-table th, .rm-table td { padding: 11px 10px; border-bottom: 1px solid var(--hairline);
+                                text-align: left; white-space: nowrap; }
+  .rm-table th { color: var(--text-2); font-weight: 600; font-size: 11px; text-transform: uppercase;
+                 letter-spacing: 0.03em; }
+  .rm-table td:first-child { color: var(--text-0); }
   .rm-table .rm-num { text-align: right; }
   .rm-table tr.tappable { cursor: pointer; }
-  .rm-table tr.tappable:active { background: #20242c; }
-  .rm-sub { font-size: 11px; color: #64748b; }
-  .rm-note { margin-top: 8px; }
-  .muted { color: #64748b; font-size: 13px; }
+  .rm-table tr.tappable:active { background: rgba(255, 255, 255, 0.05); }
+  .rm-table th:first-child, .rm-table td:first-child {
+    position: sticky; left: 0; background: rgba(15, 17, 22, 0.92); z-index: 1;
+  }
+  .rm-sub { font-size: 11.5px; color: var(--text-3); line-height: 1.5; }
+  .rm-note { margin-top: 10px; }
 
-  /* [A1-4/5, 2026-08-29] 내비게이션 셸 — 신규 */
-  .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
-  .research-link { background: none; border: 1px solid #4338ca; color: #a5b4fc; font-size: 12px;
-                    padding: 5px 10px; border-radius: 999px; cursor: pointer; }
-  .research-link:active { background: #1e1b4b; }
+  @media (max-width: 480px) {
+    .rm-scroll { overflow-x: visible; }
+    .rm-table { display: block; min-width: 0; width: 100%; }
+    .rm-table thead { display: none; }
+    .rm-table tbody { display: block; }
+    .rm-table tr { display: block; background: var(--glass-2); border: 1px solid var(--glass-border-soft);
+                   border-radius: var(--radius-md); padding: 4px 14px; margin-bottom: 10px; }
+    .rm-table tr.tappable:active { background: var(--glass-border); }
+    .rm-table td {
+      display: flex; justify-content: space-between; align-items: flex-start; gap: 14px;
+      padding: 10px 0; border-bottom: 1px solid var(--hairline); text-align: right;
+      white-space: normal; position: static; background: none;
+    }
+    .rm-table td:last-child { border-bottom: none; }
+    .rm-table td:not(:first-child)::before {
+      content: attr(data-label); color: var(--text-2); font-size: 12.5px; font-weight: 600;
+      text-align: left; flex-shrink: 0;
+    }
+    /* 첫 열은 라벨:값이 아니라 카드 제목처럼 — 종목명/자산군명/지표명 등 */
+    .rm-table td:first-child {
+      display: block; text-align: left; font-weight: 600; font-size: 15px;
+      padding: 12px 0 10px; border-bottom: 1px solid var(--hairline);
+    }
+    .rm-table td:first-child .rm-sub { font-weight: 400; margin-top: 3px; }
+  }
+  .muted { color: var(--text-2); font-size: 15px; line-height: 1.55; }
+
+  /* [A1-4/5, 2026-08-29] 내비게이션 셸 */
+  .topbar { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 6px; }
+  .research-link { background: var(--glass-2); border: 1px solid var(--glass-border); color: var(--text-1);
+                    font-size: 13px; font-weight: 600; min-height: 44px; padding: 0 16px;
+                    border-radius: var(--radius-pill); cursor: pointer; white-space: nowrap;
+                    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+  .research-link:active { background: var(--glass-border); }
   .bottom-tabbar { position: fixed; left: 0; right: 0; bottom: 0; display: flex;
-                    background: #14161c; border-top: 1px solid #2a2d35; z-index: 10; }
-  .bottom-tabbar button { flex: 1; background: none; border: none; color: #64748b; font-size: 10.5px;
-                           padding: 8px 2px 10px; cursor: pointer; line-height: 1.5; }
-  .bottom-tabbar button .tab-icon { display: block; font-size: 16px; }
-  .bottom-tabbar button.active { color: #7dd3fc; }
+                    background: rgba(16, 18, 24, 0.72); border-top: 1px solid var(--glass-border);
+                    backdrop-filter: blur(28px) saturate(160%); -webkit-backdrop-filter: blur(28px) saturate(160%);
+                    padding-bottom: env(safe-area-inset-bottom); z-index: 10; }
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .bottom-tabbar { background: #14161c; }
+  }
+  /* 이모지 탭 아이콘은 숨김만 처리(HTML/JS 미변경) — 텍스트 라벨 + 활성
+     상태의 색·굵기·점 인디케이터만으로 구분한다. */
+  .tab-icon { display: none; }
+  .bottom-tabbar button { flex: 1; display: flex; flex-direction: column; align-items: center;
+                           justify-content: center; gap: 4px; min-height: var(--tab-h);
+                           background: none; border: none; color: var(--text-2); font-size: 12.5px;
+                           font-weight: 500; padding: 8px 2px; cursor: pointer; line-height: 1.3; }
+  .bottom-tabbar button::after { content: ''; width: 4px; height: 4px; border-radius: 50%; background: transparent; }
+  .bottom-tabbar button.active { color: var(--text-0); font-weight: 700; }
+  .bottom-tabbar button.active::after { background: var(--accent); }
   .view[hidden] { display: none; }
-  .back-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
-  .back-btn { background: none; border: none; color: #94a3b8; font-size: 14px; cursor: pointer; padding: 4px 0; }
-  .subtabs { display: flex; gap: 6px; margin-bottom: 12px; overflow-x: auto; }
-  .subtabs button { background: #1a1d24; border: 1px solid #2a2d35; color: #94a3b8; font-size: 12.5px;
-                     padding: 6px 12px; border-radius: 999px; white-space: nowrap; cursor: pointer; }
-  .subtabs button.active { background: #1e3a5f; border-color: #1e3a5f; color: #93c5fd; }
-  .filter-chips { display: flex; gap: 6px; margin-bottom: 10px; }
-  .filter-chips button { background: #1a1d24; border: 1px solid #2a2d35; color: #94a3b8; font-size: 12px;
-                          padding: 5px 10px; border-radius: 999px; cursor: pointer; }
-  .filter-chips button.active { background: #312e81; border-color: #312e81; color: #a5b4fc; }
+  .back-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .back-btn { background: none; border: none; color: var(--text-2); font-size: 15px; font-weight: 500;
+              cursor: pointer; padding: 8px 4px; min-height: 44px; display: inline-flex; align-items: center; }
+  .subtabs { display: flex; gap: 8px; margin-bottom: 14px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .subtabs button { background: var(--glass-1); border: 1px solid var(--glass-border); color: var(--text-2);
+                     font-size: 13.5px; font-weight: 500; min-height: 44px; padding: 0 16px;
+                     border-radius: var(--radius-pill); white-space: nowrap; cursor: pointer;
+                     backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+  .subtabs button.active { background: var(--accent-bg); border-color: var(--accent-border); color: var(--text-0); font-weight: 600; }
+  .filter-chips { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .filter-chips button { background: var(--glass-1); border: 1px solid var(--glass-border); color: var(--text-2);
+                          font-size: 13px; font-weight: 500; min-height: 44px; padding: 0 14px;
+                          border-radius: var(--radius-pill); cursor: pointer;
+                          backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+  .filter-chips button.active { background: var(--accent-bg); border-color: var(--accent-border); color: var(--text-0); font-weight: 600; }
 
   /* §16.1 로깅 훅 자리 — 이번 단계는 UI만, 실제 로깅(저장)은 A5 */
-  .hook-row { margin-top: 8px; display: flex; gap: 6px; }
-  .hook-btn { background: #12151b; border: 1px solid #2a2d35; color: #94a3b8; font-size: 11.5px;
-              padding: 4px 10px; border-radius: 999px; cursor: pointer; }
-  .hook-btn.on { background: #134e4a; border-color: #0d9488; color: #5eead4; }
-  .hook-btn.off-selected { background: #3f1d1d; border-color: #7f1d1d; color: #fca5a5; }
+  .hook-row { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .hook-btn { background: var(--glass-1); border: 1px solid var(--glass-border); color: var(--text-2);
+              font-size: 12.5px; font-weight: 500; min-height: 44px; padding: 0 14px;
+              border-radius: var(--radius-pill); cursor: pointer; }
+  .hook-btn.on { background: var(--green-bg); border-color: var(--green-border); color: var(--green); }
+  .hook-btn.off-selected { background: var(--red-bg); border-color: var(--red-border); color: var(--red); }
 
-  .badge-mock { font-size: 11px; padding: 2px 7px; border-radius: 999px; margin-left: 6px;
-                background: #422006; color: #fdba74; }
-  .badge-phasec { font-size: 11px; padding: 2px 7px; border-radius: 999px; margin-left: 6px;
-                  background: #3f1d1d; color: #fca5a5; }
-  .today-card { background: #1a1d24; border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; }
-  .today-card-head { display: flex; justify-content: space-between; align-items: center; }
-  .today-item { padding: 8px 0; border-bottom: 1px solid #2a2d35; }
+  .today-card { padding: 16px 18px; }
+  .today-card-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .today-item { padding: 12px 0; border-bottom: 1px solid var(--hairline); }
   .today-item:last-child { border-bottom: none; }
-  .today-item-text { font-size: 13.5px; }
-  .link-more { font-size: 12px; color: #7dd3fc; background: none; border: none; cursor: pointer; }
-  .status-strip { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
-  .status-chip { background: #12151b; border-radius: 8px; padding: 6px 10px; font-size: 12px; color: #cbd5e1; }
+  .today-item-text { font-size: 15px; line-height: 1.5; color: var(--text-0); }
+  .link-more { font-size: 12.5px; color: var(--accent); font-weight: 600; background: none; border: none;
+               cursor: pointer; min-height: 44px; padding: 0 4px; }
+  .status-strip { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+  .status-chip { background: var(--glass-1); border: 1px solid var(--glass-border-soft);
+                 border-radius: var(--radius-sm); padding: 8px 12px; font-size: 12.5px; color: var(--text-1);
+                 backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
 
-  .order-field { margin-bottom: 14px; }
-  .order-label { font-size: 12px; color: #94a3b8; margin-bottom: 6px; }
-  .order-input { width: 100%; background: #12151b; border: 1px solid #2a2d35; color: #eee;
-                 border-radius: 8px; padding: 9px 10px; font-size: 14px; }
-  .order-radio-row { display: flex; gap: 16px; font-size: 14px; }
-  .order-empty { color: #64748b; font-size: 13px; padding: 10px 0; }
-  .order-submit-row { margin-top: 18px; }
-  .order-submit-btn { width: 100%; padding: 12px; border-radius: 10px; border: none; font-size: 15px;
-                       background: #2a2d35; color: #64748b; cursor: not-allowed; }
-  .order-warn { font-size: 12px; color: #fca5a5; margin-top: 8px; text-align: center; }
+  .order-field { margin-bottom: 16px; }
+  .order-label { font-size: 12.5px; color: var(--text-2); margin-bottom: 7px; font-weight: 500; }
+  .order-input { width: 100%; background: var(--glass-1); border: 1px solid var(--glass-border); color: var(--text-0);
+                 border-radius: var(--radius-sm); padding: 12px 12px; font-size: 15px; min-height: 44px; }
+  .order-radio-row { display: flex; gap: 20px; font-size: 15px; line-height: 1.5; color: var(--text-1); }
+  .order-radio-row label { display: inline-flex; align-items: center; min-height: 44px; gap: 6px; }
+  .order-empty { color: var(--text-3); font-size: 15px; padding: 10px 0; line-height: 1.5; }
+  .order-submit-row { margin-top: 20px; }
+  .order-submit-btn { width: 100%; min-height: 48px; padding: 12px; border-radius: var(--radius-md); border: none;
+                       font-size: 15.5px; font-weight: 600; background: var(--glass-2); color: var(--text-3);
+                       cursor: not-allowed; }
+  .order-warn { font-size: 12.5px; color: var(--text-2); margin-top: 10px; text-align: center; line-height: 1.5; }
 
-  .add-symbol-row { display: flex; gap: 8px; margin-bottom: 12px; }
-  .add-symbol-row input { flex: 1; background: #12151b; border: 1px solid #2a2d35; color: #eee;
-                           border-radius: 8px; padding: 8px 10px; font-size: 13px; }
+  .add-symbol-row { display: flex; gap: 8px; margin-bottom: 14px; }
+  .add-symbol-row input { flex: 1; background: var(--glass-1); border: 1px solid var(--glass-border); color: var(--text-0);
+                           border-radius: var(--radius-sm); padding: 10px 12px; font-size: 14px; min-height: 44px; }
+
+  button:focus-visible, input:focus-visible, [tabindex]:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 2px;
+  }
 </style>
 </head>
 <body>
@@ -160,7 +321,7 @@
 
 <!-- ===== TODAY ===== -->
 <section id="view-today" class="view">
-  <h2>📅 TODAY</h2>
+  <h2>TODAY</h2>
   <p class="muted" id="today-basis">기준 시각 불러오는 중...</p>
 
   <div class="status-strip" id="today-status-strip">
@@ -172,7 +333,7 @@
        A2(Intelligence Layer) 완료 후 연결. 지금은 목업 데이터. -->
   <div class="today-card">
     <div class="today-card-head">
-      <h3>📐 오늘의 규칙/리스크 <span class="badge-mock">목업</span></h3>
+      <h3>오늘의 규칙/리스크 <span class="badge-mock">목업</span></h3>
       <button class="link-more" onclick="goToTab('portfolio')">전체보기 →</button>
     </div>
     <div id="today-rules-list"></div>
@@ -180,7 +341,7 @@
 
   <div class="today-card">
     <div class="today-card-head">
-      <h3>📈 오늘의 시장 상태 <span class="badge-mock">목업</span></h3>
+      <h3>오늘의 시장 상태 <span class="badge-mock">목업</span></h3>
       <button class="link-more" onclick="goToTab('market')">전체보기 →</button>
     </div>
     <div id="today-market-list"></div>
@@ -188,7 +349,7 @@
 
   <div class="today-card">
     <div class="today-card-head">
-      <h3>📄 오늘의 사건 <span class="badge-mock">목업</span></h3>
+      <h3>오늘의 사건 <span class="badge-mock">목업</span></h3>
       <button class="link-more" onclick="goToTab('events')">전체보기 →</button>
     </div>
     <div id="today-events-list"></div>
@@ -196,7 +357,7 @@
 
   <div class="today-card">
     <div class="today-card-head">
-      <h3>🗒️ 최근 활동 기록 <span class="badge-mock">목업</span></h3>
+      <h3>최근 활동 기록 <span class="badge-mock">목업</span></h3>
       <button class="link-more" onclick="goToTab('portfolio')">전체보기 →</button>
     </div>
     <div id="today-activity-list"></div>
@@ -208,7 +369,7 @@
 
 <!-- ===== MY PORTFOLIO ===== -->
 <section id="view-portfolio" class="view" hidden>
-  <h2>💼 MY PORTFOLIO</h2>
+  <h2>MY PORTFOLIO</h2>
 
   <div class="card real-card" id="real-pending-msg" style="display:none;">
     <span class="muted">토스증권 연동 준비 중입니다. real_portfolio.json이 아직 없습니다 — sync_real.yml을 수동 실행하면 생성됩니다.</span>
@@ -259,7 +420,7 @@
 
 <!-- ===== MARKET ===== -->
 <section id="view-market" class="view" hidden>
-  <h2>📈 MARKET</h2>
+  <h2>MARKET</h2>
   <p class="muted">보유+관심종목 한정 — 시장 전체 스캔이 아닙니다.</p>
   <div class="card" id="marketstate-section">
     <p class="muted">로딩 중...</p>
@@ -268,7 +429,7 @@
 
 <!-- ===== EVENTS ===== -->
 <section id="view-events" class="view" hidden>
-  <h2>📄 EVENTS</h2>
+  <h2>EVENTS</h2>
   <div class="filter-chips" id="events-filter-chips">
     <button data-filter="all" class="active" onclick="setEventsFilter('all')">전체</button>
     <button data-filter="뉴스" onclick="setEventsFilter('뉴스')">뉴스</button>
@@ -281,13 +442,13 @@
 
 <!-- ===== WATCHLIST (신규) ===== -->
 <section id="view-watchlist" class="view" hidden>
-  <h2>⭐ WATCHLIST</h2>
+  <h2>WATCHLIST</h2>
   <p class="muted">관심종목은 정적 파일(<code>watchlist.json</code>)에 사람이 직접 입력합니다
     — 이 저장소는 빌드 서버 없는 정적 페이지라 화면에서 바로 저장할 수 없습니다.
     아래 입력란은 붙여넣을 텍스트를 만들어줄 뿐, 실제 반영은 파일을 커밋해야 합니다.</p>
   <div class="add-symbol-row">
     <input type="text" id="watchlist-add-input" placeholder="종목코드 입력 (예: 005930)" disabled>
-    <button class="btn" disabled style="background:#2a2d35; color:#64748b;">추가(정적 파일 수정 필요)</button>
+    <button class="btn btn-disabled" disabled>추가(정적 파일 수정 필요)</button>
   </div>
   <div class="card" id="watchlist-section">
     <p class="muted">로딩 중...</p>
@@ -368,19 +529,19 @@
     코드 레벨 태그(PR#36)는 그대로이며, 이 화면은 진입 경로만 메인에서 분리한 것입니다.</p>
 
   <div class="section-divider">보조지표 학습 레이어 (신호 아님)</div>
-  <h3>📚 118티커 통계 검증 결과</h3>
+  <h3>118티커 통계 검증 결과</h3>
   <div class="card" id="indicatorlearning-section">
     <p class="muted">로딩 중...</p>
   </div>
 
   <div class="section-divider">Phase 1 백테스트 검증 (완료)</div>
-  <h3>📊 게이트 판정 요약</h3>
+  <h3>게이트 판정 요약</h3>
   <div class="card" id="gate-section">
     <p class="muted">로딩 중...</p>
   </div>
 
   <div class="section-divider">Phase 2 뉴스 이벤트 실험 (진행 중)</div>
-  <h3>📰 데이터수집 진행상황 <span class="badge-phase2">캘리브레이션 대기</span></h3>
+  <h3>데이터수집 진행상황 <span class="badge-phase2">캘리브레이션 대기</span></h3>
   <div class="card phase2-card" id="phase2-section">
     <p class="muted">로딩 중...</p>
   </div>
@@ -565,11 +726,11 @@ async function loadTodayStatusStrip(bust) {
     const resp = await fetch('autoexec_state.json' + bust);
     const stopped = resp.ok ? !!(await resp.json()).stopped : false;
     el.innerHTML = `
-      <span class="status-chip">${stopped ? '🛑 킬스위치: 정지됨' : '▶️ 킬스위치: 해제됨'}</span>
-      <span class="status-chip">🔬 예측경로: 비활성(v3.2)</span>`;
+      <span class="status-chip">킬스위치: ${stopped ? '정지됨' : '해제됨'}</span>
+      <span class="status-chip">예측경로: 비활성(v3.2)</span>`;
   } catch (e) {
-    el.innerHTML = `<span class="status-chip">▶️ 킬스위치: 상태 없음(기본값)</span>
-      <span class="status-chip">🔬 예측경로: 비활성(v3.2)</span>`;
+    el.innerHTML = `<span class="status-chip">킬스위치: 상태 없음(기본값)</span>
+      <span class="status-chip">예측경로: 비활성(v3.2)</span>`;
   }
 }
 
@@ -590,7 +751,7 @@ async function loadRealAccount(bust) {
 
     const realTotal = (real.cash || 0) + positions.reduce((s, p) => s + (p.eval_amount_krw || 0), 0);
     document.getElementById('real-summary').innerHTML =
-      `💰 총자산 약 ${Math.round(realTotal).toLocaleString()}원 &nbsp;|&nbsp; 현금 ${Math.round(real.cash || 0).toLocaleString()}원` +
+      `총자산 약 ${Math.round(realTotal).toLocaleString()}원 &nbsp;|&nbsp; 현금 ${Math.round(real.cash || 0).toLocaleString()}원` +
       `<div class="sync-note">기준: ${fmtBasis(real.synced_at)} (4x/일 자동 동기화 + 수동 실행 시)</div>`;
 
     document.getElementById('real-positions-list').innerHTML = positions.map(p => {
@@ -741,7 +902,7 @@ function renderRuleMatch(rawMatch) {
   if (!assertNoPredictiveFields(rawMatch, '포트폴리오 규칙')) return '';
   const m = pick(rawMatch, PREPORT_MATCH_FIELDS);
   return `<div class="guardrail-card">
-    <div class="guardrail-rule">📐 ${esc(m.rule)}</div>
+    <div class="guardrail-rule">${esc(m.rule)}</div>
     <div class="guardrail-fact">${esc(m.fact)}</div>
     <div class="guardrail-nums">기준 ${esc(m.threshold)} · 관측 ${esc(m.observed)}</div>
   </div>`;
@@ -759,9 +920,9 @@ function renderAssetClassGap(gap) {
     const gapCls = r.gap_pct > 0 ? 'negative' : '';
     return `<tr>
       <td>${esc(r.label)}<div class="rm-sub">${esc(r.group)}${r.currently_mapped ? '' : ' · 미보유'}</div></td>
-      <td class="rm-num">${r.target_pct.toFixed(1)}%</td>
-      <td class="rm-num">${r.actual_pct.toFixed(1)}%</td>
-      <td class="rm-num ${gapCls}">${r.gap_pct >= 0 ? '+' : ''}${r.gap_pct.toFixed(1)}%p</td>
+      <td class="rm-num" data-label="목표">${r.target_pct.toFixed(1)}%</td>
+      <td class="rm-num" data-label="실제">${r.actual_pct.toFixed(1)}%</td>
+      <td class="rm-num ${gapCls}" data-label="갭">${r.gap_pct >= 0 ? '+' : ''}${r.gap_pct.toFixed(1)}%p</td>
     </tr>`;
   }).join('');
 
@@ -774,7 +935,7 @@ function renderAssetClassGap(gap) {
   const fill = (gap.monthly_gap_fill || [])[0];
   const fillAllocations = (fill && fill.allocations || []).filter(a => assertNoPredictiveFields(a, '자산군 갭 이번달 배분'));
   const fillHtml = (fill && fillAllocations.length)
-    ? `<h3 style="margin-top:14px;">💰 이번 달(${esc(fill.month)}) 유입 배분</h3>
+    ? `<h3 style="margin-top:14px;">이번 달(${esc(fill.month)}) 유입 배분</h3>
       <p class="muted">유입 예정 ${Number(fill.monthly_investable_krw).toLocaleString()}원(${esc(fill.rank)} 기준) —
         갭이 큰 자산군에 비례 배분한 계산값입니다. 자산군 단위 산술이며 개별 종목을 지정하지 않습니다.</p>`
       + fillAllocations.map(raw => {
@@ -785,7 +946,7 @@ function renderAssetClassGap(gap) {
         }).join('')
     : '';
 
-  return `<h3>📊 자산군 배분 갭 ${tag}</h3>
+  return `<h3>자산군 배분 갭 ${tag}</h3>
     <p class="muted">${esc(gap.note || '')}</p>
     <div class="rm-scroll"><table class="rm-table">
       <thead><tr><th>자산군</th><th>목표</th><th>실제</th><th>갭</th></tr></thead>
@@ -812,9 +973,9 @@ function renderRoleGap(roleGap) {
     }).join('<br>');
     return `<tr>
       <td>${esc(r.label)}<div class="rm-sub">${memberLines}</div></td>
-      <td class="rm-num">${hasTarget ? r.target_pct.toFixed(1) + '%' : '목표 없음'}</td>
-      <td class="rm-num">${r.actual_pct === null ? '-' : r.actual_pct.toFixed(1) + '%'}</td>
-      <td class="rm-num ${gapCls}">${hasTarget ? (r.gap_pct >= 0 ? '+' : '') + r.gap_pct.toFixed(1) + '%p' : '-'}</td>
+      <td class="rm-num" data-label="목표">${hasTarget ? r.target_pct.toFixed(1) + '%' : '목표 없음'}</td>
+      <td class="rm-num" data-label="실제">${r.actual_pct === null ? '-' : r.actual_pct.toFixed(1) + '%'}</td>
+      <td class="rm-num ${gapCls}" data-label="갭">${hasTarget ? (r.gap_pct >= 0 ? '+' : '') + r.gap_pct.toFixed(1) + '%p' : '-'}</td>
     </tr>`;
   }).join('');
 
@@ -825,7 +986,7 @@ function renderRoleGap(roleGap) {
         이번 달 위험자산 배정분 전액이 코어로 계산됐습니다.</p>`
     : '';
   const fillHtml = (fill && fillAllocations.length)
-    ? `<h3 style="margin-top:14px;">💰 이번 달(${esc(fill.month)}) 위험자산 배정분</h3>
+    ? `<h3 style="margin-top:14px;">이번 달(${esc(fill.month)}) 위험자산 배정분</h3>
       <p class="muted">위험자산 배정분 ${Number(fill.risk_bucket_amount_krw).toLocaleString()}원(${esc(fill.rank)} 기준) —
         역할 단위 산술이며 개별 종목을 지정하지 않습니다.</p>
       ${triggerNote}`
@@ -837,7 +998,7 @@ function renderRoleGap(roleGap) {
         }).join('')
     : '';
 
-  return `<h3 style="margin-top:14px;">🎭 포트폴리오 역할 계층</h3>
+  return `<h3 style="margin-top:14px;">포트폴리오 역할 계층</h3>
     <p class="muted">${esc(roleGap.note || '')} 위험자산 총액 ${roleGap.risk_asset_total_pct}% 기준.</p>
     <div class="rm-scroll"><table class="rm-table">
       <thead><tr><th>역할</th><th>목표</th><th>실제</th><th>갭</th></tr></thead>
@@ -862,7 +1023,7 @@ async function loadPortfolioReport(bust) {
     const matches = r.rule_matches || [];
     const matchHtml = matches.length
       ? `<h3>규칙 해당 ${matches.length}건 ${prov}</h3>` + matches.map(renderRuleMatch).join('')
-      : `<p class="ok-line">✅ 해당하는 규칙 없음 ${prov}</p>`;
+      : `<p class="ok-line">해당하는 규칙 없음 ${prov}</p>`;
     const rm = r.roadmap || {};
     let rmHtml;
     if (rm.status === '계산됨') {
@@ -871,10 +1032,10 @@ async function loadPortfolioReport(bust) {
       const head = cls.map(c => `<th>${esc(lb[c] || c)}</th>`).join('');
       const body = (rm.phases || []).map(ph => `<tr>
           <td>${esc(ph.rank)}<div class="rm-sub">${esc(ph.period)}</div></td>
-          <td class="rm-num">${Number(ph.cumulative_krw).toLocaleString()}</td>
-          ${cls.map(c => `<td class="rm-num">${ph.target_allocation_pct[c]}%</td>`).join('')}
+          <td class="rm-num" data-label="누적">${Number(ph.cumulative_krw).toLocaleString()}</td>
+          ${cls.map(c => `<td class="rm-num" data-label="${esc(lb[c] || c)}">${ph.target_allocation_pct[c]}%</td>`).join('')}
         </tr>`).join('');
-      rmHtml = `<h3>🗺️ 배분 로드맵</h3>
+      rmHtml = `<h3>배분 로드맵</h3>
         <p class="muted">${rm.total_months}개월 · 총 투자가능액
           ${Number(rm.total_investable_krw).toLocaleString()}원 · ${esc(rm.date_basis)}</p>
         <div class="rm-scroll"><table class="rm-table">
@@ -884,14 +1045,14 @@ async function loadPortfolioReport(bust) {
         ${(rm.schedule_anchor && rm.schedule_anchor.anchor_month)
           ? `<p class="muted rm-note">※ ${esc(rm.schedule_anchor.anchor_month)}부터 순차 배정 (고정값, 매달 밀리지 않음)</p>` : ''}
         ${(rm.schedule_warnings || []).map(w =>
-          `<div class="guardrail-card"><div class="guardrail-rule">⚠️ 일정 확인 필요</div>
+          `<div class="guardrail-card"><div class="guardrail-rule">일정 확인 필요</div>
            <div class="guardrail-fact">${esc(w)}</div></div>`).join('')}`;
     } else {
-      rmHtml = `<p class="muted">🗺️ 배분 로드맵: ${esc(rm.status || '미입력')} — ${esc(rm.reason || '')}</p>`;
+      rmHtml = `<p class="muted">배분 로드맵: ${esc(rm.status || '미입력')} — ${esc(rm.reason || '')}</p>`;
     }
     const gapHtml = r.asset_class_gap
       ? renderAssetClassGap(r.asset_class_gap)
-      : `<p class="muted">📊 자산군 배분 갭: 계산 불가 (asset_class_mapping.json/target_allocation.json/계급 시작일 중 하나 없음)</p>`;
+      : `<p class="muted">자산군 배분 갭: 계산 불가 (asset_class_mapping.json/target_allocation.json/계급 시작일 중 하나 없음)</p>`;
     const roleHtml = r.role_gap ? renderRoleGap(r.role_gap) : '';
     el.innerHTML = `<p class="muted">총자산
         ${Number(s.total_assets_krw || 0).toLocaleString()}원 · 현금 ${(s.cash_pct || 0).toFixed(1)}%
@@ -966,7 +1127,7 @@ async function loadRiskEngine(bust) {
     const flagged = corr.flagged_pairs || [];
     const corrHtml = flagged.length
       ? `<div class="rm-scroll"><table class="rm-table"><thead><tr><th>종목A</th><th>종목B</th><th class="rm-num">상관계수</th></tr></thead>
-          <tbody>${flagged.map(f => `<tr><td>${esc(f.symbol_a)}</td><td>${esc(f.symbol_b)}</td><td class="rm-num">${f.correlation.toFixed(3)}</td></tr>`).join('')}</tbody>
+          <tbody>${flagged.map(f => `<tr><td>${esc(f.symbol_a)}</td><td data-label="종목B">${esc(f.symbol_b)}</td><td class="rm-num" data-label="상관계수">${f.correlation.toFixed(3)}</td></tr>`).join('')}</tbody>
         </table></div><p class="muted rm-note">기준 ${corr.flag_threshold} 이상, 최근 ${corr.lookback_days}일 수익률 기준. "비슷하게 움직인다"는 사실만 — 매도 제안 아님.</p>`
       : `<p class="muted">${esc(corr.note || `상관계수 ${corr.flag_threshold || 0.7} 이상인 쌍 없음`)}</p>`;
 
@@ -980,15 +1141,15 @@ async function loadRiskEngine(bust) {
       <p class="muted">${esc(re.note)}</p>
       <p class="muted sync-note" style="margin-bottom:10px;">기준: ${fmtBasis(r.generated_at)}
         (portfolio_report.json과 같은 파일, 주 1회 갱신 — 변동성/상관계수도 이 시점에 조회한 값)</p>
-      <h3>💰 신규매수 권장금액 범위 ${tag}</h3>
+      <h3>신규매수 권장금액 범위 ${tag}</h3>
       ${sizingHtml}
-      <h3 style="margin-top:14px;">📉 MDD 예산</h3>
+      <h3 style="margin-top:14px;">MDD 예산</h3>
       ${mddHtml}
-      <h3 style="margin-top:14px;">🎯 집중도</h3>
+      <h3 style="margin-top:14px;">집중도</h3>
       ${concHtml}
-      <h3 style="margin-top:14px;">🔗 상관관계 (0.7 이상)</h3>
+      <h3 style="margin-top:14px;">상관관계 (0.7 이상)</h3>
       ${corrHtml}
-      <h3 style="margin-top:14px;">💸 비용 반영 후 수익률</h3>
+      <h3 style="margin-top:14px;">비용 반영 후 수익률</h3>
       ${costHtml}
     `;
   } catch (e) {
@@ -1013,7 +1174,7 @@ function renderGuardrailCard(rawViolation) {
     ? `기준 ${esc(v.limit_pct)}`
     : `기준 ${esc(v.limit_pct)}% / 현재 ${esc(v.actual_pct)}%`;
   return `<div class="guardrail-card">
-    <div class="guardrail-rule">⚠️ ${esc(v.rule)}</div>
+    <div class="guardrail-rule">${esc(v.rule)}</div>
     <div class="guardrail-fact">${esc(v.fact)}</div>
     <div class="guardrail-nums">${nums}</div>
   </div>`;
@@ -1047,8 +1208,8 @@ function renderReviewCard(raw) {
   }
   const curNow = Object.entries(ec.by_currency_pct_now || {}).map(([k, v]) => `${k} ${v.toFixed(1)}%`).join(', ');
 
-  const section = (icon, items, mapFn) => items.length
-    ? `<ul class="newsinfo-heads">${items.map(x => `<li>${icon} ${esc(mapFn(x))}</li>`).join('')}</ul>` : '';
+  const section = (items, mapFn) => items.length
+    ? `<ul class="newsinfo-heads">${items.map(x => `<li>${esc(mapFn(x))}</li>`).join('')}</ul>` : '';
 
   return `<div class="newsinfo-card">
     <div class="newsinfo-head">
@@ -1056,10 +1217,10 @@ function renderReviewCard(raw) {
       <span class="newsinfo-type">${r.trigger === 'ondemand' ? '/review 요청' : '배치(변동 감지)'}</span>
     </div>
     <div class="newsinfo-summary">${esc(changeLines.join(' · '))}${curNow ? ` · 현재 통화 노출: ${esc(curNow)}` : ''}</div>
-    ${section('📐', ag.concentration_matches || [], m => m.fact)}
-    ${section('🔗', spots, s => s.fact)}
-    ${section('📌', bp, b => b.fact)}
-    ${section('📰', news, n => n.fact)}
+    ${section(ag.concentration_matches || [], m => m.fact)}
+    ${section(spots, s => s.fact)}
+    ${section(bp, b => b.fact)}
+    ${section(news, n => n.fact)}
   </div>`;
 }
 
@@ -1173,10 +1334,10 @@ function renderMarketState() {
     const x = pick(r, STATEBOARD_ROW_FIELDS);
     return `<tr class="tappable" onclick="openStockDetail('${esc(x.symbol)}')">
       <td>${esc(x.name)}<div class="rm-sub">${esc(x.symbol)}</div></td>
-      <td class="rm-num">${fmtNum(x.volatility_20d_pct, 2, '%')}</td>
-      <td class="rm-num">${fmtNum(x.volatility_percentile, 1)}</td>
-      <td class="rm-num">${fmtNum(x.adx_14, 1)}</td>
-      <td class="rm-sub">${esc(x.data_status || '')}</td>
+      <td class="rm-num" data-label="20일 변동성">${fmtNum(x.volatility_20d_pct, 2, '%')}</td>
+      <td class="rm-num" data-label="변동성 백분위">${fmtNum(x.volatility_percentile, 1)}</td>
+      <td class="rm-num" data-label="ADX(14)">${fmtNum(x.adx_14, 1)}</td>
+      <td class="rm-sub" data-label="비고">${esc(x.data_status || '')}</td>
     </tr>`;
   }).join('');
   const corr = sb.correlation || {};
@@ -1277,9 +1438,9 @@ async function openStockDetail(symbol) {
   html += `</div>`;
 
   html += `<div style="display:flex; gap:10px; margin-top:6px;">
-    <button class="btn" style="flex:1; background:#134e4a; color:#5eead4;"
+    <button class="btn btn-buy" style="flex:1;"
       onclick="openOrder('${esc(symbol)}', 'buy')">매수</button>
-    <button class="btn" style="flex:1; background:#3f1d1d; color:#fca5a5;"
+    <button class="btn btn-sell" style="flex:1;"
       onclick="openOrder('${esc(symbol)}', 'sell')">매도</button>
   </div>`;
 
@@ -1347,9 +1508,9 @@ function renderLearningRow(raw) {
   const passedTrain = r.train_p_corrected !== null && r.train_p_corrected < 0.05;
   return `<tr>
     <td>${esc(r.indicator)}</td>
-    <td class="rm-num">${r.train_p_corrected === null ? '표본부족' : r.train_p_corrected.toFixed(4)}</td>
-    <td class="rm-num">${r.val_p_corrected === null ? (passedTrain ? '표본부족' : '검증 미실시') : r.val_p_corrected.toFixed(4)}</td>
-    <td class="rm-sub">${esc(r.verdict_label)}</td>
+    <td class="rm-num" data-label="훈련 p(보정후)">${r.train_p_corrected === null ? '표본부족' : r.train_p_corrected.toFixed(4)}</td>
+    <td class="rm-num" data-label="검증 p(보정후)">${r.val_p_corrected === null ? (passedTrain ? '표본부족' : '검증 미실시') : r.val_p_corrected.toFixed(4)}</td>
+    <td class="rm-sub" data-label="결과">${esc(r.verdict_label)}</td>
   </tr>`;
 }
 
