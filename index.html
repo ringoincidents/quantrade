@@ -169,9 +169,10 @@
   .progress-fill { background: var(--accent); height: 100%; }
   .waiting-note { font-size: 13px; color: var(--text-2); margin-top: 8px; line-height: 1.5; }
 
-  /* 긴 표: 구조 변경 없이 가로 스크롤 유지 + 터치 가독성 보강
-     (첫 열 sticky, 셀 여백 확대). 카드형 재배치는 JS가 <table> 마크업을
-     직접 생성하므로 DOM/스크립트 변경 없이는 불가 — 요약에 별도 보고. */
+  /* 긴 표: 480px 이상(태블릿/데스크톱)에서는 가로 스크롤 + 첫 열 sticky.
+     480px 이하(대부분의 휴대폰 세로 화면)에서는 아래 미디어쿼리로 표를
+     카드 목록으로 재배치한다 — 각 <td>의 data-label 속성(JS에서 부여,
+     계산/로딩 로직 변경 없음)을 ::before로 라벨처럼 보여준다. */
   .rm-scroll { overflow-x: auto; max-width: 100%; -webkit-overflow-scrolling: touch;
                border-radius: var(--radius-sm); }
   .rm-table { border-collapse: collapse; width: 100%; font-size: 13.5px; min-width: 480px; color: var(--text-1); }
@@ -188,6 +189,32 @@
   }
   .rm-sub { font-size: 11.5px; color: var(--text-3); line-height: 1.5; }
   .rm-note { margin-top: 10px; }
+
+  @media (max-width: 480px) {
+    .rm-scroll { overflow-x: visible; }
+    .rm-table { display: block; min-width: 0; width: 100%; }
+    .rm-table thead { display: none; }
+    .rm-table tbody { display: block; }
+    .rm-table tr { display: block; background: var(--glass-2); border: 1px solid var(--glass-border-soft);
+                   border-radius: var(--radius-md); padding: 4px 14px; margin-bottom: 10px; }
+    .rm-table tr.tappable:active { background: var(--glass-border); }
+    .rm-table td {
+      display: flex; justify-content: space-between; align-items: flex-start; gap: 14px;
+      padding: 10px 0; border-bottom: 1px solid var(--hairline); text-align: right;
+      white-space: normal; position: static; background: none;
+    }
+    .rm-table td:last-child { border-bottom: none; }
+    .rm-table td:not(:first-child)::before {
+      content: attr(data-label); color: var(--text-2); font-size: 12.5px; font-weight: 600;
+      text-align: left; flex-shrink: 0;
+    }
+    /* 첫 열은 라벨:값이 아니라 카드 제목처럼 — 종목명/자산군명/지표명 등 */
+    .rm-table td:first-child {
+      display: block; text-align: left; font-weight: 600; font-size: 15px;
+      padding: 12px 0 10px; border-bottom: 1px solid var(--hairline);
+    }
+    .rm-table td:first-child .rm-sub { font-weight: 400; margin-top: 3px; }
+  }
   .muted { color: var(--text-2); font-size: 15px; line-height: 1.55; }
 
   /* [A1-4/5, 2026-08-29] 내비게이션 셸 */
@@ -893,9 +920,9 @@ function renderAssetClassGap(gap) {
     const gapCls = r.gap_pct > 0 ? 'negative' : '';
     return `<tr>
       <td>${esc(r.label)}<div class="rm-sub">${esc(r.group)}${r.currently_mapped ? '' : ' · 미보유'}</div></td>
-      <td class="rm-num">${r.target_pct.toFixed(1)}%</td>
-      <td class="rm-num">${r.actual_pct.toFixed(1)}%</td>
-      <td class="rm-num ${gapCls}">${r.gap_pct >= 0 ? '+' : ''}${r.gap_pct.toFixed(1)}%p</td>
+      <td class="rm-num" data-label="목표">${r.target_pct.toFixed(1)}%</td>
+      <td class="rm-num" data-label="실제">${r.actual_pct.toFixed(1)}%</td>
+      <td class="rm-num ${gapCls}" data-label="갭">${r.gap_pct >= 0 ? '+' : ''}${r.gap_pct.toFixed(1)}%p</td>
     </tr>`;
   }).join('');
 
@@ -946,9 +973,9 @@ function renderRoleGap(roleGap) {
     }).join('<br>');
     return `<tr>
       <td>${esc(r.label)}<div class="rm-sub">${memberLines}</div></td>
-      <td class="rm-num">${hasTarget ? r.target_pct.toFixed(1) + '%' : '목표 없음'}</td>
-      <td class="rm-num">${r.actual_pct === null ? '-' : r.actual_pct.toFixed(1) + '%'}</td>
-      <td class="rm-num ${gapCls}">${hasTarget ? (r.gap_pct >= 0 ? '+' : '') + r.gap_pct.toFixed(1) + '%p' : '-'}</td>
+      <td class="rm-num" data-label="목표">${hasTarget ? r.target_pct.toFixed(1) + '%' : '목표 없음'}</td>
+      <td class="rm-num" data-label="실제">${r.actual_pct === null ? '-' : r.actual_pct.toFixed(1) + '%'}</td>
+      <td class="rm-num ${gapCls}" data-label="갭">${hasTarget ? (r.gap_pct >= 0 ? '+' : '') + r.gap_pct.toFixed(1) + '%p' : '-'}</td>
     </tr>`;
   }).join('');
 
@@ -1005,8 +1032,8 @@ async function loadPortfolioReport(bust) {
       const head = cls.map(c => `<th>${esc(lb[c] || c)}</th>`).join('');
       const body = (rm.phases || []).map(ph => `<tr>
           <td>${esc(ph.rank)}<div class="rm-sub">${esc(ph.period)}</div></td>
-          <td class="rm-num">${Number(ph.cumulative_krw).toLocaleString()}</td>
-          ${cls.map(c => `<td class="rm-num">${ph.target_allocation_pct[c]}%</td>`).join('')}
+          <td class="rm-num" data-label="누적">${Number(ph.cumulative_krw).toLocaleString()}</td>
+          ${cls.map(c => `<td class="rm-num" data-label="${esc(lb[c] || c)}">${ph.target_allocation_pct[c]}%</td>`).join('')}
         </tr>`).join('');
       rmHtml = `<h3>배분 로드맵</h3>
         <p class="muted">${rm.total_months}개월 · 총 투자가능액
@@ -1100,7 +1127,7 @@ async function loadRiskEngine(bust) {
     const flagged = corr.flagged_pairs || [];
     const corrHtml = flagged.length
       ? `<div class="rm-scroll"><table class="rm-table"><thead><tr><th>종목A</th><th>종목B</th><th class="rm-num">상관계수</th></tr></thead>
-          <tbody>${flagged.map(f => `<tr><td>${esc(f.symbol_a)}</td><td>${esc(f.symbol_b)}</td><td class="rm-num">${f.correlation.toFixed(3)}</td></tr>`).join('')}</tbody>
+          <tbody>${flagged.map(f => `<tr><td>${esc(f.symbol_a)}</td><td data-label="종목B">${esc(f.symbol_b)}</td><td class="rm-num" data-label="상관계수">${f.correlation.toFixed(3)}</td></tr>`).join('')}</tbody>
         </table></div><p class="muted rm-note">기준 ${corr.flag_threshold} 이상, 최근 ${corr.lookback_days}일 수익률 기준. "비슷하게 움직인다"는 사실만 — 매도 제안 아님.</p>`
       : `<p class="muted">${esc(corr.note || `상관계수 ${corr.flag_threshold || 0.7} 이상인 쌍 없음`)}</p>`;
 
@@ -1307,10 +1334,10 @@ function renderMarketState() {
     const x = pick(r, STATEBOARD_ROW_FIELDS);
     return `<tr class="tappable" onclick="openStockDetail('${esc(x.symbol)}')">
       <td>${esc(x.name)}<div class="rm-sub">${esc(x.symbol)}</div></td>
-      <td class="rm-num">${fmtNum(x.volatility_20d_pct, 2, '%')}</td>
-      <td class="rm-num">${fmtNum(x.volatility_percentile, 1)}</td>
-      <td class="rm-num">${fmtNum(x.adx_14, 1)}</td>
-      <td class="rm-sub">${esc(x.data_status || '')}</td>
+      <td class="rm-num" data-label="20일 변동성">${fmtNum(x.volatility_20d_pct, 2, '%')}</td>
+      <td class="rm-num" data-label="변동성 백분위">${fmtNum(x.volatility_percentile, 1)}</td>
+      <td class="rm-num" data-label="ADX(14)">${fmtNum(x.adx_14, 1)}</td>
+      <td class="rm-sub" data-label="비고">${esc(x.data_status || '')}</td>
     </tr>`;
   }).join('');
   const corr = sb.correlation || {};
@@ -1481,9 +1508,9 @@ function renderLearningRow(raw) {
   const passedTrain = r.train_p_corrected !== null && r.train_p_corrected < 0.05;
   return `<tr>
     <td>${esc(r.indicator)}</td>
-    <td class="rm-num">${r.train_p_corrected === null ? '표본부족' : r.train_p_corrected.toFixed(4)}</td>
-    <td class="rm-num">${r.val_p_corrected === null ? (passedTrain ? '표본부족' : '검증 미실시') : r.val_p_corrected.toFixed(4)}</td>
-    <td class="rm-sub">${esc(r.verdict_label)}</td>
+    <td class="rm-num" data-label="훈련 p(보정후)">${r.train_p_corrected === null ? '표본부족' : r.train_p_corrected.toFixed(4)}</td>
+    <td class="rm-num" data-label="검증 p(보정후)">${r.val_p_corrected === null ? (passedTrain ? '표본부족' : '검증 미실시') : r.val_p_corrected.toFixed(4)}</td>
+    <td class="rm-sub" data-label="결과">${esc(r.verdict_label)}</td>
   </tr>`;
 }
 
