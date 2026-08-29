@@ -346,6 +346,42 @@ def calc_adx(highs, lows, closes, period=14):
         return 0
     return 100 * abs(plus_di - minus_di) / denom
 
+def daily_returns(closes):
+    return [(closes[i] - closes[i - 1]) / closes[i - 1]
+            for i in range(1, len(closes)) if closes[i - 1]]
+
+
+def rolling_volatility_series(closes, window=20):
+    """일간수익률의 표준편차를 window 구간씩 굴려가며 계산한 시계열.
+    마지막 값이 "오늘의 window일 변동성"이고, 시계열 전체가 백분위를 매길
+    과거 분포다.
+
+    2026-08-29 A2 Step 2: market_indicators.py 전용이었던 걸 여기로 옮겼다 —
+    news_event_cards.py의 detect_anomalies()도 같은 방식(백분위)으로 변동성
+    급증을 판정하도록 통일하면서(PM 지시, A2_Intelligence_Layer_Design.md
+    §2-3) 두 파일이 같은 계산식을 import해서 쓰게 하기 위해서다. 함수를
+    복붙하면 나중에 계산식이 갈라질 수 있어(FORBIDDEN_FIELDS_BASE가 겪었던
+    종류의 드리프트) 공유 모듈로 옮기는 쪽을 택했다."""
+    rets = daily_returns(closes)
+    series = []
+    for i in range(window, len(rets) + 1):
+        chunk = rets[i - window:i]
+        mean = sum(chunk) / len(chunk)
+        var = sum((r - mean) ** 2 for r in chunk) / len(chunk)
+        series.append(var ** 0.5)
+    return series
+
+
+def historical_percentile(series):
+    """series의 마지막 값이 series 전체 분포에서 몇 번째 백분위인지.
+    "지금 값 / 과거 분포에서의 위치"만 반환 — 라벨을 붙이지 않는다."""
+    if not series:
+        return None
+    current = series[-1]
+    rank = sum(1 for v in series if v <= current)
+    return round(100 * rank / len(series), 1)
+
+
 def classify_strategy(expected_days):
     if expected_days <= 6:
         return "단타"

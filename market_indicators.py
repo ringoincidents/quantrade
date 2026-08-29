@@ -36,7 +36,8 @@ import argparse
 from datetime import datetime, timezone
 
 from analyze_lib import (
-    FORBIDDEN_FIELDS_BASE, FORBIDDEN_PHRASES_BASE, calc_adx, load_json, save_json,
+    FORBIDDEN_FIELDS_BASE, FORBIDDEN_PHRASES_BASE, calc_adx, daily_returns,
+    historical_percentile, load_json, rolling_volatility_series, save_json,
 )
 from news_event_cards import build_universe, fetch_candles_for_anomaly as fetch_candles
 
@@ -67,35 +68,9 @@ FORBIDDEN_PHRASES = FORBIDDEN_PHRASES_BASE + (
 
 
 # ── 순수 계산 (numpy 없이) ───────────────────────────────────────────────
-
-def daily_returns(closes):
-    return [(closes[i] - closes[i - 1]) / closes[i - 1]
-            for i in range(1, len(closes)) if closes[i - 1]]
-
-
-def rolling_volatility_series(closes, window=STATE_VOL_WINDOW):
-    """일간수익률의 표준편차를 window 구간씩 굴려가며 계산한 시계열.
-    마지막 값이 "오늘의 20일 변동성"이고, 시계열 전체가 백분위를 매길
-    과거 분포다."""
-    rets = daily_returns(closes)
-    series = []
-    for i in range(window, len(rets) + 1):
-        chunk = rets[i - window:i]
-        mean = sum(chunk) / len(chunk)
-        var = sum((r - mean) ** 2 for r in chunk) / len(chunk)
-        series.append(var ** 0.5)
-    return series
-
-
-def historical_percentile(series):
-    """series의 마지막 값이 series 전체 분포에서 몇 번째 백분위인지.
-    "지금 값 / 과거 분포에서의 위치"만 반환 — 라벨을 붙이지 않는다."""
-    if not series:
-        return None
-    current = series[-1]
-    rank = sum(1 for v in series if v <= current)
-    return round(100 * rank / len(series), 1)
-
+# daily_returns/rolling_volatility_series/historical_percentile은 2026-08-29
+# A2 Step 2에서 analyze_lib.py로 옮겼다(news_event_cards.py와 계산식을
+# 공유하기 위함 — 위 import 참고). 여기 남은 건 이 파일 전용인 pearson_corr뿐.
 
 def pearson_corr(a, b):
     n = min(len(a), len(b))

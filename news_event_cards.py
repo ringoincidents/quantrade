@@ -35,7 +35,9 @@ import requests
 
 from analyze_lib import (
     CLAUDE_API_KEY, FORBIDDEN_FIELDS_BASE, FORBIDDEN_PHRASES_BASE,
-    get_krx_candles, get_news_headlines, get_us_candles, load_json, save_json,
+    build_common_event, get_krx_candles, get_news_headlines, get_us_candles,
+    historical_percentile, load_json, rolling_volatility_series, save_json,
+    validate_common_event,
 )
 from news_event_experiment import JUDGE_MODEL
 
@@ -69,8 +71,21 @@ FORBIDDEN_PHRASES = FORBIDDEN_PHRASES_BASE + ("매수", "보입니다")
 # 초기값이며 튜닝 대상이다.
 VOLUME_SPIKE_MULTIPLE = 2.0    # 거래량이 20일 평균의 이 배수 이상이면 발동
 PRICE_GAP_PCT = 3.0            # 전일 종가 대비 시가 갭이 이 %(절대값) 이상이면 발동
-VOLATILITY_MULTIPLE = 2.0      # 당일 등락폭이 최근 20일 변동성의 이 배수 이상이면 발동
 ANOMALY_WINDOW = 20            # 거래량 평균/변동성 계산에 쓰는 과거 거래일수
+
+# 2026-08-29 A2 Step 2(PM 지시, A2_Intelligence_Layer_Design.md §2-3): 변동성
+# 급증 판정을 market_indicators.py와 같은 "백분위" 방식으로 통일했다. 예전
+# VOLATILITY_MULTIPLE(당일 등락폭이 최근 20일 변동성의 N배)은 폐기 — 같은
+# 이름의 다른 계산식이 서로 다른 파일에 있던 상태를 없앤 것이다. 값 90은
+# 설계 문서 §2-2 제안 그대로(사전 등록, 결과를 보고 맞추지 않음) — 초기값이며
+# 튜닝 대상이다.
+VOLATILITY_PERCENTILE_THRESHOLD = 90
+# 백분위 계산은 과거 분포 표본이 충분해야 의미가 있다 - market_indicators.py의
+# STATE_LOOKBACK_CANDLES와 같은 값(300)을 써서 같은 방식을 그대로 재현한다.
+# 값을 공유 상수로 묶지 않고 각자 정의한 이유: "계산 방식(함수)"을 공유하는 게
+# 이번 통일의 핵심이고, 조회 개수는 각 파일이 자기 호출부 사정에 맞춰 정할 수
+# 있게 남겨둔다(우연히 지금은 같은 숫자일 뿐).
+ANOMALY_VOL_LOOKBACK_CANDLES = 300
 
 
 # ── 대상 종목 선정 (2026-08-09 스코프 축소) ─────────────────────────────────
@@ -107,12 +122,29 @@ def _is_krx_symbol(symbol):
     return symbol.isdigit() and len(symbol) == 6
 
 
+def build_event_asset(symbol, name, market_country):
+    """공통 스키마(§1-1)의 asset 객체를 만든다 — {symbol, name, market_country,
+    currency}. currency는 이 파일에 별도 데이터 소스가 없어 시장국가로부터
+    추정한다 — fetch_candles_for_anomaly가 KR/US를 판별하는 것과 정확히 같은
+    이분법(심볼이 KRX 6자리 숫자면 KR, 아니면 US)을 재사용해 "이 캔들이 어느
+    시장 걸로 조회됐는지"와 "이 이벤트의 통화가 뭔지"가 항상 일치하게 한다."""
+    is_kr = market_country == "KR" or (market_country is None and _is_krx_symbol(symbol))
+    currency = "KRW" if is_kr else "USD"
+    return {"symbol": symbol, "name": name, "market_country": market_country,
+            "currency": currency}
+
+
 # ── 이상행동 감시 (결정론적 산술, AI 미개입) ────────────────────────────────
 
 def fetch_candles_for_anomaly(symbol, market_country=None, count=None):
     """KR/US 판별 후 캔들 조회. 실패해도 예외를 올리지 않고 None — 이상행동
-    점검을 건너뛸 뿐 카드 생성 전체를 막지 않는다(뉴스 카드와 같은 관용)."""
-    count = count or (ANOMALY_WINDOW + 5)
+    점검을 건너뛸 뿐 카드 생성 전체를 막지 않는다(뉴스 카드와 같은 관용).
+
+    2026-08-29: 기본 조회 개수를 ANOMALY_WINDOW+5(25)에서
+    ANOMALY_VOL_LOOKBACK_CANDLES(300)로 늘렸다 — 변동성 백분위 판정(A2 Step 2)이
+    과거 분포 표본을 필요로 하기 때문. 거래량/가격갭 판정은 어차피 캔들 끝부분만
+    보므로 표본이 늘어도 영향 없다."""
+    count = count or ANOMALY_VOL_LOOKBACK_CANDLES
     is_kr = market_country == "KR" or (market_country is None and _is_krx_symbol(symbol))
     try:
         if is_kr:
@@ -123,20 +155,60 @@ def fetch_candles_for_anomaly(symbol, market_country=None, count=None):
         return None
 
 
-def detect_anomalies(candles):
+def _candle_timestamp(candle):
+    """캔들의 거래일을 이벤트 timestamp로 쓴다(A2 설계 §1-4) — 일봉 데이터라
+    시:분 정보가 없으므로 자정 UTC로 채운다. 스크립트 실행 시각("지금")이
+    아니라 실제 관측(거래) 시각을 쓰는 게 §1-4의 취지에 맞다. candle에 date가
+    없으면(방어적) 실행 시각으로 폴백한다."""
+    date = candle.get("date")
+    if date:
+        return f"{date}T00:00:00+00:00"
+    return datetime.now(timezone.utc).isoformat()
+
+
+def detect_anomalies(candles, asset=None):
     """순수 산술 판정 — autoexec.py의 세 규칙과 같은 성격이다. AI가 개입하지
     않으므로 §2.1 통계 게이트 적용 대상이 아니다(CLAUDE.md v3.2 (a) 원칙).
 
     candles: 과거->현재 순서의 OHLCV 딕셔너리 리스트(get_krx_candles/get_us_candles
-    형식 — open/high/low/close/volume 키). 반환: 발동한 사실 문장 리스트(빈 리스트면
-    이상행동 없음). "위험"/"매도 검토" 같은 판단 문구는 절대 넣지 않는다 — 관측 수치와
-    배수만 서술한다."""
+    형식 — open/high/low/close/volume/date 키).
+    asset: {symbol, name, market_country, currency} 형태로 주어지면(A2 Step 2)
+    공통 스키마(9필드) change_events도 함께 만든다 — build_common_event()가
+    생성 시점에 스키마를 검증하므로 여기서 만들어지는 이벤트는 이미 사전
+    검증을 통과한 것이다. asset이 None이면(기존 호출부와의 하위 호환)
+    change_events는 항상 빈 리스트 — facts만 쓰던 기존 동작 그대로.
+
+    반환: (facts, change_events) 튜플.
+      - facts: 발동한 사실 문장 리스트(기존 그대로 — build_anomaly_card가
+        표시용으로 그대로 쓴다). "위험"/"매도 검토" 같은 판단 문구는 절대
+        넣지 않는다 — 관측 수치와 배수/백분위만 서술한다.
+      - change_events: 같은 계산에서 같이 나오는 공통 스키마 이벤트 목록
+        (A2_Intelligence_Layer_Design.md §2-1 "문장 생성을 없애는 게 아니라
+        문장 뒤에 숫자를 남긴다" 그대로 — 계산을 두 번 하지 않는다).
+
+    2026-08-29 A2 Step 2: 변동성 급증 판정을 market_indicators.py와 같은
+    "백분위" 방식으로 통일했다(PM 지시) — 예전 VOLATILITY_MULTIPLE(당일
+    등락폭이 최근 20일 변동성의 N배)은 폐기, rolling_volatility_series/
+    historical_percentile(analyze_lib.py로 이전, market_indicators.py와 공유)를
+    재사용해 "최근 20일 변동성이 과거 분포에서 몇 백분위인가"로 판정한다.
+    사실 문장의 표현도 "배수"에서 "백분위"로 바뀌었다."""
     facts = []
+    change_events = []
     if not candles or len(candles) < ANOMALY_WINDOW + 2:
-        return facts
+        return facts, change_events
 
     today, prev = candles[-1], candles[-2]
     window = candles[-(ANOMALY_WINDOW + 1):-1]  # 오늘을 제외한 최근 ANOMALY_WINDOW일
+    event_ts = _candle_timestamp(today)
+
+    def emit(event_type, observed_value, baseline, change):
+        if asset is None:
+            return
+        change_events.append(build_common_event(
+            timestamp=event_ts, asset=asset, source="news_event_cards.anomaly",
+            event_type=event_type, reliability=1.0,  # 산술 판정 - §3-1 "산술 기반은 1.0"
+            observed_value=observed_value, baseline=baseline, change=change,
+        ))
 
     # 1) 거래량 급변 — 20일 평균 대비 배수
     vols = [c.get("volume", 0) or 0 for c in window]
@@ -146,6 +218,7 @@ def detect_anomalies(candles):
         vol_mult = today_vol / avg_vol
         if vol_mult >= VOLUME_SPIKE_MULTIPLE:
             facts.append(f"거래량 20일 평균 대비 {vol_mult:.1f}배")
+            emit("거래량_급증", today_vol, avg_vol, round(vol_mult, 2))
 
     # 2) 가격 갭 — 전일 종가 대비 당일 시가
     prev_close, today_open = prev.get("close"), today.get("open")
@@ -153,21 +226,23 @@ def detect_anomalies(candles):
         gap_pct = (today_open - prev_close) / prev_close * 100
         if abs(gap_pct) >= PRICE_GAP_PCT:
             facts.append(f"전일 종가 대비 시가 갭 {gap_pct:+.1f}%")
+            emit("가격_갭", today_open, prev_close, round(gap_pct, 2))
 
-    # 3) 급등락 — 당일 등락폭을 최근 20일 변동성과 비교한 배수
-    closes = [c["close"] for c in window]
-    rets = [(closes[i] - closes[i - 1]) / closes[i - 1]
-            for i in range(1, len(closes)) if closes[i - 1]]
-    if len(rets) >= 5 and prev_close:
-        mean_r = sum(rets) / len(rets)
-        std_r = (sum((r - mean_r) ** 2 for r in rets) / len(rets)) ** 0.5
-        today_ret_pct = (today.get("close", prev_close) - prev_close) / prev_close * 100
-        if std_r > 0:
-            move_mult = abs(today_ret_pct / 100) / std_r
-            if move_mult >= VOLATILITY_MULTIPLE:
-                facts.append(f"당일 {today_ret_pct:+.1f}% (최근 20일 변동성 대비 {move_mult:.1f}배)")
+    # 3) 변동성 급증 — 최근 ANOMALY_WINDOW일 변동성의 과거 분포 내 백분위
+    #    (market_indicators.py와 동일 방식). 표본(vol_series)이 너무 적으면
+    #    백분위가 의미 없어 조용히 건너뛴다 — 데이터 부족 시 발동 안 하는
+    #    기존 관용 그대로.
+    all_closes = [c["close"] for c in candles]
+    vol_series = rolling_volatility_series(all_closes, ANOMALY_WINDOW)
+    vol_percentile = historical_percentile(vol_series) if len(vol_series) >= 20 else None
+    if vol_percentile is not None and vol_percentile >= VOLATILITY_PERCENTILE_THRESHOLD:
+        vol_pct_today = round(vol_series[-1] * 100, 2)
+        facts.append(f"최근 20일 변동성이 과거 분포 대비 {vol_percentile:.0f}백분위")
+        # baseline: 백분위 자체가 이미 과거 분포 대비 위치라 baseline 값 자체는
+        # 없음(§2-2) - 스키마상 null 허용. change에는 배율 대신 백분위를 재사용.
+        emit("변동성_급증", vol_pct_today, None, vol_percentile)
 
-    return facts
+    return facts, change_events
 
 
 def build_anomaly_card(symbol, name, facts):
@@ -286,7 +361,7 @@ def run(args):
     # 이 파일의 갱신 주기(1일 1회)를 다른 패널과 비교할 수 없다. 시:분까지 담는다
     # (real_portfolio.json의 synced_at과 같은 ISO+UTC 패턴).
     generated_at = datetime.now(timezone.utc).isoformat()
-    cards, stripped_total = [], []
+    cards, stripped_total, change_events = [], [], []
     universe = build_universe()
     print(f"대상 종목(보유+관심) {len(universe)}건: {[u['symbol'] for u in universe]}")
 
@@ -296,8 +371,13 @@ def run(args):
             break
 
         # 이상행동 감시 — 결정론적 산술, AI 미개입. 뉴스보다 먼저 확인한다.
+        # 2026-08-29 A2 Step 2: asset을 넘겨 change_events도 같이 받는다(공통
+        # 스키마, build_common_event가 생성 시점에 사전 검증) — facts는 기존
+        # 그대로 카드 표시용.
         candles = fetch_candles_for_anomaly(symbol, u["market_country"])
-        anomaly_facts = detect_anomalies(candles) if candles else []
+        asset = build_event_asset(symbol, name, u["market_country"])
+        anomaly_facts, anomaly_events = detect_anomalies(candles, asset=asset) if candles else ([], [])
+        change_events.extend(anomaly_events)
         if anomaly_facts:
             cards.append(build_anomaly_card(symbol, name, anomaly_facts))
             print(f"📊 {symbol} [이상행동] {', '.join(anomaly_facts)}")
@@ -327,9 +407,17 @@ def run(args):
                  "필드가 스키마에 없다 - 누락이 아니라 설계(CLAUDE.md v3.2). 대상은 "
                  "보유종목+관심종목으로 한정(2026-08-09 스코프 축소)."),
         "cards": cards,
+        # 2026-08-29 A2 Step 2 신설: 이상행동 카드와 같은 계산에서 나온 공통
+        # 스키마(9필드) 이벤트 목록(A2_Intelligence_Layer_Design.md §1-4 예시
+        # 그대로 - 최상위 generated_at/schema는 그대로 두고 그 아래 별도
+        # 배열로 추가). cards의 "이상행동" 카드는 표시용 문장이고, 이건 Step
+        # 3(Prioritization)/Step 4(Portfolio Relevance)가 소비할 구조화 데이터.
+        # 뉴스 사건 설명 카드(AI 판단 경로)는 이번 Step 2 범위가 아니라 아직
+        # change_events를 만들지 않는다.
+        "change_events": change_events,
     }
     save_json(CARDS_FILE, out)
-    print(f"\n카드 {len(cards)}건 생성 → {CARDS_FILE}")
+    print(f"\n카드 {len(cards)}건 생성 → {CARDS_FILE} (change_events {len(change_events)}건)")
     if stripped_total:
         print(f"제거된 예측성 필드 누적: {sorted(set(stripped_total))}")
 
@@ -426,26 +514,75 @@ def run_self_test():
     assert banned_import not in open("news_event_cards.py", encoding="utf-8").read(), \
         "시장 전체 유니버스(backtest.py) 임포트가 남아 있으면 안 됨"
 
-    # 6) [2026-08-09] 이상행동 판정 — 순수 산술, 임계값 초과 시에만 발동
-    def make_candles(n, base_price=10000, base_vol=1000):
-        return [{"open": base_price, "high": base_price * 1.01, "low": base_price * 0.99,
-                 "close": base_price, "volume": base_vol} for _ in range(n)]
+    # 6) [2026-08-09, 2026-08-29 A2 Step 2] 이상행동 판정 — 순수 산술, 임계값
+    #    초과 시에만 발동. detect_anomalies가 이제 (facts, change_events) 튜플을
+    #    반환한다 - asset을 안 주면(하위 호환 경로) change_events는 항상 빈 리스트.
+    def make_candles(n, base_price=10000, base_vol=1000, start="2026-01-01"):
+        from datetime import date, timedelta
+        d0 = date.fromisoformat(start)
+        return [{"date": (d0 + timedelta(days=i)).isoformat(),
+                 "open": base_price, "high": base_price * 1.01, "low": base_price * 0.99,
+                 "close": base_price, "volume": base_vol} for i in range(n)]
+
+    test_asset = build_event_asset("005930", "삼성전자", "KR")
 
     normal = make_candles(25)
-    assert detect_anomalies(normal) == [], "평상시 데이터에서 이상행동이 발동하면 안 됨"
-    print("[6] 평상시 데이터 -> 이상행동 0건 확인")
+    facts0, events0 = detect_anomalies(normal, asset=test_asset)
+    print(f"[6] 평상시 데이터 -> facts={facts0}, change_events={len(events0)}건")
+    assert facts0 == [] and events0 == [], "평상시 데이터에서 이상행동이 발동하면 안 됨"
 
     spike = make_candles(25)
     spike[-1] = dict(spike[-1], volume=spike[-2]["volume"] * 5)
-    facts = detect_anomalies(spike)
-    print(f"[6] 거래량 5배 주입 -> {facts}")
-    assert any("거래량" in f for f in facts), "거래량 급변이 감지되지 않음"
+    facts_novol, events_noasset = detect_anomalies(spike)  # asset 없음 - 하위 호환 경로
+    print(f"[6] 거래량 5배 주입(asset 없음) -> facts={facts_novol}, change_events={events_noasset}")
+    assert any("거래량" in f for f in facts_novol), "거래량 급변이 감지되지 않음"
+    assert events_noasset == [], "asset을 안 줬는데 change_events가 생기면 안 됨(하위 호환)"
+
+    facts_vol, events_vol = detect_anomalies(spike, asset=test_asset)
+    print(f"[6] 거래량 5배 주입(asset 있음) -> change_events={events_vol}")
+    assert len(events_vol) == 1 and events_vol[0]["event_type"] == "거래량_급증"
+    assert validate_common_event(events_vol[0]) == [], "거래량_급증 이벤트가 스키마 사전 검증을 통과 못 함"
 
     gap = make_candles(25)
     gap[-1] = dict(gap[-1], open=gap[-2]["close"] * 1.05)  # 전일 종가 대비 +5% 갭
-    facts_gap = detect_anomalies(gap)
-    print(f"[6] +5% 갭 주입 -> {facts_gap}")
+    facts_gap, events_gap = detect_anomalies(gap, asset=test_asset)
+    print(f"[6] +5% 갭 주입 -> facts={facts_gap}, change_events={events_gap}")
     assert any("갭" in f for f in facts_gap), "가격 갭이 감지되지 않음"
+    assert any(e["event_type"] == "가격_갭" for e in events_gap)
+    assert all(validate_common_event(e) == [] for e in events_gap)
+
+    # 6b) [2026-08-29 A2 Step 2] 변동성 급증 — market_indicators.py와 같은 백분위
+    #    방식(PM 지시로 VOLATILITY_MULTIPLE 배율 방식을 대체). 진폭이 갈수록
+    #    커지는 합성 시계열이면 마지막 구간의 변동성이 과거 분포 최상단에
+    #    있어야 한다(market_indicators.py self-test와 같은 구성).
+    import math
+    vol_closes = [10000.0]
+    for i in range(1, 340):
+        amp = 0.001 + (i / 340) * 0.08
+        vol_closes.append(vol_closes[-1] * (1 + amp * math.sin(i)))
+    from datetime import date, timedelta
+    d0 = date.fromisoformat("2025-01-01")
+    vol_candles = [{"date": (d0 + timedelta(days=i)).isoformat(),
+                     "open": c, "high": c * 1.01, "low": c * 0.99, "close": c, "volume": 1000}
+                    for i, c in enumerate(vol_closes)]
+    facts_pctl, events_pctl = detect_anomalies(vol_candles, asset=test_asset)
+    print(f"[6b] 증가 변동성 합성 데이터 -> facts={facts_pctl}")
+    assert any("백분위" in f for f in facts_pctl), "변동성 급증(백분위 방식)이 감지되지 않음"
+    assert any(e["event_type"] == "변동성_급증" for e in events_pctl)
+    vol_event = next(e for e in events_pctl if e["event_type"] == "변동성_급증")
+    print(f"[6b] 변동성_급증 이벤트: observed_value={vol_event['observed_value']}, "
+          f"baseline={vol_event['baseline']}, change(백분위)={vol_event['change']}")
+    assert vol_event["baseline"] is None, "백분위 방식은 baseline이 없어야 함(§2-2)"
+    assert vol_event["change"] >= VOLATILITY_PERCENTILE_THRESHOLD
+    assert validate_common_event(vol_event) == []
+    # 소스 텍스트 검색이 아니라 모듈 네임스페이스에 그 이름이 더 이상 정의돼
+    # 있지 않은지를 본다 - 텍스트 검색이면 이 설명 주석/docstring 자체가 그
+    # 이름을 언급하는 것까지 걸린다(다른 self-test가 겪은 자기지시적 함정과
+    # 같은 종류). 폐기 여부의 진짜 기준은 "코드에 그 식별자가 정의돼 있는가"다.
+    import sys
+    mod = sys.modules[__name__]
+    assert not hasattr(mod, "VOLATILITY_MULTIPLE"), \
+        "폐기된 변동성 배율 상수가 모듈에 여전히 정의돼 있으면 안 됨(백분위 방식으로 대체, §2-3)"
 
     # 7) 이상행동 카드도 뉴스 카드와 같은 스키마/금지어 규율을 따르는지
     acard = build_anomaly_card("005930", "삼성전자", ["거래량 20일 평균 대비 3.2배", "당일 -8.1%"])
@@ -457,8 +594,17 @@ def run_self_test():
 
     # 8) 데이터가 짧으면(20일 미만) 조용히 빈 리스트 (오탐 방지)
     short = make_candles(10)
-    assert detect_anomalies(short) == [], "데이터 부족 시 이상행동을 발동하면 안 됨"
+    facts_short, events_short = detect_anomalies(short, asset=test_asset)
+    assert facts_short == [] and events_short == [], "데이터 부족 시 이상행동을 발동하면 안 됨"
     print("[8] 데이터 부족(10일) -> 이상행동 0건 확인")
+
+    # 9) build_event_asset — KR/US currency 추정이 fetch_candles_for_anomaly와
+    #    같은 이분법을 쓰는지
+    asset_kr = build_event_asset("005930", "삼성전자", "KR")
+    asset_us_guess = build_event_asset("NVDA", "엔비디아", None)  # market_country 없음, 심볼로 US 추정
+    print(f"[9] KR asset={asset_kr}, market_country 없는 비KRX심볼 asset={asset_us_guess}")
+    assert asset_kr["currency"] == "KRW"
+    assert asset_us_guess["currency"] == "USD"
 
     print("\n모든 자체 검증 통과.")
 
