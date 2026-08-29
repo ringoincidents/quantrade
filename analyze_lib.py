@@ -1,3 +1,4 @@
+import argparse
 import requests
 import math
 import json
@@ -119,6 +120,158 @@ FORBIDDEN_FIELDS_BASE = (
     "signal", "buy", "sell", "score", "target_weight_pct", "rating",
     "rank", "ranking", "phase", "regime", "grade", "color", "colour",
 )
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# A2 Intelligence Layer 공통 이벤트 스키마 (2026-08-29, A2_Intelligence_Layer_Design.md
+# 최종본 Step 1 구현, PM 지시 "A2 코드 구현 착수" §1 그대로).
+#
+# Change Detection(Step 2)/Prioritization(Step 3)/Portfolio Relevance(Step 4)가
+# 공유하는 9개 필드 정의. 이 스키마가 먼저 굳어야 나머지 단계가 뒤집히지
+# 않는다는 게 PM 지시 원문 — 그래서 이 블록만 별도로 self-test하고 먼저
+# 중간보고한다.
+#
+# **이 스키마는 news_event_cards.py의 카드 스키마(CARD_FIELDS)를 대체하지
+# 않는다.** 카드(뉴스 사건 설명/이상행동)는 계속 별도 화이트리스트로 대시보드에
+# 표시된다 — 공통 스키마는 Change Detection이 새로 만드는 change_events[] 배열
+# 안의 객체 형태다(설계 문서 §1-4 예시 그대로: 각 생성기 JSON의 최상위
+# generated_at/schema는 그대로 두고, 그 아래 change_events[]에 이 스키마를
+# 따르는 항목을 추가하는 방식).
+# ─────────────────────────────────────────────────────────────────────────────
+
+# event_type 허용값(설계 문서 §2-3). ACTIVE 4종은 이번 A2에서 실제 계산식이
+# 있는 대상(Step 2가 만들어낸다), RESERVED 2종은 v4.0 로드맵 Phase B(B2/B4)
+# 대기 — 스키마에 자리만 예약하고 계산 로직은 만들지 않는다(설계 문서 §1-1/
+# §2-3 "계산식 설계는 보류"). validate_common_event는 RESERVED 값도 유효한
+# event_type으로 받아들이지만(자리 예약이 스키마 목적), Step 2 코드가 이
+# 값을 실제로 만들어내지는 않는다.
+EVENT_TYPE_ACTIVE = ("거래량_급증", "변동성_급증", "가격_갭", "상관관계_변화")
+EVENT_TYPE_RESERVED = ("환율_급변", "뉴스빈도_급증")  # Phase B 대기 - 계산 미설계
+EVENT_TYPE_ENUM = EVENT_TYPE_ACTIVE + EVENT_TYPE_RESERVED
+
+# source 식별자 레지스트리(§1-2 "5개 생성기 출력 → 공통 스키마 매핑표"를 코드로도
+# 남긴 것). "<모듈>.<방법>" 형태 — 방법 단위까지 구분하는 이유는 Step 3의
+# Reliability 산정이 소스별로 다른 고정값을 쓰기 때문(§3-1). 값은 사람이 읽는
+# 설명일 뿐 검증에 쓰이지 않는다 — source는 자유 문자열이고 이 레지스트리는
+# "이미 정의된 것들"의 목록이지 화이트리스트가 아니다(신규 소스 추가를 막지
+# 않음). post_trade_review.py/portfolio_report.py/rule_trigger_report.py는
+# 아직 change_events를 만들지 않지만(Step 2는 news_event_cards.py/
+# market_indicators.py만 통합), §1-2 매핑표가 5개 생성기 전부를 다루므로
+# 여기서도 5개 전부의 식별자를 남겨 나중에 그 매핑표를 다시 찾아볼 필요가
+# 없게 한다.
+COMMON_EVENT_SOURCES = {
+    "news_event_cards.ai_summary": "뉴스 사건 설명 카드(AI 요약, Claude 판단 개입)",
+    "news_event_cards.anomaly": "이상행동 카드(산술 판정, AI 미개입)",
+    "market_indicators.state_board": "시장 상태 수치판 스냅샷(변동성 백분위/ADX)",
+    "portfolio_report.rule_matches": "포트폴리오 리포트 규칙 매치(집중도/손실지속/목표가)",
+    "post_trade_review.correlation_blind_spots": "매매 후 리뷰 - 상관관계 사각지대 섹션",
+    "rule_trigger_report.trigger": "규칙 발동 심층분석 리포트 - 발동 사실 섹션",
+}
+
+# 9개 필드 정의(§1-1). required=True는 무조건 있어야 하는 필드(None이면 위반),
+# required="conditional"은 observed_value/baseline/change처럼 이벤트 종류에
+# 따라 null이 정상인 필드(순수 뉴스 사건은 수치가 없음 — §1-1).
+COMMON_EVENT_SCHEMA = {
+    "timestamp":      {"required": True,        "type": str,          "nullable": False},
+    "asset":          {"required": True,        "type": dict,         "nullable": False},
+    "source":         {"required": True,        "type": str,          "nullable": False},
+    "event_type":     {"required": True,        "type": str,          "nullable": False},
+    "observed_value": {"required": "conditional", "type": (int, float), "nullable": True},
+    "baseline":       {"required": "conditional", "type": (int, float), "nullable": True},
+    "change":         {"required": "conditional", "type": (int, float), "nullable": True},
+    "reliability":    {"required": True,        "type": (int, float), "nullable": False},
+    "related_assets": {"required": True,        "type": list,         "nullable": False},
+}
+
+ASSET_REQUIRED_KEYS = ("symbol", "name", "market_country", "currency")
+RELATED_ASSET_RELATIONS = ("correlation_pair", "portfolio_holding", "watchlist")
+
+
+def _is_iso8601_utc(value):
+    """ISO 8601, UTC, 오프셋 포함 형식인지 가볍게 확인(§1-1). 완전한 RFC 검증이
+    아니라 "오프셋이 없는 naive 문자열이 섞이는" 사고를 잡는 정도의 점검이다
+    — rule_trigger_report.py가 실제로 겪었던 문제(§1-3)가 스키마 검증에서도
+    조용히 통과하지 않게 한다."""
+    if not isinstance(value, str):
+        return False
+    try:
+        datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return False
+    return "+" in value[10:] or value.endswith("Z") or "-" in value[19:]
+
+
+def build_common_event(*, timestamp, asset, source, event_type, reliability,
+                        observed_value=None, baseline=None, change=None,
+                        related_assets=None):
+    """9개 필드 스키마를 따르는 이벤트 객체 하나를 만든다(§1-1). 필수값 누락/
+    잘못된 타입/허용 밖 event_type이면 즉시 ValueError로 막는다 — 생성 시점에
+    막는다는 점이 각 생성기의 audit()(사후 검사, 위반을 태그만 달거나 저장을
+    거부)과 다르다: 이건 애초에 스키마를 어긴 이벤트 객체가 만들어지지 않게
+    한다. Step 2(Change Detection)가 이 함수로 change_events[] 항목을 만든다."""
+    event = {
+        "timestamp": timestamp,
+        "asset": asset,
+        "source": source,
+        "event_type": event_type,
+        "observed_value": observed_value,
+        "baseline": baseline,
+        "change": change,
+        "reliability": reliability,
+        "related_assets": related_assets if related_assets is not None else [],
+    }
+    errors = validate_common_event(event)
+    if errors:
+        raise ValueError(f"공통 이벤트 스키마 위반: {errors}")
+    return event
+
+
+def validate_common_event(event, path="event"):
+    """스키마 위반 목록을 반환(빈 리스트 = 위반 없음). 각 생성기의 audit()류
+    함수와 같은 "예외를 던지지 않고 위반을 모아 반환"하는 패턴 — 호출자가
+    build_common_event처럼 즉시 raise할지, 다른 소비자처럼 위반을 태그만
+    남기고 계속 진행할지 선택할 수 있게 한다."""
+    errors = []
+    if not isinstance(event, dict):
+        return [f"{path}: dict가 아님"]
+
+    for field, spec in COMMON_EVENT_SCHEMA.items():
+        present = field in event and event[field] is not None
+        if not present:
+            if spec["required"] is True:
+                errors.append(f"{path}.{field}: 필수 필드 누락")
+            continue
+        value = event[field]
+        if not isinstance(value, spec["type"]):
+            errors.append(f"{path}.{field}: 타입 오류(기대 {spec['type']}, 실제 {type(value)})")
+
+    if event.get("event_type") is not None and event["event_type"] not in EVENT_TYPE_ENUM:
+        errors.append(f"{path}.event_type: 허용되지 않은 값 '{event.get('event_type')}' "
+                       f"(허용: {EVENT_TYPE_ENUM})")
+
+    if event.get("timestamp") is not None and not _is_iso8601_utc(event["timestamp"]):
+        errors.append(f"{path}.timestamp: ISO 8601 UTC(오프셋 포함) 형식이 아님 "
+                       f"('{event.get('timestamp')}')")
+
+    reliability = event.get("reliability")
+    if isinstance(reliability, (int, float)) and not (0.0 <= reliability <= 1.0):
+        errors.append(f"{path}.reliability: 0.0~1.0 범위 밖 ({reliability})")
+
+    asset = event.get("asset")
+    if isinstance(asset, dict):
+        missing_asset_keys = [k for k in ASSET_REQUIRED_KEYS if k not in asset]
+        if missing_asset_keys:
+            errors.append(f"{path}.asset: 필수 키 누락 {missing_asset_keys}")
+
+    related = event.get("related_assets")
+    if isinstance(related, list):
+        for i, ra in enumerate(related):
+            if not isinstance(ra, dict) or "symbol" not in ra:
+                errors.append(f"{path}.related_assets[{i}]: symbol 없음")
+            elif "relation" in ra and ra.get("relation") not in RELATED_ASSET_RELATIONS:
+                errors.append(f"{path}.related_assets[{i}].relation: 허용 밖 값 '{ra.get('relation')}'")
+
+    return errors
 
 
 def calc_ma(prices, window):
@@ -630,3 +783,124 @@ def send_telegram(msg):
             print("텔레그램 응답:", resp.json())
         except Exception as e:
             print("⚠️ 텔레그램 실패:", e)
+
+
+def run_self_test():
+    """analyze_lib.py 자체 검증 (네트워크 미사용). A2 Step 1 착수(2026-08-29)
+    시점에는 공통 이벤트 스키마만 검증한다 — 이 파일의 나머지 함수(지표 계산,
+    시세 조회 등)는 각자를 쓰는 다른 파일의 self-test/실행으로 이미 간접
+    검증되고 있고, 여기 새로 추가할 이유가 없다."""
+    print("=== analyze_lib.py 자체 검증 (공통 이벤트 스키마, 네트워크 미사용) ===\n")
+
+    sample_asset = {"symbol": "005930", "name": "삼성전자", "market_country": "KR", "currency": "KRW"}
+
+    # 1) 정상 이벤트 - 산술 기반(거래량 급증), 관측치 있음
+    ev = build_common_event(
+        timestamp="2026-08-29T07:13:48+00:00",
+        asset=sample_asset,
+        source="news_event_cards.anomaly",
+        event_type="거래량_급증",
+        reliability=1.0,
+        observed_value=1234567.0,
+        baseline=500000.0,
+        change=2.47,
+    )
+    print(f"[1] 정상 이벤트(산술) 생성 성공: {sorted(ev)}")
+    assert set(ev) == set(COMMON_EVENT_SCHEMA), "9개 필드 집합이 스키마와 다름"
+    assert validate_common_event(ev) == [], f"정상 이벤트인데 위반 발생: {validate_common_event(ev)}"
+
+    # 2) 정상 이벤트 - 뉴스처럼 수치가 없는 경우(observed_value/baseline/change 전부 None 허용).
+    #    event_type 자체의 의미론적 적절성은 이 테스트의 관심사가 아니다 - 스키마는
+    #    "이 event_type이면 수치가 꼭 있어야 한다"는 제약을 강제하지 않는다(§1-1
+    #    "조건부 필수"는 생성기 쪽 책임이지 스키마 검증기가 event_type별로 분기하는
+    #    규칙이 아니다).
+    ev_news = build_common_event(
+        timestamp="2026-08-29T07:13:48+00:00",
+        asset=sample_asset,
+        source="news_event_cards.ai_summary",
+        event_type="상관관계_변화",
+        reliability=0.8,
+    )
+    print(f"[2] 수치 없는 이벤트(뉴스형) 생성 성공: observed_value={ev_news['observed_value']}")
+    assert ev_news["observed_value"] is None and ev_news["baseline"] is None and ev_news["change"] is None
+
+    # 3) 필수 필드 누락 -> ValueError (asset 누락)
+    try:
+        build_common_event(timestamp="2026-08-29T07:13:48+00:00", asset=None,
+                            source="x", event_type="거래량_급증", reliability=1.0)
+        raised = False
+    except ValueError:
+        raised = True
+    print(f"[3] asset 누락 -> ValueError 발생={raised}")
+    assert raised, "필수 필드(asset) 누락인데 ValueError가 안 남"
+
+    # 4) event_type이 허용 밖 값이면 ValueError (v3.2 금지 예측 필드 유사 방식 - 사전 등록되지 않은 값 거부)
+    try:
+        build_common_event(timestamp="2026-08-29T07:13:48+00:00", asset=sample_asset,
+                            source="x", event_type="호재판단", reliability=1.0)
+        raised = False
+    except ValueError:
+        raised = True
+    print(f"[4] 허용 밖 event_type -> ValueError 발생={raised}")
+    assert raised, "허용 밖 event_type인데 ValueError가 안 남"
+
+    # 5) reliability 범위 밖(0~1) -> ValueError
+    try:
+        build_common_event(timestamp="2026-08-29T07:13:48+00:00", asset=sample_asset,
+                            source="x", event_type="거래량_급증", reliability=1.5)
+        raised = False
+    except ValueError:
+        raised = True
+    print(f"[5] reliability=1.5(범위 밖) -> ValueError 발생={raised}")
+    assert raised, "reliability 범위 위반인데 ValueError가 안 남"
+
+    # 6) timestamp가 오프셋 없는 naive 문자열이면 위반 - rule_trigger_report.py가
+    #    실제로 겪었던 문제(KST naive)가 스키마 검증에서 조용히 통과하면 안 된다.
+    naive_errors = validate_common_event({**ev, "timestamp": "2026-08-29 16:13"})
+    print(f"[6] naive timestamp -> 위반 {naive_errors}")
+    assert any("timestamp" in e for e in naive_errors), "오프셋 없는 timestamp를 못 잡음"
+
+    # 7) related_assets: relation이 허용 enum 밖이면 위반
+    bad_related = {**ev, "related_assets": [{"symbol": "000660", "relation": "임의값"}]}
+    rel_errors = validate_common_event(bad_related)
+    print(f"[7] related_assets.relation 허용 밖 값 -> 위반 {rel_errors}")
+    assert any("relation" in e for e in rel_errors), "허용 밖 relation 값을 못 잡음"
+
+    # 8) related_assets: 정상 relation 값이면 위반 없음
+    good_related = {**ev, "related_assets": [{"symbol": "000660", "name": "SK하이닉스",
+                                              "relation": "correlation_pair"}]}
+    print(f"[8] 정상 related_assets -> 위반 {validate_common_event(good_related)}")
+    assert validate_common_event(good_related) == []
+
+    # 9) EVENT_TYPE_ENUM = ACTIVE 4종 + RESERVED 2종, 서로 겹치지 않음(§2-3)
+    print(f"[9] ACTIVE={EVENT_TYPE_ACTIVE}, RESERVED={EVENT_TYPE_RESERVED}")
+    assert len(EVENT_TYPE_ACTIVE) == 4 and len(EVENT_TYPE_RESERVED) == 2
+    assert set(EVENT_TYPE_ACTIVE).isdisjoint(EVENT_TYPE_RESERVED)
+    assert EVENT_TYPE_ENUM == EVENT_TYPE_ACTIVE + EVENT_TYPE_RESERVED
+
+    # 10) COMMON_EVENT_SOURCES가 §1-2 매핑표의 5개 생성기를 전부 커버하는지
+    covered_modules = {src.split(".")[0] for src in COMMON_EVENT_SOURCES}
+    expected_modules = {"news_event_cards", "market_indicators", "portfolio_report",
+                         "post_trade_review", "rule_trigger_report"}
+    print(f"[10] source 레지스트리가 커버하는 모듈: {sorted(covered_modules)}")
+    assert covered_modules == expected_modules, f"5개 생성기 매핑 누락: {expected_modules - covered_modules}"
+
+    # 11) asset에 필수 키가 빠지면 위반(예: currency 없음)
+    incomplete_asset = {**ev, "asset": {"symbol": "005930", "name": "삼성전자", "market_country": "KR"}}
+    asset_errors = validate_common_event(incomplete_asset)
+    print(f"[11] currency 없는 asset -> 위반 {asset_errors}")
+    assert any("asset" in e for e in asset_errors), "asset 필수 키 누락을 못 잡음"
+
+    print("\n모든 자체 검증 통과.")
+
+
+def main():
+    p = argparse.ArgumentParser(description="analyze_lib 공유 로직 자체 검증")
+    p.add_argument("--self-test", action="store_true")
+    a = p.parse_args()
+    if a.self_test:
+        run_self_test()
+
+
+if __name__ == "__main__":
+    main()
