@@ -49,6 +49,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **보존 원칙**: 기각된 신호 로직(`entry_score`, `scan_crypto`/`scan_stocks`, `ask_claude_decision`의 예측 경로, `backtest.py`, 뉴스 방향 판단 트랙)은 **삭제하지 않는다.** 실행 경로만 끊고 "기각된 연구 결과, 활성 기능 제외" 표시를 달아 남긴다 — 나중에 왜 기각됐는지 재구성할 수 있어야 하고, 재개 시 게이트를 다시 돌릴 대상이기도 하다.
 
+### Alpha Lab 격리 (v4.0 §15, 2026-08-29)
+
+§2.1 게이트를 통과하지 못한 신호/실험 코드를 물리적으로 옮기지 않고 **텍스트/주석 레벨로만** 격리 표시하는 방식("옵션 B")을 적용했다. 파일을 별도 디렉터리로 옮기는 물리적 격리(다른 안, 여기서는 "옵션 A"라 부를 수 있는 대안)는 하지 않았다 — import 경로가 전부 바뀌어 diff가 커지고 실수로 뭔가를 깨뜨릴 위험이 커지는 데 비해, 지금 필요한 건 "이 코드가 Core와 무관하다"는 신호를 읽는 사람에게 주는 것뿐이라 텍스트 태그로 충분하다고 판단했다.
+
+**대상 6개 파일**, 각 파일 docstring 상단에 `[v3.2 활성 기능]`과 같은 기존 브라켓 태그 컨벤션을 따라 `[Alpha Lab — 격리됨, v4.0 §15]`를 붙이고, docstring 말미에 "Core와 연결 없음. 재개 절차(v4.0 §15) 완료 전 통합 금지" 문구를 추가했다:
+
+- `backtest.py` — Phase 1 백테스트 엔진
+- `indicator_significance_test.py` — 보조지표 실질 우위 검증
+- `news_event_backtest.py` — Phase 2 과거 뉴스 백테스트 트랙
+- `news_event_prompt_experiment.py` — Phase 2 프롬프트 A/B 실험
+- `news_event_calibration_analysis.py` — 뉴스 이벤트 캘리브레이션 분석
+- `news_event_experiment.py` — Phase 2 뉴스 이벤트 추출 실험 스크립트(실시간 트랙)
+
+**남아있는 얕은 의존 1건 (제거하지 않고 사실만 기록)**: `news_event_cards.py`(Core, v3.2 활성 기능)가 `news_event_experiment.py`(Alpha Lab)의 `JUDGE_MODEL` 상수를 import한다 — 격리 대상 파일에서 Core로 나가는 의존이 아니라, **Core에서 Alpha Lab으로 들어오는 역방향 의존**이다. `news_event_experiment.py` 자체의 docstring에도 같은 사실을 남겨뒀다. 이 의존을 끊는 것(예: `JUDGE_MODEL`을 Core 쪽 상수로 옮기거나 별도 정의)은 이번 작업 범위가 아니다 — 인지만 하고 재개 절차 논의 시 같이 다룰 것.
+
+`index.html`의 Alpha Lab 산출물 3개 fetch 지점(`indicator_significance_report.json`, `backtest_report.json`, `news_event_calibration_log.json`)에도 각각 "Alpha Lab 데이터 — 참고용, Core 판단에 사용 안 함" 주석을 달았다 — 대시보드가 이 파일들을 계속 읽어 보여주는 것 자체는 유지하되(참고 자료로서의 가치는 있음), Core의 의사결정에 쓰이는 데이터가 아니라는 점을 코드 레벨에서 명시했다.
+
 ---
 
 ## 보안: git history 비밀값 노출 대응 (2026-08-28)

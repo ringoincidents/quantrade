@@ -1,4 +1,4 @@
-"""보조지표 실질 우위 검증 (방향성 세션 지시, 2026-08-08).
+"""[Alpha Lab — 격리됨, v4.0 §15] 보조지표 실질 우위 검증 (방향성 세션 지시, 2026-08-08).
 
 목적: "거래량 동반 상승/하락", "추세선 이탈" 등 차트보조지표 기반 신호 7개가
 118티커 유니버스(backtest.py와 동일 — 크립토 80 + 미국주식 5 + KRX 33)에서
@@ -59,6 +59,10 @@ Upbit/Yahoo/stooq/Naver 네 소스 모두 이 환경의 egress 정책에서 403�
 과정은 스크래치패드에서 수행했고 이 파일에는 최종 수정된 코드만 남아있다 —
 과정 자체는 CLAUDE.md의 이번 작업 기록(indicator_significance_test 관련
 커밋 메시지)에 남겨둔다.
+
+[Alpha Lab 격리] Core(v3.2 활성 기능 — analyze.py/analyze_lib.py/news_event_cards.py 등)와
+연결 없음. 재개 절차(v4.0 §15) 완료 전 통합 금지. 물리적 파일 이동 없이 이 태그로만
+격리를 표시한다(옵션 B — 상세는 CLAUDE.md "Alpha Lab 격리" 절 참고).
 """
 import argparse
 import math

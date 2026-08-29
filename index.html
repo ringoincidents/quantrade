@@ -845,6 +845,7 @@ function renderLearningRow(raw) {
 async function loadIndicatorLearning(bust) {
   const el = document.getElementById('indicatorlearning-section');
   try {
+    // Alpha Lab 데이터 — 참고용, Core 판단에 사용 안 함 (v4.0 §15 재개 절차 전까지 격리)
     const d = await (await fetch('indicator_significance_report.json' + bust)).json();
     const rows = (d.results || []).map(renderLearningRow).join('');
     const anyPassed = (d.results || []).some(r => r.verdict === '채택');
@@ -1060,6 +1061,7 @@ async function loadRetiredPending(bust) {
 async function loadGate(bust) {
   const el = document.getElementById('gate-section');
   try {
+    // Alpha Lab 데이터 — 참고용, Core 판단에 사용 안 함 (v4.0 §15 재개 절차 전까지 격리)
     const bt = await (await fetch('backtest_report.json' + bust)).json();
     const gate = bt.gate || {};
     const passed = !!gate.gate_passed;
@@ -1097,6 +1099,7 @@ async function loadGate(bust) {
 async function loadPhase2(bust) {
   const el = document.getElementById('phase2-section');
   try {
+    // Alpha Lab 데이터 — 참고용, Core 판단에 사용 안 함 (v4.0 §15 재개 절차 전까지 격리)
     const log = await (await fetch('news_event_calibration_log.json' + bust)).json();
     const records = log.records || [];
     const total = records.length;
