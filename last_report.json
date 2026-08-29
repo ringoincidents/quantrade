@@ -1,60 +1,11 @@
 {
-  "date": "2026-08-28",
-  "generated_at": "2026-08-28T21:18:51.228281+00:00",
+  "date": "2026-08-29",
+  "generated_at": "2026-08-29T15:28:59.626881+00:00",
   "schema_version": "v3.2",
   "prediction_enabled": false,
   "guardrail_violations": [],
   "market_summary": "",
-  "positions": [
-    {
-      "market": "KRW-USDE",
-      "asset_class": "crypto",
-      "strategy_type": "스윙",
-      "amount_krw": 33333.333333333336,
-      "current_return": -3.2078103207810322,
-      "conviction": false
-    },
-    {
-      "market": "KRW-PENGU",
-      "asset_class": "crypto",
-      "strategy_type": "스윙",
-      "amount_krw": 4354,
-      "current_return": 52.35792019347038,
-      "conviction": false
-    },
-    {
-      "market": "KRW-WIF",
-      "asset_class": "crypto",
-      "strategy_type": "스윙",
-      "amount_krw": 3557,
-      "current_return": 40.099009900990104,
-      "conviction": false
-    },
-    {
-      "market": "KRW-LAYER",
-      "asset_class": "crypto",
-      "strategy_type": "스윙",
-      "amount_krw": 5775,
-      "current_return": 10.02252252252253,
-      "conviction": false
-    },
-    {
-      "market": "KRW-ANKR",
-      "asset_class": "crypto",
-      "strategy_type": "스윙",
-      "amount_krw": 3272,
-      "current_return": 13.552361396303905,
-      "conviction": false
-    },
-    {
-      "market": "KRW-USD1",
-      "asset_class": "crypto",
-      "strategy_type": "스윙",
-      "amount_krw": 879,
-      "current_return": -3.0662020905923346,
-      "conviction": false
-    }
-  ],
+  "positions": [],
   "pending": [
     {
       "id": "REAL_310200_2026-08-02",
