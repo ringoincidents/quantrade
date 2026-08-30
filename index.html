@@ -307,7 +307,7 @@
 <div class="topbar">
   <div>
     <h1>QuanTrade 대시보드</h1>
-    <p class="subtitle">v3.2: 매매 예측 비활성 — 리스크 가드레일·뉴스 사건 설명·Research(연구 기록)</p>
+    <p class="subtitle">Personal Investment Intelligence</p>
   </div>
   <button class="research-link" onclick="pushView('research')">Research →</button>
 </div>
@@ -361,7 +361,7 @@
 
   <div class="today-card">
     <div class="today-card-head">
-      <h3>AI 브리핑</h3>
+      <h3>AI 브리핑 <span class="badge-real">실데이터</span></h3>
     </div>
     <!-- [2026-08-30 A3 코드 구현] ai_briefing.json을 loadAiBriefing()이 채운다.
          "오늘의 사건" 카드(loadTodayEvents(), 위)와 완전히 분리된 별도 로더 —
@@ -380,8 +380,8 @@
     <div id="today-activity-list"></div>
   </div>
 
-  <p class="muted rm-note">※ 이 화면은 A1 단계에서 레이아웃/필드만 확정한 상태입니다.
-    실데이터 합성(4개 생성기 출력 연결)은 A2 완료 후 진행됩니다.</p>
+  <p class="muted rm-note">※ "오늘의 사건"·"AI 브리핑"은 실데이터 연결이 완료됐고,
+    규칙/리스크·시장 상태·최근 활동 기록 3개 카드는 아직 목업입니다(개별 연결 예정).</p>
 </section>
 
 <!-- ===== MY PORTFOLIO ===== -->
@@ -707,13 +707,13 @@ function setRelevance(btn, value) {
 //    portfolio_report) 출력으로 교체한다.
 // ═══════════════════════════════════════════════════════════════
 const TODAY_MOCK_RULES = [
-  { id: 'mock-rule-1', text: '(목업) 집중도 규칙 해당 1건 — 예시 종목 비중 32.1%' },
+  { id: 'mock-rule-1', text: '집중도 규칙 해당 1건 — 예시 종목 비중 32.1%' },
 ];
 const TODAY_MOCK_MARKET = [
-  { id: 'mock-market-1', text: '(목업) 예시 종목 변동성 20일 백분위 92.0' },
+  { id: 'mock-market-1', text: '예시 종목 변동성 20일 백분위 92.0' },
 ];
 const TODAY_MOCK_ACTIVITY = [
-  { id: 'mock-activity-1', text: '(목업) 최신 사후점검 리포트 발췌 — 노출 변화 없음' },
+  { id: 'mock-activity-1', text: '최신 사후점검 리포트 발췌 — 노출 변화 없음' },
 ];
 // TODAY_MOCK_EVENTS는 2026-08-30 A2→A1 연결로 제거됨 — "오늘의 사건" 카드는
 // loadTodayEvents()가 news_event_cards.json의 change_events로 채운다.
@@ -730,7 +730,7 @@ function renderTodayMock() {
   document.getElementById('today-market-list').innerHTML = renderTodayMockList(TODAY_MOCK_MARKET);
   document.getElementById('today-activity-list').innerHTML = renderTodayMockList(TODAY_MOCK_ACTIVITY);
   document.getElementById('today-basis').textContent =
-    '오늘 ' + new Date().toISOString().slice(0, 10) + ' — "오늘의 사건"은 A2 파이프라인 실데이터, 나머지 3개 카드는 여전히 목업입니다(개별 연결 예정)';
+    '오늘 ' + new Date().toISOString().slice(0, 10) + ' — "오늘의 사건"·"AI 브리핑"은 실데이터, 규칙/리스크·시장 상태·최근 활동 기록 3개 카드는 여전히 목업입니다(개별 연결 예정)';
 }
 
 // 시스템 상태 스트립은 A2 합성 대상이 아닌 단순 passthrough라 A1에서
@@ -742,10 +742,10 @@ async function loadTodayStatusStrip(bust) {
     const stopped = resp.ok ? !!(await resp.json()).stopped : false;
     el.innerHTML = `
       <span class="status-chip">킬스위치: ${stopped ? '정지됨' : '해제됨'}</span>
-      <span class="status-chip">예측경로: 비활성(v3.2)</span>`;
+      <span class="status-chip">예측경로: 비활성</span>`;
   } catch (e) {
     el.innerHTML = `<span class="status-chip">킬스위치: 상태 없음(기본값)</span>
-      <span class="status-chip">예측경로: 비활성(v3.2)</span>`;
+      <span class="status-chip">예측경로: 비활성</span>`;
   }
 }
 
