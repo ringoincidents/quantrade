@@ -34,12 +34,33 @@ jobs:
           python-version: '3.11'
       - run: pip install requests
       - name: Self-test (network-free)
-        run: python news_event_cards.py --self-test
+        run: |
+          python news_event_cards.py --self-test
+          python ai_briefing.py --self-test
       - name: Generate explanation cards
         run: |
           ARGS=""
           if [ -n "${{ inputs.max_cards }}" ]; then ARGS="--max-cards ${{ inputs.max_cards }}"; fi
           python news_event_cards.py $ARGS
+      # [2026-08-30 A3 Step 3/코드 구현] change_events가 있을 때만 AI Briefing을
+      # 생성한다(PM 지시 - "오늘 특이사항 없음"까지 AI에게 맡길 필요 없음,
+      # 이건 규칙 기반으로 충분함). ai_briefing.py 내부에도 같은 체크가 있지만
+      # (workflow_dispatch로 수동 실행되거나 로컬에서 돌 때를 위한 방어적 목적),
+      # 여기 워크플로 레벨 가드는 change_events가 없는 날 스크립트 자체를 아예
+      # 안 돌리기 위한 효율 목적 — 목적이 다른 이중 체크다(A3 설계 §3-4).
+      - name: Check for change_events
+        id: check_events
+        run: |
+          HAS_EVENTS=$(python -c "
+          import json
+          d = json.load(open('news_event_cards.json', encoding='utf-8'))
+          print('yes' if d.get('change_events') else 'no')
+          ")
+          echo "has_events=$HAS_EVENTS" >> "$GITHUB_OUTPUT"
+          echo "change_events 존재 여부: $HAS_EVENTS"
+      - name: Generate AI briefing (only if change_events present)
+        if: steps.check_events.outputs.has_events == 'yes'
+        run: python ai_briefing.py
       - name: Verify no predictive fields leaked into cards
         run: |
           python - <<'PY'
@@ -63,6 +84,10 @@ jobs:
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add news_event_cards.json
+          # ai_briefing.json은 change_events가 있는 날만 생성된다 - 없는
+          # 경로에 git add하면(bash -e) 스텝 전체가 실패한다(CLAUDE.md에
+          # 기록된 autoexec_state.json 사례와 같은 함정, 그대로 방어).
+          [ -f ai_briefing.json ] && git add ai_briefing.json
           git diff --quiet && git diff --staged --quiet && echo "변경 없음" && exit 0
           git commit -m "News event explanation cards update"
           for attempt in 1 2 3 4 5; do

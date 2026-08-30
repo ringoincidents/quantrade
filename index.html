@@ -106,7 +106,7 @@
 
   /* 태그/배지: 목업·초안·비활성·대기·실계좌·이벤트유형 등 종류와 무관하게
      전부 동일한 중립 필 스타일 하나로 통일 — 텍스트 내용으로만 구분한다. */
-  .badge, .badge-retired, .badge-mock, .badge-phasec, .badge-phase2, .badge-real, .newsinfo-type {
+  .badge, .badge-retired, .badge-mock, .badge-phasec, .badge-phase2, .badge-real, .badge-hypothesis, .newsinfo-type {
     display: inline-block; font-size: 11px; font-weight: 500; padding: 3px 9px;
     border-radius: var(--radius-pill); margin-left: 6px; vertical-align: middle;
     background: var(--glass-2); color: var(--text-2); border: 1px solid var(--glass-border-soft);
@@ -357,6 +357,19 @@
          스키마 + Prioritization priority_score)를 loadTodayEvents()가 채운다.
          나머지 3개 카드(규칙/시장/활동)는 여전히 목업 — 이번 작업 범위 밖. -->
     <div id="today-events-list"></div>
+  </div>
+
+  <div class="today-card">
+    <div class="today-card-head">
+      <h3>AI 브리핑</h3>
+    </div>
+    <!-- [2026-08-30 A3 코드 구현] ai_briefing.json을 loadAiBriefing()이 채운다.
+         "오늘의 사건" 카드(loadTodayEvents(), 위)와 완전히 분리된 별도 로더 —
+         AI Briefing이 실패해도(status: api_failed/audit_failed) 위 "오늘의
+         사건" 카드는 change_events 원자료를 그대로 보여준다(A3 설계 §3-5,
+         "AI가 단일 장애점이 되지 않는다"). 이 카드가 로딩에 실패해도
+         TODAY의 다른 카드에 영향을 주지 않는다(index.html 기존 원칙). -->
+    <div id="today-ai-briefing"></div>
   </div>
 
   <div class="today-card">
@@ -1390,6 +1403,98 @@ async function loadTodayEvents(bust) {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// 5b. TODAY "AI 브리핑" — [2026-08-30 A3 코드 구현] ai_briefing.json을
+//     읽어 렌더링한다. loadTodayEvents()(위)와 **완전히 분리된 별도
+//     로더** — ai_briefing.json이 없거나, 상태가 실패든, 이 함수가 뭘
+//     하든 loadTodayEvents()는 전혀 영향받지 않는다(A3 설계 §3-5).
+//     이 함수 자체도 try/catch로 감싸 실패가 loadData()의 나머지
+//     await 체인을 끊지 않게 한다(기존 모든 로더와 같은 관례).
+// ═══════════════════════════════════════════════════════════════
+
+const AI_BRIEFING_FAIL_STATUSES = new Set(['api_failed', 'audit_failed']);
+
+function renderKeyChangeItem(kc) {
+  return `<div class="today-item">
+      <div class="today-item-text">
+        <b>${esc(kc.name || kc.symbol || '')}</b> ${esc(kc.observation || '')}
+        ${kc.context ? `<div class="muted" style="margin-top:4px;">${esc(kc.context)}</div>` : ''}
+      </div>
+    </div>`;
+}
+
+function renderPortfolioNoteItem(n) {
+  return `<div class="today-item">
+      <div class="today-item-text">
+        <b>${esc(n.name || n.symbol || '')}</b> ${esc(n.observation || '')}
+        ${n.as_of_note ? `<div class="muted" style="margin-top:4px;">${esc(n.as_of_note)}</div>` : ''}
+      </div>
+    </div>`;
+}
+
+function renderExplanationItem(x) {
+  // is_hypothesis는 ai_briefing.py가 항상 true로 강제한 값이다(§2-2) -
+  // 그래도 방어적으로 값을 직접 확인하고 표시한다(모델이 아니라 코드가
+  // 보장한 값이지만, 렌더러 쪽에서도 가정만 하지 않는다).
+  const badge = x.is_hypothesis ? '<span class="badge-hypothesis">가설</span>' : '';
+  return `<div class="today-item">
+      <div class="today-item-text">
+        <b>${esc(x.symbol || '')}</b> ${badge} ${esc(x.hypothesis_text || '')}
+      </div>
+    </div>`;
+}
+
+function renderAiBriefing(data) {
+  const el = document.getElementById('today-ai-briefing');
+  const status = data.status;
+
+  if (status === 'no_events') {
+    el.innerHTML = '<p class="muted">오늘은 브리핑 대상 사건이 없었습니다.</p>';
+    return;
+  }
+  if (AI_BRIEFING_FAIL_STATUSES.has(status)) {
+    // PM 지시 문구 그대로: "브리핑 생성 실패"
+    el.innerHTML = `<p class="muted">브리핑 생성 실패`
+      + `${status === 'api_failed' ? ' (AI 응답을 받지 못했습니다)' : ' (생성된 내용이 안전 검사를 통과하지 못했습니다)'}`
+      + `</p>`;
+    return;
+  }
+  if (status !== 'ok') {
+    el.innerHTML = '<p class="muted">브리핑이 아직 생성되지 않았습니다.</p>';
+    return;
+  }
+
+  const keyChanges = (data.key_changes || []).map(renderKeyChangeItem).join('');
+  const notes = (data.portfolio_notes || []).map(renderPortfolioNoteItem).join('');
+  const explanations = (data.possible_explanations || []).map(renderExplanationItem).join('');
+  const confirmItems = (data.confirm_items || []).map(c => `<li>${esc(c)}</li>`).join('');
+
+  el.innerHTML = `
+    ${data.summary ? `<p>${esc(data.summary)}</p>` : ''}
+    ${keyChanges}
+    ${notes}
+    ${explanations}
+    ${confirmItems ? `<p class="muted" style="margin-bottom:4px;">확인할 것</p><ul>${confirmItems}</ul>` : ''}
+    ${data.disclaimer ? `<p class="muted sync-note">${esc(data.disclaimer)}</p>` : ''}
+    <p class="muted sync-note">기준: ${fmtBasis(data.generated_at)} (1일 1회, change_events가 있는 날만 갱신)</p>
+  `;
+}
+
+async function loadAiBriefing(bust) {
+  const el = document.getElementById('today-ai-briefing');
+  try {
+    const resp = await fetch('ai_briefing.json' + bust);
+    if (!resp.ok) {
+      el.innerHTML = '<p class="muted">브리핑이 아직 생성되지 않았습니다.</p>';
+      return;
+    }
+    const data = await resp.json();
+    renderAiBriefing(data);
+  } catch (e) {
+    el.innerHTML = '<p class="muted">브리핑을 불러오는 중 오류가 발생했습니다.</p>';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
 // 6. MARKET — 기존 market_indicators state_board 재사용(indicator_board는
 //    STOCK DETAIL로 이동, §7 참고). 행 탭 → STOCK DETAIL.
 // ═══════════════════════════════════════════════════════════════
@@ -1721,6 +1826,7 @@ async function loadData() {
   await loadMarketIndicatorsData(bust);
   await loadNewsCards(bust);
   await loadTodayEvents(bust);
+  await loadAiBriefing(bust);
   await loadWatchlist(bust);
   await loadIndicatorLearning(bust);
   await loadGate(bust);
