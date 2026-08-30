@@ -66,6 +66,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 `index.html`의 Alpha Lab 산출물 3개 fetch 지점(`indicator_significance_report.json`, `backtest_report.json`, `news_event_calibration_log.json`)에도 각각 "Alpha Lab 데이터 — 참고용, Core 판단에 사용 안 함" 주석을 달았다 — 대시보드가 이 파일들을 계속 읽어 보여주는 것 자체는 유지하되(참고 자료로서의 가치는 있음), Core의 의사결정에 쓰이는 데이터가 아니라는 점을 코드 레벨에서 명시했다.
 
+**2026-08-30 A2→A1 연결, JS/Python 문장 어투 비동기화 (제거하지 않고 사실만 기록)**: `formatChangeEventFact()`(`index.html`)는 `detect_anomalies()`(Python, `news_event_cards.py`)의 문장 어투를 JS에서 별도 재구현한 것 — 두 곳이 동기화돼 있지 않음. Python 쪽 facts 문구/이벤트 타입 변경 시 JS도 함께 확인 필요.
+
 ---
 
 ## 보안: git history 비밀값 노출 대응 (2026-08-28)
