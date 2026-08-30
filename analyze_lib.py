@@ -443,6 +443,60 @@ def attach_priorities(report, portfolio_relevance_by_symbol, prior_events=None):
     return new_report
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# A2 Step 4: Portfolio Relevance — "재가중" (2026-08-30, A2_Intelligence_Layer_
+# Design.md §4-2 PM 확정 그대로).
+# ─────────────────────────────────────────────────────────────────────────────
+
+# 관심종목 전용 고정값 — 미확정, watchlist 데이터 축적 후 조정 대상(§4-2, PM
+# 확정 "값 자체를 정하지 않고 명명된 상수로 분리"). 현재 watchlist.json이
+# 비어 있어(symbols: []) 이 값이 실제로 쓰이는 사례가 없고, 그래서 검증할
+# 데이터도 없다 — 검증 근거가 생기기 전까지 임의로 값을 바꾸지 않는다.
+WATCHLIST_RELEVANCE_WEIGHT = 0.3  # 미확정, 데이터 축적 후 조정
+
+
+def compute_portfolio_relevance(change_event, real_portfolio, watchlist):
+    """§4-2: change_event 대상 종목이 보유 중인지/관심종목인지에 따라
+    0.0~1.0의 relevance_value를 매긴다.
+
+    **"재가중"이지 "필터링"이 아니다(PM 확정)** — news_event_cards.py의
+    build_universe()가 change_events를 만들기 훨씬 전 단계에서 이미 보유+
+    관심종목으로 스캔 대상을 좁혀놓았으므로, 이 함수에 들어오는 change_event는
+    애초에 이 좁은 집합 밖의 종목을 가리키지 않는다. 그래서 이 함수는 집합에서
+    이벤트를 들어내는 역할이 아니라, 이미 좁은 집합 안에서 보유 비중이 다른
+    종목들 사이의 relevance 값 차이를 매기는 역할만 한다(§4-2 "필터링/재가중"
+    구분 확정 그대로) — 여기서 None/제외를 반환해 이벤트를 걸러내는 경로는
+    의도적으로 만들지 않았다."""
+    symbol = change_event["asset"]["symbol"]
+    held = next((p for p in real_portfolio.get("positions", []) if p.get("symbol") == symbol), None)
+    is_watched = symbol in watchlist.get("symbols", [])
+    weight_pct = None
+    if held:
+        total = real_portfolio.get("cash", 0) + sum(
+            p.get("eval_amount_krw", 0) for p in real_portfolio.get("positions", []))
+        weight_pct = round(held.get("eval_amount_krw", 0) / total * 100, 2) if total > 0 else None
+    return {
+        "is_held": held is not None,
+        "weight_pct": weight_pct,
+        "is_watched": is_watched,
+        "relevance_value": (weight_pct or 0) / 100 if held else (WATCHLIST_RELEVANCE_WEIGHT if is_watched else 0.0),
+    }
+
+
+def build_portfolio_relevance_map(symbols, real_portfolio, watchlist):
+    """attach_priorities()가 요구하는 {symbol: relevance_value} 형태로 여러
+    종목을 한 번에 계산하는 얇은 헬퍼. compute_portfolio_relevance() 자체는
+    §4-2 설계 그대로 change_event 단위 함수로 유지하고(단일 이벤트 계산
+    로직을 다시 쓰지 않음), 여기서는 symbol만 있으면 되므로 asset.symbol만
+    채운 최소 이벤트로 감싸 재사용한다."""
+    relevance_by_symbol = {}
+    for symbol in symbols:
+        stub_event = {"asset": {"symbol": symbol}}
+        relevance_by_symbol[symbol] = compute_portfolio_relevance(
+            stub_event, real_portfolio, watchlist)["relevance_value"]
+    return relevance_by_symbol
+
+
 def calc_ma(prices, window):
     return sum(prices[-window:]) / window
 
@@ -1189,6 +1243,56 @@ def run_self_test():
     actual_path = normalize_path(f"report.change_events[0].priority.priority_score")
     print(f"[23] 등록된 경로={sorted(PRIORITY_ALLOWED_FIELD_PATHS)}, 실제 생성 경로 패턴={actual_path}")
     assert actual_path in PRIORITY_ALLOWED_FIELD_PATHS
+
+    # ── A2 Step 4: Portfolio Relevance("재가중", §4-2) ──────────────────────
+
+    fake_real = {"cash": 4_000_000.0,
+                 "positions": [{"symbol": "005930", "eval_amount_krw": 4_000_000.0},
+                               {"symbol": "000660", "eval_amount_krw": 2_000_000.0}]}
+    fake_watchlist_empty = {"symbols": []}
+    fake_watchlist_with = {"symbols": ["NVDA"]}
+
+    # 24) 보유 종목 - relevance_value가 보유 비중(weight_pct/100)과 같은지
+    ev_held = {"asset": {"symbol": "005930"}}
+    rel_held = compute_portfolio_relevance(ev_held, fake_real, fake_watchlist_empty)
+    print(f"[24] 보유(005930) relevance: {rel_held}")
+    assert rel_held["is_held"] is True and rel_held["is_watched"] is False
+    total = fake_real["cash"] + sum(p["eval_amount_krw"] for p in fake_real["positions"])  # 10,000,000
+    expected_weight = round(4_000_000.0 / total * 100, 2)
+    assert rel_held["weight_pct"] == expected_weight
+    assert rel_held["relevance_value"] == expected_weight / 100
+
+    # 25) 관심종목(비보유) - watchlist에 있으면 WATCHLIST_RELEVANCE_WEIGHT, 없으면 0.0
+    ev_watched = {"asset": {"symbol": "NVDA"}}
+    rel_watched = compute_portfolio_relevance(ev_watched, fake_real, fake_watchlist_with)
+    rel_unrelated = compute_portfolio_relevance(ev_watched, fake_real, fake_watchlist_empty)
+    print(f"[25] 관심종목(watchlist 있음) relevance={rel_watched['relevance_value']}, "
+          f"(watchlist 없음) relevance={rel_unrelated['relevance_value']}")
+    assert rel_watched["is_held"] is False and rel_watched["is_watched"] is True
+    assert rel_watched["relevance_value"] == WATCHLIST_RELEVANCE_WEIGHT
+    assert rel_unrelated["relevance_value"] == 0.0, "보유도 관심종목도 아니면 0.0이어야 함"
+
+    # 26) build_portfolio_relevance_map — 여러 종목을 한 번에, compute_portfolio_relevance와
+    #     같은 값을 내는지
+    rel_map = build_portfolio_relevance_map(["005930", "000660", "NVDA"], fake_real, fake_watchlist_with)
+    print(f"[26] relevance map: {rel_map}")
+    assert rel_map["005930"] == rel_held["relevance_value"]
+    assert rel_map["NVDA"] == WATCHLIST_RELEVANCE_WEIGHT
+    assert rel_map["000660"] == round(2_000_000.0 / total * 100, 2) / 100
+
+    # 27) "필터링이 아니라 재가중" — 보유도 관심종목도 아닌 이벤트가 섞여 들어와도
+    #     attach_priorities()가 이벤트 자체를 들어내지 않고 relevance_value=0.0만
+    #     매기는지(집합에서 빼지 않는다는 §4-2 확정 사항의 코드 레벨 확인)
+    mixed_events = [{**ev_today, "asset": {**base_asset}},
+                     {**ev_today, "asset": {**base_asset, "symbol": "999999"}}]  # 보유/관심 밖 가상 종목
+    mixed_report = {"change_events": mixed_events}
+    mixed_map = build_portfolio_relevance_map(["005930", "999999"], fake_real, fake_watchlist_empty)
+    mixed_result = attach_priorities(mixed_report, mixed_map)
+    print(f"[27] 보유/관심 밖 종목 포함 -> change_events 개수: "
+          f"입력 {len(mixed_events)} / 출력 {len(mixed_result['change_events'])}")
+    assert len(mixed_result["change_events"]) == len(mixed_events), \
+        "Portfolio Relevance 단계가 이벤트를 들어내면 안 됨(필터링 아님, 재가중만)"
+    assert mixed_result["change_events"][1]["priority"]["factors"]["portfolio_relevance"] == 0.0
 
     print("\n모든 자체 검증 통과.")
 

@@ -35,9 +35,9 @@ import requests
 
 from analyze_lib import (
     CLAUDE_API_KEY, FORBIDDEN_FIELDS_BASE, FORBIDDEN_PHRASES_BASE,
-    build_common_event, get_krx_candles, get_news_headlines, get_us_candles,
-    historical_percentile, load_json, rolling_volatility_series, save_json,
-    validate_common_event,
+    attach_priorities, build_common_event, build_portfolio_relevance_map,
+    get_krx_candles, get_news_headlines, get_us_candles, historical_percentile,
+    load_json, rolling_volatility_series, save_json, validate_common_event,
 )
 from news_event_experiment import JUDGE_MODEL
 
@@ -361,6 +361,15 @@ def run(args):
     # 이 파일의 갱신 주기(1일 1회)를 다른 패널과 비교할 수 없다. 시:분까지 담는다
     # (real_portfolio.json의 synced_at과 같은 ISO+UTC 패턴).
     generated_at = datetime.now(timezone.utc).isoformat()
+
+    # 2026-08-30 A2 Step 4: Novelty(Step 3)가 참고할 과거 change_events를
+    # 이 파일을 덮어쓰기 전에 미리 읽어둔다. news_event_cards.json은 append-only
+    # 로그가 아니라 매일 통째로 덮어써지므로(A2_Intelligence_Layer_Design.md
+    # §3-1a 조사에서 재확인한 사실), 별도의 이벤트 로그 파일을 새로 만드는 대신
+    # "덮어쓰기 직전의 이전 실행 결과"를 그 자리에서 prior_events로 재사용한다.
+    prior_report = load_json(CARDS_FILE, None)
+    prior_change_events = prior_report.get("change_events", []) if prior_report else []
+
     cards, stripped_total, change_events = [], [], []
     universe = build_universe()
     print(f"대상 종목(보유+관심) {len(universe)}건: {[u['symbol'] for u in universe]}")
@@ -416,8 +425,26 @@ def run(args):
         # change_events를 만들지 않는다.
         "change_events": change_events,
     }
+
+    # 2026-08-30 A2 Step 4: change_events 각각에 Prioritization(Step 3, 4인자)과
+    # Portfolio Relevance(Step 4, "재가중")를 붙인다. 신규 파일을 만들지 않고
+    # 이 카드 생성 흐름의 끝단에서 attach_priorities() 하나만 호출한다(PM 지시).
+    # real_portfolio.json/watchlist.json은 build_universe()가 이미 한 번
+    # 읽었지만 그 결과를 반환하지 않으므로(스코프 축소용 내부 로딩) 여기서
+    # 다시 읽는다 - market_indicators.py도 REAL_PORTFOLIO_FILE을 독립적으로
+    # 다시 읽는 것과 같은 패턴.
+    real_portfolio = load_json(REAL_PORTFOLIO_FILE, {"cash": 0, "positions": []})
+    watchlist = load_json(WATCHLIST_FILE, {"symbols": []})
+    event_symbols = {(ev.get("asset") or {}).get("symbol") for ev in change_events} - {None}
+    relevance_map = build_portfolio_relevance_map(event_symbols, real_portfolio, watchlist)
+    out = attach_priorities(out, relevance_map, prior_events=prior_change_events)
+    if out.get("_audit_violations"):
+        print(f"⚠️ Prioritization 결과 감사 위반 - 태그만 남기고 저장은 계속함: "
+              f"{out['_audit_violations']}")
+
     save_json(CARDS_FILE, out)
-    print(f"\n카드 {len(cards)}건 생성 → {CARDS_FILE} (change_events {len(change_events)}건)")
+    print(f"\n카드 {len(cards)}건 생성 → {CARDS_FILE} (change_events {len(change_events)}건, "
+          f"portfolio_relevance {len(relevance_map)}종목)")
     if stripped_total:
         print(f"제거된 예측성 필드 누적: {sorted(set(stripped_total))}")
 
@@ -605,6 +632,64 @@ def run_self_test():
     print(f"[9] KR asset={asset_kr}, market_country 없는 비KRX심볼 asset={asset_us_guess}")
     assert asset_kr["currency"] == "KRW"
     assert asset_us_guess["currency"] == "USD"
+
+    # 10) [2026-08-30 A2 Step 4] run() 끝단의 attach_priorities() 연결 — 네트워크/
+    #     파일시스템을 전부 모킹해 change_events가 실제로 .priority를 달고 나오는지,
+    #     이전 실행분(prior_change_events)이 Novelty에 실제로 반영되는지 확인한다.
+    import sys
+    import unittest.mock as mock
+    mod = sys.modules[__name__]
+
+    volume_spike_candles = make_candles(24, start="2026-01-01")
+    volume_spike_candles.append(dict(volume_spike_candles[-1],
+                                      date="2026-01-25", volume=volume_spike_candles[-1]["volume"] * 5))
+    fake_universe = [{"symbol": "005930", "name": "삼성전자", "market_country": "KR"}]
+    fake_real_portfolio = {"cash": 0, "positions": [{"symbol": "005930", "eval_amount_krw": 1_000_000.0}]}
+    fake_watchlist = {"symbols": []}
+    # 어제(2026-01-24) 같은 (종목, event_type) 이벤트가 이미 있었다고 가정 —
+    # Novelty가 1.0이 아니라 감쇠돼야 한다(NOVELTY_LOOKBACK_DAYS=7일이면
+    # 1일 경과 -> round(1/7, 4) = 0.1429).
+    fake_prior_event = build_common_event(
+        timestamp="2026-01-24T00:00:00+00:00", asset=test_asset,
+        source="news_event_cards.anomaly", event_type="거래량_급증",
+        reliability=1.0, observed_value=4000, baseline=1000, change=4.0,
+    )
+    fake_prior_report = {"generated_at": "2026-01-24T00:00:00+00:00",
+                          "schema": "explanation_only_v3.2", "cards": [],
+                          "change_events": [fake_prior_event]}
+
+    def fake_load_json(path, default):
+        if path == CARDS_FILE:
+            return fake_prior_report
+        if path == REAL_PORTFOLIO_FILE:
+            return fake_real_portfolio
+        if path == WATCHLIST_FILE:
+            return fake_watchlist
+        return default
+
+    captured = {}
+    with mock.patch.object(mod, "build_universe", return_value=fake_universe), \
+         mock.patch.object(mod, "fetch_candles_for_anomaly", return_value=volume_spike_candles), \
+         mock.patch.object(mod, "get_news_headlines", return_value=None), \
+         mock.patch.object(mod, "load_json", side_effect=fake_load_json), \
+         mock.patch.object(mod, "save_json", side_effect=lambda path, data: captured.update({"out": data})):
+        run(argparse.Namespace(max_cards=8))
+
+    out = captured["out"]
+    print(f"[10] run() 산출 change_events: {len(out['change_events'])}건")
+    assert len(out["change_events"]) == 1
+    ev = out["change_events"][0]
+    print(f"[10] priority: {ev['priority']}")
+    assert ev["event_type"] == "거래량_급증"
+    # 기대값 0.1429 = round(1일 경과 / NOVELTY_LOOKBACK_DAYS(7일), 4) - analyze_lib의
+    # self-test([17])가 이미 이 계산 자체를 검증하므로, 여기서는 실제 파이프라인이
+    # 그 계산 결과를 그대로 전달하는지만 확인한다(중복 검증이 아니라 배선 확인).
+    assert ev["priority"]["factors"]["novelty"] == 0.1429, \
+        f"전날 같은 (종목,event_type) 이력이 Novelty 감쇠에 반영되지 않음: {ev['priority']['factors']}"
+    assert ev["priority"]["factors"]["portfolio_relevance"] == 1.0, \
+        "보유비중 100%인 종목의 relevance가 1.0이어야 함"
+    assert ev["priority"]["priority_score"] > 0
+    assert "_audit_violations" not in out, f"정상 실행인데 감사 위반: {out.get('_audit_violations')}"
 
     print("\n모든 자체 검증 통과.")
 
