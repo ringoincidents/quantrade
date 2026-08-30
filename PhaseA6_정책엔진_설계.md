@@ -117,3 +117,50 @@
 4. A5(`usage_log.json`) 완료를 기다릴지, 지금은 `post_trade_review_log.json` 패턴으로 먼저 만들지.
 
 이 문서는 설계 초안이다 — 코드 변경은 포함하지 않았다.
+
+---
+
+## Step 3 — 구현 결과 (2026-08-30, 진행 지시 반영)
+
+### 3-1. 노출 강화 (신규 설계 없이 바로 구현)
+
+- **텔레그램**: `portfolio_report.py`의 `format_telegram()`에 `role_gap` 섹션을 추가했다(`asset_class_gap` 섹션 바로 다음). 이전까지는 `build_report()`가 계산은 하면서도 텔레그램 렌더 함수가 읽지 않아 누락돼 있었다 — 이번 변경은 새 계산을 추가한 게 아니라 이미 있던 값을 마저 노출한 것이다. 목표가 있는 역할만 목표/실제/갭을 나열하고, `gap_pct < 0`(실제가 목표를 초과)인 역할은 별도로 "⚠️ 목표 초과" 블록에 다시 짚는다.
+- **대시보드**: `index.html`의 `renderRoleGap()`에 목표 초과 역할을 위한 경고 카드를 추가했다. **`.gate-banner`(초록/빨강 배너)는 쓰지 않았다** — 그 스타일 바로 위 CSS 주석에 "게이트 배너/칩: 통과·미통과라는 실제 판정 결과라 초록/빨강 사용이 타당한 유일한 배너류 — 그 외 배너·카드는 색을 넣지 않는다"고 명시돼 있어서다. 대신 `rule_matches`/`schedule_warnings`에 이미 쓰이고 있는 `.guardrail-card`(위반 카드 전용으로 유일하게 색 악센트가 허용된 클래스)를 그대로 재사용했다.
+
+**허용오차 관련 사실 확인**: 진행 지시는 "임계값(±5%p 같은 허용범위)은 기존 파일에 이미 있는 값을 재사용"하라고 했으나, `target_allocation.json`/`portfolio_role_mapping.json`을 재확인한 결과 그런 허용오차 값은 **어디에도 없다**(전체 저장소를 "이탈"/"편차"/"허용범위"/"threshold"로 재검색해도 역할 배분 관련 값은 없음 — 있는 건 Risk Engine의 `concentration_pct=30.0`뿐이고 이건 개별 종목 집중도 규칙이라 역할 배분 이탈과는 다른 규칙이다). 새 숫자를 만들지 말라는 지시를 따르기 위해, 허용오차를 발명하는 대신 **목표 초과 여부(0%p 기준) 자체**를 경고 조건으로 썼다 — `compute_role_gap()`이 이미 계산해 두는 `gap_pct`의 부호만 본다. 오차 허용범위가 필요하다고 판단되면 그건 새 숫자를 도입하는 결정이므로 별도 확인이 필요하다.
+
+### 3-2. 예외 승인 기록 (신규)
+
+- **`policy_exception.py`** (신규 파일) — `post_trade_review_log.json`과 동일한 불변 저널(append-only) 패턴. `build_record(role_row, reason, approved_by)`가 `compute_role_gap()`의 행을 그대로 옮겨 레코드를 만들고(새로 계산하지 않음), `append_and_save()`가 `audit()`(금지 필드/문구 검사)를 통과 못하면 저장하지 않는다.
+  - 스키마(`policy_exception_log_v1`): `id` / `schema` / `created_at` / `violated_rule` / `role` / `label` / `target_vs_actual`(`target_pct`/`actual_pct`/`gap_pct`) / `reason` / `approved_at` / `approved_by`. 진행 지시의 `event_id`는 `id`로, `target_vs_actual`은 지시 그대로 이름 붙였다.
+  - **`post_trade_review.py`의 `_append_and_save()`와 다른 점 하나**: 감사 위반 시 `SystemExit`을 던지지 않고 `AuditViolation` 예외를 던진다. `post_trade_review.py`는 스스로가 최상위 진입점(cron 단위 실행)이라 죽어도 안전하지만, 이 모듈은 `check_updates.py`의 텔레그램 폴링 루프 안에서 메시지 하나당 호출된다 — `run()`의 `telegram_offset.json` 저장이 루프 밖 맨 끝에 있어서 `SystemExit`을 쓰면 offset이 갱신되지 못해 같은 메시지가 다음 폴링에서 무한 재처리될 수 있다. 이 차이를 `policy_exception.py` 상단 docstring과 `AuditViolation` 클래스에 남겨뒀다.
+- **`check_updates.py`**: `/approve_exception <역할> <사유>` 명령 추가(기존 `/autoexec_report <id>` 등과 같은 `parts[0]`/`parts[1:]` 파싱 그대로 재사용). `handle_approve_exception()`이 하는 일:
+  1. `portfolio_report.json`의 `role_gap`에서 해당 역할을 찾는다(없으면 사용 가능한 역할 목록과 함께 안내).
+  2. **그 역할이 실제로 목표를 초과한 상태(`gap_pct < 0`)가 아니면 거부한다** — "예외 승인"은 실제로 존재하는 이탈에 대한 것이어야지, 임의 역할에 대해 만들 수 있는 게 아니라고 판단했다.
+  3. 사유가 없으면 거부(빈 사유를 기록하지 않는다).
+  4. 텔레그램 발신자(`message["from"]`)에서 `username`/`first_name`+`id`로 `approved_by` 문자열을 만든다 — Telegram API가 주는 정보를 그대로 옮길 뿐, 발신자를 제한하는 인가 로직은 추가하지 않았다(기존 `/autoexec_approve` 등 다른 명령도 발신자 제한이 없어 이 파일의 기존 보안 모델과 동일하게 맞췄다 — 발신자 제한이 필요하다면 그건 이 명령만이 아니라 봇 전체에 걸친 별도 결정이다).
+  5. `policy_exception.append_and_save()` 호출, `AuditViolation`이면 사유를 텔레그램으로 알리고 저장하지 않는다.
+- **새 상태 파일**: `policy_exception_log.json` (repo root, `check_updates.py`가 씀 — `poll.yml`의 "Commit state" 스텝에 추가해야 실제로 영속된다. **이번 구현에 워크플로 파일 변경은 포함하지 않았다** — `poll.yml` 수정은 별도 확인 후 진행 여부를 판단해야 한다, 2026-08-08 `autoexec_state.json` 미영속화 버그와 같은 유형의 실수를 피하기 위해 명시적으로 남긴다).
+
+### 3-3. 검증
+
+- `python3 portfolio_report.py --self-test` — 기존 27개 항목 + 신규 28번(텔레그램 role_gap 섹션 노출, 목표 초과 경고 줄 렌더링, role_gap 없을 때 "계산 불가" 처리, 매매 지시 문구 부재) 전부 통과.
+- `python3 policy_exception.py` 자체 self-test 3개 항목(정상 레코드/금지 문구 거부·미저장/append-only 누적) 통과.
+- `check_updates.handle_approve_exception()`을 `send_telegram`/`load_json` mock으로 4개 시나리오(역할 오타, 목표 초과 아닌 역할, 사유 누락, 정상 승인) 통합 테스트 — 전부 기대한 텔레그램 응답과 저장 결과 확인, 테스트 산출물(`policy_exception_log.json`)은 커밋 전 삭제함.
+- 대시보드는 Playwright(사전 설치된 Chromium)로 실제 렌더링해 스크린샷 확인 — "포트폴리오 역할 계층" 섹션에 "⚠️ 역할 배분 초과" 카드("스윙-전술 비중이 목표보다 27.9%p 높습니다")가 기존 "집중도" 위반 카드와 동일한 스타일로 표시됨을 확인했다. 테스트에 쓴 `portfolio_report.json`은 스크린샷 후 원본으로 복구했다(git status 깨끗함 확인).
+- 텔레그램 렌더 샘플(동일 시나리오):
+  ```
+  🧭 포트폴리오 역할 계층 (위험자산 총액 99.3% 기준) — 역할 단위 산술이며 매매 지시가 아닙니다
+     · 코어: 목표 65.0% / 실제 57.1% / 갭 +7.8%p
+     · 위성-장기: 목표 15.0% / 실제 0.0% / 갭 +15.0%p
+     · 스윙-전술: 목표 15.0% / 실제 42.9% / 갭 -27.9%p
+     ⚠️ 목표 초과:
+        - 스윙-전술 비중이 목표보다 27.9%p 높습니다 (목표 15.0% / 실제 42.9%)
+  ```
+
+### 3-4. 이번 구현에서 하지 않은 것 (범위 밖, 명시)
+
+- `poll.yml`에 `policy_exception_log.json` 커밋 스텝 추가 — 워크플로 변경은 하지 않았다.
+- 허용오차(±X%p) 숫자 도입 — 3-1에서 설명한 대로 새 숫자를 만들지 않기로 했다.
+- 발신자 인가(승인 가능한 텔레그램 계정 제한) — 기존 명령들과 같은 수준(제한 없음)으로 맞췄을 뿐 새로 강화하지 않았다.
+- A5(`usage_log.json`) 패턴 재사용 — 지시대로 A5 완료 전이라 `post_trade_review_log.json` 패턴을 대신 썼다(이미 위에 기록).
