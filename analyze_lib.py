@@ -122,6 +122,44 @@ FORBIDDEN_FIELDS_BASE = (
 )
 
 
+def normalize_path(path):
+    """배열 인덱스를 지워 경로 패턴으로 만든다(A2_Intelligence_Layer_Design.md
+    §3-3). 'report.change_events[3].priority.priority_score' ->
+    'report.change_events[].priority.priority_score' — allowed_paths에는
+    인덱스 없는 패턴만 등록하면 되고, 배열 길이가 달라져도(이벤트가 몇 건이든)
+    같은 패턴으로 매치된다."""
+    return re.sub(r"\[\d+\]", "[]", path)
+
+
+def audit_schema(obj, path="report", allowed_paths=frozenset()):
+    """FORBIDDEN_FIELDS_BASE/FORBIDDEN_PHRASES_BASE 재귀 검사 — 각 생성기의
+    audit()(rule_trigger_report.py/market_indicators.py/news_event_cards.py에
+    거의 동일하게 복붙돼 있음)과 같은 패턴이되, 위반 예외를 **파일 전체에서
+    단어를 통째로 면제**하는 대신 **정확한 필드 경로 하나만** 면제할 수 있다
+    (§3-3). "우연히 정확일치를 피해감"에 기대지 않고 "이 정확한 위치는 검토
+    후 허용됨"을 코드에 남기는 장치 — 같은 필드명이 다른 위치에 새로 나타나면
+    여전히 걸린다.
+
+    2026-08-29 PM 확정: 신규 예외는 이 경로단위 방식만 쓴다. 기존 파일단위
+    예외(indicator_significance_test.py의 signal, portfolio_report.py의
+    rank/ranking)는 소급 전환하지 않는다 — 이 함수를 쓰지 않고 그대로 둔다."""
+    bad = []
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            field_path = f"{path}.{k}"
+            if k.lower() in FORBIDDEN_FIELDS_BASE and normalize_path(field_path) not in allowed_paths:
+                bad.append(f"{field_path} (금지 필드)")
+            bad += audit_schema(v, field_path, allowed_paths)
+    elif isinstance(obj, list):
+        for i, v in enumerate(obj):
+            bad += audit_schema(v, f"{path}[{i}]", allowed_paths)
+    elif isinstance(obj, str):
+        for ph in FORBIDDEN_PHRASES_BASE:
+            if ph in obj:
+                bad.append(f"{path}: 금지 문구 '{ph}'")
+    return bad
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # A2 Intelligence Layer 공통 이벤트 스키마 (2026-08-29, A2_Intelligence_Layer_Design.md
 # 최종본 Step 1 구현, PM 지시 "A2 코드 구현 착수" §1 그대로).
@@ -272,6 +310,137 @@ def validate_common_event(event, path="event"):
                 errors.append(f"{path}.related_assets[{i}].relation: 허용 밖 값 '{ra.get('relation')}'")
 
     return errors
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# A2 Step 3: Event Prioritization (2026-08-29/30, A2_Intelligence_Layer_Design.md
+# §3-1 PM 확정 4인자 그대로 — Reliability × Novelty × Portfolio Relevance ×
+# Magnitude. Importance 인자는 없다(폐기 사유 원문: "event_type별 중요도 사전
+# 부여는 관측 사실이 아닌 사전 신념이며, 근거를 추적하면 '예상 주가 영향도'
+# (§5.1 금지 입력)로 귀결됨").
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Novelty "최근 N일" — 잠정값(§3-1a, news_event_cards.json 158건 이력의
+# (종목,event_type) 재등장 간격 분포 조사 근거로 N=7 제안). 아래 두 조건 중
+# 하나라도 발생하면 재산출 필요(PM 지시, 2026-08-29 Step 3 체크리스트):
+#   1. watchlist.json이 채워져 관심종목 유니버스가 확장될 때(현재는 비어 있어
+#      유니버스가 보유종목뿐 — §4-2에서도 같은 제약을 기록함).
+#   2. "이상행동" 단일 버킷이 거래량_급증/변동성_급증/가격_갭 3종으로 분해될 때
+#      — 사실 기록: 이 분해는 A2 Step 2(2026-08-29, 같은 날)에서 이미
+#      일어났다. 이 사실이 지금 즉시 재산출을 요구하는지는 이 코드가 판단하지
+#      않는다("상태는 사실대로 적되 판정은 내리지 않는다" 원칙, CLAUDE.md
+#      세션 시작 체크리스트) — PM 판단 대상.
+NOVELTY_LOOKBACK_DAYS = 7  # 잠정값 - 위 두 조건에서 재산출
+
+# audit_schema()의 첫 실사용 사례(PM 지시). priority_score는 FORBIDDEN_FIELDS_BASE의
+# "score"와 정확히 같은 문자열이 아니라 지금 audit_schema()의 정확일치 로직으로는
+# 사실 안 걸린다 — 그런데도 경로를 사전 등록해두는 이유는 §3-3에 적은 그대로:
+# "우연히 안 걸림"에 기대지 않고 "이 위치는 검토 후 허용됨"을 코드에 남기기
+# 위해서다(예: FORBIDDEN_FIELDS_BASE가 나중에 priority_score까지 포함하도록
+# 넓어지거나, 다른 모듈이 이 필드를 그냥 "score"로 짓는 걸 막는 안전장치).
+PRIORITY_ALLOWED_FIELD_PATHS = frozenset({
+    "report.change_events[].priority.priority_score",
+})
+
+
+def _parse_common_timestamp(value):
+    """공통 스키마 timestamp(ISO 8601 UTC) 문자열을 datetime으로. 실패하면
+    None — Novelty 계산이 파싱 불가 이벤트를 조용히 건너뛰게 한다(§1-1
+    timestamp가 검증을 통과했다는 전제가 깨져도 크래시하지 않는다)."""
+    if not value:
+        return None
+    try:
+        return datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+
+
+def compute_novelty(event, prior_events, lookback_days=NOVELTY_LOOKBACK_DAYS):
+    """§3-1: "같은 종목·같은 event_type이 최근 N일 내 이미 발생했는지(있으면
+    감쇠, 없으면 1.0)". prior_events 중 이 이벤트와 같은 (symbol, event_type)
+    조합이면서 timestamp가 이 이벤트보다 앞선 것들 중 가장 최근 것과의 날짜
+    차이를 lookback_days로 나눠 선형 감쇠시킨다(1.0 상한 — N일 이상 지났으면
+    "완전히 새로움"과 동일 취급). 같은 조합의 과거 이력이 전혀 없으면 1.0 —
+    "정보 없음"을 낮은 신규성으로 잘못 해석하지 않는다(새 이벤트를 부당하게
+    낮게 평가하지 않기 위함)."""
+    symbol = (event.get("asset") or {}).get("symbol")
+    event_type = event.get("event_type")
+    event_ts = _parse_common_timestamp(event.get("timestamp"))
+    if symbol is None or event_ts is None:
+        return 1.0
+    prior_ts = []
+    for e in prior_events:
+        if (e.get("asset") or {}).get("symbol") != symbol or e.get("event_type") != event_type:
+            continue
+        ts = _parse_common_timestamp(e.get("timestamp"))
+        if ts is not None and ts < event_ts:
+            prior_ts.append(ts)
+    if not prior_ts:
+        return 1.0
+    days_since = (event_ts - max(prior_ts)).total_seconds() / 86400
+    return round(min(1.0, max(0.0, days_since / lookback_days)), 4)
+
+
+def compute_magnitude(event):
+    """§3-1 "계산 제안: change 필드 값 그대로"를 그대로 구현한다 — change의
+    절대값을 쓴다(방향은 배제, 크기만). 알려진 한계: event_type마다 change의
+    단위가 다르다(거래량_급증은 배율, 가격_갭은 %, 변동성_급증은 백분위) —
+    이 셋을 공통 척도로 정규화하는 건 설계 문서가 "또는 abs(change - 1.0)
+    등 정규화"로 대안만 남기고 확정하지 않았으므로 이 구현에서 임의로
+    선택하지 않는다(A5 이후 필요해지면 재검토)."""
+    change = event.get("change")
+    return round(abs(change), 4) if change is not None else 0.0
+
+
+def compute_priority(event, portfolio_relevance, prior_events=None):
+    """4인자 Prioritization(§3-1): Reliability × Novelty × Portfolio Relevance
+    × Magnitude.
+
+    portfolio_relevance: Step 4(compute_portfolio_relevance, 아직 미구현)가
+    만들 값을 그대로 받는다 — 이 함수는 Step 4의 구현 방식을 몰라도 되게
+    설계했다(호출자가 relevance_value를 넘겨주기만 하면 됨).
+    prior_events: Novelty 계산에 쓸 과거 change_events 로그. 생략하면
+    Novelty=1.0으로 계산(과거 이력 없음과 동일하게 취급)."""
+    reliability = event.get("reliability", 0.0)
+    novelty = compute_novelty(event, prior_events or [])
+    magnitude = compute_magnitude(event)
+    priority_score = round(reliability * novelty * portfolio_relevance * magnitude, 4)
+    return {
+        "priority_score": priority_score,
+        "factors": {
+            "reliability": reliability,
+            "novelty": novelty,
+            "portfolio_relevance": portfolio_relevance,
+            "magnitude": magnitude,
+        },
+    }
+
+
+def attach_priorities(report, portfolio_relevance_by_symbol, prior_events=None):
+    """report["change_events"] 각 항목에 .priority(위 compute_priority 결과)를
+    채운 새 리포트를 반환한다(원본 dict는 바꾸지 않음). audit_schema()로 검사한
+    뒤 위반이 있으면 "_audit_violations"에 태그만 남긴다(rule_trigger_report.py
+    패턴 — 저장 자체를 막지는 않는다. market_indicators.py처럼 "위반 시 전체
+    반려"가 필요한지는 이 함수를 실제로 어디서 호출하는지에 달려 있어 이 A2
+    Step 3 자체 범위에서 결정하지 않는다).
+
+    portfolio_relevance_by_symbol: {symbol: relevance_value} — Step 4가 만드는
+    맵을 그대로 받는다(이 함수는 Step 4를 호출하지 않는다 - 값만 소비)."""
+    prior = list(prior_events or [])
+    events_with_priority = []
+    for ev in report.get("change_events", []):
+        symbol = (ev.get("asset") or {}).get("symbol")
+        relevance = portfolio_relevance_by_symbol.get(symbol, 0.0)
+        priority = compute_priority(ev, relevance, prior_events=prior)
+        new_ev = dict(ev)
+        new_ev["priority"] = priority
+        events_with_priority.append(new_ev)
+    new_report = dict(report)
+    new_report["change_events"] = events_with_priority
+    violations = audit_schema(new_report, allowed_paths=PRIORITY_ALLOWED_FIELD_PATHS)
+    if violations:
+        new_report["_audit_violations"] = violations
+    return new_report
 
 
 def calc_ma(prices, window):
@@ -926,6 +1095,100 @@ def run_self_test():
     asset_errors = validate_common_event(incomplete_asset)
     print(f"[11] currency 없는 asset -> 위반 {asset_errors}")
     assert any("asset" in e for e in asset_errors), "asset 필수 키 누락을 못 잡음"
+
+    # ── A2 Step 2.5: audit_schema() 경로단위 allowlist (§3-3) ──────────────
+
+    # 12) normalize_path — 배열 인덱스를 지워 패턴으로 만드는지
+    p1 = normalize_path("report.change_events[3].priority.priority_score")
+    p2 = normalize_path("report.change_events[0].priority.priority_score")
+    print(f"[12] normalize_path: idx=3 -> {p1!r}, idx=0 -> {p2!r}")
+    assert p1 == p2 == "report.change_events[].priority.priority_score"
+
+    # 13) audit_schema — 등록 안 된 경로에서 금지 필드(정확히 "score")가 나오면 걸리는지
+    dirty_report = {"change_events": [{"priority": {"score": 0.5}}]}
+    violations_unregistered = audit_schema(dirty_report)
+    print(f"[13] 미등록 경로의 'score' 필드 -> 위반 {violations_unregistered}")
+    assert any("score" in v for v in violations_unregistered), "미등록 경로의 금지 필드를 못 잡음"
+
+    # 14) 같은 구조라도 정확히 그 경로가 allowed_paths에 등록되면 위반 없음
+    same_path = normalize_path("report.change_events[0].priority.score")
+    violations_registered = audit_schema(dirty_report, allowed_paths=frozenset({same_path}))
+    print(f"[14] 같은 경로를 allowlist에 등록 -> 위반 {violations_registered}")
+    assert violations_registered == [], "등록된 경로인데도 위반으로 잡힘"
+
+    # 15) 등록된 경로 밖의 다른 위치에 같은 금지 필드가 새로 나타나면 여전히 걸리는지
+    #     (§3-3 "다른 위치에 우연히 score가 다시 나타나면 여전히 걸린다")
+    leaked = {"change_events": [{"priority": {"score": 0.5}}], "other_block": {"score": 99}}
+    violations_leak = audit_schema(leaked, allowed_paths=frozenset({same_path}))
+    print(f"[15] 등록 경로 외 다른 위치의 'score' -> 위반 {violations_leak}")
+    assert any("other_block.score" in v for v in violations_leak), "등록 경로 밖의 금지 필드 누출을 못 잡음"
+    assert not any("change_events[0].priority.score" in v for v in violations_leak), \
+        "등록된 경로까지 다시 걸리면 안 됨"
+
+    # ── A2 Step 3: Event Prioritization (4인자, §3-1) ──────────────────────
+
+    base_asset = {"symbol": "005930", "name": "삼성전자", "market_country": "KR", "currency": "KRW"}
+    ev_today = build_common_event(
+        timestamp="2026-08-29T00:00:00+00:00", asset=base_asset,
+        source="news_event_cards.anomaly", event_type="거래량_급증",
+        reliability=1.0, observed_value=5000, baseline=1000, change=5.0,
+    )
+
+    # 16) Novelty — 과거 이력이 전혀 없으면 1.0
+    print(f"[16] 과거 이력 없음 -> Novelty={compute_novelty(ev_today, [])}")
+    assert compute_novelty(ev_today, []) == 1.0
+
+    # 17) Novelty — 바로 전날 같은 (symbol, event_type) 이벤트가 있으면 강하게 감쇠
+    ev_yesterday = {**ev_today, "timestamp": "2026-08-28T00:00:00+00:00"}
+    n_1day = compute_novelty(ev_today, [ev_yesterday])
+    print(f"[17] 1일 전 같은 조합 재등장 -> Novelty={n_1day} (lookback={NOVELTY_LOOKBACK_DAYS}일)")
+    assert n_1day == round(1 / NOVELTY_LOOKBACK_DAYS, 4)
+
+    # 18) Novelty — lookback_days 이상 지났으면 1.0으로 상한(완전히 새로움과 동일 취급)
+    ev_long_ago = {**ev_today, "timestamp": "2026-08-01T00:00:00+00:00"}
+    n_far = compute_novelty(ev_today, [ev_long_ago])
+    print(f"[18] {NOVELTY_LOOKBACK_DAYS}일보다 훨씬 전 재등장 -> Novelty={n_far}")
+    assert n_far == 1.0
+
+    # 19) Novelty — 종목이나 event_type이 다르면 이력으로 안 침(무관한 이력 무시)
+    ev_other_symbol = {**ev_yesterday, "asset": {**base_asset, "symbol": "000660"}}
+    ev_other_type = {**ev_yesterday, "event_type": "가격_갭"}
+    n_unrelated = compute_novelty(ev_today, [ev_other_symbol, ev_other_type])
+    print(f"[19] 다른 종목/다른 event_type 이력만 있음 -> Novelty={n_unrelated}")
+    assert n_unrelated == 1.0, "무관한 이력이 Novelty에 영향을 주면 안 됨"
+
+    # 20) Magnitude — change의 절대값(방향 배제)
+    ev_negative_change = {**ev_today, "change": -5.0}
+    print(f"[20] change=-5.0 -> Magnitude={compute_magnitude(ev_negative_change)}")
+    assert compute_magnitude(ev_negative_change) == 5.0
+    assert compute_magnitude({**ev_today, "change": None}) == 0.0
+
+    # 21) compute_priority — 4개 인자의 단순 곱인지 수기 검증
+    result = compute_priority(ev_today, portfolio_relevance=0.5, prior_events=[])
+    expected = round(1.0 * 1.0 * 0.5 * 5.0, 4)  # reliability=1.0, novelty=1.0(이력없음), relevance=0.5, magnitude=5.0
+    print(f"[21] priority_score={result['priority_score']} (기대값 {expected})")
+    assert result["priority_score"] == expected
+    assert set(result["factors"]) == {"reliability", "novelty", "portfolio_relevance", "magnitude"}
+
+    # 22) attach_priorities — change_events 각각에 .priority가 붙고, 원본은 안 바뀌고,
+    #     audit_schema()로 검사해도(§3-3 allowlist 적용) 위반이 없는지
+    sample_report = {"generated_at": "2026-08-29T00:00:00+00:00",
+                      "schema": "explanation_only_v3.2", "cards": [],
+                      "change_events": [ev_today, {**ev_today, "asset": {**base_asset, "symbol": "000660"}}]}
+    prioritized = attach_priorities(sample_report, {"005930": 0.8, "000660": 0.2})
+    print(f"[22] 원본 change_events에 priority 키 있음={'priority' in sample_report['change_events'][0]}, "
+          f"결과 첫 이벤트 priority_score={prioritized['change_events'][0]['priority']['priority_score']}")
+    assert "priority" not in sample_report["change_events"][0], "원본 리포트를 변경하면 안 됨"
+    assert all("priority" in e for e in prioritized["change_events"])
+    assert "_audit_violations" not in prioritized, f"정상 결과인데 감사 위반 태그가 붙음: {prioritized.get('_audit_violations')}"
+    assert prioritized["change_events"][0]["priority"]["factors"]["portfolio_relevance"] == 0.8
+    assert prioritized["change_events"][1]["priority"]["factors"]["portfolio_relevance"] == 0.2
+
+    # 23) attach_priorities 결과가 실제로 PRIORITY_ALLOWED_FIELD_PATHS와 정합적인지
+    #     — 등록된 경로 문자열이 attach_priorities가 실제로 만드는 경로와 같은 패턴인지
+    actual_path = normalize_path(f"report.change_events[0].priority.priority_score")
+    print(f"[23] 등록된 경로={sorted(PRIORITY_ALLOWED_FIELD_PATHS)}, 실제 생성 경로 패턴={actual_path}")
+    assert actual_path in PRIORITY_ALLOWED_FIELD_PATHS
 
     print("\n모든 자체 검증 통과.")
 
