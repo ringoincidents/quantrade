@@ -1,3 +1,4 @@
+import argparse
 import requests
 import math
 import json
@@ -121,6 +122,392 @@ FORBIDDEN_FIELDS_BASE = (
 )
 
 
+def normalize_path(path):
+    """배열 인덱스를 지워 경로 패턴으로 만든다(A2_Intelligence_Layer_Design.md
+    §3-3). 'report.change_events[3].priority.priority_score' ->
+    'report.change_events[].priority.priority_score' — allowed_paths에는
+    인덱스 없는 패턴만 등록하면 되고, 배열 길이가 달라져도(이벤트가 몇 건이든)
+    같은 패턴으로 매치된다."""
+    return re.sub(r"\[\d+\]", "[]", path)
+
+
+def audit_schema(obj, path="report", allowed_paths=frozenset(), extra_forbidden_phrases=()):
+    """FORBIDDEN_FIELDS_BASE/FORBIDDEN_PHRASES_BASE 재귀 검사 — 각 생성기의
+    audit()(rule_trigger_report.py/market_indicators.py/news_event_cards.py에
+    거의 동일하게 복붙돼 있음)과 같은 패턴이되, 위반 예외를 **파일 전체에서
+    단어를 통째로 면제**하는 대신 **정확한 필드 경로 하나만** 면제할 수 있다
+    (§3-3). "우연히 정확일치를 피해감"에 기대지 않고 "이 정확한 위치는 검토
+    후 허용됨"을 코드에 남기는 장치 — 같은 필드명이 다른 위치에 새로 나타나면
+    여전히 걸린다.
+
+    2026-08-29 PM 확정: 신규 예외는 이 경로단위 방식만 쓴다. 기존 파일단위
+    예외(indicator_significance_test.py의 signal, portfolio_report.py의
+    rank/ranking)는 소급 전환하지 않는다 — 이 함수를 쓰지 않고 그대로 둔다.
+
+    2026-08-30 A3 Step 2 확장: `extra_forbidden_phrases` — 기존 5개 생성기가
+    각자 FORBIDDEN_PHRASES = FORBIDDEN_PHRASES_BASE + (파일 고유 문구)로 하던
+    것과 같은 역할을 이 함수도 하게 한 것. 호출자가 자기 파일 고유의 금지
+    문구를 넘기면 BASE 문구와 함께 검사한다 — 기본값 빈 튜플이라 기존
+    호출부(attach_priorities() 등)는 동작이 그대로다(하위 호환).
+    `extra_forbidden_fields`는 만들지 않았다 — 지금까지 이 함수를 실제로
+    쓰는 곳(A2 Prioritization의 priority_score)도, 설계된 곳(A3 AI
+    Briefing)도 FORBIDDEN_FIELDS_BASE 밖의 필드 확장이 필요하다는 사실이
+    아직 없다(A3_AI_Briefing_Design.md §2-5, 필드명 충돌 검사 완료 - 충돌
+    없음) — 필요해지면 그때 같은 방식으로 추가한다."""
+    bad = []
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            field_path = f"{path}.{k}"
+            if k.lower() in FORBIDDEN_FIELDS_BASE and normalize_path(field_path) not in allowed_paths:
+                bad.append(f"{field_path} (금지 필드)")
+            bad += audit_schema(v, field_path, allowed_paths, extra_forbidden_phrases)
+    elif isinstance(obj, list):
+        for i, v in enumerate(obj):
+            bad += audit_schema(v, f"{path}[{i}]", allowed_paths, extra_forbidden_phrases)
+    elif isinstance(obj, str):
+        for ph in FORBIDDEN_PHRASES_BASE + tuple(extra_forbidden_phrases):
+            if ph in obj:
+                bad.append(f"{path}: 금지 문구 '{ph}'")
+    return bad
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# A2 Intelligence Layer 공통 이벤트 스키마 (2026-08-29, A2_Intelligence_Layer_Design.md
+# 최종본 Step 1 구현, PM 지시 "A2 코드 구현 착수" §1 그대로).
+#
+# Change Detection(Step 2)/Prioritization(Step 3)/Portfolio Relevance(Step 4)가
+# 공유하는 9개 필드 정의. 이 스키마가 먼저 굳어야 나머지 단계가 뒤집히지
+# 않는다는 게 PM 지시 원문 — 그래서 이 블록만 별도로 self-test하고 먼저
+# 중간보고한다.
+#
+# **이 스키마는 news_event_cards.py의 카드 스키마(CARD_FIELDS)를 대체하지
+# 않는다.** 카드(뉴스 사건 설명/이상행동)는 계속 별도 화이트리스트로 대시보드에
+# 표시된다 — 공통 스키마는 Change Detection이 새로 만드는 change_events[] 배열
+# 안의 객체 형태다(설계 문서 §1-4 예시 그대로: 각 생성기 JSON의 최상위
+# generated_at/schema는 그대로 두고, 그 아래 change_events[]에 이 스키마를
+# 따르는 항목을 추가하는 방식).
+# ─────────────────────────────────────────────────────────────────────────────
+
+# event_type 허용값(설계 문서 §2-3). ACTIVE 4종은 이번 A2에서 실제 계산식이
+# 있는 대상(Step 2가 만들어낸다), RESERVED 2종은 v4.0 로드맵 Phase B(B2/B4)
+# 대기 — 스키마에 자리만 예약하고 계산 로직은 만들지 않는다(설계 문서 §1-1/
+# §2-3 "계산식 설계는 보류"). validate_common_event는 RESERVED 값도 유효한
+# event_type으로 받아들이지만(자리 예약이 스키마 목적), Step 2 코드가 이
+# 값을 실제로 만들어내지는 않는다.
+EVENT_TYPE_ACTIVE = ("거래량_급증", "변동성_급증", "가격_갭", "상관관계_변화")
+EVENT_TYPE_RESERVED = ("환율_급변", "뉴스빈도_급증")  # Phase B 대기 - 계산 미설계
+EVENT_TYPE_ENUM = EVENT_TYPE_ACTIVE + EVENT_TYPE_RESERVED
+
+# source 식별자 레지스트리(§1-2 "5개 생성기 출력 → 공통 스키마 매핑표"를 코드로도
+# 남긴 것). "<모듈>.<방법>" 형태 — 방법 단위까지 구분하는 이유는 Step 3의
+# Reliability 산정이 소스별로 다른 고정값을 쓰기 때문(§3-1). 값은 사람이 읽는
+# 설명일 뿐 검증에 쓰이지 않는다 — source는 자유 문자열이고 이 레지스트리는
+# "이미 정의된 것들"의 목록이지 화이트리스트가 아니다(신규 소스 추가를 막지
+# 않음). post_trade_review.py/portfolio_report.py/rule_trigger_report.py는
+# 아직 change_events를 만들지 않지만(Step 2는 news_event_cards.py/
+# market_indicators.py만 통합), §1-2 매핑표가 5개 생성기 전부를 다루므로
+# 여기서도 5개 전부의 식별자를 남겨 나중에 그 매핑표를 다시 찾아볼 필요가
+# 없게 한다.
+COMMON_EVENT_SOURCES = {
+    "news_event_cards.ai_summary": "뉴스 사건 설명 카드(AI 요약, Claude 판단 개입)",
+    "news_event_cards.anomaly": "이상행동 카드(산술 판정, AI 미개입)",
+    "market_indicators.state_board": "시장 상태 수치판 스냅샷(변동성 백분위/ADX)",
+    "portfolio_report.rule_matches": "포트폴리오 리포트 규칙 매치(집중도/손실지속/목표가)",
+    "post_trade_review.correlation_blind_spots": "매매 후 리뷰 - 상관관계 사각지대 섹션",
+    "rule_trigger_report.trigger": "규칙 발동 심층분석 리포트 - 발동 사실 섹션",
+}
+
+# 9개 필드 정의(§1-1). required=True는 무조건 있어야 하는 필드(None이면 위반),
+# required="conditional"은 observed_value/baseline/change처럼 이벤트 종류에
+# 따라 null이 정상인 필드(순수 뉴스 사건은 수치가 없음 — §1-1).
+COMMON_EVENT_SCHEMA = {
+    "timestamp":      {"required": True,        "type": str,          "nullable": False},
+    "asset":          {"required": True,        "type": dict,         "nullable": False},
+    "source":         {"required": True,        "type": str,          "nullable": False},
+    "event_type":     {"required": True,        "type": str,          "nullable": False},
+    "observed_value": {"required": "conditional", "type": (int, float), "nullable": True},
+    "baseline":       {"required": "conditional", "type": (int, float), "nullable": True},
+    "change":         {"required": "conditional", "type": (int, float), "nullable": True},
+    "reliability":    {"required": True,        "type": (int, float), "nullable": False},
+    "related_assets": {"required": True,        "type": list,         "nullable": False},
+}
+
+ASSET_REQUIRED_KEYS = ("symbol", "name", "market_country", "currency")
+RELATED_ASSET_RELATIONS = ("correlation_pair", "portfolio_holding", "watchlist")
+
+
+def _is_iso8601_utc(value):
+    """ISO 8601, UTC, 오프셋 포함 형식인지 가볍게 확인(§1-1). 완전한 RFC 검증이
+    아니라 "오프셋이 없는 naive 문자열이 섞이는" 사고를 잡는 정도의 점검이다
+    — rule_trigger_report.py가 실제로 겪었던 문제(§1-3)가 스키마 검증에서도
+    조용히 통과하지 않게 한다."""
+    if not isinstance(value, str):
+        return False
+    try:
+        datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return False
+    return "+" in value[10:] or value.endswith("Z") or "-" in value[19:]
+
+
+def build_common_event(*, timestamp, asset, source, event_type, reliability,
+                        observed_value=None, baseline=None, change=None,
+                        related_assets=None):
+    """9개 필드 스키마를 따르는 이벤트 객체 하나를 만든다(§1-1). 필수값 누락/
+    잘못된 타입/허용 밖 event_type이면 즉시 ValueError로 막는다 — 생성 시점에
+    막는다는 점이 각 생성기의 audit()(사후 검사, 위반을 태그만 달거나 저장을
+    거부)과 다르다: 이건 애초에 스키마를 어긴 이벤트 객체가 만들어지지 않게
+    한다. Step 2(Change Detection)가 이 함수로 change_events[] 항목을 만든다."""
+    event = {
+        "timestamp": timestamp,
+        "asset": asset,
+        "source": source,
+        "event_type": event_type,
+        "observed_value": observed_value,
+        "baseline": baseline,
+        "change": change,
+        "reliability": reliability,
+        "related_assets": related_assets if related_assets is not None else [],
+    }
+    errors = validate_common_event(event)
+    if errors:
+        raise ValueError(f"공통 이벤트 스키마 위반: {errors}")
+    return event
+
+
+def validate_common_event(event, path="event"):
+    """스키마 위반 목록을 반환(빈 리스트 = 위반 없음). 각 생성기의 audit()류
+    함수와 같은 "예외를 던지지 않고 위반을 모아 반환"하는 패턴 — 호출자가
+    build_common_event처럼 즉시 raise할지, 다른 소비자처럼 위반을 태그만
+    남기고 계속 진행할지 선택할 수 있게 한다."""
+    errors = []
+    if not isinstance(event, dict):
+        return [f"{path}: dict가 아님"]
+
+    for field, spec in COMMON_EVENT_SCHEMA.items():
+        present = field in event and event[field] is not None
+        if not present:
+            if spec["required"] is True:
+                errors.append(f"{path}.{field}: 필수 필드 누락")
+            continue
+        value = event[field]
+        if not isinstance(value, spec["type"]):
+            errors.append(f"{path}.{field}: 타입 오류(기대 {spec['type']}, 실제 {type(value)})")
+
+    if event.get("event_type") is not None and event["event_type"] not in EVENT_TYPE_ENUM:
+        errors.append(f"{path}.event_type: 허용되지 않은 값 '{event.get('event_type')}' "
+                       f"(허용: {EVENT_TYPE_ENUM})")
+
+    if event.get("timestamp") is not None and not _is_iso8601_utc(event["timestamp"]):
+        errors.append(f"{path}.timestamp: ISO 8601 UTC(오프셋 포함) 형식이 아님 "
+                       f"('{event.get('timestamp')}')")
+
+    reliability = event.get("reliability")
+    if isinstance(reliability, (int, float)) and not (0.0 <= reliability <= 1.0):
+        errors.append(f"{path}.reliability: 0.0~1.0 범위 밖 ({reliability})")
+
+    asset = event.get("asset")
+    if isinstance(asset, dict):
+        missing_asset_keys = [k for k in ASSET_REQUIRED_KEYS if k not in asset]
+        if missing_asset_keys:
+            errors.append(f"{path}.asset: 필수 키 누락 {missing_asset_keys}")
+
+    related = event.get("related_assets")
+    if isinstance(related, list):
+        for i, ra in enumerate(related):
+            if not isinstance(ra, dict) or "symbol" not in ra:
+                errors.append(f"{path}.related_assets[{i}]: symbol 없음")
+            elif "relation" in ra and ra.get("relation") not in RELATED_ASSET_RELATIONS:
+                errors.append(f"{path}.related_assets[{i}].relation: 허용 밖 값 '{ra.get('relation')}'")
+
+    return errors
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# A2 Step 3: Event Prioritization (2026-08-29/30, A2_Intelligence_Layer_Design.md
+# §3-1 PM 확정 4인자 그대로 — Reliability × Novelty × Portfolio Relevance ×
+# Magnitude. Importance 인자는 없다(폐기 사유 원문: "event_type별 중요도 사전
+# 부여는 관측 사실이 아닌 사전 신념이며, 근거를 추적하면 '예상 주가 영향도'
+# (§5.1 금지 입력)로 귀결됨").
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Novelty "최근 N일" — 잠정값(§3-1a, news_event_cards.json 158건 이력의
+# (종목,event_type) 재등장 간격 분포 조사 근거로 N=7 제안). 아래 두 조건 중
+# 하나라도 발생하면 재산출 필요(PM 지시, 2026-08-29 Step 3 체크리스트):
+#   1. watchlist.json이 채워져 관심종목 유니버스가 확장될 때(현재는 비어 있어
+#      유니버스가 보유종목뿐 — §4-2에서도 같은 제약을 기록함).
+#   2. "이상행동" 단일 버킷이 거래량_급증/변동성_급증/가격_갭 3종으로 분해될 때
+#      — 사실 기록: 이 분해는 A2 Step 2(2026-08-29, 같은 날)에서 이미
+#      일어났다. 이 사실이 지금 즉시 재산출을 요구하는지는 이 코드가 판단하지
+#      않는다("상태는 사실대로 적되 판정은 내리지 않는다" 원칙, CLAUDE.md
+#      세션 시작 체크리스트) — PM 판단 대상.
+NOVELTY_LOOKBACK_DAYS = 7  # 잠정값 - 위 두 조건에서 재산출
+
+# audit_schema()의 첫 실사용 사례(PM 지시). priority_score는 FORBIDDEN_FIELDS_BASE의
+# "score"와 정확히 같은 문자열이 아니라 지금 audit_schema()의 정확일치 로직으로는
+# 사실 안 걸린다 — 그런데도 경로를 사전 등록해두는 이유는 §3-3에 적은 그대로:
+# "우연히 안 걸림"에 기대지 않고 "이 위치는 검토 후 허용됨"을 코드에 남기기
+# 위해서다(예: FORBIDDEN_FIELDS_BASE가 나중에 priority_score까지 포함하도록
+# 넓어지거나, 다른 모듈이 이 필드를 그냥 "score"로 짓는 걸 막는 안전장치).
+PRIORITY_ALLOWED_FIELD_PATHS = frozenset({
+    "report.change_events[].priority.priority_score",
+})
+
+
+def _parse_common_timestamp(value):
+    """공통 스키마 timestamp(ISO 8601 UTC) 문자열을 datetime으로. 실패하면
+    None — Novelty 계산이 파싱 불가 이벤트를 조용히 건너뛰게 한다(§1-1
+    timestamp가 검증을 통과했다는 전제가 깨져도 크래시하지 않는다)."""
+    if not value:
+        return None
+    try:
+        return datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+
+
+def compute_novelty(event, prior_events, lookback_days=NOVELTY_LOOKBACK_DAYS):
+    """§3-1: "같은 종목·같은 event_type이 최근 N일 내 이미 발생했는지(있으면
+    감쇠, 없으면 1.0)". prior_events 중 이 이벤트와 같은 (symbol, event_type)
+    조합이면서 timestamp가 이 이벤트보다 앞선 것들 중 가장 최근 것과의 날짜
+    차이를 lookback_days로 나눠 선형 감쇠시킨다(1.0 상한 — N일 이상 지났으면
+    "완전히 새로움"과 동일 취급). 같은 조합의 과거 이력이 전혀 없으면 1.0 —
+    "정보 없음"을 낮은 신규성으로 잘못 해석하지 않는다(새 이벤트를 부당하게
+    낮게 평가하지 않기 위함)."""
+    symbol = (event.get("asset") or {}).get("symbol")
+    event_type = event.get("event_type")
+    event_ts = _parse_common_timestamp(event.get("timestamp"))
+    if symbol is None or event_ts is None:
+        return 1.0
+    prior_ts = []
+    for e in prior_events:
+        if (e.get("asset") or {}).get("symbol") != symbol or e.get("event_type") != event_type:
+            continue
+        ts = _parse_common_timestamp(e.get("timestamp"))
+        if ts is not None and ts < event_ts:
+            prior_ts.append(ts)
+    if not prior_ts:
+        return 1.0
+    days_since = (event_ts - max(prior_ts)).total_seconds() / 86400
+    return round(min(1.0, max(0.0, days_since / lookback_days)), 4)
+
+
+def compute_magnitude(event):
+    """§3-1 "계산 제안: change 필드 값 그대로"를 그대로 구현한다 — change의
+    절대값을 쓴다(방향은 배제, 크기만). 알려진 한계: event_type마다 change의
+    단위가 다르다(거래량_급증은 배율, 가격_갭은 %, 변동성_급증은 백분위) —
+    이 셋을 공통 척도로 정규화하는 건 설계 문서가 "또는 abs(change - 1.0)
+    등 정규화"로 대안만 남기고 확정하지 않았으므로 이 구현에서 임의로
+    선택하지 않는다(A5 이후 필요해지면 재검토)."""
+    change = event.get("change")
+    return round(abs(change), 4) if change is not None else 0.0
+
+
+def compute_priority(event, portfolio_relevance, prior_events=None):
+    """4인자 Prioritization(§3-1): Reliability × Novelty × Portfolio Relevance
+    × Magnitude.
+
+    portfolio_relevance: Step 4(compute_portfolio_relevance, 아직 미구현)가
+    만들 값을 그대로 받는다 — 이 함수는 Step 4의 구현 방식을 몰라도 되게
+    설계했다(호출자가 relevance_value를 넘겨주기만 하면 됨).
+    prior_events: Novelty 계산에 쓸 과거 change_events 로그. 생략하면
+    Novelty=1.0으로 계산(과거 이력 없음과 동일하게 취급)."""
+    reliability = event.get("reliability", 0.0)
+    novelty = compute_novelty(event, prior_events or [])
+    magnitude = compute_magnitude(event)
+    priority_score = round(reliability * novelty * portfolio_relevance * magnitude, 4)
+    return {
+        "priority_score": priority_score,
+        "factors": {
+            "reliability": reliability,
+            "novelty": novelty,
+            "portfolio_relevance": portfolio_relevance,
+            "magnitude": magnitude,
+        },
+    }
+
+
+def attach_priorities(report, portfolio_relevance_by_symbol, prior_events=None):
+    """report["change_events"] 각 항목에 .priority(위 compute_priority 결과)를
+    채운 새 리포트를 반환한다(원본 dict는 바꾸지 않음). audit_schema()로 검사한
+    뒤 위반이 있으면 "_audit_violations"에 태그만 남긴다(rule_trigger_report.py
+    패턴 — 저장 자체를 막지는 않는다. market_indicators.py처럼 "위반 시 전체
+    반려"가 필요한지는 이 함수를 실제로 어디서 호출하는지에 달려 있어 이 A2
+    Step 3 자체 범위에서 결정하지 않는다).
+
+    portfolio_relevance_by_symbol: {symbol: relevance_value} — Step 4가 만드는
+    맵을 그대로 받는다(이 함수는 Step 4를 호출하지 않는다 - 값만 소비)."""
+    prior = list(prior_events or [])
+    events_with_priority = []
+    for ev in report.get("change_events", []):
+        symbol = (ev.get("asset") or {}).get("symbol")
+        relevance = portfolio_relevance_by_symbol.get(symbol, 0.0)
+        priority = compute_priority(ev, relevance, prior_events=prior)
+        new_ev = dict(ev)
+        new_ev["priority"] = priority
+        events_with_priority.append(new_ev)
+    new_report = dict(report)
+    new_report["change_events"] = events_with_priority
+    violations = audit_schema(new_report, allowed_paths=PRIORITY_ALLOWED_FIELD_PATHS)
+    if violations:
+        new_report["_audit_violations"] = violations
+    return new_report
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# A2 Step 4: Portfolio Relevance — "재가중" (2026-08-30, A2_Intelligence_Layer_
+# Design.md §4-2 PM 확정 그대로).
+# ─────────────────────────────────────────────────────────────────────────────
+
+# 관심종목 전용 고정값 — 미확정, watchlist 데이터 축적 후 조정 대상(§4-2, PM
+# 확정 "값 자체를 정하지 않고 명명된 상수로 분리"). 현재 watchlist.json이
+# 비어 있어(symbols: []) 이 값이 실제로 쓰이는 사례가 없고, 그래서 검증할
+# 데이터도 없다 — 검증 근거가 생기기 전까지 임의로 값을 바꾸지 않는다.
+WATCHLIST_RELEVANCE_WEIGHT = 0.3  # 미확정, 데이터 축적 후 조정
+
+
+def compute_portfolio_relevance(change_event, real_portfolio, watchlist):
+    """§4-2: change_event 대상 종목이 보유 중인지/관심종목인지에 따라
+    0.0~1.0의 relevance_value를 매긴다.
+
+    **"재가중"이지 "필터링"이 아니다(PM 확정)** — news_event_cards.py의
+    build_universe()가 change_events를 만들기 훨씬 전 단계에서 이미 보유+
+    관심종목으로 스캔 대상을 좁혀놓았으므로, 이 함수에 들어오는 change_event는
+    애초에 이 좁은 집합 밖의 종목을 가리키지 않는다. 그래서 이 함수는 집합에서
+    이벤트를 들어내는 역할이 아니라, 이미 좁은 집합 안에서 보유 비중이 다른
+    종목들 사이의 relevance 값 차이를 매기는 역할만 한다(§4-2 "필터링/재가중"
+    구분 확정 그대로) — 여기서 None/제외를 반환해 이벤트를 걸러내는 경로는
+    의도적으로 만들지 않았다."""
+    symbol = change_event["asset"]["symbol"]
+    held = next((p for p in real_portfolio.get("positions", []) if p.get("symbol") == symbol), None)
+    is_watched = symbol in watchlist.get("symbols", [])
+    weight_pct = None
+    if held:
+        total = real_portfolio.get("cash", 0) + sum(
+            p.get("eval_amount_krw", 0) for p in real_portfolio.get("positions", []))
+        weight_pct = round(held.get("eval_amount_krw", 0) / total * 100, 2) if total > 0 else None
+    return {
+        "is_held": held is not None,
+        "weight_pct": weight_pct,
+        "is_watched": is_watched,
+        "relevance_value": (weight_pct or 0) / 100 if held else (WATCHLIST_RELEVANCE_WEIGHT if is_watched else 0.0),
+    }
+
+
+def build_portfolio_relevance_map(symbols, real_portfolio, watchlist):
+    """attach_priorities()가 요구하는 {symbol: relevance_value} 형태로 여러
+    종목을 한 번에 계산하는 얇은 헬퍼. compute_portfolio_relevance() 자체는
+    §4-2 설계 그대로 change_event 단위 함수로 유지하고(단일 이벤트 계산
+    로직을 다시 쓰지 않음), 여기서는 symbol만 있으면 되므로 asset.symbol만
+    채운 최소 이벤트로 감싸 재사용한다."""
+    relevance_by_symbol = {}
+    for symbol in symbols:
+        stub_event = {"asset": {"symbol": symbol}}
+        relevance_by_symbol[symbol] = compute_portfolio_relevance(
+            stub_event, real_portfolio, watchlist)["relevance_value"]
+    return relevance_by_symbol
+
+
 def calc_ma(prices, window):
     return sum(prices[-window:]) / window
 
@@ -192,6 +579,42 @@ def calc_adx(highs, lows, closes, period=14):
     if denom == 0:
         return 0
     return 100 * abs(plus_di - minus_di) / denom
+
+def daily_returns(closes):
+    return [(closes[i] - closes[i - 1]) / closes[i - 1]
+            for i in range(1, len(closes)) if closes[i - 1]]
+
+
+def rolling_volatility_series(closes, window=20):
+    """일간수익률의 표준편차를 window 구간씩 굴려가며 계산한 시계열.
+    마지막 값이 "오늘의 window일 변동성"이고, 시계열 전체가 백분위를 매길
+    과거 분포다.
+
+    2026-08-29 A2 Step 2: market_indicators.py 전용이었던 걸 여기로 옮겼다 —
+    news_event_cards.py의 detect_anomalies()도 같은 방식(백분위)으로 변동성
+    급증을 판정하도록 통일하면서(PM 지시, A2_Intelligence_Layer_Design.md
+    §2-3) 두 파일이 같은 계산식을 import해서 쓰게 하기 위해서다. 함수를
+    복붙하면 나중에 계산식이 갈라질 수 있어(FORBIDDEN_FIELDS_BASE가 겪었던
+    종류의 드리프트) 공유 모듈로 옮기는 쪽을 택했다."""
+    rets = daily_returns(closes)
+    series = []
+    for i in range(window, len(rets) + 1):
+        chunk = rets[i - window:i]
+        mean = sum(chunk) / len(chunk)
+        var = sum((r - mean) ** 2 for r in chunk) / len(chunk)
+        series.append(var ** 0.5)
+    return series
+
+
+def historical_percentile(series):
+    """series의 마지막 값이 series 전체 분포에서 몇 번째 백분위인지.
+    "지금 값 / 과거 분포에서의 위치"만 반환 — 라벨을 붙이지 않는다."""
+    if not series:
+        return None
+    current = series[-1]
+    rank = sum(1 for v in series if v <= current)
+    return round(100 * rank / len(series), 1)
+
 
 def classify_strategy(expected_days):
     if expected_days <= 6:
@@ -630,3 +1053,286 @@ def send_telegram(msg):
             print("텔레그램 응답:", resp.json())
         except Exception as e:
             print("⚠️ 텔레그램 실패:", e)
+
+
+def run_self_test():
+    """analyze_lib.py 자체 검증 (네트워크 미사용). A2 Step 1 착수(2026-08-29)
+    시점에는 공통 이벤트 스키마만 검증한다 — 이 파일의 나머지 함수(지표 계산,
+    시세 조회 등)는 각자를 쓰는 다른 파일의 self-test/실행으로 이미 간접
+    검증되고 있고, 여기 새로 추가할 이유가 없다."""
+    print("=== analyze_lib.py 자체 검증 (공통 이벤트 스키마, 네트워크 미사용) ===\n")
+
+    sample_asset = {"symbol": "005930", "name": "삼성전자", "market_country": "KR", "currency": "KRW"}
+
+    # 1) 정상 이벤트 - 산술 기반(거래량 급증), 관측치 있음
+    ev = build_common_event(
+        timestamp="2026-08-29T07:13:48+00:00",
+        asset=sample_asset,
+        source="news_event_cards.anomaly",
+        event_type="거래량_급증",
+        reliability=1.0,
+        observed_value=1234567.0,
+        baseline=500000.0,
+        change=2.47,
+    )
+    print(f"[1] 정상 이벤트(산술) 생성 성공: {sorted(ev)}")
+    assert set(ev) == set(COMMON_EVENT_SCHEMA), "9개 필드 집합이 스키마와 다름"
+    assert validate_common_event(ev) == [], f"정상 이벤트인데 위반 발생: {validate_common_event(ev)}"
+
+    # 2) 정상 이벤트 - 뉴스처럼 수치가 없는 경우(observed_value/baseline/change 전부 None 허용).
+    #    event_type 자체의 의미론적 적절성은 이 테스트의 관심사가 아니다 - 스키마는
+    #    "이 event_type이면 수치가 꼭 있어야 한다"는 제약을 강제하지 않는다(§1-1
+    #    "조건부 필수"는 생성기 쪽 책임이지 스키마 검증기가 event_type별로 분기하는
+    #    규칙이 아니다).
+    ev_news = build_common_event(
+        timestamp="2026-08-29T07:13:48+00:00",
+        asset=sample_asset,
+        source="news_event_cards.ai_summary",
+        event_type="상관관계_변화",
+        reliability=0.8,
+    )
+    print(f"[2] 수치 없는 이벤트(뉴스형) 생성 성공: observed_value={ev_news['observed_value']}")
+    assert ev_news["observed_value"] is None and ev_news["baseline"] is None and ev_news["change"] is None
+
+    # 3) 필수 필드 누락 -> ValueError (asset 누락)
+    try:
+        build_common_event(timestamp="2026-08-29T07:13:48+00:00", asset=None,
+                            source="x", event_type="거래량_급증", reliability=1.0)
+        raised = False
+    except ValueError:
+        raised = True
+    print(f"[3] asset 누락 -> ValueError 발생={raised}")
+    assert raised, "필수 필드(asset) 누락인데 ValueError가 안 남"
+
+    # 4) event_type이 허용 밖 값이면 ValueError (v3.2 금지 예측 필드 유사 방식 - 사전 등록되지 않은 값 거부)
+    try:
+        build_common_event(timestamp="2026-08-29T07:13:48+00:00", asset=sample_asset,
+                            source="x", event_type="호재판단", reliability=1.0)
+        raised = False
+    except ValueError:
+        raised = True
+    print(f"[4] 허용 밖 event_type -> ValueError 발생={raised}")
+    assert raised, "허용 밖 event_type인데 ValueError가 안 남"
+
+    # 5) reliability 범위 밖(0~1) -> ValueError
+    try:
+        build_common_event(timestamp="2026-08-29T07:13:48+00:00", asset=sample_asset,
+                            source="x", event_type="거래량_급증", reliability=1.5)
+        raised = False
+    except ValueError:
+        raised = True
+    print(f"[5] reliability=1.5(범위 밖) -> ValueError 발생={raised}")
+    assert raised, "reliability 범위 위반인데 ValueError가 안 남"
+
+    # 6) timestamp가 오프셋 없는 naive 문자열이면 위반 - rule_trigger_report.py가
+    #    실제로 겪었던 문제(KST naive)가 스키마 검증에서 조용히 통과하면 안 된다.
+    naive_errors = validate_common_event({**ev, "timestamp": "2026-08-29 16:13"})
+    print(f"[6] naive timestamp -> 위반 {naive_errors}")
+    assert any("timestamp" in e for e in naive_errors), "오프셋 없는 timestamp를 못 잡음"
+
+    # 7) related_assets: relation이 허용 enum 밖이면 위반
+    bad_related = {**ev, "related_assets": [{"symbol": "000660", "relation": "임의값"}]}
+    rel_errors = validate_common_event(bad_related)
+    print(f"[7] related_assets.relation 허용 밖 값 -> 위반 {rel_errors}")
+    assert any("relation" in e for e in rel_errors), "허용 밖 relation 값을 못 잡음"
+
+    # 8) related_assets: 정상 relation 값이면 위반 없음
+    good_related = {**ev, "related_assets": [{"symbol": "000660", "name": "SK하이닉스",
+                                              "relation": "correlation_pair"}]}
+    print(f"[8] 정상 related_assets -> 위반 {validate_common_event(good_related)}")
+    assert validate_common_event(good_related) == []
+
+    # 9) EVENT_TYPE_ENUM = ACTIVE 4종 + RESERVED 2종, 서로 겹치지 않음(§2-3)
+    print(f"[9] ACTIVE={EVENT_TYPE_ACTIVE}, RESERVED={EVENT_TYPE_RESERVED}")
+    assert len(EVENT_TYPE_ACTIVE) == 4 and len(EVENT_TYPE_RESERVED) == 2
+    assert set(EVENT_TYPE_ACTIVE).isdisjoint(EVENT_TYPE_RESERVED)
+    assert EVENT_TYPE_ENUM == EVENT_TYPE_ACTIVE + EVENT_TYPE_RESERVED
+
+    # 10) COMMON_EVENT_SOURCES가 §1-2 매핑표의 5개 생성기를 전부 커버하는지
+    covered_modules = {src.split(".")[0] for src in COMMON_EVENT_SOURCES}
+    expected_modules = {"news_event_cards", "market_indicators", "portfolio_report",
+                         "post_trade_review", "rule_trigger_report"}
+    print(f"[10] source 레지스트리가 커버하는 모듈: {sorted(covered_modules)}")
+    assert covered_modules == expected_modules, f"5개 생성기 매핑 누락: {expected_modules - covered_modules}"
+
+    # 11) asset에 필수 키가 빠지면 위반(예: currency 없음)
+    incomplete_asset = {**ev, "asset": {"symbol": "005930", "name": "삼성전자", "market_country": "KR"}}
+    asset_errors = validate_common_event(incomplete_asset)
+    print(f"[11] currency 없는 asset -> 위반 {asset_errors}")
+    assert any("asset" in e for e in asset_errors), "asset 필수 키 누락을 못 잡음"
+
+    # ── A2 Step 2.5: audit_schema() 경로단위 allowlist (§3-3) ──────────────
+
+    # 12) normalize_path — 배열 인덱스를 지워 패턴으로 만드는지
+    p1 = normalize_path("report.change_events[3].priority.priority_score")
+    p2 = normalize_path("report.change_events[0].priority.priority_score")
+    print(f"[12] normalize_path: idx=3 -> {p1!r}, idx=0 -> {p2!r}")
+    assert p1 == p2 == "report.change_events[].priority.priority_score"
+
+    # 13) audit_schema — 등록 안 된 경로에서 금지 필드(정확히 "score")가 나오면 걸리는지
+    dirty_report = {"change_events": [{"priority": {"score": 0.5}}]}
+    violations_unregistered = audit_schema(dirty_report)
+    print(f"[13] 미등록 경로의 'score' 필드 -> 위반 {violations_unregistered}")
+    assert any("score" in v for v in violations_unregistered), "미등록 경로의 금지 필드를 못 잡음"
+
+    # 14) 같은 구조라도 정확히 그 경로가 allowed_paths에 등록되면 위반 없음
+    same_path = normalize_path("report.change_events[0].priority.score")
+    violations_registered = audit_schema(dirty_report, allowed_paths=frozenset({same_path}))
+    print(f"[14] 같은 경로를 allowlist에 등록 -> 위반 {violations_registered}")
+    assert violations_registered == [], "등록된 경로인데도 위반으로 잡힘"
+
+    # 15) 등록된 경로 밖의 다른 위치에 같은 금지 필드가 새로 나타나면 여전히 걸리는지
+    #     (§3-3 "다른 위치에 우연히 score가 다시 나타나면 여전히 걸린다")
+    leaked = {"change_events": [{"priority": {"score": 0.5}}], "other_block": {"score": 99}}
+    violations_leak = audit_schema(leaked, allowed_paths=frozenset({same_path}))
+    print(f"[15] 등록 경로 외 다른 위치의 'score' -> 위반 {violations_leak}")
+    assert any("other_block.score" in v for v in violations_leak), "등록 경로 밖의 금지 필드 누출을 못 잡음"
+    assert not any("change_events[0].priority.score" in v for v in violations_leak), \
+        "등록된 경로까지 다시 걸리면 안 됨"
+
+    # 15b) [2026-08-30 A3 Step 3] extra_forbidden_phrases - 기본값(빈 튜플)은
+    #     기존 호출부와 동일하게 동작해야 한다(하위 호환) - BASE 문구만 검사.
+    plain_text_obj = {"note": "고려해 보세요"}  # BASE에는 없는 문구
+    violations_no_extra = audit_schema(plain_text_obj)
+    print(f"[15b] extra_forbidden_phrases 생략 -> 위반 {violations_no_extra}")
+    assert violations_no_extra == [], "기본값(빈 튜플)인데 BASE에 없는 문구가 걸림 - 하위 호환 깨짐"
+
+    # 15c) extra_forbidden_phrases를 넘기면 그 문구도 같이 검사되는지
+    violations_with_extra = audit_schema(plain_text_obj, extra_forbidden_phrases=("고려해 보세요",))
+    print(f"[15c] extra_forbidden_phrases=('고려해 보세요',) -> 위반 {violations_with_extra}")
+    assert any("고려해 보세요" in v for v in violations_with_extra), "확장 문구를 못 잡음"
+
+    # 15d) extra_forbidden_phrases가 BASE 문구 검사를 밀어내지 않고 같이 검사하는지
+    both = audit_schema({"note": "추천 + 고려해 보세요"}, extra_forbidden_phrases=("고려해 보세요",))
+    print(f"[15d] BASE 문구('추천')+확장 문구 동시 포함 -> 위반 {both}")
+    assert any("추천" in v for v in both) and any("고려해 보세요" in v for v in both), \
+        "BASE와 확장 문구가 동시에 검사되지 않음"
+
+    # ── A2 Step 3: Event Prioritization (4인자, §3-1) ──────────────────────
+
+    base_asset = {"symbol": "005930", "name": "삼성전자", "market_country": "KR", "currency": "KRW"}
+    ev_today = build_common_event(
+        timestamp="2026-08-29T00:00:00+00:00", asset=base_asset,
+        source="news_event_cards.anomaly", event_type="거래량_급증",
+        reliability=1.0, observed_value=5000, baseline=1000, change=5.0,
+    )
+
+    # 16) Novelty — 과거 이력이 전혀 없으면 1.0
+    print(f"[16] 과거 이력 없음 -> Novelty={compute_novelty(ev_today, [])}")
+    assert compute_novelty(ev_today, []) == 1.0
+
+    # 17) Novelty — 바로 전날 같은 (symbol, event_type) 이벤트가 있으면 강하게 감쇠
+    ev_yesterday = {**ev_today, "timestamp": "2026-08-28T00:00:00+00:00"}
+    n_1day = compute_novelty(ev_today, [ev_yesterday])
+    print(f"[17] 1일 전 같은 조합 재등장 -> Novelty={n_1day} (lookback={NOVELTY_LOOKBACK_DAYS}일)")
+    assert n_1day == round(1 / NOVELTY_LOOKBACK_DAYS, 4)
+
+    # 18) Novelty — lookback_days 이상 지났으면 1.0으로 상한(완전히 새로움과 동일 취급)
+    ev_long_ago = {**ev_today, "timestamp": "2026-08-01T00:00:00+00:00"}
+    n_far = compute_novelty(ev_today, [ev_long_ago])
+    print(f"[18] {NOVELTY_LOOKBACK_DAYS}일보다 훨씬 전 재등장 -> Novelty={n_far}")
+    assert n_far == 1.0
+
+    # 19) Novelty — 종목이나 event_type이 다르면 이력으로 안 침(무관한 이력 무시)
+    ev_other_symbol = {**ev_yesterday, "asset": {**base_asset, "symbol": "000660"}}
+    ev_other_type = {**ev_yesterday, "event_type": "가격_갭"}
+    n_unrelated = compute_novelty(ev_today, [ev_other_symbol, ev_other_type])
+    print(f"[19] 다른 종목/다른 event_type 이력만 있음 -> Novelty={n_unrelated}")
+    assert n_unrelated == 1.0, "무관한 이력이 Novelty에 영향을 주면 안 됨"
+
+    # 20) Magnitude — change의 절대값(방향 배제)
+    ev_negative_change = {**ev_today, "change": -5.0}
+    print(f"[20] change=-5.0 -> Magnitude={compute_magnitude(ev_negative_change)}")
+    assert compute_magnitude(ev_negative_change) == 5.0
+    assert compute_magnitude({**ev_today, "change": None}) == 0.0
+
+    # 21) compute_priority — 4개 인자의 단순 곱인지 수기 검증
+    result = compute_priority(ev_today, portfolio_relevance=0.5, prior_events=[])
+    expected = round(1.0 * 1.0 * 0.5 * 5.0, 4)  # reliability=1.0, novelty=1.0(이력없음), relevance=0.5, magnitude=5.0
+    print(f"[21] priority_score={result['priority_score']} (기대값 {expected})")
+    assert result["priority_score"] == expected
+    assert set(result["factors"]) == {"reliability", "novelty", "portfolio_relevance", "magnitude"}
+
+    # 22) attach_priorities — change_events 각각에 .priority가 붙고, 원본은 안 바뀌고,
+    #     audit_schema()로 검사해도(§3-3 allowlist 적용) 위반이 없는지
+    sample_report = {"generated_at": "2026-08-29T00:00:00+00:00",
+                      "schema": "explanation_only_v3.2", "cards": [],
+                      "change_events": [ev_today, {**ev_today, "asset": {**base_asset, "symbol": "000660"}}]}
+    prioritized = attach_priorities(sample_report, {"005930": 0.8, "000660": 0.2})
+    print(f"[22] 원본 change_events에 priority 키 있음={'priority' in sample_report['change_events'][0]}, "
+          f"결과 첫 이벤트 priority_score={prioritized['change_events'][0]['priority']['priority_score']}")
+    assert "priority" not in sample_report["change_events"][0], "원본 리포트를 변경하면 안 됨"
+    assert all("priority" in e for e in prioritized["change_events"])
+    assert "_audit_violations" not in prioritized, f"정상 결과인데 감사 위반 태그가 붙음: {prioritized.get('_audit_violations')}"
+    assert prioritized["change_events"][0]["priority"]["factors"]["portfolio_relevance"] == 0.8
+    assert prioritized["change_events"][1]["priority"]["factors"]["portfolio_relevance"] == 0.2
+
+    # 23) attach_priorities 결과가 실제로 PRIORITY_ALLOWED_FIELD_PATHS와 정합적인지
+    #     — 등록된 경로 문자열이 attach_priorities가 실제로 만드는 경로와 같은 패턴인지
+    actual_path = normalize_path(f"report.change_events[0].priority.priority_score")
+    print(f"[23] 등록된 경로={sorted(PRIORITY_ALLOWED_FIELD_PATHS)}, 실제 생성 경로 패턴={actual_path}")
+    assert actual_path in PRIORITY_ALLOWED_FIELD_PATHS
+
+    # ── A2 Step 4: Portfolio Relevance("재가중", §4-2) ──────────────────────
+
+    fake_real = {"cash": 4_000_000.0,
+                 "positions": [{"symbol": "005930", "eval_amount_krw": 4_000_000.0},
+                               {"symbol": "000660", "eval_amount_krw": 2_000_000.0}]}
+    fake_watchlist_empty = {"symbols": []}
+    fake_watchlist_with = {"symbols": ["NVDA"]}
+
+    # 24) 보유 종목 - relevance_value가 보유 비중(weight_pct/100)과 같은지
+    ev_held = {"asset": {"symbol": "005930"}}
+    rel_held = compute_portfolio_relevance(ev_held, fake_real, fake_watchlist_empty)
+    print(f"[24] 보유(005930) relevance: {rel_held}")
+    assert rel_held["is_held"] is True and rel_held["is_watched"] is False
+    total = fake_real["cash"] + sum(p["eval_amount_krw"] for p in fake_real["positions"])  # 10,000,000
+    expected_weight = round(4_000_000.0 / total * 100, 2)
+    assert rel_held["weight_pct"] == expected_weight
+    assert rel_held["relevance_value"] == expected_weight / 100
+
+    # 25) 관심종목(비보유) - watchlist에 있으면 WATCHLIST_RELEVANCE_WEIGHT, 없으면 0.0
+    ev_watched = {"asset": {"symbol": "NVDA"}}
+    rel_watched = compute_portfolio_relevance(ev_watched, fake_real, fake_watchlist_with)
+    rel_unrelated = compute_portfolio_relevance(ev_watched, fake_real, fake_watchlist_empty)
+    print(f"[25] 관심종목(watchlist 있음) relevance={rel_watched['relevance_value']}, "
+          f"(watchlist 없음) relevance={rel_unrelated['relevance_value']}")
+    assert rel_watched["is_held"] is False and rel_watched["is_watched"] is True
+    assert rel_watched["relevance_value"] == WATCHLIST_RELEVANCE_WEIGHT
+    assert rel_unrelated["relevance_value"] == 0.0, "보유도 관심종목도 아니면 0.0이어야 함"
+
+    # 26) build_portfolio_relevance_map — 여러 종목을 한 번에, compute_portfolio_relevance와
+    #     같은 값을 내는지
+    rel_map = build_portfolio_relevance_map(["005930", "000660", "NVDA"], fake_real, fake_watchlist_with)
+    print(f"[26] relevance map: {rel_map}")
+    assert rel_map["005930"] == rel_held["relevance_value"]
+    assert rel_map["NVDA"] == WATCHLIST_RELEVANCE_WEIGHT
+    assert rel_map["000660"] == round(2_000_000.0 / total * 100, 2) / 100
+
+    # 27) "필터링이 아니라 재가중" — 보유도 관심종목도 아닌 이벤트가 섞여 들어와도
+    #     attach_priorities()가 이벤트 자체를 들어내지 않고 relevance_value=0.0만
+    #     매기는지(집합에서 빼지 않는다는 §4-2 확정 사항의 코드 레벨 확인)
+    mixed_events = [{**ev_today, "asset": {**base_asset}},
+                     {**ev_today, "asset": {**base_asset, "symbol": "999999"}}]  # 보유/관심 밖 가상 종목
+    mixed_report = {"change_events": mixed_events}
+    mixed_map = build_portfolio_relevance_map(["005930", "999999"], fake_real, fake_watchlist_empty)
+    mixed_result = attach_priorities(mixed_report, mixed_map)
+    print(f"[27] 보유/관심 밖 종목 포함 -> change_events 개수: "
+          f"입력 {len(mixed_events)} / 출력 {len(mixed_result['change_events'])}")
+    assert len(mixed_result["change_events"]) == len(mixed_events), \
+        "Portfolio Relevance 단계가 이벤트를 들어내면 안 됨(필터링 아님, 재가중만)"
+    assert mixed_result["change_events"][1]["priority"]["factors"]["portfolio_relevance"] == 0.0
+
+    print("\n모든 자체 검증 통과.")
+
+
+def main():
+    p = argparse.ArgumentParser(description="analyze_lib 공유 로직 자체 검증")
+    p.add_argument("--self-test", action="store_true")
+    a = p.parse_args()
+    if a.self_test:
+        run_self_test()
+
+
+if __name__ == "__main__":
+    main()

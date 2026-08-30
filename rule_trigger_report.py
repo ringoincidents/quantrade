@@ -26,11 +26,9 @@
 """
 import argparse
 import json
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 
 from analyze_lib import FORBIDDEN_FIELDS_BASE, FORBIDDEN_PHRASES_BASE
-
-KST = timezone(timedelta(hours=9))
 
 # 리포트 어디에도 들어가면 안 되는 필드/문구. analyze_lib.FORBIDDEN_*_BASE(여러
 # 모듈이 공유하는 기본 세트, 2026-08-10)에 이 리포트 고유 항목만 더한다 —
@@ -195,8 +193,14 @@ def generate(symbol, position, trigger, *, closes=None, highs=None, lows=None,
     플로우와 프록시 세션이 각자 다른 방식으로 데이터를 얻더라도 리포트 형식과
     금지어 규율은 이 함수 하나로 통일된다."""
     report = {
-        "schema": "rule_trigger_report_v1",
-        "generated_at": generated_at or datetime.now(KST).strftime("%Y-%m-%d %H:%M"),
+        # 2026-08-29 A2 Step 1 정규화(A2_Intelligence_Layer_Design.md §1-3):
+        # 스키마 버전을 나머지 4개 생성기와 같은 "_v3.2" 체계로 통일하고,
+        # generated_at을 KST naive 문자열에서 나머지 4개와 같은 UTC ISO 8601로
+        # 바꿨다. 하위 호환 확인(§1-3에서 재확인한 사실): autoexec.py는 이 값을
+        # 파싱하지 않고, index.html의 fmtBasis()는 naive/ISO 두 형식을 이미 다
+        # 처리한다 — 형식 변경이 기존 소비처를 깨뜨리지 않는다.
+        "schema": "rule_trigger_report_v3.2",
+        "generated_at": generated_at or datetime.now(timezone.utc).isoformat(),
         "symbol": symbol,
         "name": position.get("name", symbol),
         "trigger": build_trigger_section(trigger),
