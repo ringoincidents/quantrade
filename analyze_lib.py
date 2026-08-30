@@ -131,7 +131,7 @@ def normalize_path(path):
     return re.sub(r"\[\d+\]", "[]", path)
 
 
-def audit_schema(obj, path="report", allowed_paths=frozenset()):
+def audit_schema(obj, path="report", allowed_paths=frozenset(), extra_forbidden_phrases=()):
     """FORBIDDEN_FIELDS_BASE/FORBIDDEN_PHRASES_BASE 재귀 검사 — 각 생성기의
     audit()(rule_trigger_report.py/market_indicators.py/news_event_cards.py에
     거의 동일하게 복붙돼 있음)과 같은 패턴이되, 위반 예외를 **파일 전체에서
@@ -142,19 +142,30 @@ def audit_schema(obj, path="report", allowed_paths=frozenset()):
 
     2026-08-29 PM 확정: 신규 예외는 이 경로단위 방식만 쓴다. 기존 파일단위
     예외(indicator_significance_test.py의 signal, portfolio_report.py의
-    rank/ranking)는 소급 전환하지 않는다 — 이 함수를 쓰지 않고 그대로 둔다."""
+    rank/ranking)는 소급 전환하지 않는다 — 이 함수를 쓰지 않고 그대로 둔다.
+
+    2026-08-30 A3 Step 2 확장: `extra_forbidden_phrases` — 기존 5개 생성기가
+    각자 FORBIDDEN_PHRASES = FORBIDDEN_PHRASES_BASE + (파일 고유 문구)로 하던
+    것과 같은 역할을 이 함수도 하게 한 것. 호출자가 자기 파일 고유의 금지
+    문구를 넘기면 BASE 문구와 함께 검사한다 — 기본값 빈 튜플이라 기존
+    호출부(attach_priorities() 등)는 동작이 그대로다(하위 호환).
+    `extra_forbidden_fields`는 만들지 않았다 — 지금까지 이 함수를 실제로
+    쓰는 곳(A2 Prioritization의 priority_score)도, 설계된 곳(A3 AI
+    Briefing)도 FORBIDDEN_FIELDS_BASE 밖의 필드 확장이 필요하다는 사실이
+    아직 없다(A3_AI_Briefing_Design.md §2-5, 필드명 충돌 검사 완료 - 충돌
+    없음) — 필요해지면 그때 같은 방식으로 추가한다."""
     bad = []
     if isinstance(obj, dict):
         for k, v in obj.items():
             field_path = f"{path}.{k}"
             if k.lower() in FORBIDDEN_FIELDS_BASE and normalize_path(field_path) not in allowed_paths:
                 bad.append(f"{field_path} (금지 필드)")
-            bad += audit_schema(v, field_path, allowed_paths)
+            bad += audit_schema(v, field_path, allowed_paths, extra_forbidden_phrases)
     elif isinstance(obj, list):
         for i, v in enumerate(obj):
-            bad += audit_schema(v, f"{path}[{i}]", allowed_paths)
+            bad += audit_schema(v, f"{path}[{i}]", allowed_paths, extra_forbidden_phrases)
     elif isinstance(obj, str):
-        for ph in FORBIDDEN_PHRASES_BASE:
+        for ph in FORBIDDEN_PHRASES_BASE + tuple(extra_forbidden_phrases):
             if ph in obj:
                 bad.append(f"{path}: 금지 문구 '{ph}'")
     return bad
@@ -1178,6 +1189,24 @@ def run_self_test():
     assert any("other_block.score" in v for v in violations_leak), "등록 경로 밖의 금지 필드 누출을 못 잡음"
     assert not any("change_events[0].priority.score" in v for v in violations_leak), \
         "등록된 경로까지 다시 걸리면 안 됨"
+
+    # 15b) [2026-08-30 A3 Step 3] extra_forbidden_phrases - 기본값(빈 튜플)은
+    #     기존 호출부와 동일하게 동작해야 한다(하위 호환) - BASE 문구만 검사.
+    plain_text_obj = {"note": "고려해 보세요"}  # BASE에는 없는 문구
+    violations_no_extra = audit_schema(plain_text_obj)
+    print(f"[15b] extra_forbidden_phrases 생략 -> 위반 {violations_no_extra}")
+    assert violations_no_extra == [], "기본값(빈 튜플)인데 BASE에 없는 문구가 걸림 - 하위 호환 깨짐"
+
+    # 15c) extra_forbidden_phrases를 넘기면 그 문구도 같이 검사되는지
+    violations_with_extra = audit_schema(plain_text_obj, extra_forbidden_phrases=("고려해 보세요",))
+    print(f"[15c] extra_forbidden_phrases=('고려해 보세요',) -> 위반 {violations_with_extra}")
+    assert any("고려해 보세요" in v for v in violations_with_extra), "확장 문구를 못 잡음"
+
+    # 15d) extra_forbidden_phrases가 BASE 문구 검사를 밀어내지 않고 같이 검사하는지
+    both = audit_schema({"note": "추천 + 고려해 보세요"}, extra_forbidden_phrases=("고려해 보세요",))
+    print(f"[15d] BASE 문구('추천')+확장 문구 동시 포함 -> 위반 {both}")
+    assert any("추천" in v for v in both) and any("고려해 보세요" in v for v in both), \
+        "BASE와 확장 문구가 동시에 검사되지 않음"
 
     # ── A2 Step 3: Event Prioritization (4인자, §3-1) ──────────────────────
 
