@@ -1,8 +1,18 @@
-# QuanTrade A3 AI Briefing 설계 문서 (2026-08-30)
+# QuanTrade A3 AI Briefing 설계 문서 (2026-08-30, Step 3 반영)
 
-> **코드 구현 없음 — 설계 문서만.** 코드 구현은 이 문서 PM 검토 후 별도 지시.
+> **코드 구현 없음 — 설계 문서만(단, audit_schema() 확장은 예외 — 아래 참고).**
+> 나머지 코드 구현은 이 문서 PM 검토 후 별도 지시.
 > **Step 1(입력)+Step 2(출력 스키마)가 확정되기 전엔 Step 3~4 착수 금지**
-> (PM 지시 원문) — 이 문서는 Step 1+2만 담고, 완료 시 중간보고한다.
+> (PM 지시 원문) — Step 1+2 중간보고 후 PM이 Step 3 착수를 승인해 이어서
+> 반영한다.
+>
+> **Step 3 착수 지시로 예외적으로 코드 변경 1건 발생**: `analyze_lib.py`의
+> `audit_schema()`에 `extra_forbidden_phrases` 파라미터를 추가했다(커밋
+> `2166d94`, self-test 포함, 이 문서와 별도 커밋으로 분리 — PM 지시
+> "먼저 별도 커밋으로 분리, self-test 재실행 후 확정" 그대로). AI Briefing
+> 생성기 자체(예: `ai_briefing.py`)는 여전히 코드가 없다 — 이 확장은
+> A2 Step 3가 만든 공용 함수의 시그니처만 넓힌 것이고, 아직 아무도 이
+> 파라미터를 실제로 쓰지 않는다.
 >
 > 조사 근거: 이 세션에서 재확인한 기존 코드(`rule_trigger_report.py`/
 > `market_indicators.py`/`news_event_cards.py`/`portfolio_report.py`/
@@ -278,35 +288,138 @@ PM이 예시로 든 "그래서 ~하는 게 좋습니다" 계열을 실제로 점
 
 ---
 
-## 부록 A. Step 3~4에서 다룰 것 (이 문서가 확정 안 함)
+## Step 3. 호출 지점·비용 설계
 
-1. 호출 시점 — `daily.yml`(11:00 UTC)/`news_event_cards.yml`(09:50 UTC)/
-   `market_indicators.yml`(10:10 UTC) 중 어디에 얹을지, 아니면 별도
-   워크플로로 뺄지. change_events가 news_event_cards.yml 산출물이라 그
-   워크플로 끝단이 자연스러운 후보라는 점만 이 문서에서 관찰로 남긴다
-   (결정은 Step 3).
-2. `CLAUDE_API_KEY` 호출 비용 추정, §19.5 월 상한과의 대조 — **§19.5
-   숫자를 이 세션이 갖고 있지 않다.** Step 3 착수 시 PM에게 요청 필요.
-3. AI 호출 실패 시 change_events 원자료가 TODAY에 그대로 뜨는지 확인 —
-   이미 사실이다: `index.html`의 `loadTodayEvents()`(2026-08-30 A2→A1
-   연결)는 AI Briefing과 무관하게 독립적으로 `change_events`를 직접
-   읽어 렌더링한다(현재 아키텍처에 AI Briefing이 껴 있지 않음). AI
-   Briefing이 추가되어도 이 경로를 안 건드리면 "AI가 단일 장애점이 되지
-   않는다"는 요구사항이 설계상 자동으로 충족된다 — Step 3에서 이 관찰을
-   전제로 삼을 것을 제안.
-4. L3의 "과거/현재 설명일 때만" 시제 제약을 프롬프트가 어떻게 강제할지
+### 3-1. 비용 추정치
+
+**전제 사실**: 이 세션은 §19.5 월 상한 숫자를 갖고 있지 않다 — PM이
+직접 확인해준 대로 "아직 산출된 적 없음"(A0 조사 §8에서 "Phase A 착수
+시 산출" 예정이었던 항목, 미수행)이 사실이다. 그래서 이번 Step 3는
+상한과의 대조 없이 **추정치만** 산출한다. 상한 설정은 이 추정치를 보고
+PM이 정한다.
+
+**모델/단가**: 이 저장소가 실제로 쓰는 모델 문자열은 `claude-sonnet-4-6`
+(`analyze_lib.ask_claude_decision`/`news_event_experiment.JUDGE_MODEL`과
+동일). Anthropic 공식 단가(2026-06-24 기준 캐시된 표, `claude-api` 스킬로
+확인): **입력 $3.00/1M 토큰, 출력 $15.00/1M 토큰.**
+
+**호출 1회당 토큰 추정** — Step 1(입력)·Step 2(출력) 설계를 그대로
+기준으로 계산했다(change_events는 TODAY와 동일하게 상위 3건, §1-1):
+
+| 구성 | 추정 토큰 | 근거 |
+|---|---|---|
+| 시스템 프롬프트(L1~L4 규칙 + 출력 스키마 지시 + 예시 2~3개, Step 4에서 확정) | 1,200~1,800 | 이 저장소의 기존 프롬프트(`build_explanation_prompt`, `ask_claude_decision`)보다 규칙·예시가 많아 더 김 |
+| 입력 데이터(change_events 3건 + portfolio_rules 0~3건 + real_portfolio 요약) | 400~550 | §1-2 JSON 구조 기준 실측 근사 |
+| **입력 합계** | **약 1,600~2,350 토큰** | |
+| 출력(summary+key_changes 3건+portfolio_notes+possible_explanations+confirm_items+disclaimer) | 500~700 | §2-1 JSON 구조 기준 실측 근사 |
+
+**호출 1회당 비용** (중심값: 입력 2,000 / 출력 600):
+`2,000/1,000,000 × $3.00 + 600/1,000,000 × $15.00 = $0.006 + $0.009 = $0.015`
+(약 15원 안팎, 환율에 따라 다름 — 이하 전부 USD로 표기).
+
+### 3-2. 일일 호출 횟수 추정 — "change_events 있을 때만" 반영
+
+PM 지시대로 change_events가 있는 날만 호출한다고 전제하고, 그 빈도를
+**실측**했다. `news_event_cards.json`의 git 히스토리(29개 커밋, A2 Step 3
+설계의 Novelty 조사에서 이미 확보한 158건 데이터)를 재사용해 "이상행동
+카드가 하나라도 있었던 날"의 비율을 계산했다:
+
+```
+관측 기간: 2026-08-04 ~ 2026-08-28 (25개 고유 날짜)
+이상행동 카드가 있었던 날: 10일
+비율: 40.0%
+```
+
+**한계(정직하게 기록)**: 이 데이터는 **A2 Step 2 이전의 구 임계값**
+(`VOLATILITY_MULTIPLE` 배율 방식 등, 지금은 백분위 방식으로 교체됨)으로
+만들어진 카드다. 새 임계값(`VOLATILITY_PERCENTILE_THRESHOLD=90`)에서의
+실제 발동 빈도는 아직 관측된 적이 없다 — 그래서 40%는 **참고용 근사치**이지
+확정된 발동률이 아니다. 이 자릿수 정도(하루 걸러 한 번보다는 드물고,
+매일보다는 훨씬 드문 수준)라는 감을 잡는 용도로만 쓴다.
+
+**월간 호출 횟수 추정**: 30일 × 40% ≈ **12회/월**.
+
+### 3-3. 월간 비용 추정 — 최종
+
+| 시나리오 | 호출/월 | 회당 비용 | 월간 추정 |
+|---|---|---|---|
+| 중심값(§3-1 중심값 × §3-2 실측 비율) | 12회 | $0.015 | **약 $0.18** |
+| 보수적 상한(모든 날 호출 + 최대 크기 프롬프트, 입력 3,000/출력 1,000) | 30회 | $0.024 | **약 $0.72** |
+
+**참고(비교 대상, 요청받지 않았으나 상한 판단에 참고될 수 있어 병기)**:
+이 저장소는 이미 `news_event_cards.py`의 `ask_explanation()`을 최대
+`MAX_CARDS`(8)건까지 1일 1회 호출하고 있다(같은 모델, `max_tokens=400`
+고정) — AI Briefing은 이미 발생 중인 이 지출 위에 월 1달러 미만을
+더하는 정도라는 게 위 표의 함의다. 이 비교는 상한을 얼마로 정할지에
+대한 이 문서의 의견이 아니라, 판단에 참고할 수 있는 기존 지출 규모를
+사실로만 남긴 것이다.
+
+### 3-4. 호출 지점 (제안)
+
+`change_events`는 `news_event_cards.yml`(09:50 UTC)의 산출물이다. 이
+워크플로의 기존 스텝 구조(`.github/workflows/news_event_cards.yml`,
+실제 파일 확인)를 보면:
+
+```
+Self-test → Generate explanation cards(news_event_cards.py 실행,
+  news_event_cards.json에 change_events 씀) → 예측성 필드 검증 →
+  실시간 트랙 무변경 검증 → Commit cards
+```
+
+**제안**: "Generate explanation cards" 스텝 **바로 다음**에 새 스텝을
+추가한다 — 방금 쓰여진 `news_event_cards.json`의 `change_events`가
+비어 있지 않을 때만 `python ai_briefing.py`(가칭)를 실행하고, 그 산출물
+(`ai_briefing.json`, 가칭)을 같은 "Commit cards" 스텝에서 함께 커밋한다.
+**별도 워크플로/스케줄을 새로 만들지 않는다** — change_events와 같은
+실행 안에서 만들어야 "방금 만든 이벤트를 브리핑한다"는 인과관계가
+어긋날 일이 없고(다른 스케줄이면 그 사이에 change_events가 또 바뀔 수
+있음), cron 슬롯을 하나 더 늘려 다른 워크플로와 커밋이 겹칠 위험도
+안 만든다.
+
+`change_events` 비어있음 판정은 셸에서 가볍게 확인 가능(예:
+`python -c "import json,sys; d=json.load(open('news_event_cards.json')); sys.exit(0 if d.get('change_events') else 1)"`
+같은 가드) — 이 문서는 방식만 제안하고 정확한 스크립트는 Step 4(코드
+구현) 몫으로 남긴다.
+
+### 3-5. AI 호출 실패 시 fallback — 재확인 결과
+
+**이미 사실이다(코드로 재확인 완료).** `index.html`을 다시 읽었다 —
+`loadTodayEvents()`(TODAY "오늘의 사건" 카드)는 `news_event_cards.json`을
+직접 fetch해서 `change_events`를 렌더링하고, AI Briefing 관련 파일/필드를
+**전혀 참조하지 않는다**(`grep`으로 "ai_briefing"/"briefing" 문자열이
+`index.html`에 없음을 확인). 즉 AI Briefing이 아직 존재하지 않는 지금도,
+그리고 나중에 추가된 뒤에도, `loadTodayEvents()`를 건드리지 않는 한
+"AI 호출이 실패해도 change_events 원자료는 그대로 뜬다"는 요구사항이
+**설계상 자동으로 충족된다.**
+
+**Step 4(코드 구현)가 지켜야 할 원칙으로 이 문서가 못박아 둔다**: AI
+Briefing UI(가칭 "AI 브리핑" 섹션)를 나중에 TODAY에 추가할 때, 그건
+`loadTodayEvents()`와 **별개의 새 카드/새 로더**로 만들고, 기존
+`loadTodayEvents()`의 동작(실패 시 에러 메시지, 성공 시 change_events
+나열)은 절대 변경하지 않는다 — AI Briefing 카드가 로딩 실패해도 TODAY의
+나머지 카드에 영향이 없어야 한다(index.html의 기존 원칙, "각 뷰 독립
+fetch로 하나가 실패해도 나머지는 안 죽는다"를 그대로 따름).
+
+---
+
+## 부록 A. Step 4에서 다룰 것 (이 문서가 확정 안 함)
+
+1. L3의 "과거/현재 설명일 때만" 시제 제약을 프롬프트가 어떻게 강제할지
    구체 문구.
-5. 시스템 프롬프트 초안, 좋은 예/나쁜 예.
+2. 시스템 프롬프트 초안, 좋은 예/나쁜 예 2~3개.
+3. `ai_briefing.py`(가칭)의 실제 구현 — `run()`/`audit()` 또는
+   `audit_schema()` 호출/self-test 등 이 저장소 기존 생성기 관례를 따를지
+   확정.
+4. §3-4가 제안한 "change_events 비어있음" 가드 스크립트의 정확한 형태.
 
 ## 부록 B. PM 확인 필요 목록
 
 1. **§1-3**: `priority_score`를 프롬프트에 아예 안 넣는 C안을 이 문서가
    제안했다 — A안(숫자는 주되 인용 금지 지시)이나 B안(등급화)을 원하면
    재작성 필요.
-2. **§2-3**: `audit_schema()`에 `extra_forbidden_phrases` 파라미터를
-   추가하는 (b)안을 제안했다 — 기존 5개 파일처럼 새 `audit()`를 통짜로
-   만드는 (a)안을 원하면 재작성 필요. (b)를 택해도 실제 시그니처 변경은
-   코드 구현 단계(별도 지시) 몫이라는 점은 이 문서가 이미 전제했다.
+2. ~~**§2-3**: `audit_schema()`에 `extra_forbidden_phrases` 파라미터를
+   추가하는 (b)안~~ → **PM이 Step 3 착수 지시에서 확정, 커밋 `2166d94`로
+   반영 완료.**
 3. **§2-2**: 가설 필드에 `is_hypothesis: true` 불리언 + 텍스트 내
    명시 문구를 이중으로 강제하는 안 — 텍스트 명시만으로 충분하다고
    보면 불리언 필드는 과설계일 수 있다.
