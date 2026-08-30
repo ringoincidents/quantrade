@@ -97,6 +97,7 @@
          color: var(--text-0); line-height: 1.4; cursor: default; min-height: 44px; }
   .pos.tappable { cursor: pointer; border-radius: var(--radius-sm); margin: 0 -2px; padding: 12px; }
   .pos.tappable:active { background: rgba(255, 255, 255, 0.05); }
+  .today-item-text.tappable { cursor: pointer; }
   .pos:last-child { border-bottom: none; }
   .pos .pos-main { display: flex; flex-direction: column; gap: 3px; }
   .pos .pos-sub { font-size: 12px; color: var(--text-3); line-height: 1.4; font-weight: 400; }
@@ -349,9 +350,12 @@
 
   <div class="today-card">
     <div class="today-card-head">
-      <h3>오늘의 사건 <span class="badge-mock">목업</span></h3>
+      <h3>오늘의 사건 <span class="badge-real">실데이터</span></h3>
       <button class="link-more" onclick="goToTab('events')">전체보기 →</button>
     </div>
+    <!-- [2026-08-30 A2→A1 연결] news_event_cards.json의 change_events(공통
+         스키마 + Prioritization priority_score)를 loadTodayEvents()가 채운다.
+         나머지 3개 카드(규칙/시장/활동)는 여전히 목업 — 이번 작업 범위 밖. -->
     <div id="today-events-list"></div>
   </div>
 
@@ -695,12 +699,11 @@ const TODAY_MOCK_RULES = [
 const TODAY_MOCK_MARKET = [
   { id: 'mock-market-1', text: '(목업) 예시 종목 변동성 20일 백분위 92.0' },
 ];
-const TODAY_MOCK_EVENTS = [
-  { id: 'mock-event-1', text: '(목업) 예시 종목 [공시] 요약 한 줄' },
-];
 const TODAY_MOCK_ACTIVITY = [
   { id: 'mock-activity-1', text: '(목업) 최신 사후점검 리포트 발췌 — 노출 변화 없음' },
 ];
+// TODAY_MOCK_EVENTS는 2026-08-30 A2→A1 연결로 제거됨 — "오늘의 사건" 카드는
+// loadTodayEvents()가 news_event_cards.json의 change_events로 채운다.
 
 function renderTodayMockList(items) {
   return items.map(it => `<div class="today-item">
@@ -712,10 +715,9 @@ function renderTodayMockList(items) {
 function renderTodayMock() {
   document.getElementById('today-rules-list').innerHTML = renderTodayMockList(TODAY_MOCK_RULES);
   document.getElementById('today-market-list').innerHTML = renderTodayMockList(TODAY_MOCK_MARKET);
-  document.getElementById('today-events-list').innerHTML = renderTodayMockList(TODAY_MOCK_EVENTS);
   document.getElementById('today-activity-list').innerHTML = renderTodayMockList(TODAY_MOCK_ACTIVITY);
   document.getElementById('today-basis').textContent =
-    '오늘 ' + new Date().toISOString().slice(0, 10) + ' — 위 4개 카드는 목업입니다(A2 이후 실데이터 연결)';
+    '오늘 ' + new Date().toISOString().slice(0, 10) + ' — "오늘의 사건"은 A2 파이프라인 실데이터, 나머지 3개 카드는 여전히 목업입니다(개별 연결 예정)';
 }
 
 // 시스템 상태 스트립은 A2 합성 대상이 아닌 단순 passthrough라 A1에서
@@ -1302,6 +1304,92 @@ async function loadNewsCards(bust) {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// 2b. TODAY "오늘의 사건" — [2026-08-30 A2→A1 연결 지시] news_event_cards.json의
+//     change_events(공통 스키마 9필드 + Prioritization의 priority_score)를
+//     읽어 우선순위 상위 N건만 노출한다. cards(뉴스/이상행동 설명 카드,
+//     EVENTS 화면이 이미 씀)와는 별개 배열 — 여기는 A2 Step 2~4가 만드는
+//     구조화 이벤트 쪽만 다룬다.
+//
+//     상위 몇 건을 보여줄지(PM 확인 완료, 2026-08-30): 고정 3건. 임계값
+//     방식은 채택하지 않았다 — 값 튜닝이 필요한 새 임계값(검증 근거 없음)을
+//     또 만들지 않기 위함이고, TODAY가 "한눈에 보는 요약" 카드라는 A1 설계
+//     의도와도 고정 소량 노출이 더 맞는다.
+//
+//     Alpha Lab Research 뷰와는 자연히 섞이지 않는다 — Research는
+//     indicator_significance_report.json/backtest_report.json/
+//     news_event_calibration_log.json 3개만 읽고(§10 아래 loadIndicatorLearning
+//     등) news_event_cards.json을 아예 fetch하지 않는다. Phase B RESERVED
+//     event_type(환율_급변/뉴스빈도_급증)도 그걸 만드는 계산 로직 자체가
+//     아직 없어(analyze_lib.py EVENT_TYPE_RESERVED, A2 설계 §2-3) change_events에
+//     나타날 수 없다 — 별도 필터링 코드가 필요 없다(둘 다 사실이지, 이
+//     화면이 뭔가를 걸러내서 막고 있는 게 아니다).
+const TODAY_EVENTS_LIMIT = 3;
+
+// event_type별 사실 서술 포맷 — analyze_lib.py의 detect_anomalies()가 만드는
+// facts 문장(예: "거래량 20일 평균 대비 5.0배")과 같은 어투를 그대로 재현한다.
+// change_event 자체에는 완성 문장이 없다(공통 스키마 9필드에 fact_text가
+// 없음, A2 Step 1 확정) - observed_value/baseline/change 수치에서 매번
+// 다시 조립한다.
+const CHANGE_EVENT_FACT_FORMATTERS = {
+  '거래량_급증': ev => `거래량 20일 평균 대비 ${fmtNum(ev.change, 1)}배`,
+  '가격_갭': ev => `전일 종가 대비 시가 갭 ${ev.change >= 0 ? '+' : ''}${fmtNum(ev.change, 1)}%`,
+  '변동성_급증': ev => `최근 20일 변동성이 과거 분포 대비 ${fmtNum(ev.change, 0)}백분위`,
+};
+
+function formatChangeEventFact(ev) {
+  const formatter = CHANGE_EVENT_FACT_FORMATTERS[ev.event_type];
+  if (formatter) return formatter(ev);
+  // 아직 이 파이프라인이 만들지 않는 event_type(상관관계_변화 등)을 위한
+  // 안전한 기본값 — 판단 문구 없이 관측 수치만 기계적으로 나열한다.
+  const parts = [`관측값 ${fmtNum(ev.observed_value, 2)}`];
+  if (ev.baseline !== null && ev.baseline !== undefined) parts.push(`기준값 ${fmtNum(ev.baseline, 2)}`);
+  if (ev.change !== null && ev.change !== undefined) parts.push(`변화 ${fmtNum(ev.change, 2)}`);
+  return parts.join(', ');
+}
+
+// §16.1 "확인함" 훅용 안정적 식별자 — 종목+event_type+timestamp 조합이면
+// 같은 사건을 가리키는 한 항상 같은 id가 나온다(재렌더링/정렬 순서 변경에
+// 안전 - EVENTS 화면의 인덱스 기반 id와 달리 배열 위치에 의존하지 않는다).
+function changeEventHookId(ev) {
+  const a = ev.asset || {};
+  return `changeevent-${a.symbol || ''}-${ev.event_type || ''}-${ev.timestamp || ''}`;
+}
+
+function renderTodayEventItem(ev) {
+  if (!assertNoPredictiveFields(ev, '변화 이벤트')) return '';
+  const a = ev.asset || {};
+  const score = ev.priority && typeof ev.priority.priority_score === 'number'
+    ? ev.priority.priority_score.toFixed(3) : '-';
+  return `<div class="today-item">
+      <div class="today-item-text tappable" onclick="openStockDetail('${esc(a.symbol || '')}')">
+        <b>${esc(a.name || a.symbol || '')}</b> [${esc(ev.event_type)}] ${esc(formatChangeEventFact(ev))}
+        <span class="newsinfo-type">priority ${score}</span>
+      </div>
+      ${renderAckHook(changeEventHookId(ev))}
+    </div>`;
+}
+
+async function loadTodayEvents(bust) {
+  const el = document.getElementById('today-events-list');
+  try {
+    const data = await (await fetch('news_event_cards.json' + bust)).json();
+    const events = (data.change_events || []).slice().sort((x, y) =>
+      (y.priority?.priority_score ?? -Infinity) - (x.priority?.priority_score ?? -Infinity));
+    const top = events.slice(0, TODAY_EVENTS_LIMIT);
+    if (top.length === 0) {
+      el.innerHTML = '<p class="muted">오늘 발생한 변화 이벤트가 없습니다.</p>';
+      return;
+    }
+    el.innerHTML = top.map(renderTodayEventItem).join('')
+      + `<p class="muted sync-note">기준: ${fmtBasis(data.generated_at)} `
+      + `(전체 ${events.length}건 중 priority_score 상위 ${top.length}건, 1일 1회 갱신)</p>`;
+  } catch (e) {
+    el.innerHTML = `<p class="muted">변화 이벤트를 아직 불러올 수 없습니다
+      (news_event_cards.json 없음).</p>`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
 // 6. MARKET — 기존 market_indicators state_board 재사용(indicator_board는
 //    STOCK DETAIL로 이동, §7 참고). 행 탭 → STOCK DETAIL.
 // ═══════════════════════════════════════════════════════════════
@@ -1632,6 +1720,7 @@ async function loadData() {
   await loadRiskEngine(bust);
   await loadMarketIndicatorsData(bust);
   await loadNewsCards(bust);
+  await loadTodayEvents(bust);
   await loadWatchlist(bust);
   await loadIndicatorLearning(bust);
   await loadGate(bust);
