@@ -251,6 +251,43 @@ def handle_autoexec_reject(approval_id):
     return True
 
 
+# ── 정책 이탈 예외 승인 (A6, 2026-08-30) ────────────────────────────────────
+# portfolio_report.py의 role_gap(역할 배분 목표 초과 사실)을 사람이 보고
+# "지금은 예외로 둔다"고 승인한 것만 기록한다. 새 매매 판단이나 자동 조치가
+# 아니다 — policy_exception.py의 불변 저널에 사실을 남기고 끝난다.
+
+def handle_approve_exception(role, reason, telegram_from):
+    import portfolio_report, policy_exception
+    report = load_json(portfolio_report.REPORT_FILE, None)
+    if not report or not report.get("role_gap"):
+        send_telegram("❓ 역할 배분 정보가 없습니다 (portfolio_report.py가 먼저 실행돼야 합니다).")
+        return
+    rows = report["role_gap"]["rows"]
+    row = next((r for r in rows if r["role"] == role), None)
+    if not row:
+        valid = ", ".join(r["role"] for r in rows)
+        send_telegram(f"❓ '{role}' 역할을 찾을 수 없습니다. 사용 가능: {valid}")
+        return
+    if row.get("gap_pct") is None or row["gap_pct"] >= 0:
+        send_telegram(f"ℹ️ {row.get('label', role)}는 현재 목표 초과 상태가 아닙니다 — 예외 승인 대상이 아닙니다.")
+        return
+    if not reason:
+        send_telegram("❓ 예외 사유를 함께 적어주세요: /approve_exception <역할> <사유>")
+        return
+
+    ident = telegram_from.get("username") or telegram_from.get("first_name") or "알수없음"
+    approved_by = f"{ident} (id:{telegram_from.get('id', '알수없음')})"
+    try:
+        record = policy_exception.append_and_save(
+            policy_exception.build_record(row, reason, approved_by))
+    except policy_exception.AuditViolation as e:
+        send_telegram(f"❌ 예외 사유에 금지된 표현이 포함되어 저장하지 않았습니다: {'; '.join(e.violations)}")
+        return
+    send_telegram(f"✅ 예외 승인 기록됨: {record['label']} 역할 배분 초과 "
+                  f"(목표 {row['target_pct']:.1f}% / 실제 {row['actual_pct']:.1f}%)\n"
+                  f"사유: {reason}\nID: {record['id']}")
+
+
 def run():
     offset_data = load_json(OFFSET_FILE, {"last_update_id": 0})
     portfolio = load_json(PORTFOLIO_FILE, {"cash": 100000, "positions": []})
@@ -298,6 +335,8 @@ def run():
             handle_autoexec_approve(parts[1])
         elif cmd == "/autoexec_reject" and len(parts) > 1:
             handle_autoexec_reject(parts[1])
+        elif cmd == "/approve_exception" and len(parts) > 1:
+            handle_approve_exception(parts[1], " ".join(parts[2:]), message.get("from", {}))
         elif cmd == "/review":
             handle_review()
         elif cmd == "/status":

@@ -1135,6 +1135,28 @@ def format_telegram(report):
             for a in fill["allocations"][:3]:
                 lines.append(f"      - {a['label']} {a['amount_krw']:,.0f}원")
 
+    role_gap = report.get("role_gap")
+    lines.append("")
+    if not role_gap:
+        lines.append("🧭 포트폴리오 역할 계층: 계산 불가 (portfolio_role_mapping.json 없음)")
+    else:
+        lines.append(f"🧭 포트폴리오 역할 계층 (위험자산 총액 {role_gap['risk_asset_total_pct']:.1f}% 기준) "
+                     f"— 역할 단위 산술이며 매매 지시가 아닙니다")
+        for r in role_gap["rows"]:
+            if r["target_pct"] is None or r["gap_pct"] is None:
+                continue
+            lines.append(f"   · {r['label']}: 목표 {r['target_pct']:.1f}% / 실제 {r['actual_pct']:.1f}% "
+                         f"/ 갭 {r['gap_pct']:+.1f}%p")
+        over = [r for r in role_gap["rows"] if r.get("gap_pct") is not None and r["gap_pct"] < 0]
+        if over:
+            lines.append("   ⚠️ 목표 초과:")
+            for r in over:
+                lines.append(f"      - {r['label']} 비중이 목표보다 {abs(r['gap_pct']):.1f}%p 높습니다"
+                             f" (목표 {r['target_pct']:.1f}% / 실제 {r['actual_pct']:.1f}%)")
+        if role_gap["unmapped_holdings_weight_pct"] > 0:
+            lines.append(f"   ※ 미매핑 보유종목 비중 {role_gap['unmapped_holdings_weight_pct']:.1f}% "
+                         f"(어떤 역할에도 포함 안 됨)")
+
     lines.append("")
     lines.append("※ 현황과 규칙 해당 여부만 알립니다. 매매 판단은 포함하지 않습니다.")
     return "\n".join(lines)
@@ -1672,6 +1694,36 @@ def run_self_test():
           f"미매핑 보유: {report27['role_gap']['unmapped_holdings'] if report27['role_gap'] else None}")
     assert report27["role_gap"] is not None
     assert audit(report27) == [], f"role_gap 포함 리포트가 감사를 통과 못 함: {audit(report27)}"
+
+    # 28) 텔레그램 리포트에 role_gap 섹션이 실리는지(2026-08-30 A6 — 이전까지는
+    #     계산만 되고 텔레그램에는 누락돼 있었다), 목표 초과(gap_pct<0) 역할은
+    #     "⚠️ 목표 초과" 경고 줄로 별도 표시되는지, role_gap이 없으면(role_mapping
+    #     미제공) "계산 불가" 문구로 조용히 처리되는지.
+    text27 = format_telegram(report27)
+    assert "포트폴리오 역할 계층" in text27, "role_gap 섹션이 텔레그램 텍스트에 없음"
+    print(f"[28] role_gap 텔레그램 섹션 포함 확인: {'포트폴리오 역할 계층' in text27}")
+
+    report28_over = dict(report27)
+    report28_over["role_gap"] = {
+        "risk_asset_total_pct": 90.0,
+        "rows": [
+            {"role": "코어", "label": "코어", "target_pct": 65, "actual_pct": 40.0, "gap_pct": 25.0, "members": []},
+            {"role": "위성-장기", "label": "위성-장기", "target_pct": 15, "actual_pct": 25.0, "gap_pct": -10.0, "members": []},
+        ],
+        "unmapped_holdings": [], "unmapped_holdings_weight_pct": 0.0, "note": "",
+    }
+    text28 = format_telegram(report28_over)
+    assert "⚠️ 목표 초과" in text28
+    assert "위성-장기 비중이 목표보다 10.0%p 높습니다" in text28, text28
+    for banned in ("매수", "매도", "파세요", "사세요", "추천", "정리하세요"):
+        assert banned not in text28, f"role_gap 경고 텔레그램 텍스트에 매매 지시 표현 '{banned}' 있음"
+    print("[28] 목표 초과 역할 경고 줄 렌더링 확인 완료")
+
+    report28_none = dict(report27)
+    report28_none["role_gap"] = None
+    text28b = format_telegram(report28_none)
+    assert "계산 불가" in text28b
+    print("[28] role_gap 없을 때 '계산 불가' 문구로 처리 확인")
 
     print("\n모든 자체 검증 통과.")
 

@@ -976,9 +976,8 @@ const ROLE_FILL_ALLOC_FIELDS = ['role', 'label', 'gap_pct', 'amount_krw'];
 
 function renderRoleGap(roleGap) {
   if (!roleGap) return '';
-  const rows = (roleGap.rows || []).filter(r => assertNoPredictiveFields(r, '역할 갭 행'));
-  const body = rows.map(raw => {
-    const r = pick(raw, ROLE_ROW_FIELDS);
+  const rows = (roleGap.rows || []).filter(r => assertNoPredictiveFields(r, '역할 갭 행')).map(raw => pick(raw, ROLE_ROW_FIELDS));
+  const body = rows.map(r => {
     const hasTarget = r.target_pct !== null && r.target_pct !== undefined;
     const gapCls = (hasTarget && r.gap_pct > 0) ? 'negative' : '';
     const members = (r.members || []).filter(m => assertNoPredictiveFields(m, '역할 갭 멤버'));
@@ -993,6 +992,21 @@ function renderRoleGap(roleGap) {
       <td class="rm-num ${gapCls}" data-label="갭">${hasTarget ? (r.gap_pct >= 0 ? '+' : '') + r.gap_pct.toFixed(1) + '%p' : '-'}</td>
     </tr>`;
   }).join('');
+
+  // 정책 위반 경고(A6, 2026-08-30): 목표가 있고 실제 비중이 목표를 초과한
+  // 역할(gap_pct < 0)만 규칙 위반 카드로 별도 강조한다. 대시보드에서 색
+  // 악센트는 guardrail-card에만 허용된다(위 CSS 주석 "가드레일 카드만
+  // 유일하게 색 악센트를 가진다" 참고) — 그래서 gate-banner를 재사용하지
+  // 않고 이미 rule_matches에 쓰이는 guardrail-card를 그대로 썼다. 허용
+  // 오차(±X%p) 같은 새 숫자는 만들지 않았다 — target_allocation.json/
+  // portfolio_role_mapping.json 어디에도 그런 값이 없어서(재확인 완료),
+  // 목표 초과 여부(0%p 기준) 자체를 사실로 표시한다.
+  const overRows = rows.filter(r => r.target_pct !== null && r.target_pct !== undefined && r.gap_pct < 0);
+  const violationHtml = overRows.map(r => `<div class="guardrail-card">
+      <div class="guardrail-rule">역할 배분 초과</div>
+      <div class="guardrail-fact">${esc(r.label)} 비중이 목표보다 ${Math.abs(r.gap_pct).toFixed(1)}%p 높습니다.</div>
+      <div class="guardrail-nums">목표 ${r.target_pct.toFixed(1)}% · 실제 ${r.actual_pct.toFixed(1)}%</div>
+    </div>`).join('');
 
   const fill = (roleGap.monthly_gap_fill || [])[0];
   const fillAllocations = (fill && fill.allocations || []).filter(a => assertNoPredictiveFields(a, '역할 갭 이번달 배분'));
@@ -1015,6 +1029,7 @@ function renderRoleGap(roleGap) {
 
   return `<h3 style="margin-top:14px;">포트폴리오 역할 계층</h3>
     <p class="muted">${esc(roleGap.note || '')} 위험자산 총액 ${roleGap.risk_asset_total_pct}% 기준.</p>
+    ${violationHtml}
     <div class="rm-scroll"><table class="rm-table">
       <thead><tr><th>역할</th><th>목표</th><th>실제</th><th>갭</th></tr></thead>
       <tbody>${body}</tbody></table></div>
