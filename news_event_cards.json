@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-30T14:31:28.115679+00:00",
+  "generated_at": "2026-08-31T17:14:55.208352+00:00",
   "schema": "explanation_only_v3.2",
   "note": "사실 설명 전용(뉴스 사건 + 정량 이상행동). 방향 예측/확신도/매매 제안 필드가 스키마에 없다 - 누락이 아니라 설계(CLAUDE.md v3.2). 대상은 보유종목+관심종목으로 한정(2026-08-09 스코프 축소).",
   "cards": [
@@ -7,7 +7,7 @@
       "market": "004000",
       "name": "롯데정밀화학",
       "event_type": "실적발표",
-      "summary": "롯데정밀화학은 2분기 영업이익 619억원(전년 동기 대비 611.5% 증가)과 전년 4분기 매출액 4390억원(+2.4%), 영업이익 193억원(+59%)의 실적을 발표했다. 아울러 반도체 현상액 소재인 TMAC 관련 증권사 분석 보고서가 발표되었다.",
+      "summary": "[요약 생략 - 금지 문구 감지로 검수 실패]",
       "headlines": [
         "롯데정밀화학, 증권사 목표가 상향에 강세…12.37% - 매일경제 마켓",
         "롯데정밀화학 2분기 영업이익 619억원…작년 동기 대비 611.5%↑ - 연합뉴스",
@@ -20,31 +20,51 @@
       "market": "NCPL",
       "name": "넷캐피탈",
       "event_type": "이상행동",
-      "summary": "거래량 20일 평균 대비 3.3배, 전일 종가 대비 시가 갭 +9.8%, 최근 20일 변동성이 과거 분포 대비 98백분위",
+      "summary": "최근 20일 변동성이 과거 분포 대비 97백분위",
       "headlines": []
     },
     {
       "market": "NCPL",
       "name": "넷캐피탈",
       "event_type": "규제",
-      "summary": "넷케피털(NCPL)은 10-K 연례보고서 미제출로 나스닥 규정 위반 통지를 받았으며, 이후 상장 유지를 위한 180일 추가 유예기간을 획득하였다. 또한 이사회 멤버인 세실리아 렝 이사가 SEC 소송 합의에 따른 법원 승인 후속 조치로 사임하였다.",
+      "summary": "넷케피털(NCPL)은 10-K 연례보고서 미제출로 나스닥 규정 위반 통지를 받았으며, 이후 상장 유지를 위한 180일 추가 유예기간을 획득하였다. 또한 이사회 멤버인 세실리아 렝이 SEC 소송 합의에 따른 법원 승인 후속 조치로 이사직에서 사임하였다.",
       "headlines": [
         "넷케피털, 10-K 연례보고서 제출 지연으로 나스닥 규정 위반 통지 받아 - 데이터투자",
-        "Netcapital 주식 시세: NCPL 주식 차트, 시가총액 & 오늘의 뉴스 - CoinGecko",
         "넷케피털 세실리아 렝 이사 사임…SEC 소송 합의 따른 법원 승인 후속 조치 - 데이터투자",
+        "세계증시 - 매일경제 마켓",
         "넷케피털, 나스닥 상장 유지 위한 180일 추가 유예기간 획득 - 데이터투자",
         "넷캐피탈, 연차보고서 미제출로 나스닥 규정 위반 통보 - 매일경제 마켓"
+      ]
+    },
+    {
+      "market": "BTAI",
+      "name": "바이오엑셀 테라퓨틱스",
+      "event_type": "이상행동",
+      "summary": "거래량 20일 평균 대비 2.3배, 전일 종가 대비 시가 갭 -16.6%, 최근 20일 변동성이 과거 분포 대비 92백분위",
+      "headlines": []
+    },
+    {
+      "market": "BTAI",
+      "name": "바이오엑셀 테라퓨틱스",
+      "event_type": "공시",
+      "summary": "바이오엑셀 테라퓨틱스(BTAI)는 오크트리와의 신용 계약을 여러 차례 개정하여 원금 상환 시기를 8월 말로 유예하고 자금 조달 기한을 연장하는 내용의 수정안을 체결했다고 공시하였다. 또한 이갈미의 가정 내 급성 초조 치료 관련 기회를 강조하는 내용이 보도되었다.",
+      "headlines": [
+        "바이오엑셀 테라퓨틱스(BTAI), 2026년 3월 27일 제9차 신용 계약 수정안 체결 - 데이터투자",
+        "바이오엑셀, 이갈미 가정 내 급성 초조 치료 기회 강조,BioXcel Therapeutics, Inc.,BTAI - wowglobal.co.kr",
+        "바이오엑셀 테라퓨틱스, 대출 계약 13차 개정안 체결…자금 조달 기한 28일로 연장 - 데이터투자",
+        "바이오엑셀 테라퓨틱스, 오크트리와 신용계약 개정…원금 상환 8월 말로 유예 - 데이터투자",
+        "코인 열풍 어디까지… 알트코인 시가총액 올해만 5배 '껑충' - 세계일보"
       ]
     },
     {
       "market": "SCHD",
       "name": "SCHD",
       "event_type": "기타",
-      "summary": "SCHD ETF와 관련하여 연간 리밸런싱이 진행되었으며, 삼성자산운용의 FunETF 플랫폼에서 미국 ETF 서비스가 출시되었다는 내용과 함께 SCHD의 배당 ETF 비교 및 투자 사례 등이 보도되었다.",
+      "summary": "SCHD ETF가 배당 관련 종목 구성을 조정하는 리밸런싱을 실시했다고 보도되었으며, 삼성자산운용의 FunETF 플랫폼에서 SCHD를 포함한 미국 ETF 서비스가 출시되었다. 또한 SCHD의 수익률 비교 및 투자 관점을 다룬 다수의 미디어 보도가 있었다.",
       "headlines": [
-        "[해방 프로젝트] EP. 11 : 매일 87만 원씩 SCHD와 QLD만 매수하는 부부 근황 Knee (7A51OtCxzK) - Mshale",
-        "Schwab US Dividend Equity ETF Tokenized ETF (Robinhood) 거래소 SCHD 마켓 | 매수·매도·트레이드 - CryptoRank",
         "[ETF 특징주] '10년간 압도적 수익률' SCHD보다 나은 배당 ETF - 뉴스핌",
+        "Schwab US Dividend Equity ETF Tokenized ETF (Robinhood) - CryptoRank",
+        "[10만 구독자 Q&A ⑤] 내가 SCHD를 모으지 않는 이유 3가지 Lisa Ann Walter (1eoKY4qbb5) - Mshale",
         "“QQQ·SCHD 한눈에”…삼성운용 FunETF, 美 ETF 서비스 출시 - 매일경제 마켓",
         "SCHD '리밸런싱'…배당성장 기대주 더 담았다 - 한국경제"
       ]
@@ -52,70 +72,20 @@
     {
       "market": "TE",
       "name": "T1 에너지",
-      "event_type": "실적발표 또는 M&A",
-      "summary": "TE 커넥티비티(TEL)가 실적 기대치를 상회한 결과를 발표하였으며, 14억 달러 규모의 아스트로다인(Astrodyne) 인수 계약을 체결하였다고 보도되었다. 해당 발표 이후 TEL 주가는 5.9% 하락하였다.",
+      "event_type": "M&A",
+      "summary": "TE Connectivity(TEL)가 아스트로다인(Astrodyne)을 인수하고 AI 사업을 확대한다고 보도되었으며, 7월 22일 TEL 주가가 8.75% 하락한 것으로 기록되었다.",
       "headlines": [
         "T1 Energy Tokenized Stock (Robinhood) 오늘 Canadian Dollar 가격 | 실시간 TE - CAD 변환기 및 환율 - CryptoRank",
-        "실적 기대치를 상회하고 14억 달러 규모의 아스트로다인(Astrodyne) 인수 계약을 체결했음에도 TE 커넥티비티(TEL) 주가가 5.9% 하락한 이유 - simplywall.st",
-        "TE VS AG - VALORANT Esports",
         "2026.TE KOOP.te huur - EA",
-        "T1 Energy Tokenized Stock (Robinhood) 오늘 Indonesian Rupiah 가격 | 실시간 TE - IDR 변환기 및 환율 - CryptoRank"
+        "TE의 아스트로다인(Astrodyne) 인수와 AI 사업 확대가 TE 커넥티비티(TEL) 투자 전망을 바꿀 수도 있다 - simplywall.st",
+        "TE VS TYL - VALORANT Esports",
+        "TE Connectivity PLC (TEL) 주식 움직였습니다 하락 8.75%에 7월22일: 어떤 신호인가요? - TradingKey"
       ]
     }
   ],
   "change_events": [
     {
-      "timestamp": "2026-08-28T00:00:00+00:00",
-      "asset": {
-        "symbol": "NCPL",
-        "name": "넷캐피탈",
-        "market_country": "US",
-        "currency": "USD"
-      },
-      "source": "news_event_cards.anomaly",
-      "event_type": "거래량_급증",
-      "observed_value": 106729900,
-      "baseline": 32083370.0,
-      "change": 3.33,
-      "reliability": 1.0,
-      "related_assets": [],
-      "priority": {
-        "priority_score": 0.013,
-        "factors": {
-          "reliability": 1.0,
-          "novelty": 1.0,
-          "portfolio_relevance": 0.0039000000000000003,
-          "magnitude": 3.33
-        }
-      }
-    },
-    {
-      "timestamp": "2026-08-28T00:00:00+00:00",
-      "asset": {
-        "symbol": "NCPL",
-        "name": "넷캐피탈",
-        "market_country": "US",
-        "currency": "USD"
-      },
-      "source": "news_event_cards.anomaly",
-      "event_type": "가격_갭",
-      "observed_value": 0.5920000076293945,
-      "baseline": 0.5389999747276306,
-      "change": 9.83,
-      "reliability": 1.0,
-      "related_assets": [],
-      "priority": {
-        "priority_score": 0.0383,
-        "factors": {
-          "reliability": 1.0,
-          "novelty": 1.0,
-          "portfolio_relevance": 0.0039000000000000003,
-          "magnitude": 9.83
-        }
-      }
-    },
-    {
-      "timestamp": "2026-08-28T00:00:00+00:00",
+      "timestamp": "2026-08-31T00:00:00+00:00",
       "asset": {
         "symbol": "NCPL",
         "name": "넷캐피탈",
@@ -126,16 +96,91 @@
       "event_type": "변동성_급증",
       "observed_value": 29.69,
       "baseline": null,
-      "change": 97.5,
+      "change": 97.1,
       "reliability": 1.0,
       "related_assets": [],
       "priority": {
-        "priority_score": 0.3803,
+        "priority_score": 0.1623,
+        "factors": {
+          "reliability": 1.0,
+          "novelty": 0.4286,
+          "portfolio_relevance": 0.0039000000000000003,
+          "magnitude": 97.1
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-31T00:00:00+00:00",
+      "asset": {
+        "symbol": "BTAI",
+        "name": "바이오엑셀 테라퓨틱스",
+        "market_country": "US",
+        "currency": "USD"
+      },
+      "source": "news_event_cards.anomaly",
+      "event_type": "거래량_급증",
+      "observed_value": 8817550,
+      "baseline": 3891730.0,
+      "change": 2.27,
+      "reliability": 1.0,
+      "related_assets": [],
+      "priority": {
+        "priority_score": 0.0005,
         "factors": {
           "reliability": 1.0,
           "novelty": 1.0,
-          "portfolio_relevance": 0.0039000000000000003,
-          "magnitude": 97.5
+          "portfolio_relevance": 0.0002,
+          "magnitude": 2.27
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-31T00:00:00+00:00",
+      "asset": {
+        "symbol": "BTAI",
+        "name": "바이오엑셀 테라퓨틱스",
+        "market_country": "US",
+        "currency": "USD"
+      },
+      "source": "news_event_cards.anomaly",
+      "event_type": "가격_갭",
+      "observed_value": 0.1509000062942505,
+      "baseline": 0.1809999942779541,
+      "change": -16.63,
+      "reliability": 1.0,
+      "related_assets": [],
+      "priority": {
+        "priority_score": 0.0033,
+        "factors": {
+          "reliability": 1.0,
+          "novelty": 1.0,
+          "portfolio_relevance": 0.0002,
+          "magnitude": 16.63
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-31T00:00:00+00:00",
+      "asset": {
+        "symbol": "BTAI",
+        "name": "바이오엑셀 테라퓨틱스",
+        "market_country": "US",
+        "currency": "USD"
+      },
+      "source": "news_event_cards.anomaly",
+      "event_type": "변동성_급증",
+      "observed_value": 18.08,
+      "baseline": null,
+      "change": 92.5,
+      "reliability": 1.0,
+      "related_assets": [],
+      "priority": {
+        "priority_score": 0.0185,
+        "factors": {
+          "reliability": 1.0,
+          "novelty": 1.0,
+          "portfolio_relevance": 0.0002,
+          "magnitude": 92.5
         }
       }
     }
