@@ -1,6 +1,6 @@
 {
-  "synced_at": "2026-08-31T05:52:12.586138+00:00",
-  "cash": 1171.595,
+  "synced_at": "2026-08-31T15:14:48.299176+00:00",
+  "cash": 223.788,
   "positions": [
     {
       "symbol": "004000",
@@ -9,10 +9,10 @@
       "currency": "KRW",
       "quantity": "13",
       "avg_price": "48700",
-      "current_price": "47650",
-      "eval_amount": 619450.0,
-      "eval_amount_krw": 619450.0,
-      "return_pct": -2.15
+      "current_price": "47800",
+      "eval_amount": 621400.0,
+      "eval_amount_krw": 621400.0,
+      "return_pct": -1.8399999999999999
     },
     {
       "symbol": "NCPL",
@@ -21,10 +21,22 @@
       "currency": "USD",
       "quantity": "19",
       "avg_price": "0.606321",
-      "current_price": "0.6923",
-      "eval_amount": 13.1537,
-      "eval_amount_krw": 18066.60695,
-      "return_pct": 14.180000000000001
+      "current_price": "0.6881",
+      "eval_amount": 13.0739,
+      "eval_amount_krw": 17941.966665,
+      "return_pct": 13.48
+    },
+    {
+      "symbol": "BTAI",
+      "name": "바이오엑셀 테라퓨틱스",
+      "market_country": "US",
+      "currency": "USD",
+      "quantity": "4",
+      "avg_price": "0.1721",
+      "current_price": "0.1652",
+      "eval_amount": 0.6608,
+      "eval_amount_krw": 906.84888,
+      "return_pct": -4.0
     },
     {
       "symbol": "SCHD",
@@ -33,10 +45,10 @@
       "currency": "USD",
       "quantity": "65.799361",
       "avg_price": "33.01161",
-      "current_price": "34.91",
-      "eval_amount": 2297.055692,
-      "eval_amount_krw": 3155005.992962,
-      "return_pct": 5.75
+      "current_price": "34.84",
+      "eval_amount": 2292.449737,
+      "eval_amount_krw": 3146043.3965719496,
+      "return_pct": 5.53
     },
     {
       "symbol": "TE",
@@ -45,10 +57,10 @@
       "currency": "USD",
       "quantity": "131",
       "avg_price": "4.862061",
-      "current_price": "4.78",
-      "eval_amount": 626.18,
-      "eval_amount_krw": 860058.23,
-      "return_pct": -1.68
+      "current_price": "4.47",
+      "eval_amount": 585.57,
+      "eval_amount_krw": 803606.9895,
+      "return_pct": -8.06
     }
   ]
 }
