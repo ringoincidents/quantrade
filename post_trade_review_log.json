@@ -367,6 +367,83 @@
           "fact": "T1 에너지(TE) 비중이 17.5%인 상태에서 최근 실적발표 또는 M&A 관련 사실이 있었습니다: TE 커넥티비티(TEL)가 실적 기대치를 상회한 결과를 발표하였으며, 14억 달러 규모의 아스트로다인(Astrodyne) 인수 계약을 체결하였다고 보도되었다. 해당 발표 이후 TEL 주가는 5.9% 하락하였다."
         }
       ]
+    },
+    {
+      "id": "review-2026-09-01T12:42:53.581629+00:00",
+      "generated_at": "2026-09-01T12:42:53.581629+00:00",
+      "trigger": "batch",
+      "schema": "post_trade_review_v3.2",
+      "note": "매매 이후 사람이 놓쳤을 수 있는 것을 사후에 짚어보는 기록입니다. 새 AI 판단이나 매매 제안이 아니라 이미 계산된 값을 재사용한 사실 연결이며, 생성 시점에 확정되고 이후 수정되지 않습니다.",
+      "exposure_change": {
+        "has_baseline": true,
+        "added_symbols": [],
+        "removed_symbols": [
+          "BTAI",
+          "NCPL"
+        ],
+        "by_currency_pct_now": {
+          "KRW": 13.39,
+          "USD": 86.57
+        },
+        "by_country_pct_now": {
+          "KR": 13.39,
+          "US": 86.57
+        },
+        "by_currency_pct_delta": {
+          "KRW": -0.15,
+          "USD": 0.11
+        },
+        "by_country_pct_delta": {
+          "KR": -0.15,
+          "US": 0.11
+        },
+        "sector_status": "데이터 소스 미연결"
+      },
+      "allocation_gap": {
+        "concentration_matches": [
+          {
+            "rule": "집중도",
+            "symbol": "SCHD",
+            "name": "SCHD",
+            "threshold": "단일 종목 비중 30% 이상",
+            "observed": "69.07%",
+            "fact": "SCHD(SCHD) 비중이 총자산의 69.07%로 기준 30% 이상"
+          }
+        ],
+        "asset_class_target_status": "데이터 소스 미연결 — 보유 종목을 로드맵의 자산군(bond/developed_exUS/emerging/...)으로 분류할 데이터가 없어 국가/통화 노출만 비교합니다."
+      },
+      "correlation_blind_spots": {
+        "flag_threshold": 0.7,
+        "lookback_days": 90,
+        "spots": []
+      },
+      "behavior_patterns": [],
+      "recent_news_links": [
+        {
+          "symbol": "004000",
+          "name": "롯데정밀화학",
+          "weight_pct": 13.39,
+          "event_type": "실적발표",
+          "summary": "[요약 생략 - 금지 문구 감지로 검수 실패]",
+          "fact": "롯데정밀화학(004000) 비중이 13.4%인 상태에서 최근 실적발표 관련 사실이 있었습니다: [요약 생략 - 금지 문구 감지로 검수 실패]"
+        },
+        {
+          "symbol": "SCHD",
+          "name": "SCHD",
+          "weight_pct": 69.07,
+          "event_type": "기타",
+          "summary": "SCHD ETF가 배당 관련 종목 구성을 조정하는 리밸런싱을 실시했다고 보도되었으며, 삼성자산운용의 FunETF 플랫폼에서 SCHD를 포함한 미국 ETF 서비스가 출시되었다. 또한 SCHD의 수익률 비교 및 투자 관점을 다룬 다수의 미디어 보도가 있었다.",
+          "fact": "SCHD(SCHD) 비중이 69.1%인 상태에서 최근 기타 관련 사실이 있었습니다: SCHD ETF가 배당 관련 종목 구성을 조정하는 리밸런싱을 실시했다고 보도되었으며, 삼성자산운용의 FunETF 플랫폼에서 SCHD를 포함한 미국 ETF 서비스가 출시되었다. 또한 SCHD의 수익률 비교 및 투자 관점을 다룬 다수의 미디어 보도가 있었다."
+        },
+        {
+          "symbol": "TE",
+          "name": "T1 에너지",
+          "weight_pct": 17.5,
+          "event_type": "M&A",
+          "summary": "TE Connectivity(TEL)가 아스트로다인(Astrodyne)을 인수하고 AI 사업을 확대한다고 보도되었으며, 7월 22일 TEL 주가가 8.75% 하락한 것으로 기록되었다.",
+          "fact": "T1 에너지(TE) 비중이 17.5%인 상태에서 최근 M&A 관련 사실이 있었습니다: TE Connectivity(TEL)가 아스트로다인(Astrodyne)을 인수하고 AI 사업을 확대한다고 보도되었으며, 7월 22일 TEL 주가가 8.75% 하락한 것으로 기록되었다."
+        }
+      ]
     }
   ]
 }
