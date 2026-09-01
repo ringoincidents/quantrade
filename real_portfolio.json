@@ -1,6 +1,6 @@
 {
-  "synced_at": "2026-09-01T05:24:16.664179+00:00",
-  "cash": 223.69600000000003,
+  "synced_at": "2026-09-01T12:39:11.007289+00:00",
+  "cash": 1849.8656,
   "positions": [
     {
       "symbol": "004000",
@@ -9,34 +9,10 @@
       "currency": "KRW",
       "quantity": "13",
       "avg_price": "48700",
-      "current_price": "47425",
-      "eval_amount": 616525.0,
-      "eval_amount_krw": 616525.0,
-      "return_pct": -2.6100000000000003
-    },
-    {
-      "symbol": "NCPL",
-      "name": "넷캐피탈",
-      "market_country": "US",
-      "currency": "USD",
-      "quantity": "19",
-      "avg_price": "0.606321",
-      "current_price": "0.7127",
-      "eval_amount": 13.5413,
-      "eval_amount_krw": 18567.83056,
-      "return_pct": 17.54
-    },
-    {
-      "symbol": "BTAI",
-      "name": "바이오엑셀 테라퓨틱스",
-      "market_country": "US",
-      "currency": "USD",
-      "quantity": "4",
-      "avg_price": "0.1721",
-      "current_price": "0.1602",
-      "eval_amount": 0.6408,
-      "eval_amount_krw": 878.6649600000001,
-      "return_pct": -6.909999999999999
+      "current_price": "47300",
+      "eval_amount": 614900.0,
+      "eval_amount_krw": 614900.0,
+      "return_pct": -2.87
     },
     {
       "symbol": "SCHD",
@@ -45,22 +21,22 @@
       "currency": "USD",
       "quantity": "65.799361",
       "avg_price": "33.01161",
-      "current_price": "34.96",
-      "eval_amount": 2300.34566,
-      "eval_amount_krw": 3154233.968992,
-      "return_pct": 5.8999999999999995
+      "current_price": "34.97",
+      "eval_amount": 2301.003654,
+      "eval_amount_krw": 3170829.05528508,
+      "return_pct": 5.93
     },
     {
       "symbol": "TE",
       "name": "T1 에너지",
       "market_country": "US",
       "currency": "USD",
-      "quantity": "131",
-      "avg_price": "4.862061",
-      "current_price": "4.51",
-      "eval_amount": 590.81,
-      "eval_amount_krw": 810118.6719999999,
-      "return_pct": -7.24
+      "quantity": "134",
+      "avg_price": "4.851044",
+      "current_price": "4.35",
+      "eval_amount": 582.9,
+      "eval_amount_krw": 803247.858,
+      "return_pct": -10.32
     }
   ]
 }
