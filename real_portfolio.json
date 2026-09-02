@@ -1,6 +1,6 @@
 {
-  "synced_at": "2026-09-02T04:51:07.801401+00:00",
-  "cash": 95289.088,
+  "synced_at": "2026-09-02T12:12:33.396765+00:00",
+  "cash": 2429.2271,
   "positions": [
     {
       "symbol": "004000",
@@ -9,10 +9,10 @@
       "currency": "KRW",
       "quantity": "13",
       "avg_price": "48700",
-      "current_price": "46200",
-      "eval_amount": 600600.0,
-      "eval_amount_krw": 600600.0,
-      "return_pct": -5.13
+      "current_price": "45850",
+      "eval_amount": 596050.0,
+      "eval_amount_krw": 596050.0,
+      "return_pct": -5.8500000000000005
     },
     {
       "symbol": "SCHD",
@@ -21,22 +21,22 @@
       "currency": "USD",
       "quantity": "65.799361",
       "avg_price": "33.01161",
-      "current_price": "34.82",
-      "eval_amount": 2291.13375,
-      "eval_amount_krw": 3137936.7839999995,
-      "return_pct": 5.47
+      "current_price": "34.87",
+      "eval_amount": 2294.423718,
+      "eval_amount_krw": 3134710.51624314,
+      "return_pct": 5.62
     },
     {
       "symbol": "TE",
       "name": "T1 에너지",
       "market_country": "US",
       "currency": "USD",
-      "quantity": "134",
-      "avg_price": "4.851044",
-      "current_price": "4.31",
-      "eval_amount": 577.54,
-      "eval_amount_krw": 790998.7839999999,
-      "return_pct": -11.15
+      "quantity": "150",
+      "avg_price": "4.783733",
+      "current_price": "4.27",
+      "eval_amount": 640.5,
+      "eval_amount_krw": 875070.3150000001,
+      "return_pct": -10.73
     }
   ]
 }
