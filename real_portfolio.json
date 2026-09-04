@@ -1,6 +1,6 @@
 {
-  "synced_at": "2026-09-03T12:11:30.878715+00:00",
-  "cash": 2433.7224,
+  "synced_at": "2026-09-04T04:51:59.125734+00:00",
+  "cash": 2423.2560000000003,
   "positions": [
     {
       "symbol": "004000",
@@ -9,10 +9,10 @@
       "currency": "KRW",
       "quantity": "13",
       "avg_price": "48700",
-      "current_price": "46150",
-      "eval_amount": 599950.0,
-      "eval_amount_krw": 599950.0,
-      "return_pct": -5.2299999999999995
+      "current_price": "45700",
+      "eval_amount": 594100.0,
+      "eval_amount_krw": 594100.0,
+      "return_pct": -6.16
     },
     {
       "symbol": "SCHD",
@@ -21,10 +21,10 @@
       "currency": "USD",
       "quantity": "65.799361",
       "avg_price": "33.01161",
-      "current_price": "35.06",
-      "eval_amount": 2306.925596,
-      "eval_amount_krw": 3139910.29020368,
-      "return_pct": 6.2
+      "current_price": "35.05",
+      "eval_amount": 2306.267603,
+      "eval_amount_krw": 3125453.8555856,
+      "return_pct": 6.17
     },
     {
       "symbol": "TE",
@@ -33,10 +33,10 @@
       "currency": "USD",
       "quantity": "150",
       "avg_price": "4.783733",
-      "current_price": "4.31",
-      "eval_amount": 646.5,
-      "eval_amount_krw": 879938.22,
-      "return_pct": -9.9
+      "current_price": "4.55",
+      "eval_amount": 682.5,
+      "eval_amount_krw": 924924.0,
+      "return_pct": -4.88
     }
   ]
 }
