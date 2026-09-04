@@ -1,21 +1,117 @@
 {
-  "generated_at": "2026-09-03T13:54:51.033805+00:00",
+  "generated_at": "2026-09-04T13:48:27.462250+00:00",
   "schema": "explanation_only_v3.2",
   "note": "사실 설명 전용(뉴스 사건 + 정량 이상행동). 방향 예측/확신도/매매 제안 필드가 스키마에 없다 - 누락이 아니라 설계(CLAUDE.md v3.2). 대상은 보유종목+관심종목으로 한정(2026-08-09 스코프 축소).",
   "cards": [
     {
+      "market": "004000",
+      "name": "롯데정밀화학",
+      "event_type": "실적발표",
+      "summary": "롯데정밀화학의 2분기 영업이익이 619억원으로 전년 동기 대비 611.5% 증가했다고 보고되었다. 또한 증권사가 반도체 현상액 밸류체인 관련 TMAC 소재에 대한 리포트를 발표했다.",
+      "headlines": [
+        "롯데정밀화학 '반도체 현상액 밸류체인의 숨은 병목, TMAC' 증권사 발표에 강세…7.75% - 매일경제 마켓",
+        "롯데정밀화학 2분기 영업이익 619억원…작년 동기 대비 611.5%↑ - yna.co.kr",
+        "[0429시황레이더] 롯데정밀화학, 'TMAC' 구조적 성장 기대감 등 - 인포스탁데일리",
+        "증권사 리포트 총정리, 상승여력 높은 종목 분석 - 매일경제 마켓",
+        "삼성 이재용 이부진 이서현 3각편대 수혜주는? - 씽크풀 AI"
+      ]
+    },
+    {
+      "market": "BTAI",
+      "name": "바이오엑셀 테라퓨틱스",
+      "event_type": "이상행동",
+      "summary": "전일 종가 대비 시가 갭 -22.9%, 최근 20일 변동성이 과거 분포 대비 93백분위",
+      "headlines": []
+    },
+    {
+      "market": "BTAI",
+      "name": "바이오엑셀 테라퓨틱스",
+      "event_type": "공시",
+      "summary": "바이오엑셀 테라퓨틱스(BTAI)는 대주단과 제9차 신용 계약 수정안을 체결해 원리금 상환 유예 및 유동성 요건 완화를 받았으며, 나스닥 상장폐지 결정과 함께 7,725만 달러 규모의 DIP 금융 조달 및 주식 분할·정관 수정이 발표되었다.",
+      "headlines": [
+        "바이오엑셀 테라퓨틱스(BTAI), 2026년 3월 27일 제9차 신용 계약 수정안 체결 - 데이터투자",
+        "바이오엑셀쎄라퓨틱스(BTAI), 주식 분할 및 정관 수정 발표 - beyondpost.co.kr",
+        "바이오엑셀 테라퓨틱스, 대주단과 신용계약 개정…원리금 상환 유예 및 유동성 요건 완화 - 데이터투자",
+        "바이오엑셀 테라퓨틱스, 나스닥서 상장폐지 결정…7725만 달러 규모 DIP 금융 조달 - 데이터투자"
+      ]
+    },
+    {
+      "market": "SCHD",
+      "name": "SCHD",
+      "event_type": "기타",
+      "summary": "SCHD ETF가 리밸런싱을 실시해 배당성장 종목 편입 비중을 조정했다는 보도가 있었으며, 삼성자산운용의 FunETF 플랫폼이 SCHD를 포함한 미국 ETF 서비스를 출시했다는 내용이 보도되었다.",
+      "headlines": [
+        "국채금리 오르자…서학개미 파킹 ETF·배당·빅테크로 대피 - 뉴시스",
+        "[ETF 특징주] '10년간 압도적 수익률' SCHD보다 나은 배당 ETF - 뉴스핌",
+        "SCHD '리밸런싱'…배당성장 기대주 더 담았다 - 한국경제",
+        "“QQQ·SCHD 한눈에”…삼성운용 FunETF, 美 ETF 서비스 출시 - 매일경제 마켓",
+        "[10만 구독자 Q&A ⑤] 내가 SCHD를 모으지 않는 이유 3가지 Lisa Ann Walter (1eoKY4qbb5) - Mshale"
+      ]
+    },
+    {
       "market": "TE",
       "name": "T1 에너지",
-      "event_type": "실적발표 또는 M&A",
-      "summary": "TE Connectivity(TEL)는 실적 기대치를 상회하고 14억 달러 규모의 아스트로다인(Astrodyne) 인수 계약을 체결했다고 발표하였으며, 이후 주가는 7월 22일 기준 8.75% 하락하였다.",
+      "event_type": "실적발표, M&A",
+      "summary": "TE Connectivity(TEL)는 실적 기대치를 상회하는 결과를 발표하고 14억 달러 규모의 아스트로다인(Astrodyne) 인수 계약을 체결하였으며, 이후 주가는 7월 22일 기준 8.75% 하락하였다.",
       "headlines": [
-        "T1 Energy Tokenized Stock (Robinhood) 오늘 Canadian Dollar 가격 | 실시간 TE - CAD 변환기 및 환율 - CryptoRank",
         "실적 기대치를 상회하고 14억 달러 규모의 아스트로다인(Astrodyne) 인수 계약을 체결했음에도 TE 커넥티비티(TEL) 주가가 5.9% 하락한 이유 - simplywall.st",
+        "T1 Energy Tokenized Stock (Robinhood) 오늘 Canadian Dollar 가격 | 실시간 TE - CAD 변환기 및 환율 - CryptoRank",
+        "국제 학생들이 투반 마을에서 국기 만들기 체험을 하고 있습니다. - Vietnam.vn",
         "TE Connectivity PLC (TEL) 주식 움직였습니다 하락 8.75%에 7월22일: 어떤 신호인가요? - TradingKey",
-        "TE Connectivity 주식, 오늘 하락세 보이는 이유는? - Investing.com 한국어",
-        "TE VS TYL - VALORANT Esports"
+        "TE Connectivity 주식, 오늘 하락세 보이는 이유는? - Investing.com 한국어"
       ]
     }
   ],
-  "change_events": []
+  "change_events": [
+    {
+      "timestamp": "2026-09-04T00:00:00+00:00",
+      "asset": {
+        "symbol": "BTAI",
+        "name": "바이오엑셀 테라퓨틱스",
+        "market_country": "US",
+        "currency": "USD"
+      },
+      "source": "news_event_cards.anomaly",
+      "event_type": "가격_갭",
+      "observed_value": 0.09099999815225601,
+      "baseline": 0.11800000071525574,
+      "change": -22.88,
+      "reliability": 1.0,
+      "related_assets": [],
+      "priority": {
+        "priority_score": 0.0092,
+        "factors": {
+          "reliability": 1.0,
+          "novelty": 1.0,
+          "portfolio_relevance": 0.0004,
+          "magnitude": 22.88
+        }
+      }
+    },
+    {
+      "timestamp": "2026-09-04T00:00:00+00:00",
+      "asset": {
+        "symbol": "BTAI",
+        "name": "바이오엑셀 테라퓨틱스",
+        "market_country": "US",
+        "currency": "USD"
+      },
+      "source": "news_event_cards.anomaly",
+      "event_type": "변동성_급증",
+      "observed_value": 18.86,
+      "baseline": null,
+      "change": 92.9,
+      "reliability": 1.0,
+      "related_assets": [],
+      "priority": {
+        "priority_score": 0.0372,
+        "factors": {
+          "reliability": 1.0,
+          "novelty": 1.0,
+          "portfolio_relevance": 0.0004,
+          "magnitude": 92.9
+        }
+      }
+    }
+  ]
 }
