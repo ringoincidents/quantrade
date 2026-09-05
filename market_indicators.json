@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-04T14:18:58.064462+00:00",
+  "generated_at": "2026-09-05T13:26:28.917602+00:00",
   "schema": "market_indicators_v3.2",
   "note": "개별 계산값을 항목별로만 나열합니다. 지표들을 하나로 합치지 않고, 종목 간 우열을 매겨 배열하지 않으며, 색을 이용한 강조도 하지 않습니다. 표의 나열 순서는 원본(보유+관심종목) 그대로이며 계산값 크기로 다시 배열하지 않습니다.",
   "state_board": {
@@ -16,30 +16,30 @@
       {
         "symbol": "BTAI",
         "name": "바이오엑셀 테라퓨틱스",
-        "volatility_20d_pct": 18.83,
-        "volatility_percentile": 92.9,
-        "adx_14": 82.8,
+        "volatility_20d_pct": 19.66,
+        "volatility_percentile": 93.2,
+        "adx_14": 83.2,
         "data_status": null
       },
       {
         "symbol": "SCHD",
         "name": "SCHD",
         "volatility_20d_pct": 0.6,
-        "volatility_percentile": 28.9,
+        "volatility_percentile": 30.7,
         "adx_14": 41.7,
         "data_status": null
       },
       {
         "symbol": "TE",
         "name": "T1 에너지",
-        "volatility_20d_pct": 5.4,
-        "volatility_percentile": 9.3,
-        "adx_14": 28.5,
+        "volatility_20d_pct": 5.42,
+        "volatility_percentile": 9.6,
+        "adx_14": 24.9,
         "data_status": null
       }
     ],
     "correlation": {
-      "avg_pairwise_correlation": -0.042,
+      "avg_pairwise_correlation": -0.04,
       "pair_count": 6,
       "symbol_count": 4,
       "window_days": 60
@@ -63,9 +63,9 @@
         "name": "바이오엑셀 테라퓨틱스",
         "per": null,
         "per_status": "데이터 소스 미연결",
-        "volatility_20d_pct": 18.83,
-        "momentum_20d_pct": -89.91,
-        "adx_14": 82.8,
+        "volatility_20d_pct": 19.66,
+        "momentum_20d_pct": -91.8,
+        "adx_14": 83.2,
         "data_status": null
       },
       {
@@ -74,7 +74,7 @@
         "per": null,
         "per_status": "데이터 소스 미연결",
         "volatility_20d_pct": 0.6,
-        "momentum_20d_pct": 2.77,
+        "momentum_20d_pct": 2.65,
         "adx_14": 41.7,
         "data_status": null
       },
@@ -83,9 +83,9 @@
         "name": "T1 에너지",
         "per": null,
         "per_status": "데이터 소스 미연결",
-        "volatility_20d_pct": 5.4,
-        "momentum_20d_pct": -22.48,
-        "adx_14": 28.5,
+        "volatility_20d_pct": 5.42,
+        "momentum_20d_pct": -21.37,
+        "adx_14": 24.9,
         "data_status": null
       }
     ]
