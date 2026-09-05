@@ -1,6 +1,6 @@
 {
-  "synced_at": "2026-09-05T04:45:02.847635+00:00",
-  "cash": 105.682,
+  "synced_at": "2026-09-05T11:20:37.143727+00:00",
+  "cash": 105.717,
   "positions": [
     {
       "symbol": "004000",
@@ -23,7 +23,7 @@
       "avg_price": "0.1067",
       "current_price": "0.0739",
       "eval_amount": 1.1824,
-      "eval_amount_krw": 1599.3142399999997,
+      "eval_amount_krw": 1599.9054399999998,
       "return_pct": -30.740000000000002
     },
     {
@@ -35,7 +35,7 @@
       "avg_price": "33.01161",
       "current_price": "34.8",
       "eval_amount": 2289.817762,
-      "eval_amount_krw": 3097207.5048812,
+      "eval_amount_krw": 3098352.4137622,
       "return_pct": 5.41
     },
     {
@@ -47,7 +47,7 @@
       "avg_price": "4.783733",
       "current_price": "4.6",
       "eval_amount": 690.0,
-      "eval_amount_krw": 933293.9999999999,
+      "eval_amount_krw": 933638.9999999999,
       "return_pct": -3.84
     }
   ]
