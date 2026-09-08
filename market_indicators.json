@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-07T15:48:56.166603+00:00",
+  "generated_at": "2026-09-08T14:30:26.991935+00:00",
   "schema": "market_indicators_v3.2",
   "note": "개별 계산값을 항목별로만 나열합니다. 지표들을 하나로 합치지 않고, 종목 간 우열을 매겨 배열하지 않으며, 색을 이용한 강조도 하지 않습니다. 표의 나열 순서는 원본(보유+관심종목) 그대로이며 계산값 크기로 다시 배열하지 않습니다.",
   "state_board": {
@@ -10,38 +10,38 @@
         "name": "롯데정밀화학",
         "volatility_20d_pct": 1.83,
         "volatility_percentile": 25.7,
-        "adx_14": 3.8,
+        "adx_14": 15.7,
         "data_status": null
       },
       {
-        "symbol": "BTAI",
+        "symbol": "BTAIQ",
         "name": "바이오엑셀 테라퓨틱스",
-        "volatility_20d_pct": 19.66,
-        "volatility_percentile": 93.2,
-        "adx_14": 83.2,
-        "data_status": null
+        "volatility_20d_pct": null,
+        "volatility_percentile": null,
+        "adx_14": null,
+        "data_status": "데이터 부족"
       },
       {
         "symbol": "SCHD",
         "name": "SCHD",
-        "volatility_20d_pct": 0.6,
-        "volatility_percentile": 30.7,
-        "adx_14": 41.7,
+        "volatility_20d_pct": 0.61,
+        "volatility_percentile": 31.1,
+        "adx_14": 15.6,
         "data_status": null
       },
       {
         "symbol": "TE",
         "name": "T1 에너지",
-        "volatility_20d_pct": 5.42,
-        "volatility_percentile": 9.6,
-        "adx_14": 24.9,
+        "volatility_20d_pct": 5.87,
+        "volatility_percentile": 13.9,
+        "adx_14": 14.3,
         "data_status": null
       }
     ],
     "correlation": {
-      "avg_pairwise_correlation": 0.015,
-      "pair_count": 6,
-      "symbol_count": 4,
+      "avg_pairwise_correlation": -0.092,
+      "pair_count": 3,
+      "symbol_count": 3,
       "window_days": 60
     }
   },
@@ -54,18 +54,18 @@
         "per": null,
         "per_status": "데이터 소스 미연결",
         "volatility_20d_pct": 1.83,
-        "momentum_20d_pct": -5.66,
-        "adx_14": 3.8,
+        "momentum_20d_pct": -7.08,
+        "adx_14": 15.7,
         "data_status": null
       },
       {
-        "symbol": "BTAI",
+        "symbol": "BTAIQ",
         "name": "바이오엑셀 테라퓨틱스",
         "per": null,
         "per_status": "데이터 소스 미연결",
-        "volatility_20d_pct": 19.66,
-        "momentum_20d_pct": -91.8,
-        "adx_14": 83.2,
+        "volatility_20d_pct": null,
+        "momentum_20d_pct": null,
+        "adx_14": null,
         "data_status": null
       },
       {
@@ -73,9 +73,9 @@
         "name": "SCHD",
         "per": null,
         "per_status": "데이터 소스 미연결",
-        "volatility_20d_pct": 0.6,
-        "momentum_20d_pct": 2.65,
-        "adx_14": 41.7,
+        "volatility_20d_pct": 0.61,
+        "momentum_20d_pct": 1.1,
+        "adx_14": 15.6,
         "data_status": null
       },
       {
@@ -83,9 +83,9 @@
         "name": "T1 에너지",
         "per": null,
         "per_status": "데이터 소스 미연결",
-        "volatility_20d_pct": 5.42,
-        "momentum_20d_pct": -21.37,
-        "adx_14": 24.9,
+        "volatility_20d_pct": 5.87,
+        "momentum_20d_pct": -2.26,
+        "adx_14": 14.3,
         "data_status": null
       }
     ]
