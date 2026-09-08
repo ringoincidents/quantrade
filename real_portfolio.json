@@ -1,6 +1,6 @@
 {
-  "synced_at": "2026-09-08T04:57:12.721323+00:00",
-  "cash": 104.90500000000002,
+  "synced_at": "2026-09-08T12:13:10.132393+00:00",
+  "cash": 347.0,
   "positions": [
     {
       "symbol": "004000",
@@ -9,13 +9,13 @@
       "currency": "KRW",
       "quantity": "13",
       "avg_price": "48700",
-      "current_price": "45200",
-      "eval_amount": 587600.0,
-      "eval_amount_krw": 587600.0,
-      "return_pct": -7.180000000000001
+      "current_price": "45250",
+      "eval_amount": 588250.0,
+      "eval_amount_krw": 588250.0,
+      "return_pct": -7.08
     },
     {
-      "symbol": "BTAI",
+      "symbol": "BTAIQ",
       "name": "바이오엑셀 테라퓨틱스",
       "market_country": "US",
       "currency": "USD",
@@ -23,7 +23,7 @@
       "avg_price": "0.1067",
       "current_price": "0.0739",
       "eval_amount": 1.1824,
-      "eval_amount_krw": 1586.1896,
+      "eval_amount_krw": 1591.498576,
       "return_pct": -30.740000000000002
     },
     {
@@ -31,12 +31,12 @@
       "name": "SCHD",
       "market_country": "US",
       "currency": "USD",
-      "quantity": "65.799361",
-      "avg_price": "33.01161",
-      "current_price": "34.6",
-      "eval_amount": 2276.65789,
-      "eval_amount_krw": 3054136.5594349997,
-      "return_pct": 4.81
+      "quantity": "70.799361",
+      "avg_price": "33.128545",
+      "current_price": "34.63",
+      "eval_amount": 2451.781871,
+      "eval_amount_krw": 3300073.88054729,
+      "return_pct": 4.53
     },
     {
       "symbol": "TE",
@@ -45,10 +45,10 @@
       "currency": "USD",
       "quantity": "150",
       "avg_price": "4.783733",
-      "current_price": "4.7",
-      "eval_amount": 705.0,
-      "eval_amount_krw": 945757.5,
-      "return_pct": -1.7500000000000002
+      "current_price": "4.69",
+      "eval_amount": 703.5,
+      "eval_amount_krw": 946903.965,
+      "return_pct": -1.95
     }
   ]
 }
