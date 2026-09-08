@@ -1,89 +1,39 @@
 {
-  "generated_at": "2026-09-07T15:18:19.383681+00:00",
+  "generated_at": "2026-09-08T13:54:35.600369+00:00",
   "schema": "explanation_only_v3.2",
   "note": "사실 설명 전용(뉴스 사건 + 정량 이상행동). 방향 예측/확신도/매매 제안 필드가 스키마에 없다 - 누락이 아니라 설계(CLAUDE.md v3.2). 대상은 보유종목+관심종목으로 한정(2026-08-09 스코프 축소).",
   "cards": [
     {
-      "market": "BTAI",
-      "name": "바이오엑셀 테라퓨틱스",
+      "market": "TE",
+      "name": "T1 에너지",
       "event_type": "이상행동",
-      "summary": "거래량 20일 평균 대비 2.9배, 전일 종가 대비 시가 갭 -21.2%, 최근 20일 변동성이 과거 분포 대비 93백분위",
+      "summary": "전일 종가 대비 시가 갭 +3.9%",
       "headlines": []
     }
   ],
   "change_events": [
     {
-      "timestamp": "2026-09-04T00:00:00+00:00",
+      "timestamp": "2026-09-08T00:00:00+00:00",
       "asset": {
-        "symbol": "BTAI",
-        "name": "바이오엑셀 테라퓨틱스",
-        "market_country": "US",
-        "currency": "USD"
-      },
-      "source": "news_event_cards.anomaly",
-      "event_type": "거래량_급증",
-      "observed_value": 42941900,
-      "baseline": 15041080.0,
-      "change": 2.85,
-      "reliability": 1.0,
-      "related_assets": [],
-      "priority": {
-        "priority_score": 0.0009,
-        "factors": {
-          "reliability": 1.0,
-          "novelty": 1.0,
-          "portfolio_relevance": 0.0003,
-          "magnitude": 2.85
-        }
-      }
-    },
-    {
-      "timestamp": "2026-09-04T00:00:00+00:00",
-      "asset": {
-        "symbol": "BTAI",
-        "name": "바이오엑셀 테라퓨틱스",
+        "symbol": "TE",
+        "name": "T1 에너지",
         "market_country": "US",
         "currency": "USD"
       },
       "source": "news_event_cards.anomaly",
       "event_type": "가격_갭",
-      "observed_value": 0.09300000220537186,
-      "baseline": 0.11800000071525574,
-      "change": -21.19,
+      "observed_value": 4.78000020980835,
+      "baseline": 4.599999904632568,
+      "change": 3.91,
       "reliability": 1.0,
       "related_assets": [],
       "priority": {
-        "priority_score": 0.0064,
+        "priority_score": 0.7656,
         "factors": {
           "reliability": 1.0,
           "novelty": 1.0,
-          "portfolio_relevance": 0.0003,
-          "magnitude": 21.19
-        }
-      }
-    },
-    {
-      "timestamp": "2026-09-04T00:00:00+00:00",
-      "asset": {
-        "symbol": "BTAI",
-        "name": "바이오엑셀 테라퓨틱스",
-        "market_country": "US",
-        "currency": "USD"
-      },
-      "source": "news_event_cards.anomaly",
-      "event_type": "변동성_급증",
-      "observed_value": 19.66,
-      "baseline": null,
-      "change": 93.2,
-      "reliability": 1.0,
-      "related_assets": [],
-      "priority": {
-        "priority_score": 0.028,
-        "factors": {
-          "reliability": 1.0,
-          "novelty": 1.0,
-          "portfolio_relevance": 0.0003,
-          "magnitude": 93.2
+          "portfolio_relevance": 0.19579999999999997,
+          "magnitude": 3.91
         }
       }
     }
