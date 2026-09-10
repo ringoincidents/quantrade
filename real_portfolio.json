@@ -1,6 +1,6 @@
 {
-  "synced_at": "2026-09-09T12:25:09.964564+00:00",
-  "cash": 16513.568000000003,
+  "synced_at": "2026-09-10T04:59:35.448259+00:00",
+  "cash": 16487.696,
   "positions": [
     {
       "symbol": "004000",
@@ -9,10 +9,10 @@
       "currency": "KRW",
       "quantity": "13",
       "avg_price": "48700",
-      "current_price": "46500",
-      "eval_amount": 604500.0,
-      "eval_amount_krw": 604500.0,
-      "return_pct": -4.51
+      "current_price": "46450",
+      "eval_amount": 603850.0,
+      "eval_amount_krw": 603850.0,
+      "return_pct": -4.62
     },
     {
       "symbol": "BTAIQ",
@@ -21,10 +21,22 @@
       "currency": "USD",
       "quantity": "16",
       "avg_price": "0.1067",
-      "current_price": "0.0429",
-      "eval_amount": 0.6864,
-      "eval_amount_krw": 919.7073600000001,
-      "return_pct": -59.79
+      "current_price": "0.047",
+      "eval_amount": 0.752,
+      "eval_amount_krw": 1006.0255999999999,
+      "return_pct": -55.95
+    },
+    {
+      "symbol": "ELMT",
+      "name": "엘메트 그룹",
+      "market_country": "US",
+      "currency": "USD",
+      "quantity": "8",
+      "avg_price": "17.01",
+      "current_price": "16.46",
+      "eval_amount": 131.68,
+      "eval_amount_krw": 176161.50400000002,
+      "return_pct": -3.2300000000000004
     },
     {
       "symbol": "SCHD",
@@ -33,10 +45,10 @@
       "currency": "USD",
       "quantity": "70.799361",
       "avg_price": "33.128545",
-      "current_price": "34.38",
-      "eval_amount": 2434.082031,
-      "eval_amount_krw": 3261426.5133369,
-      "return_pct": 3.7699999999999996
+      "current_price": "34.2",
+      "eval_amount": 2421.338146,
+      "eval_amount_krw": 3239266.1717188,
+      "return_pct": 3.2300000000000004
     },
     {
       "symbol": "TE",
@@ -45,10 +57,10 @@
       "currency": "USD",
       "quantity": "150",
       "avg_price": "4.783733",
-      "current_price": "4.92",
-      "eval_amount": 738.0,
-      "eval_amount_krw": 988846.2000000001,
-      "return_pct": 2.8400000000000003
+      "current_price": "4.9",
+      "eval_amount": 735.0,
+      "eval_amount_krw": 983283.0,
+      "return_pct": 2.4299999999999997
     }
   ]
 }
