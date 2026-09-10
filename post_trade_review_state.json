@@ -1,8 +1,10 @@
 {
-  "loss_since": {},
+  "loss_since": {
+    "BTAIQ": "2026-09-10"
+  },
   "last_snapshot": {
-    "synced_at": "2026-09-08T12:13:10.132393+00:00",
-    "cash": 347.0,
+    "synced_at": "2026-09-10T12:19:02.575801+00:00",
+    "cash": 1294.9515,
     "positions": [
       {
         "symbol": "004000",
@@ -11,10 +13,10 @@
         "currency": "KRW",
         "quantity": "13",
         "avg_price": "48700",
-        "current_price": "45250",
-        "eval_amount": 588250.0,
-        "eval_amount_krw": 588250.0,
-        "return_pct": -7.08
+        "current_price": "46350",
+        "eval_amount": 602550.0,
+        "eval_amount_krw": 602550.0,
+        "return_pct": -4.82
       },
       {
         "symbol": "BTAIQ",
@@ -23,34 +25,46 @@
         "currency": "USD",
         "quantity": "16",
         "avg_price": "0.1067",
-        "current_price": "0.0739",
-        "eval_amount": 1.1824,
-        "eval_amount_krw": 1591.498576,
-        "return_pct": -30.740000000000002
+        "current_price": "0.047",
+        "eval_amount": 0.752,
+        "eval_amount_krw": 1013.9742399999999,
+        "return_pct": -55.95
+      },
+      {
+        "symbol": "ELMT",
+        "name": "엘메트 그룹",
+        "market_country": "US",
+        "currency": "USD",
+        "quantity": "8",
+        "avg_price": "17.01",
+        "current_price": "16.6",
+        "eval_amount": 132.8,
+        "eval_amount_krw": 179063.536,
+        "return_pct": -2.41
       },
       {
         "symbol": "SCHD",
         "name": "SCHD",
         "market_country": "US",
         "currency": "USD",
-        "quantity": "70.799361",
-        "avg_price": "33.128545",
-        "current_price": "34.63",
-        "eval_amount": 2451.781871,
-        "eval_amount_krw": 3300073.88054729,
-        "return_pct": 4.53
+        "quantity": "74.799361",
+        "avg_price": "33.186912",
+        "current_price": "34.21",
+        "eval_amount": 2558.886139,
+        "eval_amount_krw": 3450325.30324343,
+        "return_pct": 3.08
       },
       {
         "symbol": "TE",
         "name": "T1 에너지",
         "market_country": "US",
         "currency": "USD",
-        "quantity": "150",
-        "avg_price": "4.783733",
-        "current_price": "4.69",
-        "eval_amount": 703.5,
-        "eval_amount_krw": 946903.965,
-        "return_pct": -1.95
+        "quantity": "213",
+        "avg_price": "4.82061",
+        "current_price": "4.77",
+        "eval_amount": 1016.01,
+        "eval_amount_krw": 1369957.4037,
+        "return_pct": -1.04
       }
     ]
   }
