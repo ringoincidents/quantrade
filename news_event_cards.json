@@ -1,66 +1,7 @@
 {
-  "generated_at": "2026-09-11T13:51:15.194243+00:00",
+  "generated_at": "2026-09-12T13:10:25.422856+00:00",
   "schema": "explanation_only_v3.2",
   "note": "사실 설명 전용(뉴스 사건 + 정량 이상행동). 방향 예측/확신도/매매 제안 필드가 스키마에 없다 - 누락이 아니라 설계(CLAUDE.md v3.2). 대상은 보유종목+관심종목으로 한정(2026-08-09 스코프 축소).",
-  "cards": [
-    {
-      "market": "BTAIQ",
-      "name": "바이오엑셀 테라퓨틱스",
-      "event_type": "이상행동",
-      "summary": "전일 종가 대비 시가 갭 +10.2%, 최근 20일 변동성이 과거 분포 대비 94백분위",
-      "headlines": []
-    }
-  ],
-  "change_events": [
-    {
-      "timestamp": "2026-09-11T00:00:00+00:00",
-      "asset": {
-        "symbol": "BTAIQ",
-        "name": "바이오엑셀 테라퓨틱스",
-        "market_country": "US",
-        "currency": "USD"
-      },
-      "source": "news_event_cards.anomaly",
-      "event_type": "가격_갭",
-      "observed_value": 0.05510000139474869,
-      "baseline": 0.05000000074505806,
-      "change": 10.2,
-      "reliability": 1.0,
-      "related_assets": [],
-      "priority": {
-        "priority_score": 0.002,
-        "factors": {
-          "reliability": 1.0,
-          "novelty": 1.0,
-          "portfolio_relevance": 0.0002,
-          "magnitude": 10.2
-        }
-      }
-    },
-    {
-      "timestamp": "2026-09-11T00:00:00+00:00",
-      "asset": {
-        "symbol": "BTAIQ",
-        "name": "바이오엑셀 테라퓨틱스",
-        "market_country": "US",
-        "currency": "USD"
-      },
-      "source": "news_event_cards.anomaly",
-      "event_type": "변동성_급증",
-      "observed_value": 20.52,
-      "baseline": null,
-      "change": 93.6,
-      "reliability": 1.0,
-      "related_assets": [],
-      "priority": {
-        "priority_score": 0.0187,
-        "factors": {
-          "reliability": 1.0,
-          "novelty": 1.0,
-          "portfolio_relevance": 0.0002,
-          "magnitude": 93.6
-        }
-      }
-    }
-  ]
+  "cards": [],
+  "change_events": []
 }
