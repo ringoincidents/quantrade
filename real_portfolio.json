@@ -1,6 +1,6 @@
 {
-  "synced_at": "2026-09-11T12:17:29.712230+00:00",
-  "cash": 1293.156,
+  "synced_at": "2026-09-12T04:49:09.831029+00:00",
+  "cash": 1293.555,
   "positions": [
     {
       "symbol": "004000",
@@ -21,10 +21,10 @@
       "currency": "USD",
       "quantity": "16",
       "avg_price": "0.1067",
-      "current_price": "0.05",
-      "eval_amount": 0.8,
-      "eval_amount_krw": 1077.184,
-      "return_pct": -53.13
+      "current_price": "0.051",
+      "eval_amount": 0.816,
+      "eval_amount_krw": 1099.0704,
+      "return_pct": -52.2
     },
     {
       "symbol": "ELMT",
@@ -33,10 +33,10 @@
       "currency": "USD",
       "quantity": "8",
       "avg_price": "17.01",
-      "current_price": "16.4",
-      "eval_amount": 131.2,
-      "eval_amount_krw": 176658.17599999998,
-      "return_pct": -3.58
+      "current_price": "16.19",
+      "eval_amount": 129.52,
+      "eval_amount_krw": 174450.488,
+      "return_pct": -4.82
     },
     {
       "symbol": "SCHD",
@@ -47,7 +47,7 @@
       "avg_price": "33.186912",
       "current_price": "34.12",
       "eval_amount": 2552.154197,
-      "eval_amount_krw": 3436424.58317656,
+      "eval_amount_krw": 3437496.4879393,
       "return_pct": 2.81
     },
     {
@@ -57,10 +57,10 @@
       "currency": "USD",
       "quantity": "213",
       "avg_price": "4.82061",
-      "current_price": "4.63",
-      "eval_amount": 986.19,
-      "eval_amount_krw": 1327885.1112000002,
-      "return_pct": -3.95
+      "current_price": "4.61",
+      "eval_amount": 981.93,
+      "eval_amount_krw": 1322561.517,
+      "return_pct": -4.36
     }
   ]
 }
