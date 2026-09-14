@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-07T00:55:38.823487+00:00",
+  "generated_at": "2026-09-14T00:58:42.674397+00:00",
   "schema": "portfolio_report_v3.2",
   "note": "현황 계산 + 사전 정의 규칙 해당 여부만 담는다. 매매 판단/방향 예측/확신도 필드는 스키마에 없다 - 누락이 아니라 설계.",
   "thresholds": {
@@ -9,48 +9,56 @@
     "loss_sustained_days": 60
   },
   "snapshot": {
-    "synced_at": "2026-09-06T11:42:27.406075+00:00",
-    "total_assets_krw": 4629747.0,
-    "cash_krw": 106.0,
-    "cash_pct": 0.0,
-    "position_count": 4,
+    "synced_at": "2026-09-13T12:47:31.708369+00:00",
+    "total_assets_krw": 5541401.0,
+    "cash_krw": 1294.0,
+    "cash_pct": 0.02,
+    "position_count": 5,
     "positions": [
       {
         "symbol": "SCHD",
         "name": "SCHD",
         "market_country": "US",
-        "eval_amount_krw": 3098352.0,
-        "weight_pct": 66.92,
-        "return_pct": 5.41
+        "eval_amount_krw": 3437496.0,
+        "weight_pct": 62.03,
+        "return_pct": 2.81
       },
       {
         "symbol": "TE",
         "name": "T1 에너지",
         "market_country": "US",
-        "eval_amount_krw": 933639.0,
-        "weight_pct": 20.17,
-        "return_pct": -3.84
+        "eval_amount_krw": 1322562.0,
+        "weight_pct": 23.87,
+        "return_pct": -4.36
       },
       {
         "symbol": "004000",
         "name": "롯데정밀화학",
         "market_country": "KR",
-        "eval_amount_krw": 596050.0,
-        "weight_pct": 12.87,
-        "return_pct": -5.8500000000000005
+        "eval_amount_krw": 604500.0,
+        "weight_pct": 10.91,
+        "return_pct": -4.51
       },
       {
-        "symbol": "BTAI",
+        "symbol": "ELMT",
+        "name": "엘메트 그룹",
+        "market_country": "US",
+        "eval_amount_krw": 174450.0,
+        "weight_pct": 3.15,
+        "return_pct": -4.82
+      },
+      {
+        "symbol": "BTAIQ",
         "name": "바이오엑셀 테라퓨틱스",
         "market_country": "US",
-        "eval_amount_krw": 1600.0,
-        "weight_pct": 0.03,
-        "return_pct": -30.740000000000002
+        "eval_amount_krw": 1099.0,
+        "weight_pct": 0.02,
+        "return_pct": -52.2
       }
     ],
     "weight_by_country_pct": {
-      "US": 87.12,
-      "KR": 12.87
+      "US": 89.07,
+      "KR": 10.91
     }
   },
   "rule_matches": [],
@@ -63,17 +71,17 @@
         "name": "SCHD",
         "sizing": {
           "recommended_range_krw": {
-            "min": 925949,
-            "max": 925949
+            "min": 1108280,
+            "max": 1108280
           },
           "by_strategy_krw": {
-            "단타": 925949,
-            "스윙": 925949,
-            "장기": 925949
+            "단타": 1108280,
+            "스윙": 1108280,
+            "장기": 1108280
           },
-          "ceiling_krw": 925949,
+          "ceiling_krw": 1108280,
           "inputs": {
-            "volatility_pct": 0.62,
+            "volatility_pct": 0.686,
             "reference_vol_pct": 2.0,
             "per_trade_risk_budget_pct": 2.0
           }
@@ -85,17 +93,17 @@
         "name": "T1 에너지",
         "sizing": {
           "recommended_range_krw": {
-            "min": 133202,
-            "max": 666008
+            "min": 163902,
+            "max": 819509
           },
           "by_strategy_krw": {
-            "단타": 666008,
-            "스윙": 333004,
-            "장기": 133202
+            "단타": 819509,
+            "스윙": 409755,
+            "장기": 163902
           },
-          "ceiling_krw": 925949,
+          "ceiling_krw": 1108280,
           "inputs": {
-            "volatility_pct": 5.561,
+            "volatility_pct": 5.409,
             "reference_vol_pct": 2.0,
             "per_trade_risk_budget_pct": 2.0
           }
@@ -107,17 +115,17 @@
         "name": "롯데정밀화학",
         "sizing": {
           "recommended_range_krw": {
-            "min": 395477,
-            "max": 925949
+            "min": 465795,
+            "max": 1108280
           },
           "by_strategy_krw": {
-            "단타": 925949,
-            "스윙": 925949,
-            "장기": 395477
+            "단타": 1108280,
+            "스윙": 1108280,
+            "장기": 465795
           },
-          "ceiling_krw": 925949,
+          "ceiling_krw": 1108280,
           "inputs": {
-            "volatility_pct": 1.873,
+            "volatility_pct": 1.903,
             "reference_vol_pct": 2.0,
             "per_trade_risk_budget_pct": 2.0
           }
@@ -125,21 +133,43 @@
         "note": null
       },
       {
-        "symbol": "BTAI",
+        "symbol": "ELMT",
+        "name": "엘메트 그룹",
+        "sizing": {
+          "recommended_range_krw": {
+            "min": 138387,
+            "max": 691934
+          },
+          "by_strategy_krw": {
+            "단타": 691934,
+            "스윙": 345967,
+            "장기": 138387
+          },
+          "ceiling_krw": 1108280,
+          "inputs": {
+            "volatility_pct": 6.407,
+            "reference_vol_pct": 2.0,
+            "per_trade_risk_budget_pct": 2.0
+          }
+        },
+        "note": null
+      },
+      {
+        "symbol": "BTAIQ",
         "name": "바이오엑셀 테라퓨틱스",
         "sizing": {
           "recommended_range_krw": {
-            "min": 36718,
-            "max": 183588
+            "min": 41965,
+            "max": 209823
           },
           "by_strategy_krw": {
-            "단타": 183588,
-            "스윙": 91794,
-            "장기": 36718
+            "단타": 209823,
+            "스윙": 104912,
+            "장기": 41965
           },
-          "ceiling_krw": 925949,
+          "ceiling_krw": 1108280,
           "inputs": {
-            "volatility_pct": 20.174,
+            "volatility_pct": 21.128,
             "reference_vol_pct": 2.0,
             "per_trade_risk_budget_pct": 2.0
           }
@@ -148,16 +178,16 @@
       }
     ],
     "mdd_budget": {
-      "portfolio_unrealized_return_pct": 2.08,
+      "portfolio_unrealized_return_pct": 0.05,
       "mdd_limit_pct": -20.0,
-      "budget_usage_pct": -10.4,
+      "budget_usage_pct": -0.2,
       "note": "실제 고점 대비 낙폭(진짜 MDD)이 아니라 현재 미실현손익 기준 소진율 — real_portfolio.json은 스냅샷이라 과거 고점을 모른다."
     },
     "concentration": [
       {
         "symbol": "SCHD",
         "name": "SCHD",
-        "weight_pct": 66.92,
+        "weight_pct": 62.03,
         "threshold_pct": 30.0,
         "asset_type": "etf",
         "rule_applies": false
@@ -165,7 +195,7 @@
       {
         "symbol": "TE",
         "name": "T1 에너지",
-        "weight_pct": 20.17,
+        "weight_pct": 23.87,
         "threshold_pct": 30.0,
         "asset_type": "individual_stock",
         "rule_applies": true
@@ -173,15 +203,23 @@
       {
         "symbol": "004000",
         "name": "롯데정밀화학",
-        "weight_pct": 12.87,
+        "weight_pct": 10.91,
         "threshold_pct": 30.0,
         "asset_type": "individual_stock",
         "rule_applies": true
       },
       {
-        "symbol": "BTAI",
+        "symbol": "ELMT",
+        "name": "엘메트 그룹",
+        "weight_pct": 3.15,
+        "threshold_pct": 30.0,
+        "asset_type": "individual_stock",
+        "rule_applies": true
+      },
+      {
+        "symbol": "BTAIQ",
         "name": "바이오엑셀 테라퓨틱스",
-        "weight_pct": 0.03,
+        "weight_pct": 0.02,
         "threshold_pct": 30.0,
         "asset_type": "individual_stock",
         "rule_applies": true
@@ -193,26 +231,37 @@
         "SCHD": {
           "SCHD": 1.0,
           "TE": -0.192,
-          "004000": 0.024,
-          "BTAI": 0.106
+          "004000": 0.101,
+          "ELMT": -0.081,
+          "BTAIQ": null
         },
         "TE": {
           "SCHD": -0.192,
           "TE": 1.0,
-          "004000": 0.068,
-          "BTAI": 0.154
+          "004000": -0.022,
+          "ELMT": 0.381,
+          "BTAIQ": null
         },
         "004000": {
-          "SCHD": 0.024,
-          "TE": 0.068,
+          "SCHD": 0.101,
+          "TE": -0.022,
           "004000": 1.0,
-          "BTAI": 0.107
+          "ELMT": 0.054,
+          "BTAIQ": null
         },
-        "BTAI": {
-          "SCHD": 0.106,
-          "TE": 0.154,
-          "004000": 0.107,
-          "BTAI": 1.0
+        "ELMT": {
+          "SCHD": -0.081,
+          "TE": 0.381,
+          "004000": 0.054,
+          "ELMT": 1.0,
+          "BTAIQ": null
+        },
+        "BTAIQ": {
+          "SCHD": null,
+          "TE": null,
+          "004000": null,
+          "ELMT": null,
+          "BTAIQ": 1.0
         }
       },
       "flagged_pairs": [],
@@ -222,30 +271,37 @@
       {
         "symbol": "SCHD",
         "name": "SCHD",
-        "return_pct": 5.41,
+        "return_pct": 2.81,
         "sell_cost_pct": 0.35,
-        "cost_adjusted_return_pct": 5.06
+        "cost_adjusted_return_pct": 2.46
       },
       {
         "symbol": "TE",
         "name": "T1 에너지",
-        "return_pct": -3.84,
+        "return_pct": -4.36,
         "sell_cost_pct": 0.35,
-        "cost_adjusted_return_pct": -4.19
+        "cost_adjusted_return_pct": -4.71
       },
       {
         "symbol": "004000",
         "name": "롯데정밀화학",
-        "return_pct": -5.8500000000000005,
+        "return_pct": -4.51,
         "sell_cost_pct": 0.295,
-        "cost_adjusted_return_pct": -6.145
+        "cost_adjusted_return_pct": -4.805
       },
       {
-        "symbol": "BTAI",
-        "name": "바이오엑셀 테라퓨틱스",
-        "return_pct": -30.740000000000002,
+        "symbol": "ELMT",
+        "name": "엘메트 그룹",
+        "return_pct": -4.82,
         "sell_cost_pct": 0.35,
-        "cost_adjusted_return_pct": -31.09
+        "cost_adjusted_return_pct": -5.17
+      },
+      {
+        "symbol": "BTAIQ",
+        "name": "바이오엑셀 테라퓨틱스",
+        "return_pct": -52.2,
+        "sell_cost_pct": 0.35,
+        "cost_adjusted_return_pct": -52.55
       }
     ]
   },
@@ -366,27 +422,27 @@
         "asset_class": "bond",
         "label": "채권",
         "group": "안전자산",
-        "target_pct": 5.0,
+        "target_pct": 0.0,
         "actual_pct": 0.0,
-        "gap_pct": 5.0,
+        "gap_pct": 0.0,
         "currently_mapped": false
       },
       {
         "asset_class": "cash",
         "label": "현금성",
         "group": "안전자산",
-        "target_pct": 5.0,
-        "actual_pct": 0.0,
-        "gap_pct": 5.0,
-        "currently_mapped": false
+        "target_pct": 10.0,
+        "actual_pct": 0.02,
+        "gap_pct": 9.98,
+        "currently_mapped": true
       },
       {
         "asset_class": "기존_배당",
         "label": "배당(기존)",
         "group": "위험자산",
         "target_pct": 45.0,
-        "actual_pct": 66.92,
-        "gap_pct": -21.92,
+        "actual_pct": 62.03,
+        "gap_pct": -17.03,
         "currently_mapped": true
       },
       {
@@ -403,8 +459,8 @@
         "label": "개별성장주(기존)",
         "group": "위험자산",
         "target_pct": 45.0,
-        "actual_pct": 33.04,
-        "gap_pct": 11.96,
+        "actual_pct": 34.78,
+        "gap_pct": 10.22,
         "currently_mapped": true
       },
       {
@@ -455,12 +511,17 @@
     ],
     "unmapped_holdings": [
       {
-        "symbol": "BTAI",
+        "symbol": "ELMT",
+        "name": "엘메트 그룹",
+        "weight_pct": 3.15
+      },
+      {
+        "symbol": "BTAIQ",
         "name": "바이오엑셀 테라퓨틱스",
-        "weight_pct": 0.03
+        "weight_pct": 0.02
       }
     ],
-    "unmapped_holdings_weight_pct": 0.03,
+    "unmapped_holdings_weight_pct": 3.17,
     "note": "자산군별 목표/실제 비중과 그 차이(%p)만 나열합니다. 매핑 안 된 자산군의 갭이 0%p인 것은 정상입니다(목표도 0%로 계산). 매핑 안 된 보유종목은 unmapped_holdings에 따로 모았습니다 — 어떤 자산군에도 포함되지 않았다는 사실이며, 판단이 필요하다는 뜻은 아닙니다.",
     "monthly_gap_fill": [
       {
@@ -469,22 +530,16 @@
         "monthly_investable_krw": 850000,
         "allocations": [
           {
-            "asset_class": "bond",
-            "label": "채권",
-            "gap_pct": 5.0,
-            "amount_krw": 193534
-          },
-          {
             "asset_class": "cash",
             "label": "현금성",
-            "gap_pct": 5.0,
-            "amount_krw": 193534
+            "gap_pct": 9.98,
+            "amount_krw": 419950
           },
           {
             "asset_class": "기존_개별성장주",
             "label": "개별성장주(기존)",
-            "gap_pct": 11.96,
-            "amount_krw": 462933
+            "gap_pct": 10.22,
+            "amount_krw": 430050
           }
         ]
       },
@@ -494,22 +549,16 @@
         "monthly_investable_krw": 850000,
         "allocations": [
           {
-            "asset_class": "bond",
-            "label": "채권",
-            "gap_pct": 5.0,
-            "amount_krw": 193534
-          },
-          {
             "asset_class": "cash",
             "label": "현금성",
-            "gap_pct": 5.0,
-            "amount_krw": 193534
+            "gap_pct": 9.98,
+            "amount_krw": 419950
           },
           {
             "asset_class": "기존_개별성장주",
             "label": "개별성장주(기존)",
-            "gap_pct": 11.96,
-            "amount_krw": 462933
+            "gap_pct": 10.22,
+            "amount_krw": 430050
           }
         ]
       },
@@ -519,41 +568,35 @@
         "monthly_investable_krw": 850000,
         "allocations": [
           {
-            "asset_class": "bond",
-            "label": "채권",
-            "gap_pct": 5.0,
-            "amount_krw": 193534
-          },
-          {
             "asset_class": "cash",
             "label": "현금성",
-            "gap_pct": 5.0,
-            "amount_krw": 193534
+            "gap_pct": 9.98,
+            "amount_krw": 419950
           },
           {
             "asset_class": "기존_개별성장주",
             "label": "개별성장주(기존)",
-            "gap_pct": 11.96,
-            "amount_krw": 462933
+            "gap_pct": 10.22,
+            "amount_krw": 430050
           }
         ]
       }
     ]
   },
   "role_gap": {
-    "risk_asset_total_pct": 100.0,
+    "risk_asset_total_pct": 99.98,
     "rows": [
       {
         "role": "코어",
         "label": "코어",
         "target_pct": 65,
-        "actual_pct": 66.92,
-        "gap_pct": -1.92,
+        "actual_pct": 62.04,
+        "gap_pct": 2.96,
         "members": [
           {
             "symbol": "SCHD",
             "name": "SCHD",
-            "weight_pct": 66.92,
+            "weight_pct": 62.03,
             "note": null
           }
         ]
@@ -570,19 +613,19 @@
         "role": "스윙-전술",
         "label": "스윙-전술",
         "target_pct": 15,
-        "actual_pct": 33.04,
-        "gap_pct": -18.04,
+        "actual_pct": 34.79,
+        "gap_pct": -19.79,
         "members": [
           {
             "symbol": "004000",
             "name": "롯데정밀화학",
-            "weight_pct": 12.87,
+            "weight_pct": 10.91,
             "note": null
           },
           {
             "symbol": "TE",
             "name": "T1 에너지",
-            "weight_pct": 20.17,
+            "weight_pct": 23.87,
             "note": null
           }
         ]
@@ -598,12 +641,17 @@
     ],
     "unmapped_holdings": [
       {
-        "symbol": "BTAI",
+        "symbol": "ELMT",
+        "name": "엘메트 그룹",
+        "weight_pct": 3.15
+      },
+      {
+        "symbol": "BTAIQ",
         "name": "바이오엑셀 테라퓨틱스",
-        "weight_pct": 0.03
+        "weight_pct": 0.02
       }
     ],
-    "unmapped_holdings_weight_pct": 0.03,
+    "unmapped_holdings_weight_pct": 3.17,
     "note": "역할별 목표/실제 비중은 포트폴리오 전체가 아니라 위험자산 총액 대비입니다. 목표 비중이 없는 역할은 갭을 계산하지 않습니다 — 지어내지 않습니다.",
     "monthly_gap_fill": [
       {
