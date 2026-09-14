@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-13T14:19:59.723857+00:00",
+  "generated_at": "2026-09-14T16:21:06.245670+00:00",
   "schema": "market_indicators_v3.2",
   "note": "개별 계산값을 항목별로만 나열합니다. 지표들을 하나로 합치지 않고, 종목 간 우열을 매겨 배열하지 않으며, 색을 이용한 강조도 하지 않습니다. 표의 나열 순서는 원본(보유+관심종목) 그대로이며 계산값 크기로 다시 배열하지 않습니다.",
   "state_board": {
@@ -8,48 +8,40 @@
       {
         "symbol": "004000",
         "name": "롯데정밀화학",
-        "volatility_20d_pct": 1.88,
-        "volatility_percentile": 27.5,
-        "adx_14": 35.1,
+        "volatility_20d_pct": 1.84,
+        "volatility_percentile": 25.7,
+        "adx_14": 21.9,
         "data_status": null
       },
       {
         "symbol": "BTAIQ",
         "name": "바이오엑셀 테라퓨틱스",
-        "volatility_20d_pct": 20.58,
-        "volatility_percentile": 93.6,
-        "adx_14": 83.3,
-        "data_status": null
-      },
-      {
-        "symbol": "ELMT",
-        "name": "엘메트 그룹",
-        "volatility_20d_pct": 6.24,
-        "volatility_percentile": 65.4,
-        "adx_14": 37.0,
-        "data_status": null
+        "volatility_20d_pct": null,
+        "volatility_percentile": null,
+        "adx_14": null,
+        "data_status": "데이터 부족"
       },
       {
         "symbol": "SCHD",
         "name": "SCHD",
-        "volatility_20d_pct": 0.67,
-        "volatility_percentile": 50.0,
-        "adx_14": 48.9,
+        "volatility_20d_pct": 0.7,
+        "volatility_percentile": 58.9,
+        "adx_14": 36.6,
         "data_status": null
       },
       {
         "symbol": "TE",
         "name": "T1 에너지",
-        "volatility_20d_pct": 5.27,
-        "volatility_percentile": 5.7,
-        "adx_14": 21.5,
+        "volatility_20d_pct": 5.15,
+        "volatility_percentile": 5.0,
+        "adx_14": 9.6,
         "data_status": null
       }
     ],
     "correlation": {
-      "avg_pairwise_correlation": 0.073,
-      "pair_count": 10,
-      "symbol_count": 5,
+      "avg_pairwise_correlation": -0.027,
+      "pair_count": 6,
+      "symbol_count": 4,
       "window_days": 60
     }
   },
@@ -61,9 +53,9 @@
         "name": "롯데정밀화학",
         "per": null,
         "per_status": "데이터 소스 미연결",
-        "volatility_20d_pct": 1.88,
-        "momentum_20d_pct": -0.32,
-        "adx_14": 35.1,
+        "volatility_20d_pct": 1.84,
+        "momentum_20d_pct": -2.87,
+        "adx_14": 21.9,
         "data_status": null
       },
       {
@@ -71,19 +63,9 @@
         "name": "바이오엑셀 테라퓨틱스",
         "per": null,
         "per_status": "데이터 소스 미연결",
-        "volatility_20d_pct": 20.58,
-        "momentum_20d_pct": -95.49,
-        "adx_14": 83.3,
-        "data_status": null
-      },
-      {
-        "symbol": "ELMT",
-        "name": "엘메트 그룹",
-        "per": null,
-        "per_status": "데이터 소스 미연결",
-        "volatility_20d_pct": 6.24,
-        "momentum_20d_pct": -5.6,
-        "adx_14": 37.0,
+        "volatility_20d_pct": null,
+        "momentum_20d_pct": null,
+        "adx_14": null,
         "data_status": null
       },
       {
@@ -91,9 +73,9 @@
         "name": "SCHD",
         "per": null,
         "per_status": "데이터 소스 미연결",
-        "volatility_20d_pct": 0.67,
-        "momentum_20d_pct": -0.9,
-        "adx_14": 48.9,
+        "volatility_20d_pct": 0.7,
+        "momentum_20d_pct": -0.29,
+        "adx_14": 36.6,
         "data_status": null
       },
       {
@@ -101,9 +83,9 @@
         "name": "T1 에너지",
         "per": null,
         "per_status": "데이터 소스 미연결",
-        "volatility_20d_pct": 5.27,
-        "momentum_20d_pct": -3.76,
-        "adx_14": 21.5,
+        "volatility_20d_pct": 5.15,
+        "momentum_20d_pct": -14.58,
+        "adx_14": 9.6,
         "data_status": null
       }
     ]
