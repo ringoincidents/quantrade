@@ -686,6 +686,75 @@
           "fact": "바이오엑셀 테라퓨틱스(BTAIQ) 비중이 0.0%인 상태에서 최근 이상행동 관련 사실이 있었습니다: 전일 종가 대비 시가 갭 +4.0%, 최근 20일 변동성이 과거 분포 대비 94백분위"
         }
       ]
+    },
+    {
+      "id": "review-2026-09-15T12:51:29.355874+00:00",
+      "generated_at": "2026-09-15T12:51:29.355874+00:00",
+      "trigger": "batch",
+      "schema": "post_trade_review_v3.2",
+      "note": "매매 이후 사람이 놓쳤을 수 있는 것을 사후에 짚어보는 기록입니다. 새 AI 판단이나 매매 제안이 아니라 이미 계산된 값을 재사용한 사실 연결이며, 생성 시점에 확정되고 이후 수정되지 않습니다.",
+      "exposure_change": {
+        "has_baseline": true,
+        "added_symbols": [
+          "ADBT"
+        ],
+        "removed_symbols": [],
+        "by_currency_pct_now": {
+          "KRW": 10.54,
+          "USD": 89.45
+        },
+        "by_country_pct_now": {
+          "KR": 10.54,
+          "US": 89.45
+        },
+        "by_currency_pct_delta": {
+          "KRW": -0.11,
+          "USD": 0.12
+        },
+        "by_country_pct_delta": {
+          "KR": -0.11,
+          "US": 0.12
+        },
+        "sector_status": "데이터 소스 미연결"
+      },
+      "allocation_gap": {
+        "concentration_matches": [
+          {
+            "rule": "집중도",
+            "symbol": "SCHD",
+            "name": "SCHD",
+            "threshold": "단일 종목 비중 30% 이상",
+            "observed": "62.41%",
+            "fact": "SCHD(SCHD) 비중이 총자산의 62.41%로 기준 30% 이상"
+          }
+        ],
+        "asset_class_target_status": "데이터 소스 미연결 — 보유 종목을 로드맵의 자산군(bond/developed_exUS/emerging/...)으로 분류할 데이터가 없어 국가/통화 노출만 비교합니다."
+      },
+      "correlation_blind_spots": {
+        "flag_threshold": 0.7,
+        "lookback_days": 90,
+        "spots": []
+      },
+      "behavior_patterns": [
+        {
+          "symbol": "BTAIQ",
+          "name": "바이오엑셀 테라퓨틱스",
+          "return_pct": -57.730000000000004,
+          "threshold_pct": -50.0,
+          "days_since_threshold": 5,
+          "fact": "바이오엑셀 테라퓨틱스(BTAIQ) 평가손익 -57.73%가 기준 -50% 이하로 2026-09-10부터 5일째이며, 그 사이 매도 없이 보유가 유지되고 있습니다."
+        }
+      ],
+      "recent_news_links": [
+        {
+          "symbol": "TE",
+          "name": "T1 에너지",
+          "weight_pct": 27.0,
+          "event_type": "이상행동",
+          "summary": "전일 종가 대비 시가 갭 -5.4%",
+          "fact": "T1 에너지(TE) 비중이 27.0%인 상태에서 최근 이상행동 관련 사실이 있었습니다: 전일 종가 대비 시가 갭 -5.4%"
+        }
+      ]
     }
   ]
 }
