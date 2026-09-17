@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-16T14:22:35.736633+00:00",
+  "generated_at": "2026-09-17T14:28:25.516771+00:00",
   "schema": "explanation_only_v3.2",
   "note": "사실 설명 전용(뉴스 사건 + 정량 이상행동). 방향 예측/확신도/매매 제안 필드가 스키마에 없다 - 누락이 아니라 설계(CLAUDE.md v3.2). 대상은 보유종목+관심종목으로 한정(2026-08-09 스코프 축소).",
   "cards": [
@@ -7,45 +7,13 @@
       "market": "BTAIQ",
       "name": "바이오엑셀 테라퓨틱스",
       "event_type": "이상행동",
-      "summary": "전일 종가 대비 시가 갭 +16.2%, 최근 20일 변동성이 과거 분포 대비 93백분위",
-      "headlines": []
-    },
-    {
-      "market": "SNYR",
-      "name": "시너지 CHC",
-      "event_type": "이상행동",
-      "summary": "거래량 20일 평균 대비 16.9배, 전일 종가 대비 시가 갭 +73.2%, 최근 20일 변동성이 과거 분포 대비 100백분위",
+      "summary": "최근 20일 변동성이 과거 분포 대비 95백분위",
       "headlines": []
     }
   ],
   "change_events": [
     {
-      "timestamp": "2026-09-16T00:00:00+00:00",
-      "asset": {
-        "symbol": "BTAIQ",
-        "name": "바이오엑셀 테라퓨틱스",
-        "market_country": "US",
-        "currency": "USD"
-      },
-      "source": "news_event_cards.anomaly",
-      "event_type": "가격_갭",
-      "observed_value": 0.052299998700618744,
-      "baseline": 0.04500000178813934,
-      "change": 16.22,
-      "reliability": 1.0,
-      "related_assets": [],
-      "priority": {
-        "priority_score": 0.0005,
-        "factors": {
-          "reliability": 1.0,
-          "novelty": 0.1429,
-          "portfolio_relevance": 0.0002,
-          "magnitude": 16.22
-        }
-      }
-    },
-    {
-      "timestamp": "2026-09-16T00:00:00+00:00",
+      "timestamp": "2026-09-17T00:00:00+00:00",
       "asset": {
         "symbol": "BTAIQ",
         "name": "바이오엑셀 테라퓨틱스",
@@ -54,93 +22,18 @@
       },
       "source": "news_event_cards.anomaly",
       "event_type": "변동성_급증",
-      "observed_value": 20.16,
+      "observed_value": 23.8,
       "baseline": null,
-      "change": 92.9,
+      "change": 95.4,
       "reliability": 1.0,
       "related_assets": [],
       "priority": {
-        "priority_score": 0.0027,
+        "priority_score": 0.0041,
         "factors": {
           "reliability": 1.0,
           "novelty": 0.1429,
-          "portfolio_relevance": 0.0002,
-          "magnitude": 92.9
-        }
-      }
-    },
-    {
-      "timestamp": "2026-09-16T00:00:00+00:00",
-      "asset": {
-        "symbol": "SNYR",
-        "name": "시너지 CHC",
-        "market_country": "US",
-        "currency": "USD"
-      },
-      "source": "news_event_cards.anomaly",
-      "event_type": "거래량_급증",
-      "observed_value": 474033642,
-      "baseline": 28093055.0,
-      "change": 16.87,
-      "reliability": 1.0,
-      "related_assets": [],
-      "priority": {
-        "priority_score": 0.0017,
-        "factors": {
-          "reliability": 1.0,
-          "novelty": 1.0,
-          "portfolio_relevance": 0.0001,
-          "magnitude": 16.87
-        }
-      }
-    },
-    {
-      "timestamp": "2026-09-16T00:00:00+00:00",
-      "asset": {
-        "symbol": "SNYR",
-        "name": "시너지 CHC",
-        "market_country": "US",
-        "currency": "USD"
-      },
-      "source": "news_event_cards.anomaly",
-      "event_type": "가격_갭",
-      "observed_value": 0.1420000046491623,
-      "baseline": 0.0820000022649765,
-      "change": 73.17,
-      "reliability": 1.0,
-      "related_assets": [],
-      "priority": {
-        "priority_score": 0.0073,
-        "factors": {
-          "reliability": 1.0,
-          "novelty": 1.0,
-          "portfolio_relevance": 0.0001,
-          "magnitude": 73.17
-        }
-      }
-    },
-    {
-      "timestamp": "2026-09-16T00:00:00+00:00",
-      "asset": {
-        "symbol": "SNYR",
-        "name": "시너지 CHC",
-        "market_country": "US",
-        "currency": "USD"
-      },
-      "source": "news_event_cards.anomaly",
-      "event_type": "변동성_급증",
-      "observed_value": 20.29,
-      "baseline": null,
-      "change": 100.0,
-      "reliability": 1.0,
-      "related_assets": [],
-      "priority": {
-        "priority_score": 0.01,
-        "factors": {
-          "reliability": 1.0,
-          "novelty": 1.0,
-          "portfolio_relevance": 0.0001,
-          "magnitude": 100.0
+          "portfolio_relevance": 0.0003,
+          "magnitude": 95.4
         }
       }
     }
