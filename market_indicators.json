@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-16T14:56:00.432372+00:00",
+  "generated_at": "2026-09-17T14:58:07.171624+00:00",
   "schema": "market_indicators_v3.2",
   "note": "개별 계산값을 항목별로만 나열합니다. 지표들을 하나로 합치지 않고, 종목 간 우열을 매겨 배열하지 않으며, 색을 이용한 강조도 하지 않습니다. 표의 나열 순서는 원본(보유+관심종목) 그대로이며 계산값 크기로 다시 배열하지 않습니다.",
   "state_board": {
@@ -8,48 +8,40 @@
       {
         "symbol": "004000",
         "name": "롯데정밀화학",
-        "volatility_20d_pct": 1.76,
-        "volatility_percentile": 18.6,
-        "adx_14": 9.5,
+        "volatility_20d_pct": 1.69,
+        "volatility_percentile": 16.4,
+        "adx_14": 5.9,
         "data_status": null
       },
       {
         "symbol": "BTAIQ",
         "name": "바이오엑셀 테라퓨틱스",
-        "volatility_20d_pct": 20.18,
-        "volatility_percentile": 92.9,
-        "adx_14": 80.5,
-        "data_status": null
-      },
-      {
-        "symbol": "SNYR",
-        "name": "시너지 CHC",
-        "volatility_20d_pct": 18.84,
-        "volatility_percentile": 100.0,
-        "adx_14": 46.6,
+        "volatility_20d_pct": 23.78,
+        "volatility_percentile": 95.4,
+        "adx_14": 75.5,
         "data_status": null
       },
       {
         "symbol": "SCHD",
         "name": "SCHD",
-        "volatility_20d_pct": 0.66,
-        "volatility_percentile": 47.5,
-        "adx_14": 38.3,
+        "volatility_20d_pct": 0.59,
+        "volatility_percentile": 28.9,
+        "adx_14": 42.1,
         "data_status": null
       },
       {
         "symbol": "TE",
         "name": "T1 에너지",
-        "volatility_20d_pct": 5.0,
-        "volatility_percentile": 4.3,
-        "adx_14": 2.8,
+        "volatility_20d_pct": 5.28,
+        "volatility_percentile": 6.1,
+        "adx_14": 18.0,
         "data_status": null
       }
     ],
     "correlation": {
-      "avg_pairwise_correlation": -0.028,
-      "pair_count": 10,
-      "symbol_count": 5,
+      "avg_pairwise_correlation": -0.018,
+      "pair_count": 6,
+      "symbol_count": 4,
       "window_days": 60
     }
   },
@@ -61,9 +53,9 @@
         "name": "롯데정밀화학",
         "per": null,
         "per_status": "데이터 소스 미연결",
-        "volatility_20d_pct": 1.76,
-        "momentum_20d_pct": -0.33,
-        "adx_14": 9.5,
+        "volatility_20d_pct": 1.69,
+        "momentum_20d_pct": 1.35,
+        "adx_14": 5.9,
         "data_status": null
       },
       {
@@ -71,19 +63,9 @@
         "name": "바이오엑셀 테라퓨틱스",
         "per": null,
         "per_status": "데이터 소스 미연결",
-        "volatility_20d_pct": 20.18,
-        "momentum_20d_pct": -94.57,
-        "adx_14": 80.5,
-        "data_status": null
-      },
-      {
-        "symbol": "SNYR",
-        "name": "시너지 CHC",
-        "per": null,
-        "per_status": "데이터 소스 미연결",
-        "volatility_20d_pct": 18.84,
-        "momentum_20d_pct": 31.3,
-        "adx_14": 46.6,
+        "volatility_20d_pct": 23.78,
+        "momentum_20d_pct": -92.93,
+        "adx_14": 75.5,
         "data_status": null
       },
       {
@@ -91,9 +73,9 @@
         "name": "SCHD",
         "per": null,
         "per_status": "데이터 소스 미연결",
-        "volatility_20d_pct": 0.66,
-        "momentum_20d_pct": -1.09,
-        "adx_14": 38.3,
+        "volatility_20d_pct": 0.59,
+        "momentum_20d_pct": -3.61,
+        "adx_14": 42.1,
         "data_status": null
       },
       {
@@ -101,9 +83,9 @@
         "name": "T1 에너지",
         "per": null,
         "per_status": "데이터 소스 미연결",
-        "volatility_20d_pct": 5.0,
-        "momentum_20d_pct": -9.57,
-        "adx_14": 2.8,
+        "volatility_20d_pct": 5.28,
+        "momentum_20d_pct": -4.51,
+        "adx_14": 18.0,
         "data_status": null
       }
     ]
