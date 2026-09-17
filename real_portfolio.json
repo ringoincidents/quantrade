@@ -1,6 +1,6 @@
 {
-  "synced_at": "2026-09-17T05:04:46.423041+00:00",
-  "cash": 248.94000000000003,
+  "synced_at": "2026-09-17T12:40:01.575139+00:00",
+  "cash": 622.938,
   "positions": [
     {
       "symbol": "004000",
@@ -9,10 +9,10 @@
       "currency": "KRW",
       "quantity": "13",
       "avg_price": "48700",
-      "current_price": "44750",
-      "eval_amount": 581750.0,
-      "eval_amount_krw": 581750.0,
-      "return_pct": -8.110000000000001
+      "current_price": "44950",
+      "eval_amount": 584350.0,
+      "eval_amount_krw": 584350.0,
+      "return_pct": -7.7
     },
     {
       "symbol": "BTAIQ",
@@ -23,20 +23,8 @@
       "avg_price": "0.1067",
       "current_price": "0.0669",
       "eval_amount": 1.0704,
-      "eval_amount_krw": 1479.2928,
+      "eval_amount_krw": 1481.3800800000001,
       "return_pct": -37.3
-    },
-    {
-      "symbol": "SNYR",
-      "name": "시너지 CHC",
-      "market_country": "US",
-      "currency": "USD",
-      "quantity": "2",
-      "avg_price": "0.284",
-      "current_price": "0.104",
-      "eval_amount": 0.208,
-      "eval_amount_krw": 287.45599999999996,
-      "return_pct": -63.38
     },
     {
       "symbol": "SCHD",
@@ -45,10 +33,10 @@
       "currency": "USD",
       "quantity": "74.799361",
       "avg_price": "33.186912",
-      "current_price": "34",
-      "eval_amount": 2543.178274,
-      "eval_amount_krw": 3514672.374668,
-      "return_pct": 2.45
+      "current_price": "34.02",
+      "eval_amount": 2544.674261,
+      "eval_amount_krw": 3521701.94351095,
+      "return_pct": 2.5100000000000002
     },
     {
       "symbol": "TE",
@@ -57,10 +45,10 @@
       "currency": "USD",
       "quantity": "253",
       "avg_price": "4.739881",
-      "current_price": "4.19",
-      "eval_amount": 1060.07,
-      "eval_amount_krw": 1465016.74,
-      "return_pct": -11.600000000000001
+      "current_price": "4.28",
+      "eval_amount": 1082.84,
+      "eval_amount_krw": 1498596.4179999998,
+      "return_pct": -9.700000000000001
     }
   ]
 }
