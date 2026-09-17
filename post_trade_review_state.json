@@ -1,11 +1,8 @@
 {
-  "loss_since": {
-    "BTAIQ": "2026-09-10",
-    "SNYR": "2026-09-16"
-  },
+  "loss_since": {},
   "last_snapshot": {
-    "synced_at": "2026-09-16T12:41:06.460446+00:00",
-    "cash": 247.22300000000004,
+    "synced_at": "2026-09-17T12:40:01.575139+00:00",
+    "cash": 622.938,
     "positions": [
       {
         "symbol": "004000",
@@ -14,10 +11,10 @@
         "currency": "KRW",
         "quantity": "13",
         "avg_price": "48700",
-        "current_price": "45200",
-        "eval_amount": 587600.0,
-        "eval_amount_krw": 587600.0,
-        "return_pct": -7.180000000000001
+        "current_price": "44950",
+        "eval_amount": 584350.0,
+        "eval_amount_krw": 584350.0,
+        "return_pct": -7.7
       },
       {
         "symbol": "BTAIQ",
@@ -26,22 +23,10 @@
         "currency": "USD",
         "quantity": "16",
         "avg_price": "0.1067",
-        "current_price": "0.0447",
-        "eval_amount": 0.7152,
-        "eval_amount_krw": 981.18288,
-        "return_pct": -58.099999999999994
-      },
-      {
-        "symbol": "SNYR",
-        "name": "시너지 CHC",
-        "market_country": "US",
-        "currency": "USD",
-        "quantity": "2",
-        "avg_price": "0.284",
-        "current_price": "0.1339",
-        "eval_amount": 0.2678,
-        "eval_amount_krw": 367.39482,
-        "return_pct": -52.849999999999994
+        "current_price": "0.0669",
+        "eval_amount": 1.0704,
+        "eval_amount_krw": 1481.3800800000001,
+        "return_pct": -37.3
       },
       {
         "symbol": "SCHD",
@@ -50,10 +35,10 @@
         "currency": "USD",
         "quantity": "74.799361",
         "avg_price": "33.186912",
-        "current_price": "34.3",
-        "eval_amount": 2565.618082,
-        "eval_amount_krw": 3519771.4466958004,
-        "return_pct": 3.35
+        "current_price": "34.02",
+        "eval_amount": 2544.674261,
+        "eval_amount_krw": 3521701.94351095,
+        "return_pct": 2.5100000000000002
       },
       {
         "symbol": "TE",
@@ -62,10 +47,10 @@
         "currency": "USD",
         "quantity": "253",
         "avg_price": "4.739881",
-        "current_price": "4.38",
-        "eval_amount": 1108.14,
-        "eval_amount_krw": 1520257.2660000003,
-        "return_pct": -7.59
+        "current_price": "4.28",
+        "eval_amount": 1082.84,
+        "eval_amount_krw": 1498596.4179999998,
+        "return_pct": -9.700000000000001
       }
     ]
   }
