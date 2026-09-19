@@ -124,6 +124,13 @@ class PerformanceCapitalLoop:
         mandate = self.capital.get_mandate(new_mandate_id)
 
         deployable_cash = float(plan["investable_now"])
+        previous_deployable = 0.0
+        if previous_mandate_id:
+            previous = self.capital.get_mandate(previous_mandate_id)
+            if previous["client_id"] != client_id:
+                raise ValueError("previous mandate belongs to a different Client")
+            previous_deployable = float(previous.get("investable_capital", 0.0) or 0.0)
+        incremental_surplus = max(0.0, deployable_cash - previous_deployable)
         result = {
             "schema": "performance_capital_reconciliation_v1",
             "client_id": client_id,
@@ -137,6 +144,8 @@ class PerformanceCapitalLoop:
             "invested_market_value": float(invested_market_value),
             "protected_liquidity_reserve": float(plan["liquidity_reserve"]),
             "deployable_cash_after_client_needs": deployable_cash,
+            "previous_deployable_cash": previous_deployable,
+            "incremental_investable_surplus": incremental_surplus,
             "planning_conflicts": plan["conflicts"],
             "live_execution_authorized": False,
         }
@@ -165,7 +174,7 @@ class PerformanceCapitalLoop:
 
         state = dict(institutional_state or {})
         # A deployable balance becomes planning work, never an automatic order.
-        state["new_investable_surplus"] = deployable_cash
+        state["new_investable_surplus"] = incremental_surplus
         if strategy_performance_state is not None:
             state["strategy_performance"] = strategy_performance_state
 
