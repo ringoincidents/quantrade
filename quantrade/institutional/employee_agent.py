@@ -108,6 +108,15 @@ class EmployeeAgent:
         result["plan"] = json.loads(result.pop("plan_json"))
         return result
 
+    def _messages(self, work_order_id: str) -> list[dict]:
+        return [
+            dict(r) for r in self.conn.execute(
+                """SELECT sender_type,sender_id,recipient_type,recipient_id,body,created_at
+                FROM org_messages WHERE work_order_id=? ORDER BY created_at""",
+                (work_order_id,),
+            )
+        ]
+
     def _recent_tool_results(self, work_order_id: str, limit: int = 8) -> list[dict]:
         rows = self.conn.execute(
             """SELECT tool_name,input_json,output_json,status,error_text,completed_at
@@ -138,6 +147,7 @@ class EmployeeAgent:
             "workspace_id": wsid,
             "workspace": workspace,
             "available_tools": self.tools.discover(employee_id),
+            "messages": self._messages(work_order_id),
             "recent_tool_results": self._recent_tool_results(work_order_id),
             "rules": {
                 "do_not_invent_tools": True,
