@@ -280,7 +280,12 @@ class InstitutionalKernel:
             self._ledger("Case", case_id, "FOUNDER_DECISION_RECORDED", {
                 "decision_id": did, "action": action.value
             })
-        self.transition(case_id, CaseStatus.DECIDED)
+        # RESEARCH is a Founder instruction to reopen institutional work, not a terminal decision.
+        # The decision record itself remains immutable in the ledger.
+        if action == DecisionAction.RESEARCH:
+            self.transition(case_id, CaseStatus.RESEARCH)
+        else:
+            self.transition(case_id, CaseStatus.DECIDED)
         return did
 
     def update_decision(self, decision_id: str, **changes) -> None:
