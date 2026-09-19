@@ -10,11 +10,9 @@ class Materiality(str, Enum):
     HIGH = "HIGH"
 
 
-class EscalationAction(str, Enum):
+class EventTriageAction(str, Enum):
     INTERNAL_LOG = "INTERNAL_LOG"
-    OPEN_CASE_LOW = "OPEN_CASE_LOW"
-    OPEN_CASE_MEDIUM = "OPEN_CASE_MEDIUM"
-    OPEN_CASE_HIGH = "OPEN_CASE_HIGH"
+    OPEN_CASE = "OPEN_CASE"
 
 
 class CaseStatus(str, Enum):
@@ -47,37 +45,33 @@ class TimingMode(str, Enum):
 
 
 @dataclass(frozen=True)
-class EscalationResult:
-    action: EscalationAction
-    materiality: Materiality | None
+class EventTriageResult:
+    action: EventTriageAction
     reason: str
 
 
-class FixtureEscalationPolicy:
+class FixtureEventTriagePolicy:
     """Deterministic P1 fixture policy.
 
-    These event types are test/demo fixtures, not production investment thresholds.
+    Event triage answers only whether an Event can be handled internally or needs
+    institutional judgment as a Case. LOW/MEDIUM/HIGH is deliberately assigned
+    later, after institutional review. These event types are synthetic fixtures,
+    not production investment thresholds.
     """
 
-    def evaluate(self, event_type: str, payload: dict) -> EscalationResult:
+    def evaluate(self, event_type: str, payload: dict) -> EventTriageResult:
         if event_type in {"DIVIDEND_RECEIVED", "ROUTINE_OBSERVATION"}:
-            return EscalationResult(
-                EscalationAction.INTERNAL_LOG, None, "routine deterministic event"
+            return EventTriageResult(
+                EventTriageAction.INTERNAL_LOG, "routine deterministic event"
             )
-        if event_type == "PORTFOLIO_POLICY_LIMIT_APPROACH":
-            return EscalationResult(
-                EscalationAction.OPEN_CASE_HIGH,
-                Materiality.HIGH,
-                "synthetic policy-limit fixture requires material judgment",
+        if event_type in {
+            "PORTFOLIO_POLICY_LIMIT_APPROACH",
+            "MATERIAL_REVIEW_REQUIRED",
+        }:
+            return EventTriageResult(
+                EventTriageAction.OPEN_CASE,
+                "synthetic fixture requires institutional investment judgment",
             )
-        if event_type == "MATERIAL_REVIEW_MEDIUM":
-            return EscalationResult(
-                EscalationAction.OPEN_CASE_MEDIUM, Materiality.MEDIUM, "fixture"
-            )
-        if event_type == "MATERIAL_REVIEW_LOW":
-            return EscalationResult(
-                EscalationAction.OPEN_CASE_LOW, Materiality.LOW, "fixture"
-            )
-        return EscalationResult(
-            EscalationAction.INTERNAL_LOG, None, "no fixture escalation rule"
+        return EventTriageResult(
+            EventTriageAction.INTERNAL_LOG, "no fixture case-opening rule"
         )
