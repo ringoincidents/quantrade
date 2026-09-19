@@ -51,6 +51,7 @@ Existing deterministic functions to preserve:
 - `portfolio_report.build_risk_engine(...)`
 
 Known limitations:
+- the adapter currently reuses `portfolio_report.py`, which transitively imports the legacy `requests` dependency through `analyze_lib.py`; the institutional kernel itself remains dependency-light
 - `THRESHOLDS.provisional == true`
 - `RISK_ENGINE.provisional == true`
 - MDD budget is explicitly an unrealized-return proxy, not true peak-to-trough MDD.
