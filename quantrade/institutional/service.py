@@ -218,7 +218,25 @@ class InstitutionalKernel:
             self.transition(case_id, CaseStatus.FOUNDER_PENDING)
         return route
 
-    def add_evidence(self, case_id: str, source: str, fact: str, provenance: dict) -> str:
+    def add_evidence(
+        self,
+        case_id: str,
+        source: str,
+        fact: str,
+        provenance: dict,
+        *,
+        observed_at: str | None = None,
+        fingerprint: str | None = None,
+    ) -> str:
+        """Attach sourced evidence, preserving observation time and optional idempotency."""
+        if fingerprint:
+            existing = self.conn.execute(
+                "SELECT evidence_id FROM evidence_fingerprints WHERE case_id=? AND fingerprint=?",
+                (case_id, fingerprint),
+            ).fetchone()
+            if existing:
+                return existing["evidence_id"]
+
         eid = _id("EVD")
         now = _now()
         with self.conn:
@@ -226,9 +244,17 @@ class InstitutionalKernel:
                 """INSERT INTO evidence
                 (evidence_id,case_id,source,observed_at,fact,provenance,created_at)
                 VALUES (?,?,?,?,?,?,?)""",
-                (eid, case_id, source, now, fact, _json(provenance), now),
+                (eid, case_id, source, observed_at or now, fact, _json(provenance), now),
             )
-            self._ledger("Case", case_id, "EVIDENCE_ATTACHED", {"evidence_id": eid, "source": source})
+            if fingerprint:
+                self.conn.execute(
+                    """INSERT INTO evidence_fingerprints(case_id,fingerprint,evidence_id)
+                    VALUES (?,?,?)""",
+                    (case_id, fingerprint, eid),
+                )
+            self._ledger("Case", case_id, "EVIDENCE_ATTACHED", {
+                "evidence_id": eid, "source": source, "fingerprint": fingerprint
+            })
         return eid
 
     def add_snapshot(self, case_id: str, snapshot: dict, source: str = "fixture") -> str:
