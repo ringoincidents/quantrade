@@ -146,7 +146,8 @@ class StrategyEmployeeTests(unittest.TestCase):
         ])
         agent = EmployeeAgent(self.kernel, self.org, self.tools, provider, max_iterations=10)
         result = agent.run(employee_id=self.strategy, work_order_id=self.order)
-        self.assertEqual("COMPLETED", result["status"])
+        self.assertEqual("WAITING_DEPENDENCIES", result["status"])
+        self.assertTrue(any(b["kind"] == "WORK_REQUEST" for b in result["blockers"]))
 
         ws = self.kernel.conn.execute(
             "SELECT state_json FROM workspaces WHERE employee_id=? AND work_order_id=?",
@@ -165,6 +166,10 @@ class StrategyEmployeeTests(unittest.TestCase):
         ).fetchone()
         self.assertEqual("IID-CHART", req["recipient_office"])
         self.assertEqual("OPEN", req["status"])
+        order_status = self.kernel.conn.execute(
+            "SELECT status FROM work_orders WHERE work_order_id=?", (self.order,)
+        ).fetchone()["status"]
+        self.assertEqual("WAITING_DEPENDENCY", order_status)
 
         self.assertIn("data.catalog", [t["name"] for t in provider.contexts[0]["available_tools"]])
         model_calls = self.kernel.conn.execute(
