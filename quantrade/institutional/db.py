@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS cases (
   trigger_event_id TEXT NOT NULL REFERENCES events(event_id),
   subject TEXT NOT NULL,
   status TEXT NOT NULL,
-  materiality TEXT NOT NULL,
+  materiality TEXT,
   opened_at TEXT NOT NULL,
   closed_at TEXT,
   version INTEGER NOT NULL DEFAULT 1
