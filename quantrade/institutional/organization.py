@@ -314,6 +314,263 @@ class OrganizationRuntime:
         )
         return aid
 
+    def _active_employee(self, employee_id: str) -> dict:
+        row = self.conn.execute(
+            "SELECT * FROM employees WHERE employee_id=?", (employee_id,)
+        ).fetchone()
+        if not row:
+            raise KeyError(employee_id)
+        employee = dict(row)
+        if employee["status"] != "ACTIVE":
+            raise ValueError(f"employee is not active: {employee_id}")
+        return employee
+
+    def claim_office_work_order(self, employee_id: str) -> str | None:
+        """Atomically assign the oldest unclaimed office WorkOrder to an employee.
+
+        Office-addressed autonomous work is not considered executable until a
+        concrete employee claims it. This closes the gap between "work recorded"
+        and "work actually owned".
+        """
+        employee = self._active_employee(employee_id)
+        row = self.conn.execute(
+            """SELECT work_order_id FROM work_orders
+            WHERE recipient_office=? AND recipient_employee_id IS NULL AND status='OPEN'
+            ORDER BY created_at LIMIT 1""",
+            (employee["office_id"],),
+        ).fetchone()
+        if not row:
+            return None
+        wid = row["work_order_id"]
+        now = _now()
+        with self.conn:
+            cur = self.conn.execute(
+                """UPDATE work_orders
+                SET recipient_employee_id=?,status='ASSIGNED',updated_at=?
+                WHERE work_order_id=? AND recipient_employee_id IS NULL AND status='OPEN'""",
+                (employee_id, now, wid),
+            )
+        if cur.rowcount != 1:
+            return None
+        self.kernel.record_activity(
+            "WorkOrder", wid, "WORK_ORDER_CLAIMED",
+            {"employee_id": employee_id, "office_id": employee["office_id"]},
+        )
+        return wid
+
+    def accept_work_request(self, request_id: str, employee_id: str) -> str:
+        """Accept a cross-office request and materialize it as child WorkOrder."""
+        employee = self._active_employee(employee_id)
+        row = self.conn.execute(
+            "SELECT * FROM work_requests WHERE request_id=?", (request_id,)
+        ).fetchone()
+        if not row:
+            raise KeyError(request_id)
+        request = dict(row)
+        if request["status"] != "OPEN":
+            raise ValueError(f"work request is not open: {request_id}")
+        if request["recipient_office"] != employee["office_id"]:
+            raise ValueError("employee belongs to a different office")
+        if request["recipient_employee_id"] not in (None, employee_id):
+            raise ValueError("work request is assigned to a different employee")
+
+        parent = self.conn.execute(
+            "SELECT budget_json,linked_case_id FROM work_orders WHERE work_order_id=?",
+            (request["work_order_id"],),
+        ).fetchone()
+        if not parent:
+            raise KeyError(request["work_order_id"])
+        context_refs = json.loads(request["context_refs_json"])
+        child_id = self.create_work_order(
+            issuer_type="EMPLOYEE",
+            issuer_id=request["issuer_employee_id"],
+            recipient_office=employee["office_id"],
+            recipient_employee_id=employee_id,
+            objective=request["objective"],
+            constraints={
+                "request_id": request_id,
+                "parent_work_order_id": request["work_order_id"],
+                "context_refs": context_refs,
+            },
+            linked_case_id=parent["linked_case_id"],
+            authority_scope={"research": True, "trade": False},
+            budget=json.loads(parent["budget_json"]),
+        )
+        now = _now()
+        with self.conn:
+            self.conn.execute(
+                """INSERT INTO work_order_links
+                (parent_work_order_id,child_work_order_id,relation,created_at)
+                VALUES (?,?,?,?)""",
+                (
+                    request["work_order_id"], child_id,
+                    f"WORK_REQUEST:{request_id}", now,
+                ),
+            )
+            self.conn.execute(
+                """UPDATE work_requests
+                SET recipient_employee_id=?,status='ACCEPTED',updated_at=?
+                WHERE request_id=?""",
+                (employee_id, now, request_id),
+            )
+        self.kernel.record_activity(
+            "WorkOrder", request["work_order_id"], "WORK_REQUEST_ACCEPTED",
+            {
+                "request_id": request_id,
+                "employee_id": employee_id,
+                "child_work_order_id": child_id,
+            },
+        )
+        return child_id
+
+    def claim_office_work_request(self, employee_id: str) -> dict | None:
+        """Claim the oldest office request and return its child WorkOrder."""
+        employee = self._active_employee(employee_id)
+        row = self.conn.execute(
+            """SELECT request_id FROM work_requests
+            WHERE recipient_office=? AND recipient_employee_id IS NULL AND status='OPEN'
+            ORDER BY created_at LIMIT 1""",
+            (employee["office_id"],),
+        ).fetchone()
+        if not row:
+            return None
+        child_id = self.accept_work_request(row["request_id"], employee_id)
+        return {"request_id": row["request_id"], "child_work_order_id": child_id}
+
+    def pending_dependencies(self, work_order_id: str) -> list[dict]:
+        blockers: list[dict] = []
+        for row in self.conn.execute(
+            """SELECT request_id,status,recipient_office,recipient_employee_id
+            FROM work_requests
+            WHERE work_order_id=? AND status NOT IN ('COMPLETED','REJECTED')
+            ORDER BY created_at""",
+            (work_order_id,),
+        ):
+            blockers.append({
+                "kind": "WORK_REQUEST",
+                "id": row["request_id"],
+                "status": row["status"],
+                "recipient_office": row["recipient_office"],
+                "recipient_employee_id": row["recipient_employee_id"],
+            })
+        for row in self.conn.execute(
+            """SELECT l.child_work_order_id,w.status,l.relation
+            FROM work_order_links l
+            JOIN work_orders w ON w.work_order_id=l.child_work_order_id
+            WHERE l.parent_work_order_id=?
+              AND w.status NOT IN ('COMPLETED','CANCELLED')
+            ORDER BY l.created_at""",
+            (work_order_id,),
+        ):
+            blockers.append({
+                "kind": "CHILD_WORK_ORDER",
+                "id": row["child_work_order_id"],
+                "status": row["status"],
+                "relation": row["relation"],
+            })
+        return blockers
+
+    def complete_employee_work(
+        self,
+        *,
+        employee_id: str,
+        work_order_id: str,
+        task_id: str,
+        summary: str = "",
+    ) -> dict:
+        """Complete work only when delegated dependencies have reached terminal state."""
+        blockers = self.pending_dependencies(work_order_id)
+        now = _now()
+        if blockers:
+            with self.conn:
+                self.conn.execute(
+                    "UPDATE tasks SET status='WAITING_DEPENDENCY',updated_at=? WHERE task_id=?",
+                    (now, task_id),
+                )
+                self.conn.execute(
+                    """UPDATE work_orders SET status='WAITING_DEPENDENCY',updated_at=?
+                    WHERE work_order_id=?""",
+                    (now, work_order_id),
+                )
+            self.kernel.record_activity(
+                "WorkOrder", work_order_id, "WORK_COMPLETION_BLOCKED",
+                {"employee_id": employee_id, "task_id": task_id, "blockers": blockers},
+            )
+            return {
+                "status": "WAITING_DEPENDENCIES",
+                "task_id": task_id,
+                "blockers": blockers,
+            }
+
+        with self.conn:
+            self.conn.execute(
+                "UPDATE tasks SET status='COMPLETED',updated_at=? WHERE task_id=?",
+                (now, task_id),
+            )
+            self.conn.execute(
+                "UPDATE work_orders SET status='COMPLETED',updated_at=? WHERE work_order_id=?",
+                (now, work_order_id),
+            )
+        self.kernel.record_activity(
+            "WorkOrder", work_order_id, "EMPLOYEE_WORK_FINISHED",
+            {
+                "employee_id": employee_id,
+                "task_id": task_id,
+                "summary": summary,
+            },
+        )
+
+        # A child WorkOrder created from a WorkRequest resolves that request and
+        # wakes a parent that was truthfully waiting for the dependency.
+        link = self.conn.execute(
+            """SELECT parent_work_order_id,relation FROM work_order_links
+            WHERE child_work_order_id=? AND relation LIKE 'WORK_REQUEST:%'""",
+            (work_order_id,),
+        ).fetchone()
+        if link:
+            request_id = link["relation"].split(":", 1)[1]
+            with self.conn:
+                self.conn.execute(
+                    """UPDATE work_requests
+                    SET status='COMPLETED',response_note=?,updated_at=?
+                    WHERE request_id=?""",
+                    (summary, now, request_id),
+                )
+            self.kernel.record_activity(
+                "WorkOrder", link["parent_work_order_id"], "WORK_REQUEST_COMPLETED",
+                {
+                    "request_id": request_id,
+                    "child_work_order_id": work_order_id,
+                    "summary": summary,
+                },
+            )
+            parent = self.conn.execute(
+                "SELECT status FROM work_orders WHERE work_order_id=?",
+                (link["parent_work_order_id"],),
+            ).fetchone()
+            if parent and parent["status"] == "WAITING_DEPENDENCY":
+                with self.conn:
+                    self.conn.execute(
+                        """UPDATE work_orders SET status='OPEN',updated_at=?
+                        WHERE work_order_id=?""",
+                        (now, link["parent_work_order_id"]),
+                    )
+                    self.conn.execute(
+                        """UPDATE tasks SET status='OPEN',updated_at=?
+                        WHERE work_order_id=? AND status='WAITING_DEPENDENCY'""",
+                        (now, link["parent_work_order_id"]),
+                    )
+                self.kernel.record_activity(
+                    "WorkOrder", link["parent_work_order_id"], "WORK_ORDER_RESUMED",
+                    {"resolved_request_id": request_id},
+                )
+
+        return {
+            "status": "COMPLETED",
+            "task_id": task_id,
+            "summary": summary,
+        }
+
     def employee_inbox(self, employee_id: str) -> dict:
         orders = [
             dict(r) for r in self.conn.execute(
