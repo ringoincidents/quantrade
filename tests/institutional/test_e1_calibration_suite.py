@@ -73,6 +73,41 @@ class E1CalibrationSuiteTests(unittest.TestCase):
             {r["treatment"] for r in rows},
         )
 
+    def test_institutional_employee_observes_tool_failure_and_recovers(self):
+        provider = ScriptedModelProvider([
+            ModelAction("TOOL", {
+                "tool_name": "eval.lookup",
+                "arguments": {"name": "primary_covenant"},
+            }),
+            ModelAction("TOOL", {
+                "tool_name": "eval.lookup",
+                "arguments": {"name": "primary_covenant"},
+            }),
+            ModelAction("FINISH", {
+                "summary": (
+                    '{"answer":18.0,"status":"SUPPORTED",'
+                    '"evidence_ids":["PRIMARY-COVENANT"],'
+                    '"uncertainty":"first provider call timed out"}'
+                )
+            }),
+        ])
+        result = run_e1_trial(
+            self.kernel,
+            eval_task_id="E1-05",
+            treatment="QUANTRADE_INSTITUTIONAL",
+            provider=provider,
+            seed_label="recovery-1",
+        )
+        self.assertTrue(result.passed)
+        statuses = [
+            r["status"] for r in self.kernel.conn.execute(
+                """SELECT status FROM tool_invocations
+                WHERE work_order_id=? ORDER BY started_at""",
+                (result.work_order_id,),
+            )
+        ]
+        self.assertEqual(["ERROR", "COMPLETED"], statuses)
+
     def test_missing_data_task_rewards_unknown_not_activity(self):
         provider = ScriptedModelProvider([
             ModelAction("TOOL", {
