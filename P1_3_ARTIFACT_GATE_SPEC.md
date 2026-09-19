@@ -1,3 +1,9 @@
+> **Sequence correction — 2026-09-19**
+>
+> This design remains valid but is deferred to **P1.3F**.
+> It must not be implemented as the next layer by itself.
+> QuanTrade first needs the Employee Runtime, Department Workstations, and common Organizational Communication Protocol defined in `P1_3_EMPLOYEE_RUNTIME_SPEC.md`. Artifact gates then govern the outputs those employees actually produce.
+>
 # QuanTrade P1.3 — Parallel Institutional Review & Artifact Gates
 
 Date: 2026-09-19
