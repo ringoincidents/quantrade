@@ -444,6 +444,11 @@ class InstitutionalKernel:
             rows = self.conn.execute("SELECT * FROM ledger_events ORDER BY ledger_id")
         return [dict(r) for r in rows]
 
+    def record_activity(self, aggregate_type: str, aggregate_id: str, event_type: str, payload: dict) -> None:
+        """Public append-only activity hook for sibling institutional runtimes."""
+        with self.conn:
+            self._ledger(aggregate_type, aggregate_id, event_type, payload)
+
     def verify_ledger_chain(self) -> bool:
         previous_hash = None
         for row in self.conn.execute("SELECT * FROM ledger_events ORDER BY ledger_id"):
