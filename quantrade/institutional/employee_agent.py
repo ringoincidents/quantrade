@@ -149,6 +149,7 @@ class EmployeeAgent:
             "available_tools": self.tools.discover(employee_id),
             "messages": self._messages(work_order_id),
             "recent_tool_results": self._recent_tool_results(work_order_id),
+            "pending_dependencies": self.org.pending_dependencies(work_order_id),
             "rules": {
                 "do_not_invent_tools": True,
                 "deterministic_calculations_via_tools": True,
@@ -276,29 +277,14 @@ class EmployeeAgent:
                 )
 
             elif action.kind == "FINISH":
-                with self.conn:
-                    self.conn.execute(
-                        "UPDATE tasks SET status='COMPLETED',updated_at=? WHERE task_id=?",
-                        (_now(), current_task),
-                    )
-                    self.conn.execute(
-                        "UPDATE work_orders SET status='COMPLETED',updated_at=? WHERE work_order_id=?",
-                        (_now(), work_order_id),
-                    )
-                self.kernel.record_activity(
-                    "WorkOrder", work_order_id, "EMPLOYEE_WORK_FINISHED",
-                    {
-                        "employee_id": employee_id,
-                        "task_id": current_task,
-                        "summary": p.get("summary", ""),
-                    },
+                completion = self.org.complete_employee_work(
+                    employee_id=employee_id,
+                    work_order_id=work_order_id,
+                    task_id=current_task,
+                    summary=p.get("summary", ""),
                 )
-                return {
-                    "status": "COMPLETED",
-                    "iterations": iteration,
-                    "task_id": current_task,
-                    "summary": p.get("summary", ""),
-                }
+                completion["iterations"] = iteration
+                return completion
 
         raise RuntimeError(
             f"employee loop exceeded max_iterations={self.max_iterations}"
