@@ -7,7 +7,7 @@
 # QuanTrade P1.3 — Parallel Institutional Review & Artifact Gates
 
 Date: 2026-09-19
-Status: Design started
+Status: Initial vertical slice implemented
 
 ## Finding
 
@@ -120,3 +120,22 @@ That authority rule is a Founder/CEO governance decision and must be decided bef
 ## Gate to P1.4
 
 P1.3 passes when a Case can collect Evidence, Portfolio, Risk and ARU work in parallel and enter Committee based on artifacts rather than a hard-coded departmental sequence.
+
+
+## Epoch A implementation note
+
+The first artifact-gate vertical slice is now implemented after Employee Runtime,
+workstations, durable routing and restart recovery.
+
+Implemented:
+- coarse `INSTITUTIONAL_REVIEW` phase while legacy granular states remain readable;
+- `committee_readiness(case_id)`;
+- `enter_committee(case_id)`;
+- latest non-superseded SPMG/IPRO position selection;
+- deterministic RiskAssessment + same-Case PortfolioSnapshot requirement;
+- ARU office provenance on Challenges;
+- unresolved dissent preservation;
+- Ledger record of the exact artifact IDs satisfying Committee entry;
+- no Founder routing merely because the gate becomes ready.
+
+This slice does not decide the deferred IPRO-veto / Founder-override governance fork.
