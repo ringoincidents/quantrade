@@ -97,6 +97,36 @@ CREATE TABLE IF NOT EXISTS artifacts (
   created_at TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS tool_definitions (
+  tool_name TEXT PRIMARY KEY,
+  description TEXT NOT NULL,
+  input_schema_json TEXT NOT NULL,
+  deterministic INTEGER NOT NULL,
+  side_effect_class TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS employee_tool_grants (
+  employee_id TEXT NOT NULL REFERENCES employees(employee_id),
+  tool_name TEXT NOT NULL REFERENCES tool_definitions(tool_name),
+  granted_at TEXT NOT NULL,
+  PRIMARY KEY (employee_id, tool_name)
+);
+
+CREATE TABLE IF NOT EXISTS tool_invocations (
+  invocation_id TEXT PRIMARY KEY,
+  work_order_id TEXT NOT NULL REFERENCES work_orders(work_order_id),
+  task_id TEXT REFERENCES tasks(task_id),
+  employee_id TEXT NOT NULL REFERENCES employees(employee_id),
+  tool_name TEXT NOT NULL REFERENCES tool_definitions(tool_name),
+  input_json TEXT NOT NULL,
+  output_json TEXT,
+  status TEXT NOT NULL,
+  error_text TEXT,
+  started_at TEXT NOT NULL,
+  completed_at TEXT
+);
+
 CREATE TABLE IF NOT EXISTS events (
   event_id TEXT PRIMARY KEY,
   event_type TEXT NOT NULL,
