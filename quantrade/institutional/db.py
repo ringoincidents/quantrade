@@ -127,6 +127,21 @@ CREATE TABLE IF NOT EXISTS tool_invocations (
   completed_at TEXT
 );
 
+CREATE TABLE IF NOT EXISTS model_calls (
+  model_call_id TEXT PRIMARY KEY,
+  employee_id TEXT NOT NULL REFERENCES employees(employee_id),
+  work_order_id TEXT NOT NULL REFERENCES work_orders(work_order_id),
+  task_id TEXT REFERENCES tasks(task_id),
+  provider TEXT NOT NULL,
+  model TEXT NOT NULL,
+  input_context_json TEXT NOT NULL,
+  output_action_json TEXT,
+  status TEXT NOT NULL,
+  error_text TEXT,
+  started_at TEXT NOT NULL,
+  completed_at TEXT
+);
+
 CREATE TABLE IF NOT EXISTS events (
   event_id TEXT PRIMARY KEY,
   event_type TEXT NOT NULL,
