@@ -97,7 +97,14 @@ class SecretaryOrchestrationTests(unittest.TestCase):
         result = EmployeeAgent(
             self.kernel, self.org, self.tools, provider, max_iterations=8
         ).run(employee_id=self.secretary, work_order_id=self.intake)
-        self.assertEqual("COMPLETED", result["status"])
+        self.assertEqual("WAITING_DEPENDENCIES", result["status"])
+        self.assertTrue(any(
+            b["kind"] == "CHILD_WORK_ORDER" for b in result["blockers"]
+        ))
+        parent_status = self.kernel.conn.execute(
+            "SELECT status FROM work_orders WHERE work_order_id=?", (self.intake,)
+        ).fetchone()["status"]
+        self.assertEqual("WAITING_DEPENDENCY", parent_status)
 
         links = self.kernel.conn.execute(
             """SELECT child_work_order_id FROM work_order_links
