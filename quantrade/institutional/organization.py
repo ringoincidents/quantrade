@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from .service import InstitutionalKernel
@@ -325,13 +325,99 @@ class OrganizationRuntime:
             raise ValueError(f"employee is not active: {employee_id}")
         return employee
 
-    def claim_office_work_order(self, employee_id: str) -> str | None:
-        """Atomically assign the oldest unclaimed office WorkOrder to an employee.
+    @staticmethod
+    def _lease_deadline(lease_seconds: int) -> str:
+        if lease_seconds <= 0:
+            raise ValueError("lease_seconds must be positive")
+        return (datetime.now(timezone.utc) + timedelta(seconds=lease_seconds)).isoformat()
 
-        Office-addressed autonomous work is not considered executable until a
-        concrete employee claims it. This closes the gap between "work recorded"
-        and "work actually owned".
+    def acquire_work_order_lease(
+        self,
+        work_order_id: str,
+        employee_id: str,
+        *,
+        worker_id: str,
+        lease_seconds: int = 300,
+    ) -> str:
+        """Acquire or reclaim a durable execution lease for one WorkOrder.
+
+        Employee ownership and worker-process ownership are intentionally
+        separate. A crashed process loses its lease after expiry; the same
+        institutional employee can then resume the durable WorkOrder.
         """
+        employee = self._active_employee(employee_id)
+        order = self.conn.execute(
+            "SELECT * FROM work_orders WHERE work_order_id=?", (work_order_id,)
+        ).fetchone()
+        if not order:
+            raise KeyError(work_order_id)
+        if order["status"] not in {"OPEN", "ASSIGNED"}:
+            raise ValueError(f"work order is not leasable: {order['status']}")
+        if order["recipient_office"] and order["recipient_office"] != employee["office_id"]:
+            raise ValueError("employee belongs to a different office")
+        if order["recipient_employee_id"] not in (None, employee_id):
+            raise ValueError("work order is assigned to a different employee")
+
+        existing = self.conn.execute(
+            "SELECT * FROM work_order_leases WHERE work_order_id=?", (work_order_id,)
+        ).fetchone()
+        now = datetime.now(timezone.utc)
+        generation = 1
+        reclaimed = False
+        if existing:
+            expires = datetime.fromisoformat(existing["expires_at"])
+            if expires > now:
+                raise ValueError("work order already has an active lease")
+            generation = int(existing["generation"]) + 1
+            reclaimed = True
+
+        token = _id("LEASE")
+        now_text = now.isoformat()
+        expires_at = self._lease_deadline(lease_seconds)
+        with self.conn:
+            if existing:
+                self.conn.execute(
+                    "DELETE FROM work_order_leases WHERE work_order_id=?",
+                    (work_order_id,),
+                )
+            self.conn.execute(
+                """INSERT INTO work_order_leases
+                (work_order_id,employee_id,worker_id,lease_token,generation,
+                 claimed_at,heartbeat_at,expires_at)
+                VALUES (?,?,?,?,?,?,?,?)""",
+                (
+                    work_order_id, employee_id, worker_id, token, generation,
+                    now_text, now_text, expires_at,
+                ),
+            )
+            self.conn.execute(
+                """UPDATE work_orders
+                SET recipient_employee_id=?,status='ASSIGNED',updated_at=?
+                WHERE work_order_id=?""",
+                (employee_id, now_text, work_order_id),
+            )
+        self.kernel.record_activity(
+            "WorkOrder",
+            work_order_id,
+            "WORK_ORDER_RECLAIMED" if reclaimed else "WORK_ORDER_CLAIMED",
+            {
+                "employee_id": employee_id,
+                "office_id": employee["office_id"],
+                "worker_id": worker_id,
+                "generation": generation,
+                "expires_at": expires_at,
+            },
+        )
+        return token
+
+    def claim_office_work_order(
+        self,
+        employee_id: str,
+        *,
+        worker_id: str | None = None,
+        lease_seconds: int = 300,
+    ) -> str | None:
+        """Assign and lease the oldest unclaimed office WorkOrder."""
         employee = self._active_employee(employee_id)
         row = self.conn.execute(
             """SELECT work_order_id FROM work_orders
@@ -342,21 +428,121 @@ class OrganizationRuntime:
         if not row:
             return None
         wid = row["work_order_id"]
-        now = _now()
-        with self.conn:
-            cur = self.conn.execute(
-                """UPDATE work_orders
-                SET recipient_employee_id=?,status='ASSIGNED',updated_at=?
-                WHERE work_order_id=? AND recipient_employee_id IS NULL AND status='OPEN'""",
-                (employee_id, now, wid),
+        try:
+            self.acquire_work_order_lease(
+                wid,
+                employee_id,
+                worker_id=worker_id or f"inline:{employee_id}",
+                lease_seconds=lease_seconds,
             )
-        if cur.rowcount != 1:
+        except ValueError:
             return None
-        self.kernel.record_activity(
-            "WorkOrder", wid, "WORK_ORDER_CLAIMED",
-            {"employee_id": employee_id, "office_id": employee["office_id"]},
-        )
         return wid
+
+    def reclaim_expired_work_order(
+        self,
+        employee_id: str,
+        *,
+        worker_id: str,
+        lease_seconds: int = 300,
+    ) -> dict | None:
+        """Reclaim the oldest expired lease owned by the same employee persona."""
+        self._active_employee(employee_id)
+        now = _now()
+        row = self.conn.execute(
+            """SELECT w.work_order_id,l.generation
+            FROM work_orders w
+            JOIN work_order_leases l ON l.work_order_id=w.work_order_id
+            WHERE w.recipient_employee_id=?
+              AND w.status='ASSIGNED'
+              AND l.expires_at<=?
+            ORDER BY l.expires_at,w.created_at LIMIT 1""",
+            (employee_id, now),
+        ).fetchone()
+        if not row:
+            return None
+        token = self.acquire_work_order_lease(
+            row["work_order_id"],
+            employee_id,
+            worker_id=worker_id,
+            lease_seconds=lease_seconds,
+        )
+        return {
+            "work_order_id": row["work_order_id"],
+            "lease_token": token,
+            "generation": int(row["generation"]) + 1,
+        }
+
+    def heartbeat_work_order_lease(
+        self,
+        lease_token: str,
+        *,
+        worker_id: str,
+        lease_seconds: int = 300,
+    ) -> str:
+        now = datetime.now(timezone.utc)
+        row = self.conn.execute(
+            "SELECT * FROM work_order_leases WHERE lease_token=?", (lease_token,)
+        ).fetchone()
+        if not row:
+            raise KeyError(lease_token)
+        if row["worker_id"] != worker_id:
+            raise ValueError("lease belongs to a different worker")
+        if datetime.fromisoformat(row["expires_at"]) <= now:
+            raise ValueError("lease has expired")
+        expires_at = self._lease_deadline(lease_seconds)
+        with self.conn:
+            self.conn.execute(
+                """UPDATE work_order_leases
+                SET heartbeat_at=?,expires_at=? WHERE lease_token=?""",
+                (now.isoformat(), expires_at, lease_token),
+            )
+        self.kernel.record_activity(
+            "WorkOrder", row["work_order_id"], "WORK_ORDER_LEASE_HEARTBEAT",
+            {"worker_id": worker_id, "expires_at": expires_at},
+        )
+        return expires_at
+
+    def validate_work_order_lease(
+        self,
+        work_order_id: str,
+        *,
+        lease_token: str,
+        worker_id: str,
+    ) -> bool:
+        row = self.conn.execute(
+            """SELECT expires_at FROM work_order_leases
+            WHERE work_order_id=? AND lease_token=? AND worker_id=?""",
+            (work_order_id, lease_token, worker_id),
+        ).fetchone()
+        if not row:
+            return False
+        return datetime.fromisoformat(row["expires_at"]) > datetime.now(timezone.utc)
+
+    def release_work_order_lease(
+        self,
+        work_order_id: str,
+        *,
+        lease_token: str | None = None,
+        reason: str = "RELEASED",
+    ) -> None:
+        row = self.conn.execute(
+            "SELECT lease_token,worker_id FROM work_order_leases WHERE work_order_id=?",
+            (work_order_id,),
+        ).fetchone()
+        if not row:
+            return
+        if lease_token is not None and row["lease_token"] != lease_token:
+            raise ValueError("lease token mismatch")
+        with self.conn:
+            self.conn.execute(
+                "DELETE FROM work_order_leases WHERE work_order_id=?",
+                (work_order_id,),
+            )
+        self.kernel.record_activity(
+            "WorkOrder", work_order_id, "WORK_ORDER_LEASE_RELEASED",
+            {"worker_id": row["worker_id"], "reason": reason},
+        )
 
     def accept_work_request(self, request_id: str, employee_id: str) -> str:
         """Accept a cross-office request and materialize it as child WorkOrder."""
@@ -492,6 +678,9 @@ class OrganizationRuntime:
                     WHERE work_order_id=?""",
                     (now, work_order_id),
                 )
+            self.release_work_order_lease(
+                work_order_id, reason="WAITING_DEPENDENCY"
+            )
             self.kernel.record_activity(
                 "WorkOrder", work_order_id, "WORK_COMPLETION_BLOCKED",
                 {"employee_id": employee_id, "task_id": task_id, "blockers": blockers},
@@ -511,6 +700,7 @@ class OrganizationRuntime:
                 "UPDATE work_orders SET status='COMPLETED',updated_at=? WHERE work_order_id=?",
                 (now, work_order_id),
             )
+        self.release_work_order_lease(work_order_id, reason="COMPLETED")
         self.kernel.record_activity(
             "WorkOrder", work_order_id, "EMPLOYEE_WORK_FINISHED",
             {
