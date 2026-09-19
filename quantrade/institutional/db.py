@@ -39,6 +39,13 @@ CREATE TABLE IF NOT EXISTS evidence (
   created_at TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS evidence_fingerprints (
+  case_id TEXT NOT NULL REFERENCES cases(case_id),
+  fingerprint TEXT NOT NULL,
+  evidence_id TEXT NOT NULL REFERENCES evidence(evidence_id),
+  PRIMARY KEY (case_id, fingerprint)
+);
+
 CREATE TABLE IF NOT EXISTS portfolio_snapshots (
   snapshot_id TEXT PRIMARY KEY,
   case_id TEXT NOT NULL REFERENCES cases(case_id),
