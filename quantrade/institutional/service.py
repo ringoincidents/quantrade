@@ -62,6 +62,20 @@ class InstitutionalKernel:
     def close(self) -> None:
         self.conn.close()
 
+    def _next_case_id(self) -> str:
+        year = datetime.now(timezone.utc).year
+        prefix = f"QT-{year}-"
+        rows = self.conn.execute(
+            "SELECT case_id FROM cases WHERE case_id LIKE ?", (prefix + "%",)
+        ).fetchall()
+        numbers = []
+        for row in rows:
+            try:
+                numbers.append(int(row["case_id"].rsplit("-", 1)[1]))
+            except (ValueError, IndexError):
+                continue
+        return f"{prefix}{(max(numbers, default=0) + 1):04d}"
+
     def _ledger(self, aggregate_type: str, aggregate_id: str, event_type: str, payload: dict) -> None:
         prev = self.conn.execute(
             "SELECT event_hash FROM ledger_events ORDER BY ledger_id DESC LIMIT 1"
@@ -112,7 +126,7 @@ class InstitutionalKernel:
                 self._ledger("Event", event_id, "EVENT_RESOLVED_INTERNAL", {"reason": result.reason})
                 return {"event_id": event_id, "case_id": None, "route": "INTERNAL"}
 
-            cid = case_id or _id("QT")
+            cid = case_id or self._next_case_id()
             materiality = result.materiality.value
             self.conn.execute(
                 """INSERT INTO cases
@@ -363,6 +377,25 @@ class InstitutionalKernel:
         else:
             rows = self.conn.execute("SELECT * FROM ledger_events ORDER BY ledger_id")
         return [dict(r) for r in rows]
+
+    def verify_ledger_chain(self) -> bool:
+        previous_hash = None
+        for row in self.conn.execute("SELECT * FROM ledger_events ORDER BY ledger_id"):
+            if row["previous_hash"] != previous_hash:
+                return False
+            body = _json({
+                "aggregate_type": row["aggregate_type"],
+                "aggregate_id": row["aggregate_id"],
+                "event_type": row["event_type"],
+                "payload": json.loads(row["payload"]),
+                "occurred_at": row["occurred_at"],
+                "previous_hash": row["previous_hash"],
+            })
+            expected = hashlib.sha256(body.encode("utf-8")).hexdigest()
+            if expected != row["event_hash"]:
+                return False
+            previous_hash = row["event_hash"]
+        return True
 
     def founder_desk(self) -> list[str]:
         return [r["case_id"] for r in self.conn.execute("SELECT case_id FROM founder_desk")]
