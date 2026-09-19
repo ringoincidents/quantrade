@@ -6,18 +6,26 @@ import sqlite3
 SCHEMA = """
 PRAGMA foreign_keys = ON;
 
-CREATE TABLE IF NOT EXISTS client_profiles (
+CREATE TABLE IF NOT EXISTS clients (
   client_id TEXT PRIMARY KEY,
   base_currency TEXT NOT NULL,
-  profile_json TEXT NOT NULL,
-  version INTEGER NOT NULL,
-  effective_at TEXT NOT NULL,
+  status TEXT NOT NULL,
   created_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS client_profile_versions (
+  profile_version_id TEXT PRIMARY KEY,
+  client_id TEXT NOT NULL REFERENCES clients(client_id),
+  version INTEGER NOT NULL,
+  profile_json TEXT NOT NULL,
+  effective_at TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  UNIQUE(client_id, version)
 );
 
 CREATE TABLE IF NOT EXISTS client_goals (
   goal_id TEXT PRIMARY KEY,
-  client_id TEXT NOT NULL REFERENCES client_profiles(client_id),
+  client_id TEXT NOT NULL REFERENCES clients(client_id),
   name TEXT NOT NULL,
   target_amount REAL NOT NULL,
   target_date TEXT NOT NULL,
