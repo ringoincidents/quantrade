@@ -155,7 +155,7 @@ def synthetic_korea_strategy_sources() -> dict[str, list[dict]]:
         ],
         "fundamentals": [
             {"symbol": "KRX001", "sales_growth_yoy_pct": 28.0, "op_margin_q_minus_2": 7.0, "op_margin_q_minus_1": 9.0, "op_margin_q": 11.0},
-            {"symbol": "KRX002", "sales_growth_yoy_pct": 34.0, "op_margin_q_minus_2": 4.0, "op_margin_q_minus_1": 3.0, "op_margin_q": 6.0},
+            {"symbol": "KRX002", "sales_growth_yoy_pct": 34.0, "op_margin_q_minus_2": 4.0, "op_margin_q_minus_1": 5.0, "op_margin_q": 6.0},
             {"symbol": "KRX003", "sales_growth_yoy_pct": 23.0, "op_margin_q_minus_2": 5.0, "op_margin_q_minus_1": 7.0, "op_margin_q": 9.0},
             {"symbol": "KRX004", "sales_growth_yoy_pct": 21.0, "op_margin_q_minus_2": 8.0, "op_margin_q_minus_1": 9.0, "op_margin_q": 10.0},
             {"symbol": "KRX005", "sales_growth_yoy_pct": 12.0, "op_margin_q_minus_2": 6.0, "op_margin_q_minus_1": 7.0, "op_margin_q": 8.0},
