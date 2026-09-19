@@ -2,238 +2,117 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-<meta name="theme-color" content="#f5f6f8">
-<title>QuanTrade Company Prototype P0.2</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#eeeae0">
+<title>QuanTrade — Founder Console P0.3.1</title>
 <style>
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent} :root{
---bg:#f5f6f8;--paper:#fff;--ink:#101114;--sub:#70747b;--hair:rgba(20,24,30,.10);
---blue:#1677ff;--cyan:#00a8c8;--soft:#eef1f5;--warn:#b86b00;--danger:#c93f3f;--ok:#16794a;
---glass:rgba(247,249,252,.68);--shadow:0 14px 40px rgba(20,28,40,.10)
-}
-html,body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Apple SD Gothic Neo","Noto Sans KR",sans-serif}
-body{min-height:100vh}.app{max-width:520px;margin:auto;min-height:100vh;padding:env(safe-area-inset-top) 0 calc(110px + env(safe-area-inset-bottom));overflow:hidden}
-.view{display:none;animation:fade .22s ease}.view.active{display:block}@keyframes fade{from{opacity:.35;transform:translateY(4px)}to{opacity:1;transform:none}}
-.top{padding:20px 20px 10px;display:flex;align-items:center;gap:10px}.top .back{border:0;background:none;font-size:25px;padding:4px 8px 4px 0}.top .title{font-weight:750;font-size:17px}.top .spacer{flex:1}.ghost{border:0;background:transparent;color:var(--blue);font-weight:650}
-.page{padding:0 20px}.date{font-size:13px;color:var(--sub);font-weight:650;margin-top:7px}.display{font-size:34px;line-height:1.12;letter-spacing:-1.4px;margin:9px 0 8px;font-weight:780}.lead{color:var(--sub);font-size:14px;line-height:1.55;margin:0 0 22px}
-.section{margin:28px 0 12px;display:flex;align-items:end}.section h2{font-size:20px;letter-spacing:-.5px;margin:0}.section small{color:var(--sub);margin-left:auto}
-.brief{background:linear-gradient(135deg,#edf5ff,#fff 62%);border:1px solid rgba(20,80,160,.10);border-radius:25px;padding:19px 18px;box-shadow:0 8px 28px rgba(40,70,120,.06)}
-.brief-head{display:flex;align-items:center;gap:10px;margin-bottom:13px}.seal{width:34px;height:34px;border-radius:50%;background:#111;color:#fff;display:grid;place-items:center;font-size:13px}.brief-head b{font-size:14px}.brief-head span{display:block;color:var(--sub);font-size:11px;margin-top:2px}.brief p{font-size:14px;line-height:1.6;margin:0}.brief ul{margin:12px 0 0;padding:0;list-style:none}.brief li{padding:9px 0;border-top:1px solid var(--hair);font-size:13px;line-height:1.4}.brief li strong{color:var(--blue);margin-right:6px}
-.desk{display:flex;gap:12px;overflow:auto;padding:3px 20px 18px;margin:0 -20px;scroll-snap-type:x mandatory}.doc{min-width:82%;background:var(--paper);border-radius:22px;padding:18px;box-shadow:var(--shadow);scroll-snap-align:center;border:1px solid rgba(20,24,30,.05);text-align:left;color:inherit}.doc .meta{font-size:10px;color:var(--sub);display:flex;justify-content:space-between}.doc .kind{font-size:11px;color:var(--blue);font-weight:750;margin:16px 0 6px}.doc h3{font-size:21px;letter-spacing:-.5px;margin:0 0 12px}.doc p{color:var(--sub);font-size:13px;line-height:1.5}.stamps{display:flex;gap:6px;flex-wrap:wrap;margin-top:15px}.stamp{font-size:10px;padding:6px 8px;border-radius:99px;background:var(--soft)}.stamp.warn{color:var(--warn);background:#fff5e6}.stamp.no{color:var(--danger);background:#fff0f0}
-.monitor{background:#111820;color:#f7f9fb;border-radius:25px;padding:18px;overflow:hidden;position:relative}.monitor:after{content:"";position:absolute;width:180px;height:180px;border-radius:50%;background:rgba(48,150,255,.16);filter:blur(30px);right:-80px;top:-100px}.monitor-head{display:flex;align-items:center;margin-bottom:12px}.monitor-head span{font-size:11px;color:#aeb7c2}.monitor-head b{font-size:12px;margin-left:auto;color:#7ee0ff}.pulse{display:grid;grid-template-columns:1fr 1fr;gap:8px}.pulse div{background:rgba(255,255,255,.065);border-radius:14px;padding:12px;position:relative;z-index:1}.pulse small{display:block;color:#9aa6b2;font-size:10px}.pulse b{display:block;margin-top:5px;font-size:15px}.feed{margin-top:10px}.feed-row{display:grid;grid-template-columns:42px 1fr;gap:9px;padding:11px 0;border-top:1px solid rgba(255,255,255,.09);font-size:12px}.feed-row time{color:#65d9ff}.feed-row p{margin:0;color:#dbe1e7;line-height:1.45}.feed-row span{display:block;color:#84909d;font-size:10px;margin-top:3px}
-.company-summary{display:flex;gap:18px;margin:18px 0 24px}.company-summary div{flex:1}.company-summary small{color:var(--sub);font-size:10px}.company-summary b{display:block;font-size:25px;margin-top:4px}.dept{width:100%;border:0;background:var(--paper);border-radius:20px;margin:10px 0;padding:17px;text-align:left;color:inherit;box-shadow:0 5px 20px rgba(20,28,40,.05);display:grid;grid-template-columns:1fr auto;gap:8px}.dept .num{font-size:10px;color:var(--sub);font-weight:700}.dept h3{margin:3px 0;font-size:17px}.dept p{margin:0;color:var(--sub);font-size:12px}.dept .state{align-self:center;font-size:10px;padding:6px 8px;border-radius:99px;background:#edf8f4;color:var(--ok);font-weight:700}.dept .state.busy{background:#eef5ff;color:var(--blue)}.dept .state.wait{background:#f1f2f4;color:#6f747b}
-.room-hero{background:var(--paper);border-radius:25px;padding:20px;margin-top:8px}.room-hero .office{font-size:11px;color:var(--blue);font-weight:750}.room-hero h2{font-size:26px;margin:7px 0}.chief{margin-top:16px;background:var(--soft);border-radius:17px;padding:14px;font-size:13px;line-height:1.55}.task{background:var(--paper);border-radius:18px;padding:15px;margin:9px 0;border:1px solid rgba(20,24,30,.05)}.task-head{display:flex;align-items:center;gap:8px}.task-head b{font-size:14px}.task-head span{margin-left:auto;font-size:10px;color:var(--sub)}.task p{font-size:12px;color:var(--sub);margin:7px 0}.bar{height:4px;background:#e9edf1;border-radius:10px;overflow:hidden}.bar i{display:block;height:100%;background:var(--blue);border-radius:10px}.room-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:15px}.action{border:0;border-radius:15px;background:#eaf3ff;color:#075dbd;padding:13px;font-weight:700}.action.dark{background:#161b22;color:white}
-.paper{background:#fff;border-radius:4px;padding:22px 19px;margin-top:12px;box-shadow:0 10px 35px rgba(20,28,40,.08);border-top:3px solid #111}.paper-head{border-bottom:1px solid var(--hair);padding-bottom:14px}.paper-head small{font-size:10px;color:var(--sub)}.paper-head h2{font-size:23px;margin:6px 0}.paper p{font-size:13px;line-height:1.65}.review{margin:18px 0}.review div{display:grid;grid-template-columns:1.2fr .8fr;padding:11px 0;border-top:1px solid var(--hair);font-size:12px}.review b:last-child{text-align:right}.decision-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:18px}.decision-buttons button{border:0;background:var(--soft);padding:13px;border-radius:13px;font-weight:700}.decision-buttons button.primary{background:#111;color:white}.decision-note{width:100%;border:0;background:#f2f4f7;border-radius:14px;padding:13px;margin-top:9px;min-height:68px;font:inherit}
-.situation-day{font-size:11px;color:var(--sub);margin:20px 0 8px}.event{display:grid;grid-template-columns:48px 12px 1fr;gap:8px;min-height:76px}.event time{font-size:11px;color:var(--sub);padding-top:3px}.event .line{position:relative}.event .line:before{content:"";position:absolute;width:1px;background:#d8dde3;left:5px;top:12px;bottom:-8px}.event .line:after{content:"";position:absolute;width:9px;height:9px;border-radius:50%;background:#111;left:1px;top:4px}.event:last-child .line:before{display:none}.event b{font-size:13px}.event p{font-size:12px;color:var(--sub);line-height:1.45;margin:4px 0}
-.secretary{position:fixed;z-index:30;left:50%;transform:translateX(-50%) translateY(120%);bottom:calc(86px + env(safe-area-inset-bottom));width:min(480px,calc(100% - 24px));background:rgba(250,251,253,.92);backdrop-filter:blur(28px) saturate(150%);-webkit-backdrop-filter:blur(28px) saturate(150%);border:1px solid rgba(255,255,255,.8);box-shadow:0 20px 60px rgba(25,35,50,.20);border-radius:28px;padding:17px;transition:.35s cubic-bezier(.2,.85,.2,1)}.secretary.open{transform:translateX(-50%) translateY(0)}.secretary .handle{width:36px;height:4px;background:#d0d4d9;border-radius:10px;margin:-6px auto 13px}.sec-head{display:flex;align-items:center;gap:10px}.sec-head b{font-size:15px}.sec-head button{margin-left:auto;border:0;background:none;font-size:20px}.chips{display:flex;gap:7px;overflow:auto;margin:14px 0}.chips button{white-space:nowrap;border:0;background:#e9edf2;border-radius:99px;padding:8px 10px;font-size:11px}.composer{display:flex;gap:7px}.composer input{flex:1;border:0;background:white;border-radius:16px;padding:13px;min-width:0}.composer button{border:0;background:#111;color:white;border-radius:16px;padding:0 15px;font-weight:700}
-.bottom{position:fixed;z-index:25;bottom:calc(10px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);width:min(460px,calc(100% - 24px));height:66px;background:var(--glass);backdrop-filter:blur(30px) saturate(170%);-webkit-backdrop-filter:blur(30px) saturate(170%);border:1px solid rgba(255,255,255,.75);box-shadow:0 14px 40px rgba(30,40,55,.16);border-radius:25px;padding:6px;display:grid;grid-template-columns:repeat(4,1fr);overflow:hidden}.bottom button{position:relative;z-index:2;border:0;background:transparent;touch-action:manipulation;cursor:pointer;color:#727780;font-size:10px;font-weight:650;border-radius:19px}.bottom button b{display:block;font-size:20px;font-weight:450;margin-bottom:2px}.bottom button.active{color:#111}.indicator{position:absolute;z-index:1;top:6px;bottom:6px;width:calc((100% - 12px)/4);left:6px;background:rgba(255,255,255,.82);border:1px solid rgba(255,255,255,.9);box-shadow:0 4px 15px rgba(30,40,55,.08);border-radius:19px;transition:left .35s cubic-bezier(.2,.8,.2,1)}
-.toast{position:fixed;z-index:50;top:calc(18px + env(safe-area-inset-top));left:50%;transform:translate(-50%,-120px);background:#111;color:white;padding:11px 15px;border-radius:99px;font-size:12px;transition:.3s}.toast.show{transform:translate(-50%,0)}
-.modal{display:none;position:fixed;inset:0;z-index:40;background:rgba(15,20,28,.25);backdrop-filter:blur(8px);padding:70px 16px 100px;overflow:auto}.modal.open{display:block}.modal-card{max-width:480px;margin:auto;background:#f8f9fb;border-radius:28px;padding:18px}.modal-card h3{margin:4px 0 5px}.modal-card>p{color:var(--sub);font-size:13px}.close{float:right;border:0;background:#e9edf2;width:32px;height:32px;border-radius:50%;font-size:18px}
-@media(min-width:700px){body{background:#e9ebef}.app{background:var(--bg);box-shadow:0 0 80px rgba(20,25,35,.12)}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--paper:#f3f0e7;--sheet:#faf8f1;--ink:#191a18;--muted:#686961;--rule:#c9c5b8;--blue:#214f78;--red:#8d3029;--amber:#91661e;--green:#315e48;--serif:"Iowan Old Style","Noto Serif KR",Georgia,serif;--sans:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif}
+html,body{margin:0;min-height:100%;background:#d9d6ce;color:var(--ink);font-family:var(--sans)}
+button,input,textarea{font:inherit}.app{width:min(100%,680px);min-height:100vh;margin:auto;background:var(--paper)}
+.mast{position:sticky;top:0;z-index:20;background:rgba(243,240,231,.96);border-bottom:1px solid #222;padding:calc(10px + env(safe-area-inset-top)) 18px 9px}
+.brand{display:flex;align-items:center;gap:9px}.monogram{font:700 12px var(--serif);letter-spacing:.12em;border:1px solid #222;padding:5px 6px}.brand-lines{line-height:1.1}.brand-lines b{display:block;font:700 12px var(--serif);letter-spacing:.09em}.brand-lines span{font-size:9px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}.mast button{margin-left:auto;border:0;border-left:1px solid var(--rule);background:none;color:var(--blue);padding:7px 0 7px 12px;font-size:12px;font-weight:700}
+.crumb{margin-top:9px;padding-top:7px;border-top:1px solid var(--rule);display:flex;align-items:center;font:10px/1.3 var(--sans);letter-spacing:.08em;color:var(--muted);text-transform:uppercase}.crumb button{margin:0;padding:0;border:0;color:var(--muted);font-size:10px;font-weight:500}.crumb i{font-style:normal;margin:0 7px}.crumb strong{color:var(--ink)}
+.view{display:none;padding:30px 18px 70px}.view.active{display:block;animation:enter .18s ease-out}@keyframes enter{from{opacity:.35}to{opacity:1}}
+.eyebrow{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}h1{font:600 38px/1.08 var(--serif);letter-spacing:-.035em;margin:7px 0 8px}h2{font:600 22px/1.2 var(--serif);margin:0}.intro{margin:0 0 30px;color:var(--muted);font-size:13px;line-height:1.7;max-width:540px}.rule-title{border-bottom:2px solid var(--ink);padding:28px 0 8px;display:flex;align-items:end}.rule-title span{margin-left:auto;font-size:10px;color:var(--muted);letter-spacing:.08em}
+.memo{background:var(--sheet);border:1px solid var(--rule);border-top:3px solid var(--ink);padding:20px 18px}.docline{display:flex;justify-content:space-between;gap:12px;font-size:9px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}.memo h2{margin:20px 0 12px}.memo p{font:15px/1.72 var(--serif);margin:0}.memo ol{margin:16px 0 0;padding:0;list-style:none;border-top:1px solid var(--rule)}.memo li{display:grid;grid-template-columns:58px 1fr;gap:8px;padding:10px 0;border-bottom:1px solid var(--rule);font-size:12px;line-height:1.5}.memo li b{color:var(--blue)}
+.docket{border-bottom:1px solid var(--ink)}.docket-row{width:100%;border:0;border-top:1px solid var(--rule);background:transparent;padding:14px 0;text-align:left;color:inherit;display:grid;grid-template-columns:74px 1fr 18px;gap:10px;align-items:start}.docket-row:first-child{border-top:0}.code{font:10px/1.45 ui-monospace,SFMono-Regular,monospace;color:var(--muted)}.docket-row strong{display:block;font:600 15px/1.35 var(--serif)}.docket-row p{font-size:11px;line-height:1.5;color:var(--muted);margin:5px 0 0}.arrow{color:var(--blue)}.mark{font-size:9px;letter-spacing:.06em;color:var(--amber);margin-bottom:4px}.mark.red{color:var(--red)}
+.wire{border-bottom:1px solid var(--ink)}.wire-row{display:grid;grid-template-columns:44px 1fr;gap:12px;padding:11px 0;border-top:1px solid var(--rule)}.wire-row:first-child{border-top:0}.wire time{font:10px ui-monospace,monospace;color:var(--blue)}.wire b{font-size:11px}.wire p{font-size:11px;line-height:1.5;color:var(--muted);margin:3px 0 0}
+.doors{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--ink);margin-top:26px}.door{min-height:112px;border:0;background:var(--sheet);text-align:left;padding:16px;color:inherit}.door+ .door{border-left:1px solid var(--ink)}.door small{display:block;font:9px ui-monospace,monospace;color:var(--muted);margin-bottom:25px}.door b{font:600 17px var(--serif)}.door span{float:right;color:var(--blue)}
+.building{border-top:2px solid var(--ink)}.floor{border-bottom:1px solid var(--ink);display:grid;grid-template-columns:84px 1fr}.floor-label{padding:14px 10px 14px 0;border-right:1px solid var(--rule)}.floor-label small{font:9px ui-monospace,monospace;color:var(--muted)}.floor-label b{display:block;font:600 12px/1.35 var(--serif);margin-top:4px}.office-link{width:100%;border:0;border-bottom:1px solid var(--rule);background:transparent;text-align:left;padding:13px 0 13px 14px;color:inherit}.office-link:last-child{border-bottom:0}.office-link b{font-size:13px}.office-link span{display:block;font-size:10px;color:var(--muted);margin-top:3px}.fabric{border:1px dashed #78776f;padding:15px;margin-top:22px}.fabric b{font:600 14px var(--serif)}.fabric p{font-size:11px;line-height:1.55;color:var(--muted);margin:6px 0 0}
+.office-head{border-top:4px double var(--ink);border-bottom:1px solid var(--ink);padding:20px 0}.office-head h1{font-size:32px}.mandate{font:15px/1.65 var(--serif);margin:18px 0 0;max-width:560px}.briefing{margin:20px 0;border-left:3px solid var(--ink);padding:4px 0 4px 15px;font:14px/1.7 var(--serif)}
+.ledger{width:100%;border-collapse:collapse}.ledger th{text-align:left;padding:8px 5px;border-bottom:1px solid var(--ink);font-size:9px;letter-spacing:.08em;color:var(--muted)}.ledger td{padding:12px 5px;border-bottom:1px solid var(--rule);font-size:11px;vertical-align:top;line-height:1.45}.ledger td:first-child{font-family:ui-monospace,monospace;color:var(--muted);width:76px}.status{color:var(--blue);font-weight:700}.output{background:var(--sheet);border-top:2px solid var(--ink);border-bottom:1px solid var(--ink);padding:18px;margin-top:20px}.output h3{font:600 18px var(--serif);margin:5px 0 10px}.output p{font-size:12px;line-height:1.65;color:var(--muted)}
+.actions{display:grid;grid-template-columns:1fr 1fr;margin-top:24px;border:1px solid var(--ink)}.actions button,.decision-actions button{border:0;background:transparent;min-height:52px;color:var(--blue);font-weight:700;font-size:12px}.actions button+button{border-left:1px solid var(--ink)}
+.backline{border:0;background:none;color:var(--blue);padding:0 0 18px;font-size:12px;font-weight:700}
+.case-paper{background:var(--sheet);border-top:4px double var(--ink);border-bottom:1px solid var(--ink);padding:22px 18px}.case-paper h1{font-size:31px}.abstract{border:1px solid var(--ink);padding:15px;margin:21px 0}.abstract b,.section-label{font-size:9px;letter-spacing:.12em;text-transform:uppercase}.abstract p{font:14px/1.7 var(--serif);margin:8px 0 0}.positions{margin:10px 0 25px}.position{display:grid;grid-template-columns:1fr 110px;padding:12px 0;border-bottom:1px solid var(--rule);font-size:11px}.position:first-child{border-top:1px solid var(--ink)}.position strong:last-child{text-align:right}.opposed{color:var(--red)}.conditional{color:var(--amber)}.questions{font:14px/1.7 var(--serif);padding-left:20px}.note{width:100%;border:1px solid var(--rule);border-radius:0;background:#fffdf7;padding:12px;min-height:84px;margin-top:8px;resize:vertical}.decision-actions{display:grid;grid-template-columns:repeat(2,1fr);border:1px solid var(--ink);margin-top:14px}.decision-actions button{border-bottom:1px solid var(--rule)}.decision-actions button:nth-child(odd){border-right:1px solid var(--rule)}.decision-actions button:nth-child(n+3){border-bottom:0}.decision-actions .approve{background:var(--ink);color:#fff}
+.operations{border-top:2px solid var(--ink)}.op-row{display:grid;grid-template-columns:48px 105px 1fr;padding:11px 0;border-bottom:1px solid var(--rule);gap:8px}.op-row time,.op-row .origin{font-size:9px;color:var(--muted)}.op-row p{font-size:11px;line-height:1.45;margin:0}.op-row small{display:block;margin-top:5px;color:var(--blue);font-size:9px}.classification{font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.archive-row{border-bottom:1px solid var(--rule);padding:13px 0}.archive-row .docline{margin-bottom:6px}.archive-row b{font:600 14px var(--serif)}.archive-row p{font-size:11px;color:var(--muted);margin:4px 0}
+.secretary-grid{border-top:2px solid var(--ink)}.service{padding:17px 0;border-bottom:1px solid var(--rule)}.service header{display:flex;gap:12px}.service code{font:700 11px ui-monospace,monospace;color:var(--blue)}.service h3{font:600 17px var(--serif);margin:0}.service p{font-size:11px;color:var(--muted);line-height:1.55;margin:7px 0 12px 42px}.service button{margin-left:42px;border:0;border-bottom:1px solid var(--blue);background:none;color:var(--blue);padding:3px 0;font-size:11px}.order-form{display:none;background:var(--sheet);border:1px solid var(--ink);padding:16px;margin-top:20px}.order-form.open{display:block}.order-form label{display:block;font-size:10px;font-weight:700;margin-bottom:6px}.order-form select,.order-form textarea{width:100%;border:1px solid var(--rule);border-radius:0;background:white;padding:10px;margin-bottom:12px;font-size:12px}.order-form textarea{min-height:90px}.submit{width:100%;border:0;background:var(--ink);color:white;padding:13px;font-weight:700}.return-box{border-left:3px solid var(--blue);padding:10px 14px;margin-top:22px}.return-box b{font:600 14px var(--serif)}.return-box p{font-size:11px;line-height:1.6;color:var(--muted)}
+.company-state{border-top:3px solid var(--ink);border-bottom:1px solid var(--ink);padding:14px 0 15px;margin-bottom:22px}.company-state h2{font-size:18px}.company-state>p{font:15px/1.6 var(--serif);margin:8px 0 13px}.state-line{display:flex;flex-wrap:wrap}.state-line span{font-size:10px;padding:5px 9px;border-left:1px solid var(--rule)}.state-line span:first-child{padding-left:0;border:0}.state-line .alert{color:var(--red);font-weight:700}
+.operating-map{border:1px solid var(--ink);background:var(--sheet);padding:16px 14px}.map-stage{position:relative;padding-bottom:24px}.map-stage:not(:last-child):after{content:"↓  evidence & mandate";position:absolute;bottom:3px;left:50%;transform:translateX(-50%);font:8px ui-monospace,monospace;color:var(--muted);letter-spacing:.05em}.map-stage.control:after{content:"↓  positions retained"}.map-node{width:100%;border:0;border-top:2px solid var(--ink);background:transparent;text-align:left;color:inherit;padding:10px 2px;display:grid;grid-template-columns:1fr auto;gap:5px}.map-node small{font:8px ui-monospace,monospace;color:var(--muted)}.map-node b{font:600 15px var(--serif)}.map-node em{grid-column:2;grid-row:1/3;align-self:center;font-style:normal;font-size:10px;color:var(--blue)}.map-split{display:grid;grid-template-columns:1fr 1fr;gap:12px}.map-split .map-node:last-child{border-top-color:var(--red)}.map-split .map-node:last-child em{color:var(--red)}.map-founder{border:2px solid var(--ink);padding:12px;text-align:center}.map-founder small{font:8px ui-monospace,monospace;color:var(--muted)}.map-founder b{display:block;font:600 16px var(--serif);margin-top:3px}.map-founder span{font-size:10px;color:var(--amber)}
+.directory-toggle{width:100%;border:0;border-bottom:1px solid var(--ink);background:none;text-align:left;color:var(--blue);padding:16px 0 9px;font-size:11px;font-weight:700}.directory-panel{display:none}.directory-panel.open{display:block}
+.workbench{border-top:2px solid var(--ink);margin-top:21px}.workbench-head{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--rule)}.workbench-head h2{font-size:19px}.workbench-head span{font:9px ui-monospace,monospace;color:var(--muted);text-align:right}.work-row{display:grid;grid-template-columns:82px 1fr auto;gap:9px;padding:12px 0;border-bottom:1px solid var(--rule)}.work-row code{font-size:9px;color:var(--muted)}.work-row b{font-size:12px}.work-row p{grid-column:2/4;margin:3px 0 0;font-size:10px;line-height:1.5;color:var(--muted)}.work-row strong{font-size:10px;color:var(--blue);text-align:right}.work-row strong.red{color:var(--red)}.work-summary{padding:15px 0;border-bottom:1px solid var(--ink);display:grid;grid-template-columns:1fr 1fr;gap:14px}.work-summary div+div{border-left:1px solid var(--rule);padding-left:14px}.work-summary small{font-size:9px;color:var(--muted)}.work-summary b{display:block;font:600 14px/1.4 var(--serif);margin-top:5px}
+.direct-form{display:none;border:1px solid var(--ink);background:var(--sheet);padding:14px;margin-top:12px}.direct-form.open{display:block}.direct-form textarea{width:100%;min-height:76px;border:1px solid var(--rule);border-radius:0;padding:10px;background:white;margin:10px 0}.direct-form p{font-size:10px;color:var(--muted);line-height:1.5;margin:0}.direct-form button{width:100%;border:0;background:var(--ink);color:white;padding:12px;font-weight:700}
+.submit.secondary{background:transparent;color:var(--blue);border:1px solid var(--blue);margin-bottom:8px}.route-review{display:none;border-left:3px solid var(--blue);padding:9px 12px;margin:0 0 12px;font-size:11px;line-height:1.5}.route-review.open{display:block}
+.notice{position:fixed;z-index:40;top:calc(18px + env(safe-area-inset-top));left:50%;width:min(92%,520px);transform:translate(-50%,-140%);transition:.25s;background:#20211f;color:white;border-left:4px solid #7996b0;padding:12px 14px;font-size:11px;line-height:1.4}.notice.show{transform:translate(-50%,0)}
+@media(max-width:390px){.view{padding-left:15px;padding-right:15px}.floor{grid-template-columns:72px}.op-row{grid-template-columns:42px 85px 1fr}.brand-lines span{display:none}h1{font-size:34px}}
+@media(min-width:681px){.app{box-shadow:0 0 60px rgba(0,0,0,.15)}}
 </style>
 </head>
-<body>
-<div class="app">
-  <section id="office" class="view active">
-    <div class="page">
-      <div class="date">2026년 9월 19일 · 토요일</div>
-      <h1 class="display">집무실</h1>
-      <p class="lead">회사를 운영하기 위해 지금 알아야 할 것과 직접 처리해야 할 일만 모았습니다.</p>
+<body><div class="app">
+<header class="mast"><div class="brand"><div class="monogram">QT</div><div class="brand-lines"><b>QUANTRADE</b><span>Private Investment Office / Founder Console</span></div><button data-action="nav" data-target="secretary">비서실 호출</button></div><div class="crumb" id="crumb"><button data-action="nav" data-target="founder">FOUNDER CONSOLE</button><i>/</i><strong>FOUNDER OFFICE</strong></div></header>
 
-      <div class="brief">
-        <div class="brief-head"><div class="seal">비서</div><div><b>비서실 오전·오후 통합 브리핑</b><span>16:17 기준 · 회사 전체 취합</span></div></div>
-        <p><b>좋은 오후입니다.</b> 지금 직접 확인하실 사항은 <b id="briefCount">3건</b>입니다. 회사는 정상 운영 중이며, 실주문은 연결되어 있지 않습니다.</p>
-        <ul>
-          <li><strong>결재</strong> CASE-041 포지션 축소안이 투자위원회를 통과해 책상에 올라왔습니다.</li>
-          <li><strong>주요 상황</strong> 원/달러 변동성 확대를 투자정보본부가 분석 중입니다. 현재 긴급 위험 신호는 없습니다.</li>
-          <li><strong>예정</strong> 22:00 주요 기업 실적발표 모니터링 업무가 예약되어 있습니다.</li>
-        </ul>
-      </div>
+<main>
+<section class="view active" id="founder" data-title="Founder Office">
+ <div class="eyebrow">2026.09.19 · Office memorandum</div><h1>Founder Office</h1><p class="intro">운영 정보는 부서에서 압축되어 올라옵니다. 이곳에는 판단과 권한 행사가 필요한 문서만 놓입니다.</p>
+ <section class="company-state"><div class="docline"><span>SECRETARY SYNTHESIS / NOW</span><span id="stateTime">16:17 KST</span></div><h2>오늘 알아야 할 회사 상태</h2><p id="companyStateText">회사는 정상 운영 중입니다. 한 안건에 기관 이견이 있으며 Founder 판단을 기다립니다.</p><div class="state-line"><span>Research · 조사 중</span><span>Portfolio · 상신 완료</span><span class="alert">Control · 이견 존재</span><span id="founderState">Founder · 판단 대기</span></div></section>
+ <div class="rule-title"><h2>내 책상</h2><span id="deskLabel">결재 대기 01</span></div><div class="docket" id="deskDocket"></div>
+ <div class="rule-title"><h2>회사 전문</h2><span>COMPANY WIRE / 압축본</span></div><div class="wire" id="founderWire"></div>
+ <div class="doors"><button class="door" data-action="nav" data-target="company"><small>DOOR 01 / INSTITUTION</small><b>회사로 들어가기</b><span>→</span></button><button class="door" data-action="nav" data-target="situation"><small>DOOR 02 / OPERATIONS</small><b>상황실 열기</b><span>→</span></button></div>
+ <button class="door" style="width:100%;border:1px solid var(--ink);border-top:0;min-height:74px" data-action="nav" data-target="memory"><small style="margin-bottom:8px">ARCHIVE / PROTOTYPE AUDIT VIEW</small><b>기관 기억 열람</b><span>→</span></button>
+</section>
 
-      <div class="section"><h2>내 책상</h2><small id="deskCount">처리할 서류 3</small></div>
-      <div class="desk">
-        <button class="doc" data-action="open-case"><div class="meta"><span>QT / 결재문서</span><span>14:32</span></div><div class="kind">투자위원회 결재안</div><h3>CASE-041<br>ABC 포지션 축소안</h3><p>포트폴리오본부 제안에 대해 위험관리실은 조건부 동의, 반대검증실은 반대 의견을 냈습니다.</p><div class="stamps"><span class="stamp">전략·포트폴리오 찬성</span><span class="stamp warn">위험 조건부</span><span class="stamp no">반대검증 반대</span></div></button>
-        <button class="doc" data-action="toast" data-arg="자료 요청 문서를 열었습니다"><div class="meta"><span>QT / 검토요청</span><span>11:20</span></div><div class="kind">추가자료 도착</div><h3>XYZ 신규 진입 검토</h3><p>투자정보본부에서 요청했던 산업 데이터가 도착했습니다. 현재 재검토 대기 중입니다.</p><div class="stamps"><span class="stamp">리서치 보완</span></div></button>
-        <button class="doc" data-action="toast" data-arg="정책 예외 요청 문서를 열었습니다"><div class="meta"><span>QT / 정책</span><span>09:15</span></div><div class="kind">예외 승인 요청</div><h3>리스크 정책 예외</h3><p>독립위험관리실에서 임시 정책 예외에 대한 Founder 승인을 요청했습니다.</p><div class="stamps"><span class="stamp warn">승인 필요</span></div></button>
-      </div>
+<section class="view" id="company" data-title="Company Operating Map"><button class="backline" data-action="nav" data-target="founder">← Founder Office</button><div class="eyebrow">Live operating map / institutional flow</div><h1>회사 운영지도</h1><p class="intro">근거가 제안으로, 제안이 독립 의견과 심의를 거쳐 Founder 판단으로 이동합니다. 이견은 지워지지 않고 함께 올라옵니다.</p><div class="operating-map" id="operatingMap"></div><aside class="fabric"><b>Evidence Intelligence Fabric</b><p>부서가 아니라 모든 단계에 근거·출처·판단 이력을 공급하는 기관 공통 정보 직물입니다.</p></aside><button class="directory-toggle" data-action="directory-toggle">전체 13개 사무실 Directory 열기 ＋</button><div class="directory-panel" id="directoryPanel"><div class="building" id="building"></div></div></section>
 
-      <div class="section"><h2>회사 모니터</h2><small data-action="nav" data-arg="company" style="color:var(--blue)">회사 전체 보기</small></div>
-      <div class="monitor">
-        <div class="monitor-head"><span>QUANTRADE / LIVE</span><b>● 정상 운영</b></div>
-        <div class="pulse"><div><small>진행 업무</small><b id="activeTasks">7</b></div><div><small>결재 대기</small><b id="approvalCount">2</b></div><div><small>조사 중</small><b>3</b></div><div><small>위험 위반</small><b>0</b></div></div>
-        <div class="feed" id="homeFeed"></div>
-      </div>
-    </div>
-  </section>
+<section class="view" id="office" data-title="Department Office"><button class="backline" data-action="nav" data-target="company">← 회사 디렉터리</button><div id="officeContent"></div></section>
 
-  <section id="company" class="view">
-    <div class="page">
-      <div class="date">QUANTRADE / ORGANIZATION</div><h1 class="display">회사</h1><p class="lead">조직도가 아니라 지금 회사가 실제로 무엇을 하고 있는지 봅니다. 부서를 누르면 해당 사무실로 들어갑니다.</p>
-      <div class="company-summary"><div><small>진행 중</small><b id="companyActive">7</b></div><div><small>오늘 완료</small><b>5</b></div><div><small>내 결재 대기</small><b id="companyPending">2</b></div></div>
-      <div id="deptList"></div>
-    </div>
-  </section>
+<section class="view" id="case" data-title="Decision Docket"><button class="backline" data-action="nav" data-target="founder">← Founder Office / 내 책상</button><article class="case-paper"><div class="docline"><span>IC / CASE-041 / REV.03</span><span id="caseState">FOUNDER DECISION PENDING</span></div><h1>ABC 포지션 축소안</h1><p class="intro">투자위원회 상신 · 보안등급 INTERNAL · 예시 데이터</p><div class="abstract"><b>Executive abstract</b><p>가상의 실적 전망 변화로 기존 성장 가정 일부가 약화되었습니다. 전략·포트폴리오본부는 예시 비중 8%에서 6%로의 축소를 제안합니다. 실제 종목·계좌·주문과 무관한 모의 문서입니다.</p></div><div class="section-label">Institutional positions</div><div class="positions"><div class="position"><strong>투자정보본부</strong><strong>근거 보완 완료</strong></div><div class="position"><strong>전략·포트폴리오본부</strong><strong>축소 제안</strong></div><div class="position"><strong>독립위험관리실</strong><strong class="conditional">조건부 동의</strong></div><div class="position"><strong>반대검증실</strong><strong class="opposed">반대 의견 유지</strong></div><div class="position"><strong>투자위원회</strong><strong>Founder 상신</strong></div></div><div class="section-label">Unresolved questions</div><ol class="questions"><li>수요 둔화는 구조적인가, 순환적인가?</li><li>현재 가격은 전망 하향을 어느 정도 반영했는가?</li></ol><label class="section-label" for="founderNote">Founder note</label><textarea class="note" id="founderNote" placeholder="판단 근거 또는 후속 지시를 기록합니다."></textarea><div class="decision-actions"><button data-action="decide" data-value="반려">반려</button><button data-action="decide" data-value="보류">보류</button><button data-action="decide" data-value="추가조사">재조사 지시</button><button class="approve" data-action="decide" data-value="승인">승인</button></div></article></section>
 
-  <section id="situation" class="view">
-    <div class="page"><div class="date">QUANTRADE / OPERATIONS</div><h1 class="display">상황실</h1><p class="lead">회사의 사건과 업무가 어느 부서에서 시작되고 어디로 전달되는지 시간 순서로 추적합니다.</p>
-      <div class="situation-day">오늘 · 실시간 기관 기록</div><div id="timeline"></div>
-    </div>
-  </section>
+<section class="view" id="situation" data-title="Situation Room"><button class="backline" data-action="nav" data-target="founder">← Founder Office</button><div class="eyebrow">OPS-LEDGER / Prototype event log</div><h1>상황실</h1><p class="intro">누가 기록했고 어디로 보냈는지 시간 순서로 읽습니다. 이 P0.3.1 원장은 브라우저 localStorage 모의 기록이며 실제 불변 원장이나 백엔드가 아닙니다.</p><div class="operations" id="operations"></div></section>
 
-  <section id="records" class="view">
-    <div class="page"><div class="date">INSTITUTIONAL MEMORY</div><h1 class="display">기록</h1><p class="lead">완료된 결정, 보고서, 지시와 감사 기록을 보존합니다.</p>
-      <div class="section"><h2>오늘의 기록</h2><small>자동 보존</small></div>
-      <div id="recordList"></div>
-    </div>
-  </section>
+<section class="view" id="memory" data-title="Institutional Memory"><button class="backline" data-action="nav" data-target="founder">← Founder Office</button><div class="eyebrow">Archive / Prototype audit view</div><h1>기관 기억</h1><p class="intro">결정과 지시를 생산 주체·시각과 함께 재현합니다. 브라우저 내부 모의 보존이며 실제 감사 원장으로 간주하지 않습니다.</p><div id="archive"></div></section>
 
-  <section id="room" class="view">
-    <div class="top"><button class="back" data-action="nav" data-arg="company">‹</button><div class="title">부서 사무실</div><div class="spacer"></div><button class="ghost" data-action="secretary-open">비서 호출</button></div>
-    <div class="page" id="roomContent"></div>
-  </section>
-
-  <section id="case" class="view">
-    <div class="top"><button class="back" data-action="nav" data-arg="office">‹</button><div class="title">결재 서류</div><div class="spacer"></div><button class="ghost" data-action="nav" data-arg="situation">흐름 보기</button></div>
-    <div class="page">
-      <article class="paper">
-        <div class="paper-head"><small>QUANTRADE · INVESTMENT COMMITTEE · CASE-041</small><h2>ABC 포지션 축소안</h2><small>작성 2026.09.19 · Founder 결재 대기</small></div>
-        <p><b>핵심 요약</b></p><p>가상의 실적 전망 변화로 기존 성장 가정의 일부가 약화되었습니다. 전략·포트폴리오본부는 예시 비중 8% → 6% 축소를 제안했습니다. 이는 실제 종목이나 사용자 계좌에 대한 제안이 아닙니다.</p>
-        <div class="review"><div><b>투자정보본부</b><b>근거 보완 완료</b></div><div><b>전략·포트폴리오본부</b><b>축소 제안</b></div><div><b>독립위험관리실</b><b style="color:var(--warn)">조건부 동의</b></div><div><b>반대검증실</b><b style="color:var(--danger)">반대</b></div><div><b>투자위원회</b><b>Founder 상신</b></div></div>
-        <p><b>미해결 쟁점</b></p><p>① 수요 둔화가 구조적인지 순환적인지 불확실함.<br>② 현재 가격이 전망 하향을 어느 정도 반영했는지 불확실함.</p>
-        <textarea id="decisionReason" class="decision-note" placeholder="결재 의견 또는 추가 지시를 남길 수 있습니다."></textarea>
-        <div class="decision-buttons"><button data-action="decide" data-arg="반려">반려</button><button data-action="decide" data-arg="보류">보류</button><button data-action="decide" data-arg="추가조사">재조사 지시</button><button class="primary" data-action="decide" data-arg="승인">승인</button></div>
-      </article>
-    </div>
-  </section>
-
-  <div class="bottom" id="bottomNav">
-    <div class="indicator" id="indicator"></div>
-    <button class="active" data-nav="office" data-action="nav" data-arg="office"><b>⌂</b>집무실</button>
-    <button data-nav="company" data-action="nav" data-arg="company"><b>▦</b>회사</button>
-    <button data-nav="situation" data-action="nav" data-arg="situation"><b>◎</b>상황실</button>
-    <button data-nav="records" data-action="nav" data-arg="records"><b>≡</b>기록</button>
-  </div>
-
-  <div class="secretary" id="secretary">
-    <div class="handle"></div><div class="sec-head"><div class="seal">비서</div><div><b>비서실</b><div style="font-size:10px;color:var(--sub)">지시 · 요약 · 자료요청 · 일정</div></div><button data-action="secretary-close">×</button></div>
-    <div class="chips"><button data-action="prefill" data-arg="오늘 회사 상황을 요약해줘">회사 상황 요약</button><button data-action="prefill" data-arg="내 결재 대기 안건만 보여줘">결재 안건</button><button data-action="prefill" data-arg="위험관리실에 스트레스 테스트를 지시해줘">업무 지시</button></div>
-    <div class="composer"><input id="secInput" placeholder="비서실에 지시하거나 물어보세요"><button data-action="secretary-send">보내기</button></div>
-  </div>
-
-  <div class="modal" id="modal"><div class="modal-card"><button class="close" data-action="modal-close">×</button><h3 id="modalTitle">업무 지시</h3><p id="modalDesc"></p><textarea id="directInput" class="decision-note" placeholder="이 부서에 직접 지시할 내용을 입력하세요."></textarea><button class="action dark" style="width:100%;margin-top:8px" data-action="direct-submit">직접 지시하기</button></div></div>
-  <div class="toast" id="toast"></div>
-</div>
-
+<section class="view" id="secretary" data-title="Secretary Office"><button class="backline" data-action="nav" data-target="founder">← Founder Office</button><div class="eyebrow">Executive routing & return office</div><h1>비서실</h1><p class="intro">기관 정보를 회수하고 지시의 목적지를 확인한 뒤 배정하며, 판단 가치가 있는 결과만 되돌립니다.</p><div class="secretary-grid"><div class="service"><header><code>ASK</code><h3>기관 정보 회수</h3></header><p>현재 원장과 안건 상태를 읽어 Founder용 답변을 만듭니다.</p><button data-action="ask">현재 판단 사항 회수</button></div><div class="service"><header><code>ORDER</code><h3>지시 분류 및 배정</h3></header><p>비서실이 원문을 분류하고 목적지를 확인받은 뒤 업무번호를 발급합니다.</p><button data-action="order-open">새 지시 기안</button></div><div class="service"><header><code>RETURN</code><h3>결정 가치 선별</h3></header><p>현재 부서 안건과 Founder 지시 중 되돌아올 항목을 선별합니다.</p><button data-action="return">반환 대상 확인</button></div></div><form class="order-form" id="orderForm"><div class="docline"><span>FOUNDER INSTRUCTION</span><span>SECRETARY ROUTING</span></div><label for="orderText">지시 원문</label><textarea id="orderText" placeholder="조사 범위와 반환 조건을 명확히 적어주세요."></textarea><button class="submit secondary" type="button" data-action="route-classify">비서실 분류 요청</button><div class="route-review" id="routeReview"></div><label for="orderOffice">확인된 책임 사무실</label><select id="orderOffice" disabled></select><button class="submit" id="routeAssign" type="submit" disabled>목적지 확인 및 업무번호 발급</button></form><div class="return-box" id="secretaryResult"><b>비서실 접수대</b><p>ASK, ORDER, RETURN 중 업무를 선택하십시오. 결과는 현재 프로토타입 상태를 기준으로 작성됩니다.</p></div></section>
+</main><div class="notice" id="notice" role="status" aria-live="polite"></div></div>
 <script>
-const depts=[
-{id:"intel",name:"투자정보본부",en:"Investment Intelligence",summary:"3건 조사 중 · 1건 검증 대기",state:"업무 중",cls:"busy",chief:"현재 중요도가 높은 변화는 원/달러 변동성과 반도체 업황입니다. CASE-041의 근거 검증은 완료했습니다.",tasks:[["원/달러 변동성 분석",72,"거시경제팀"],["반도체 공급망 변화",86,"기업분석팀"],["ETF 자금흐름 이상",34,"시장구조팀"]]},
-{id:"portfolio",name:"전략·포트폴리오본부",en:"Strategy & Portfolio",summary:"1건 포트폴리오 검토 · 2건 모니터링",state:"업무 중",cls:"busy",chief:"CASE-041 제안은 위원회로 상신했습니다. 현재 신규 제안보다 기존 포지션의 변화 감시를 우선하고 있습니다.",tasks:[["CASE-041 자본배분 검토",100,"포트폴리오팀"],["기술주 익스포저 모니터링",58,"자산배분팀"]]},
-{id:"risk",name:"독립위험관리실",en:"Independent Portfolio Risk",summary:"1건 심사 · Stress Test 대기",state:"심사 중",cls:"busy",chief:"현재 hard policy 위반은 없습니다. CASE-041은 조건부 동의 의견을 냈으며 추가 시나리오 요청을 받을 수 있습니다.",tasks:[["CASE-041 위험심사",100,"포트폴리오위험"],["상관관계 변화 점검",49,"시장위험"]]},
-{id:"red",name:"반대검증실",en:"Adversarial Review",summary:"2건 반대분석 완료 · 1건 이견 유지",state:"검토 완료",cls:"",chief:"CASE-041에서 핵심 가정 두 가지가 아직 충분히 입증되지 않았습니다. 즉시 축소 논리에 반대 의견을 유지합니다.",tasks:[["CASE-041 Counter-thesis",100,"독립검증"],["확증편향 점검",100,"Reasoning Audit"]]},
-{id:"committee",name:"투자위원회",en:"Investment Committee",summary:"1건 Founder 결재 대기",state:"상신 완료",cls:"wait",chief:"CASE-041의 부서별 의견을 취합해 Founder에게 상신했습니다. 위원회가 결정을 대신하지 않습니다.",tasks:[["CASE-041 의견 취합",100,"위원회"]]},
-{id:"execution",name:"주문집행·시장운영실",en:"Execution & Market Operations",summary:"승인 주문 없음 · Shadow Mode",state:"대기",cls:"wait",chief:"현재 실주문 연결은 차단되어 있습니다. 승인된 결정이 생겨도 Prototype에서는 가상 상태 전이만 기록합니다.",tasks:[]}
+const offices=[
+ {id:'cio',floor:'Executive Office',floorKo:'경영 집무층',name:'최고투자설계실',en:'Chief Investment Architecture',state:'운영 원칙 검토 중',mandate:'투자 체계의 목적, 권한 경계와 장기 운영 원칙을 설계합니다.',brief:'현재 핵심 과제는 의사결정 속도보다 독립 검증과 승인 권한이 훼손되지 않도록 운영 구조를 점검하는 일입니다.',matters:[['GOV-012','기관 권한표 개정','검토 중'],['ARC-007','장기 자본 원칙 문서','작성 중']],output:'투자 운영 헌장 개정안',outputText:'부서 간 이견을 제거하지 않고 의사결정 문서에 보존하는 원칙을 명문화했습니다.'},
+ {id:'capital',floor:'Client & Capital',floorKo:'고객·자본층',name:'고객자본관리실',en:'Client Capital Office',state:'자본 제약 확인 중',mandate:'고객 자본의 목적과 제약, 유동성 약속을 투자 의사결정의 선행 조건으로 관리합니다.',brief:'예시 자본의 유동성 요구와 투자 기간에 변경은 없습니다. 실제 고객 데이터는 연결되어 있지 않습니다.',matters:[['CAP-018','자본 제약 정기 확인','확인 중']],output:'자본 제약 확인서',outputText:'모의 포트폴리오가 준수해야 할 유동성 범위와 손실 허용 경계를 기록합니다.'},
+ {id:'intel',floor:'Research Floor',floorKo:'조사층',name:'투자정보본부',en:'Investment Intelligence',state:'조사 중',mandate:'시장과 기업의 변화를 출처가 추적 가능한 근거로 변환합니다.',brief:'원/달러 변동성과 반도체 업황을 우선 조사 중입니다. CASE-041의 사실 근거 보완은 완료했습니다.',matters:[['RES-231','원/달러 변동성','조사 중'],['RES-229','반도체 공급망 변화','검증 중']],output:'근거 팩 / RES-229-A',outputText:'출처, 관측 사실, 해석을 분리했습니다. 방향성 예측이나 매매 제안은 포함하지 않습니다.'},
+ {id:'portfolio',floor:'Investment Floor',floorKo:'투자층',name:'전략·포트폴리오본부',en:'Strategy & Portfolio',state:'안건 검토 중',mandate:'승인된 원칙과 자본 제약 안에서 포트폴리오 대안을 작성합니다.',brief:'CASE-041을 위원회로 상신했습니다. 신규 제안보다 기존 익스포저 변화 감시를 우선합니다.',matters:[['CASE-041','ABC 비중 축소안','상신 완료'],['MON-088','기술주 익스포저','감시 중']],output:'포트폴리오 제안서 / CASE-041',outputText:'예시 비중 8%에서 6%로 축소하는 대안과 무행동 대안을 함께 제출했습니다.'},
+ {id:'risk',floor:'Independent Control',floorKo:'독립통제층',name:'독립위험관리실',en:'Independent Portfolio Risk',state:'조건 검토 중',mandate:'투자 제안과 독립된 보고선에서 한도와 손실 시나리오를 심사합니다.',brief:'현재 하드 정책 위반은 없습니다. CASE-041에는 추가 시나리오를 조건으로 동의했습니다.',matters:[['RISK-114','CASE-041 위험심사','조건부 동의'],['RISK-115','상관관계 변화','점검 중']],output:'독립 위험 의견 / RISK-114',outputText:'집중도 한도 위반은 없으나 수요 충격 시나리오 보완을 조건으로 명시했습니다.'},
+ {id:'red',floor:'Independent Control',floorKo:'독립통제층',name:'반대검증실',en:'Adversarial Review',state:'이견 유지',mandate:'합의의 속도와 무관하게 반대 가설, 누락 근거와 확증편향을 기록합니다.',brief:'CASE-041의 핵심 가정 두 가지가 충분히 입증되지 않아 반대 의견을 유지합니다.',matters:[['ADV-041','CASE-041 반대 가설','이견 유지'],['AUD-063','확증편향 점검','검토 완료']],output:'Counter-thesis / ADV-041',outputText:'수요 둔화가 순환적일 가능성과 가격 선반영 가능성이 해소되지 않았습니다.'},
+ {id:'committee',floor:'Decision Floor',floorKo:'의사결정층',name:'투자위원회',en:'Investment Committee',state:'Founder 결재 대기',mandate:'기관 의견을 한 문서에 보존하고 권한자에게 결정을 상신합니다.',brief:'CASE-041의 찬성, 조건부 동의, 반대 의견을 병합 없이 Founder에게 상신했습니다.',matters:[['CASE-041','ABC 포지션 축소안','결재 대기']],output:'위원회 상신문 / CASE-041',outputText:'위원회는 결정을 대신하지 않으며 각 기관의 원문 의견을 보존했습니다.'},
+ {id:'control',floor:'Decision Floor',floorKo:'의사결정층',name:'투자결정통제실',en:'Decision Control Office',state:'권한 확인 완료',mandate:'결정권자, 선행 조건과 실행 가능 상태를 확인해 무권한 전이를 차단합니다.',brief:'CASE-041의 Founder 권한과 필수 검토 완료를 확인했습니다. 실주문 연결은 별도로 차단돼 있습니다.',matters:[['CTRL-041','CASE-041 권한 점검','확인 완료']],output:'결정 통제 확인서',outputText:'필수 독립 의견이 첨부되었고 최종 권한은 Founder에게 있음을 확인합니다.'},
+ {id:'execution',floor:'Operations Floor',floorKo:'운영층',name:'주문집행·시장운영실',en:'Execution & Market Operations',state:'연결 차단',mandate:'승인된 지시만 시장 운영 절차로 옮기며 실행 전후 통제를 보존합니다.',brief:'실주문 연결은 비활성입니다. 이 프로토타입의 결정은 기록 상태만 바꾸며 주문을 만들지 않습니다.',matters:[],output:'시장 연결 상태 확인',outputText:'BROKER CONNECTION: DISABLED. 승인된 모의 결정도 외부로 전송되지 않습니다.'},
+ {id:'performance',floor:'Post-Decision',floorKo:'사후검토층',name:'성과분석실',en:'Performance Analysis',state:'귀속 분석 대기',mandate:'결정 이후 결과를 시장, 선택, 실행 요인으로 나누어 기록합니다.',brief:'오늘 확정된 신규 결정이 없어 사후 귀속 분석은 대기 중입니다.',matters:[['PERF-090','월간 성과 귀속','자료 취합']],output:'성과 귀속 원장',outputText:'수익률 숫자보다 어떤 결정이 어떤 결과에 기여했는지를 재구성합니다.'},
+ {id:'science',floor:'Post-Decision',floorKo:'사후검토층',name:'투자과학·학습연구소',en:'Investment Science & Learning',state:'학습안 검토 중',mandate:'결정과 결과 사이의 증거를 축적하고 검증 가능한 학습 의제로 전환합니다.',brief:'예측 성능을 주장하지 않으며, 사전등록 기준을 통과한 근거만 운영 전환 후보로 다룹니다.',matters:[['LAB-032','결정 품질 회고 설계','검토 중']],output:'학습 의제 / LAB-032',outputText:'결과 편향을 줄이기 위해 당시 정보와 판단 근거를 먼저 동결합니다.'},
+ {id:'platform',floor:'Platform',floorKo:'플랫폼층',name:'데이터·투자기술본부',en:'Data & Investment Technology',state:'서비스 감시 중',mandate:'데이터 계보, 기관 시스템과 기록 보존 기반을 운영합니다.',brief:'기관 기록 저장 경로는 정상입니다. 이 화면은 브라우저 로컬 저장소만 사용하는 독립 프로토타입입니다.',matters:[['TECH-144','데이터 계보 점검','감시 중']],output:'데이터 계보 보고',outputText:'각 문서의 생산 주체와 다음 목적지를 추적할 수 있도록 메타데이터를 유지합니다.'},
+ {id:'audit',floor:'Governance',floorKo:'감사층',name:'모델위험·감사실',en:'Model Risk & Audit',state:'독립 감사 중',mandate:'모델, 규칙과 기관 기록이 선언된 권한 및 통제와 일치하는지 독립 감사합니다.',brief:'실주문 비활성 상태와 예시 데이터 표기를 점검 중입니다.',matters:[['AUD-091','프로토타입 통제 감사','감사 중']],output:'감사 관찰사항 / AUD-091',outputText:'모든 투자 수치는 예시이며 외부 주문 연결이 없음을 재확인했습니다.'}
 ];
-let extraTasks=JSON.parse(localStorage.getItem("qt_extra_tasks")||"[]");
-let logs=JSON.parse(localStorage.getItem("qt_logs")||"null")||[
-["16:02","투자정보본부","원/달러 변동성 분석을 시작했습니다."],
-["15:48","투자위원회","CASE-041을 Founder 결재로 상신했습니다."],
-["15:42","독립위험관리실","CASE-041 위험심사를 완료했습니다."],
-["15:37","반대검증실","CASE-041의 미해결 가정 2건을 확인했습니다."],
-["15:31","전략·포트폴리오본부","CASE-041 제안서를 위원회에 제출했습니다."]
+const floorOrder=['Executive Office','Client & Capital','Research Floor','Investment Floor','Independent Control','Decision Floor','Operations Floor','Post-Decision','Platform','Governance'];
+const baseEvents=[
+ {time:'16:02',origin:'투자정보본부',event:'원/달러 변동성 조사를 개시함.',type:'RESEARCH',next:'Evidence Fabric'},
+ {time:'15:48',origin:'투자위원회',event:'CASE-041을 Founder 결재로 상신함.',type:'DECISION',next:'Founder Office'},
+ {time:'15:42',origin:'독립위험관리실',event:'CASE-041 조건부 동의 의견을 등록함.',type:'CONTROL',next:'투자위원회'},
+ {time:'15:37',origin:'반대검증실',event:'미해결 가정 2건과 반대 의견을 등록함.',type:'CHALLENGE',next:'투자위원회'},
+ {time:'15:31',origin:'전략·포트폴리오본부',event:'CASE-041 제안서를 위원회에 제출함.',type:'PROPOSAL',next:'투자위원회'}
 ];
-let decision=localStorage.getItem("qt_decision")||"";
-let currentDept=null;
-function persist(){localStorage.setItem("qt_extra_tasks",JSON.stringify(extraTasks));localStorage.setItem("qt_logs",JSON.stringify(logs))}
-function navTo(id){
- document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id===id));
- const base=["office","company","situation","records"]; const idx=base.indexOf(id);
- document.getElementById("bottomNav").style.display=(id==="room"||id==="case")?"none":"grid";
- document.querySelectorAll("[data-nav]").forEach(b=>b.classList.toggle("active",b.dataset.nav===id));
- if(idx>=0)document.getElementById("indicator").style.left=`calc(6px + ${idx} * ((100% - 12px)/4))`;
- if(id==="company")renderDepartments(); if(id==="situation")renderTimeline(); if(id==="records")renderRecords(); if(id==="office")renderHome();
- window.scrollTo(0,0)
-}
-function renderHome(){
- let active=7+extraTasks.length; document.getElementById("activeTasks").textContent=active; document.getElementById("companyActive").textContent=active;
- let pending=decision?1:2; document.getElementById("approvalCount").textContent=pending; document.getElementById("companyPending").textContent=pending;
- document.getElementById("homeFeed").innerHTML=logs.slice(0,3).map(x=>`<div class="feed-row"><time>${x[0]}</time><p>${x[2]}<span>${x[1]}</span></p></div>`).join("");
- if(decision){document.getElementById("briefCount").textContent="2건";document.getElementById("deskCount").textContent="처리할 서류 2"}
-}
-function renderDepartments(){
- document.getElementById("deptList").innerHTML=depts.map((d,i)=>{let n=extraTasks.filter(t=>t.dept===d.id).length;return `<button class="dept" data-action="open-dept" data-arg="${d.id}"><div><span class="num">0${i+1} · ${d.en}</span><h3>${d.name}</h3><p>${d.summary}${n?` · Founder 지시 ${n}건`:""}</p></div><span class="state ${d.cls}">${d.state}</span></button>`}).join("")
-}
-function openDept(id){
- currentDept=id; let d=depts.find(x=>x.id===id); let extras=extraTasks.filter(t=>t.dept===id);
- let tasks=[...d.tasks,...extras.map(t=>[t.text,12,"Founder 직접 지시"])];
- document.getElementById("roomContent").innerHTML=`<div class="room-hero"><div class="office">${d.en.toUpperCase()}</div><h2>${d.name}</h2><div class="chief"><b>부서 브리핑</b><br>${d.chief}</div><div class="room-actions"><button class="action" data-action="direct-order" data-arg="${id}">이 부서에 직접 지시</button><button class="action dark" data-action="secretary-with" data-arg="${d.name} 현황을 요약해줘">비서실에 물어보기</button></div></div><div class="section"><h2>현재 업무</h2><small>${tasks.length}건</small></div>${tasks.length?tasks.map(t=>`<div class="task"><div class="task-head"><b>${t[0]}</b><span>${t[2]}</span></div><p>진행률 ${t[1]}%</p><div class="bar"><i style="width:${t[1]}%"></i></div></div>`).join(""):`<div class="task"><p>현재 진행 중인 업무가 없습니다.</p></div>`}<div class="section"><h2>부서 자료</h2><small>Prototype</small></div><div class="task"><div class="task-head"><b>${d.name} 현황 보고</b><span>오늘</span></div><p>실제 구현에서는 이 영역이 부서 성격에 맞는 고유 분석·보고서·도구로 대체됩니다.</p></div>`;
- navTo("room")
-}
-function openCase(){navTo("case")}
-function decide(v){
- let reason=document.getElementById("decisionReason").value.trim(); decision=v; localStorage.setItem("qt_decision",v);
- let now=new Date().toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit",hour12:false});
- logs.unshift([now,"Founder",`CASE-041 결재: ${v}${reason?` · ${reason}`:""}`]); persist(); toast(`CASE-041을 '${v}' 처리했습니다`); navTo("office")
-}
-function renderTimeline(){
- document.getElementById("timeline").innerHTML=logs.map(x=>`<div class="event"><time>${x[0]}</time><div class="line"></div><div><b>${x[1]}</b><p>${x[2]}</p></div></div>`).join("")
-}
-function renderRecords(){
- document.getElementById("recordList").innerHTML=logs.map(x=>`<div class="task"><div class="task-head"><b>${x[1]}</b><span>${x[0]}</span></div><p>${x[2]}</p></div>`).join("")
-}
-function openSecretary(){document.getElementById("secretary").classList.add("open")}
-function closeSecretary(){document.getElementById("secretary").classList.remove("open")}
-function prefill(t){document.getElementById("secInput").value=t}
-function openSecretaryWith(t){prefill(t);openSecretary()}
-function sendSecretary(){
- let input=document.getElementById("secInput"),t=input.value.trim(); if(!t)return;
- let target="intel"; if(t.includes("위험")||t.includes("리스크")||t.includes("스트레스"))target="risk"; else if(t.includes("포트폴리오")||t.includes("비중"))target="portfolio"; else if(t.includes("반대")||t.includes("검증"))target="red";
- if(t.includes("지시")||t.includes("분석")||t.includes("조사")||t.includes("테스트")){
-   extraTasks.push({dept:target,text:t}); let d=depts.find(x=>x.id===target),now=new Date().toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit",hour12:false});
-   logs.unshift([now,"비서실",`Founder 지시를 '${d.name}'에 배정: ${t}`]);persist();toast(`${d.name}에 업무를 배정했습니다`);
- } else toast("Prototype 비서: 요청을 확인했습니다");
- input.value="";closeSecretary();renderHome()
-}
-function directOrder(id){
- currentDept=id;let d=depts.find(x=>x.id===id);document.getElementById("modalTitle").textContent=`${d.name} 직접 지시`;document.getElementById("modalDesc").textContent="비서실을 거치지 않고 해당 부서에 직접 업무를 지시합니다. 지시는 기관 기록에 남습니다.";document.getElementById("directInput").value="";document.getElementById("modal").classList.add("open")
-}
-function submitDirect(){
- let t=document.getElementById("directInput").value.trim();if(!t)return;let d=depts.find(x=>x.id===currentDept);extraTasks.push({dept:currentDept,text:t});let now=new Date().toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit",hour12:false});logs.unshift([now,"Founder → "+d.name,`직접 지시: ${t}`]);persist();closeModal();toast("직접 지시가 등록되었습니다");openDept(currentDept)
-}
-function closeModal(){document.getElementById("modal").classList.remove("open")}
-function toast(t){let e=document.getElementById("toast");e.textContent=t;e.classList.add("show");setTimeout(()=>e.classList.remove("show"),2200)}
-renderHome();renderDepartments();renderTimeline();renderRecords();
-</script>
-
-<script>
-(function(){
-  function act(el){
-    var a=el.getAttribute("data-action"), x=el.getAttribute("data-arg")||"";
-    if(!a)return;
-    if(a==="nav") navTo(x);
-    else if(a==="open-case") openCase();
-    else if(a==="toast") toast(x);
-    else if(a==="open-dept") openDept(x);
-    else if(a==="secretary-open") openSecretary();
-    else if(a==="secretary-close") closeSecretary();
-    else if(a==="secretary-with") openSecretaryWith(x);
-    else if(a==="prefill") prefill(x);
-    else if(a==="secretary-send") sendSecretary();
-    else if(a==="direct-order") directOrder(x);
-    else if(a==="direct-submit") submitDirect();
-    else if(a==="modal-close") closeModal();
-    else if(a==="decide") decide(x);
-  }
-  var last=0;
-  function route(e){
-    var el=e.target.closest && e.target.closest("[data-action]");
-    if(!el)return;
-    if(e.type==="touchend"){ last=Date.now(); e.preventDefault(); act(el); }
-    else if(e.type==="click" && Date.now()-last>500){ e.preventDefault(); act(el); }
-  }
-  document.addEventListener("touchend",route,{passive:false});
-  document.addEventListener("click",route,false);
-})();
-</script>
-
-</body>
-</html>
+let state=loadState(); let currentOffice='intel';
+function loadState(){try{return JSON.parse(localStorage.getItem('qt_p03_state'))||{orders:[],events:baseEvents,decision:null}}catch(e){return{orders:[],events:baseEvents,decision:null}}}
+if(!Array.isArray(state.events))state.events=baseEvents;if(!Array.isArray(state.orders))state.orders=[];
+function save(){localStorage.setItem('qt_p03_state',JSON.stringify(state))}
+function esc(v){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+function now(){return new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',hour12:false})}
+function nav(id){document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===id));let target=document.getElementById(id);let title=target?.dataset.title||id;document.getElementById('crumb').innerHTML=`<button data-action="nav" data-target="founder">FOUNDER CONSOLE</button><i>/</i><strong>${esc(title)}</strong>`;if(id==='founder')renderFounder();if(id==='company'){renderOperatingMap();renderBuilding()}if(id==='situation')renderOperations();if(id==='memory')renderArchive();if(id==='secretary')renderSecretary();window.scrollTo(0,0)}
+function renderFounder(){let pending=!state.decision;document.getElementById('deskLabel').textContent=pending?'결재 대기 01':'결재 대기 00';document.getElementById('companyStateText').textContent=pending?'회사는 정상 운영 중입니다. CASE-041에 독립 기관 이견이 있으며 Founder 판단을 기다립니다.':'회사는 정상 운영 중입니다. CASE-041 결정은 기록됐으며 새로 권한 행사가 필요한 사건은 없습니다.';document.getElementById('founderState').textContent=pending?'Founder · 판단 대기':`Founder · ${state.decision.value} 기록`;document.getElementById('founderState').classList.toggle('alert',pending);document.getElementById('deskDocket').innerHTML=pending?`<button class="docket-row" data-action="nav" data-target="case"><span class="code">CASE-041<br>14:32</span><span><span class="mark red">기관 이견 있음 · 결재 요청</span><strong>ABC 포지션 축소안</strong><p>비서실 압축: 위험관리 조건부 동의 / 반대검증 반대. 예시 안건.</p></span><span class="arrow">→</span></button>`:`<div class="docket-row"><span class="code">CLEAR</span><span><strong>결재 대기 문서가 없습니다.</strong><p>CASE-041은 ${esc(state.decision.value)} 처리되어 기관 기억으로 이관됐습니다.</p></span><span></span></div>`;document.getElementById('founderWire').innerHTML=state.events.slice(0,4).map(e=>`<div class="wire-row"><time>${esc(e.time)}</time><div><b>${esc(e.origin)}</b><p>${esc(e.event)}</p></div></div>`).join('')}
+function renderOperatingMap(){let pending=!state.decision;document.getElementById('operatingMap').innerHTML=`<div class="map-stage"><button class="map-node" data-action="office" data-id="intel"><small>01 / EVIDENCE</small><b>투자정보본부</b><em>조사 중</em></button></div><div class="map-stage"><button class="map-node" data-action="office" data-id="portfolio"><small>02 / PROPOSAL</small><b>전략·포트폴리오본부</b><em>위원회 상신</em></button></div><div class="map-stage control"><div class="map-split"><button class="map-node" data-action="office" data-id="risk"><small>03A / RISK</small><b>독립위험관리실</b><em>조건부 동의</em></button><button class="map-node" data-action="office" data-id="red"><small>03B / CHALLENGE</small><b>반대검증실</b><em>이견 존재</em></button></div></div><div class="map-stage"><button class="map-node" data-action="office" data-id="committee"><small>04 / DELIBERATION</small><b>투자위원회</b><em>심의 완료</em></button></div><div class="map-founder"><small>05 / FINAL AUTHORITY</small><b>Founder Office</b><span>${pending?'판단 대기 · CASE-041':esc(state.decision.value)+' 기록 완료'}</span></div>`}
+function renderBuilding(){document.getElementById('building').innerHTML=floorOrder.map((floor,i)=>{let group=offices.filter(o=>o.floor===floor);return `<div class="floor"><div class="floor-label"><small>F${String(10-i).padStart(2,'0')}</small><b>${esc(group[0].floorKo)}</b></div><div>${group.map(o=>`<button class="office-link" data-action="office" data-id="${o.id}"><b>${o.name}</b><span>${o.state} · ${o.en}</span></button>`).join('')}</div></div>`}).join('')}
+const deskTypes={intel:['Evidence Desk','SOURCE / CLAIM / REVIEW',['검증된 근거','관측과 해석 분리']],portfolio:['Portfolio Proposals / Exposure','PROPOSAL / EXPOSURE',['무행동 대안 포함','모의 익스포저']],risk:['Limits & Risk Opinions','LIMIT / OPINION',['하드 위반 없음','조건부 의견']],red:['Challenges / Counter-theses','CHALLENGE / STATUS',['반대 가설 보존','미해결 2건']],committee:['Agenda / Institutional Positions','AGENDA / POSITION',['CASE-041 심의','이견 병합 금지']],control:['Authority & Preconditions','AUTHORITY / GATE',['Founder 권한','선행 검토 완료']],execution:['Execution Queue / Connection State','QUEUE / CONNECTION',['승인 주문 없음','BROKER DISABLED']],cio:['Institutional Architecture','CHARTER / AUTHORITY',['권한표 개정','운영 헌장']],capital:['Capital Constraints','LIQUIDITY / MANDATE',['유동성 약속','실데이터 없음']],performance:['Decision Attribution','DECISION / OUTCOME',['귀속 분석 대기','결과 편향 통제']],science:['Learning Register','HYPOTHESIS / EVIDENCE',['사전등록 원칙','운영 전환 금지']],platform:['Data Lineage','SOURCE / SERVICE',['계보 추적','로컬 프로토타입']],audit:['Independent Audit','CONTROL / FINDING',['통제 감사 중','독립 보고선']]};
+function officeWorkbench(o,matters){let d=deskTypes[o.id],rows=matters.length?matters.map((m,i)=>`<div class="work-row"><code>${esc(m[0])}</code><b>${esc(m[1])}</b><strong class="${o.id==='red'?'red':''}">${esc(m[2])}</strong><p>${i===0?esc(o.outputText):'생산 주체와 다음 목적지가 원장에 함께 보존됩니다.'}</p></div>`).join(''):`<div class="work-row"><code>QUEUE</code><b>현재 대기 업무 없음</b><strong>대기</strong><p>${esc(o.outputText)}</p></div>`;return `<section class="workbench"><header class="workbench-head"><h2>${d[0]}</h2><span>${d[1]}</span></header><div class="work-summary"><div><small>현재 기관 입장</small><b>${d[2][0]}</b></div><div><small>통제 표식</small><b>${d[2][1]}</b></div></div>${rows}</section>`}
+function openOffice(id){currentOffice=id;let o=offices.find(x=>x.id===id);let extra=state.orders.filter(x=>x.office===id);let matters=[...extra.map(x=>[x.no,x.text,x.route==='direct'?'직접 지시 접수':'비서실 배정']),...o.matters];document.getElementById('officeContent').innerHTML=`<header class="office-head"><div class="eyebrow">${esc(o.en)} / Office file</div><h1>${esc(o.name)}</h1><p class="mandate">${esc(o.mandate)}</p></header><div class="briefing"><b>사무실 브리핑</b><br>${esc(o.brief)}</div>${officeWorkbench(o,matters)}<article class="output"><div class="docline"><span>PRIMARY INSTITUTIONAL OUTPUT</span><span>ILLUSTRATIVE</span></div><h3>${esc(o.output)}</h3><p>${esc(o.outputText)}</p></article><div class="actions"><button data-action="direct-open">Founder 직접 지시</button><button data-action="secretary-route" data-id="${o.id}">비서실 경유</button></div><form class="direct-form" id="directForm"><div class="docline"><span>DIRECT AUTHORITY</span><span>${esc(o.name)}</span></div><p>비서실 분류 없이 이 사무실에 즉시 업무번호를 발급합니다. 사무실 업무대와 상황실에 바로 기록됩니다.</p><textarea id="directText" placeholder="직접 지시 원문"></textarea><button type="submit">이 사무실에 직접 발급</button></form>`;nav('office')}
+function renderOperations(){document.getElementById('operations').innerHTML=state.events.map(e=>`<div class="op-row"><time>${esc(e.time)}</time><div class="origin">${esc(e.origin)}<br><span class="classification">${esc(e.type)}</span></div><p>${esc(e.event)}<small>다음 목적지 → ${esc(e.next)}</small></p></div>`).join('')}
+function renderArchive(){let rows=state.events.filter(e=>e.type==='DECISION'||e.type==='FOUNDER ORDER');document.getElementById('archive').innerHTML=rows.length?rows.map(e=>`<article class="archive-row"><div class="docline"><span>${esc(e.type)}</span><span>${esc(e.time)} / ${esc(e.origin)}</span></div><b>${esc(e.event)}</b><p>다음 목적지: ${esc(e.next)}</p></article>`).join(''):'<p class="intro">보존된 결정 또는 지시가 없습니다.</p>'}
+function renderSecretary(){let select=document.getElementById('orderOffice');select.innerHTML=offices.map(o=>`<option value="${o.id}">${o.name}</option>`).join('')}
+function showSecretaryOrder(id){currentOffice=id;nav('secretary');document.getElementById('orderForm').classList.add('open');document.getElementById('orderText').value='';document.getElementById('orderOffice').value=id;document.getElementById('orderOffice').disabled=true;document.getElementById('routeAssign').disabled=true;document.getElementById('routeReview').classList.remove('open');document.getElementById('secretaryResult').innerHTML='<b>비서실 분류 대기</b><p>지시 원문을 제출하면 내용과 출발 사무실을 참고해 책임 목적지를 제안합니다.</p>'}
+function classifyRoute(){let text=document.getElementById('orderText').value.trim();if(!text){notice('분류할 지시 원문을 입력하십시오.');return}let id=currentOffice;if(/위험|한도|스트레스/.test(text))id='risk';else if(/반대|가설|검증/.test(text))id='red';else if(/비중|포트폴리오|익스포저/.test(text))id='portfolio';else if(/근거|조사|환율|기업/.test(text))id='intel';let o=offices.find(x=>x.id===id);document.getElementById('orderOffice').value=id;document.getElementById('orderOffice').disabled=false;document.getElementById('routeAssign').disabled=false;let r=document.getElementById('routeReview');r.classList.add('open');r.innerHTML=`비서실 분류: <b>${esc(o.name)}</b><br>목적지를 확인하거나 변경한 뒤 배정하십시오.`}
+function issueOrder(office,text,route){let o=offices.find(x=>x.id===office),no='FO-'+new Date().toISOString().slice(2,10).replaceAll('-','')+'-'+String(state.orders.length+1).padStart(3,'0'),origin=route==='direct'?'Founder Office':'비서실';state.orders.unshift({no,office,text,time:now(),route});state.events.unshift({time:now(),origin,event:`${no} · ${route==='direct'?'직접 지시':'분류·확인 후 배정'}: ${text}`,type:'FOUNDER ORDER',next:o.name});save();return{no,o}}
+function submitOrder(e){e.preventDefault();let office=document.getElementById('orderOffice').value,text=document.getElementById('orderText').value.trim();if(!text||document.getElementById('routeAssign').disabled){notice('비서실 분류와 목적지 확인을 먼저 완료하십시오.');return}let x=issueOrder(office,text,'secretary');document.getElementById('orderText').value='';document.getElementById('routeReview').classList.remove('open');document.getElementById('routeAssign').disabled=true;document.getElementById('secretaryResult').innerHTML=`<b>${esc(x.no)} 배정 완료</b><p>비서실 분류와 목적지 확인을 거쳐 ${esc(x.o.name)}에 접수했습니다.</p>`;notice(`${x.no} · 비서실 배정 완료`)}
+function submitDirect(e){e.preventDefault();let text=document.getElementById('directText').value.trim();if(!text){notice('직접 지시 원문을 입력하십시오.');return}let x=issueOrder(currentOffice,text,'direct');notice(`${x.no} · 직접 발급 완료`);openOffice(currentOffice)}
+function decide(value){if(state.decision){notice(`CASE-041은 이미 ${state.decision.value} 처리됐습니다.`);return}let note=document.getElementById('founderNote').value.trim();state.decision={value,note,time:now()};state.events.unshift({time:state.decision.time,origin:'Founder Office',event:`CASE-041 결정: ${value}${note?' · '+note:''}`,type:'DECISION',next:value==='추가조사'?'비서실 / 재배정':'기관 기억'});save();document.getElementById('caseState').textContent=`DECIDED / ${value}`;notice(`CASE-041 · ${value} 기록 완료`);nav('founder')}
+function notice(t){let el=document.getElementById('notice');el.textContent=t;el.classList.add('show');clearTimeout(notice.timer);notice.timer=setTimeout(()=>el.classList.remove('show'),2400)}
+document.addEventListener('click',e=>{let b=e.target.closest('[data-action]');if(!b)return;let a=b.dataset.action;if(a==='nav')nav(b.dataset.target);else if(a==='office')openOffice(b.dataset.id);else if(a==='direct-open')document.getElementById('directForm').classList.toggle('open');else if(a==='secretary-route')showSecretaryOrder(b.dataset.id);else if(a==='directory-toggle'){let p=document.getElementById('directoryPanel'),open=p.classList.toggle('open');b.textContent=open?'전체 13개 사무실 Directory 닫기 −':'전체 13개 사무실 Directory 열기 ＋'}else if(a==='order-open'){document.getElementById('orderForm').classList.toggle('open')}else if(a==='route-classify')classifyRoute();else if(a==='ask'){let pending=state.decision?'없음':'CASE-041 1건',orders=state.orders.length,latest=state.events[0];document.getElementById('secretaryResult').innerHTML=`<b>현재 기관 상태 회수</b><p>Founder 판단 대기: ${pending}. 누적 Founder 지시: ${orders}건. 최근 원장 사건: ${esc(latest.origin)} — ${esc(latest.event)}</p>`}else if(a==='return'){let openOrders=state.orders.slice(0,3),body=openOrders.length?openOrders.map(x=>`${esc(x.no)} ${esc(offices.find(o=>o.id===x.office).name)} · 접수 상태`).join('<br>'):'등록된 Founder 지시 없음';document.getElementById('secretaryResult').innerHTML=`<b>현재 반환 후보</b><p>${body}<br>완료·검증 전 항목은 Founder 책상으로 올리지 않습니다.</p>`}else if(a==='decide')decide(b.dataset.value)});
+document.addEventListener('submit',e=>{if(e.target.id==='directForm')submitDirect(e)});
+document.getElementById('orderForm').addEventListener('submit',submitOrder);
+renderFounder();renderOperatingMap();renderBuilding();renderOperations();renderArchive();renderSecretary();
+</script></body></html>
