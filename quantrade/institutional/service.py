@@ -11,8 +11,8 @@ from .db import connect
 from .domain import (
     CaseStatus,
     DecisionAction,
-    EscalationAction,
-    FixtureEscalationPolicy,
+    EventTriageAction,
+    FixtureEventTriagePolicy,
     Materiality,
     TimingMode,
 )
@@ -57,7 +57,7 @@ def _json(value: Any) -> str:
 class InstitutionalKernel:
     def __init__(self, db_path: str = ":memory:", policy=None):
         self.conn = connect(db_path)
-        self.policy = policy or FixtureEscalationPolicy()
+        self.policy = policy or FixtureEventTriagePolicy()
 
     def close(self) -> None:
         self.conn.close()
@@ -120,32 +120,25 @@ class InstitutionalKernel:
                 (event_id, event_type, now, source, subject, _json(payload), result.action.value, now),
             )
             self._ledger("Event", event_id, "EVENT_INGESTED", {
-                "event_type": event_type, "resolution": result.action.value
+                "event_type": event_type, "triage": result.action.value
             })
-            if result.action == EscalationAction.INTERNAL_LOG:
+            if result.action == EventTriageAction.INTERNAL_LOG:
                 self._ledger("Event", event_id, "EVENT_RESOLVED_INTERNAL", {"reason": result.reason})
                 return {"event_id": event_id, "case_id": None, "route": "INTERNAL"}
 
             cid = case_id or self._next_case_id()
-            materiality = result.materiality.value
             self.conn.execute(
                 """INSERT INTO cases
                 (case_id,title,trigger_event_id,subject,status,materiality,opened_at)
                 VALUES (?,?,?,?,?,?,?)""",
-                (cid, title or f"Review: {subject}", event_id, subject, CaseStatus.OPEN.value, materiality, now),
+                (cid, title or f"Review: {subject}", event_id, subject, CaseStatus.OPEN.value, None, now),
             )
             self._ledger("Case", cid, "CASE_OPENED", {
-                "trigger_event_id": event_id, "materiality": materiality
+                "trigger_event_id": event_id,
+                "materiality": None,
+                "reason": result.reason,
             })
-            route = "INTERNAL"
-            if result.materiality == Materiality.MEDIUM:
-                self.conn.execute(
-                    "INSERT INTO founder_briefing_queue(case_id,created_at) VALUES (?,?)", (cid, now)
-                )
-                route = "FOUNDER_BRIEFING"
-            elif result.materiality == Materiality.HIGH:
-                route = "CASE_HIGH"
-            return {"event_id": event_id, "case_id": cid, "route": route}
+            return {"event_id": event_id, "case_id": cid, "route": "CASE_OPEN"}
 
     def get_case(self, case_id: str) -> dict:
         row = self.conn.execute("SELECT * FROM cases WHERE case_id=?", (case_id,)).fetchone()
@@ -164,6 +157,14 @@ class InstitutionalKernel:
             current = CaseStatus(row["status"])
             if target not in TRANSITIONS[current]:
                 raise InvalidTransition(f"{current.value} -> {target.value}")
+            if target == CaseStatus.FOUNDER_PENDING:
+                materiality = self.conn.execute(
+                    "SELECT materiality FROM cases WHERE case_id=?", (case_id,)
+                ).fetchone()["materiality"]
+                if materiality != Materiality.HIGH.value:
+                    raise InvalidTransition(
+                        "Only a HIGH Case may enter FOUNDER_PENDING; assess materiality after institutional review"
+                    )
             closed_at = _now() if target == CaseStatus.CLOSED else None
             self.conn.execute(
                 "UPDATE cases SET status=?, version=version+1, closed_at=COALESCE(?,closed_at) WHERE case_id=?",
@@ -177,6 +178,45 @@ class InstitutionalKernel:
             self._ledger("Case", case_id, "CASE_TRANSITIONED", {
                 "from": current.value, "to": target.value
             })
+
+    def assess_materiality(
+        self, case_id: str, materiality: Materiality | str, reason: str
+    ) -> str:
+        """Assign Case importance after institutional review and route Founder attention."""
+        materiality = Materiality(materiality)
+        row = self.conn.execute(
+            "SELECT status FROM cases WHERE case_id=?", (case_id,)
+        ).fetchone()
+        if not row:
+            raise KeyError(case_id)
+        if CaseStatus(row["status"]) != CaseStatus.COMMITTEE:
+            raise InvalidTransition("Materiality assessment requires COMMITTEE state")
+
+        route = "INTERNAL_RESOLUTION"
+        with self.conn:
+            self.conn.execute(
+                "UPDATE cases SET materiality=?, version=version+1 WHERE case_id=?",
+                (materiality.value, case_id),
+            )
+            self.conn.execute("DELETE FROM founder_briefing_queue WHERE case_id=?", (case_id,))
+            self.conn.execute("DELETE FROM founder_desk WHERE case_id=?", (case_id,))
+            if materiality == Materiality.MEDIUM:
+                self.conn.execute(
+                    "INSERT INTO founder_briefing_queue(case_id,created_at) VALUES (?,?)",
+                    (case_id, _now()),
+                )
+                route = "FOUNDER_BRIEFING"
+            elif materiality == Materiality.HIGH:
+                route = "FOUNDER_DESK"
+            self._ledger("Case", case_id, "CASE_MATERIALITY_ASSESSED", {
+                "materiality": materiality.value,
+                "reason": reason,
+                "route": route,
+            })
+
+        if materiality == Materiality.HIGH:
+            self.transition(case_id, CaseStatus.FOUNDER_PENDING)
+        return route
 
     def add_evidence(self, case_id: str, source: str, fact: str, provenance: dict) -> str:
         eid = _id("EVD")
