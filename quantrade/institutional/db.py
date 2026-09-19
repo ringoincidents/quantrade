@@ -423,6 +423,14 @@ MIGRATIONS = [
                ON work_order_leases(expires_at)""",
         ),
     ),
+    (
+        2,
+        "challenge_office_provenance",
+        (
+            """ALTER TABLE challenges
+               ADD COLUMN office TEXT NOT NULL DEFAULT 'ARU'""",
+        ),
+    ),
 ]
 
 
