@@ -106,6 +106,7 @@ class DirectAgentRunner:
         for iteration in range(1, self.max_iterations + 1):
             context = {
                 "mode": "DIRECT_SINGLE_AGENT",
+                "allowed_actions": sorted(self.ALLOWED_ACTIONS),
                 "task_packet": task_packet,
                 "scratchpad": scratchpad,
                 "available_tools": self.tools.discover(employee_id),
