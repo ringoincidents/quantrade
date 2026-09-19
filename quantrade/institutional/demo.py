@@ -5,7 +5,7 @@ import json
 import os
 import tempfile
 
-from .domain import CaseStatus, DecisionAction, TimingMode
+from .domain import CaseStatus, DecisionAction, Materiality, TimingMode
 from .service import InstitutionalKernel
 
 
@@ -32,7 +32,7 @@ def run_demo(db_path: str) -> dict:
             "Fixture evidence: earnings and valuation facts collected.",
             {"mock": True, "url": None},
         )
-        kernel.add_snapshot(
+        snapshot_id = kernel.add_snapshot(
             case_id,
             {
                 "cash": 1000,
@@ -54,9 +54,6 @@ def run_demo(db_path: str) -> dict:
         )
 
         kernel.transition(case_id, CaseStatus.RISK_REVIEW)
-        snapshot_id = kernel.conn.execute(
-            "SELECT snapshot_id FROM portfolio_snapshots WHERE case_id=?", (case_id,)
-        ).fetchone()["snapshot_id"]
         kernel.add_risk_assessment(
             case_id,
             snapshot_id,
@@ -80,7 +77,11 @@ def run_demo(db_path: str) -> dict:
             "REDUCE",
             ["Is the concentration persistent after the named catalyst?"],
         )
-        kernel.transition(case_id, CaseStatus.FOUNDER_PENDING)
+        route = kernel.assess_materiality(
+            case_id,
+            Materiality.HIGH,
+            "Synthetic fixture: unresolved concentration question requires Founder judgment.",
+        )
 
         decision_id = kernel.decide(
             case_id, DecisionAction.APPROVE, "Fixture approval; no live order authorized."
@@ -99,6 +100,7 @@ def run_demo(db_path: str) -> dict:
         return {
             "routine_event": routine,
             "material_event": material,
+            "post_review_route": route,
             "case": kernel.get_case(case_id),
             "committee_package_id": package["package_id"],
             "decision_id": decision_id,
@@ -106,6 +108,7 @@ def run_demo(db_path: str) -> dict:
             "execution_id": execution_id,
             "review_ids": reviews,
             "ledger_count": len(kernel.ledger()),
+            "ledger_chain_valid": kernel.verify_ledger_chain(),
             "broker_side_effect": False,
         }
     finally:
