@@ -63,6 +63,18 @@ class InstitutionalKernelTests(unittest.TestCase):
         self.assertEqual("CASE_HIGH", high["route"])
         self.assertNotIn(high["case_id"], self.kernel.founder_desk())
 
+    def test_generated_case_id_uses_institutional_format(self):
+        result = self.kernel.ingest_event(
+            "PORTFOLIO_POLICY_LIMIT_APPROACH", "fixture", "MOCK", {"mock": True}
+        )
+        self.assertRegex(result["case_id"], r"^QT-\\d{4}-\\d{4}$")
+
+    def test_ledger_hash_chain_verifies(self):
+        self.kernel.ingest_event("DIVIDEND_RECEIVED", "fixture", "MOCK", {"amount": 1})
+        case_id = self._high_case()
+        self.kernel.transition(case_id, CaseStatus.RESEARCH)
+        self.assertTrue(self.kernel.verify_ledger_chain())
+
     def test_invalid_transition_rejected(self):
         case_id = self._high_case()
         with self.assertRaises(InvalidTransition):
