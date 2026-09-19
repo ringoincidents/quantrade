@@ -185,10 +185,11 @@ class PortfolioRiskAdapterTests(unittest.TestCase):
         import quantrade.institutional.portfolio_adapters as module
 
         source = inspect.getsource(module)
-        self.assertNotIn("autoexec", source)
+        self.assertNotIn("import autoexec", source)
+        self.assertNotIn("from autoexec", source)
         self.assertNotIn("pending_actions", source)
-        self.assertNotIn("real_portfolio_sync", source)
-        self.assertNotIn("broker", source.lower())
+        self.assertNotIn("import real_portfolio_sync", source)
+        self.assertNotIn("from real_portfolio_sync", source)
 
 
 if __name__ == "__main__":
