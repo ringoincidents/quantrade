@@ -58,10 +58,18 @@ class StrategyDataPlane:
             field = cond["field"]
             op = cond["op"]
             value = cond["value"]
-            rows = [
-                row for row in rows
-                if field in row and self._compare(row[field], op, value)
-            ]
+            filtered = []
+            for row in rows:
+                if field not in row:
+                    continue
+                expected = value
+                if isinstance(value, dict) and "field" in value:
+                    if value["field"] not in row:
+                        continue
+                    expected = row[value["field"]]
+                if self._compare(row[field], op, expected):
+                    filtered.append(row)
+            rows = filtered
 
         select = args.get("select")
         if select:
