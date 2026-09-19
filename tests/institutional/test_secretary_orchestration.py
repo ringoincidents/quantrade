@@ -112,7 +112,7 @@ class SecretaryOrchestrationTests(unittest.TestCase):
         self.assertEqual("SPMG", child["recipient_office"])
         self.assertEqual(self.strategy, child["recipient_employee_id"])
         self.assertFalse(json.loads(child["authority_scope_json"])["trade"])
-        self.assertNotIn("buy", child["objective"].lower())
+        self.assertNotIn("execute", child["objective"].lower())
 
     def test_strategy_employee_receives_delegated_order_in_same_org_protocol(self):
         workstation = [
