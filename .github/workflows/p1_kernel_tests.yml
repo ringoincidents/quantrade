@@ -7,6 +7,7 @@ on:
       - "tests/institutional/**"
       - "P1_0_INSTITUTIONAL_KERNEL_SPEC.md"
       - "P1_1_PORTFOLIO_RISK_ADAPTER_SPEC.md"
+      - "P1_2_EVIDENCE_ADAPTER_SPEC.md"
       - "portfolio_report.py"
       - ".github/workflows/p1_kernel_tests.yml"
   workflow_dispatch:
