@@ -106,6 +106,17 @@ class InstitutionalKernelTests(unittest.TestCase):
         with self.assertRaises(ImmutableRecordError):
             self.kernel.update_decision(decision, founder_note="rewrite")
 
+    def test_founder_research_request_returns_case_to_research(self):
+        case_id = self._high_case()
+        self._advance_to_founder(case_id)
+        decision = self.kernel.decide(case_id, DecisionAction.RESEARCH, "investigate uncertainty")
+        self.assertEqual(CaseStatus.RESEARCH.value, self.kernel.get_case(case_id)["status"])
+        self.assertNotIn(case_id, self.kernel.founder_desk())
+        row = self.kernel.conn.execute(
+            "SELECT action FROM decisions WHERE decision_id=?", (decision,)
+        ).fetchone()
+        self.assertEqual("RESEARCH", row["action"])
+
     def test_plan_modes_and_simulated_execution_have_no_broker_path(self):
         for idx, mode in enumerate(TimingMode, start=1):
             case_id = self._high_case(f"QT-2026-{1000+idx}")
