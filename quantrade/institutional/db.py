@@ -70,6 +70,33 @@ CREATE TABLE IF NOT EXISTS investment_mandates (
   created_at TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS performance_records (
+  performance_id TEXT PRIMARY KEY,
+  client_id TEXT NOT NULL REFERENCES clients(client_id),
+  period_start TEXT NOT NULL,
+  period_end TEXT NOT NULL,
+  start_value REAL NOT NULL,
+  end_value REAL NOT NULL,
+  net_external_flows REAL NOT NULL,
+  realized_pnl REAL NOT NULL,
+  investment_income REAL NOT NULL,
+  fees REAL NOT NULL,
+  taxes REAL NOT NULL,
+  attribution_json TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS capital_reconciliations (
+  reconciliation_id TEXT PRIMARY KEY,
+  client_id TEXT NOT NULL REFERENCES clients(client_id),
+  performance_id TEXT REFERENCES performance_records(performance_id),
+  previous_mandate_id TEXT REFERENCES investment_mandates(mandate_id),
+  new_capital_plan_id TEXT NOT NULL REFERENCES capital_plans(capital_plan_id),
+  new_mandate_id TEXT NOT NULL REFERENCES investment_mandates(mandate_id),
+  result_json TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS autonomous_work_triggers (
   trigger_id TEXT PRIMARY KEY,
   mandate_id TEXT NOT NULL REFERENCES investment_mandates(mandate_id),
