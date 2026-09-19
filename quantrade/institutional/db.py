@@ -6,6 +6,97 @@ import sqlite3
 SCHEMA = """
 PRAGMA foreign_keys = ON;
 
+CREATE TABLE IF NOT EXISTS employees (
+  employee_id TEXT PRIMARY KEY,
+  office_id TEXT NOT NULL,
+  role TEXT NOT NULL,
+  charter TEXT NOT NULL,
+  authority_json TEXT NOT NULL,
+  model_profile_json TEXT NOT NULL,
+  workstation_profile_json TEXT NOT NULL,
+  status TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS work_orders (
+  work_order_id TEXT PRIMARY KEY,
+  issuer_type TEXT NOT NULL,
+  issuer_id TEXT NOT NULL,
+  recipient_office TEXT,
+  recipient_employee_id TEXT REFERENCES employees(employee_id),
+  objective TEXT NOT NULL,
+  constraints_json TEXT NOT NULL,
+  urgency TEXT NOT NULL,
+  linked_case_id TEXT REFERENCES cases(case_id),
+  authority_scope_json TEXT NOT NULL,
+  budget_json TEXT NOT NULL,
+  status TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS tasks (
+  task_id TEXT PRIMARY KEY,
+  work_order_id TEXT NOT NULL REFERENCES work_orders(work_order_id),
+  creator_employee_id TEXT REFERENCES employees(employee_id),
+  assignee_employee_id TEXT REFERENCES employees(employee_id),
+  objective TEXT NOT NULL,
+  plan_json TEXT NOT NULL,
+  status TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS work_requests (
+  request_id TEXT PRIMARY KEY,
+  work_order_id TEXT NOT NULL REFERENCES work_orders(work_order_id),
+  task_id TEXT REFERENCES tasks(task_id),
+  issuer_employee_id TEXT NOT NULL REFERENCES employees(employee_id),
+  recipient_office TEXT NOT NULL,
+  recipient_employee_id TEXT REFERENCES employees(employee_id),
+  objective TEXT NOT NULL,
+  context_refs_json TEXT NOT NULL,
+  status TEXT NOT NULL,
+  response_note TEXT,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS org_messages (
+  message_id TEXT PRIMARY KEY,
+  work_order_id TEXT REFERENCES work_orders(work_order_id),
+  task_id TEXT REFERENCES tasks(task_id),
+  request_id TEXT REFERENCES work_requests(request_id),
+  sender_type TEXT NOT NULL,
+  sender_id TEXT NOT NULL,
+  recipient_type TEXT NOT NULL,
+  recipient_id TEXT NOT NULL,
+  body TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS workspaces (
+  workspace_id TEXT PRIMARY KEY,
+  employee_id TEXT NOT NULL REFERENCES employees(employee_id),
+  work_order_id TEXT NOT NULL REFERENCES work_orders(work_order_id),
+  state_json TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  UNIQUE(employee_id, work_order_id)
+);
+
+CREATE TABLE IF NOT EXISTS artifacts (
+  artifact_id TEXT PRIMARY KEY,
+  work_order_id TEXT NOT NULL REFERENCES work_orders(work_order_id),
+  task_id TEXT REFERENCES tasks(task_id),
+  producer_employee_id TEXT REFERENCES employees(employee_id),
+  artifact_type TEXT NOT NULL,
+  title TEXT NOT NULL,
+  content_ref TEXT,
+  metadata_json TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS events (
   event_id TEXT PRIMARY KEY,
   event_type TEXT NOT NULL,
