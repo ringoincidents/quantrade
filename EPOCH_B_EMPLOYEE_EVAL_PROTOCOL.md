@@ -175,3 +175,36 @@ E4 — finance realism
 - Free consumer subscriptions are not assumed to grant API automation.
 - External spend requires explicit Founder approval.
 - Live trading remains forbidden.
+
+
+## E1 calibration suite frozen v0
+
+The first six public calibration tasks are now code-defined and deterministically
+graded:
+
+- E1-01 stale evidence trap;
+- E1-02 contradictory evidence / uncertainty preservation;
+- E1-03 deterministic calculation tool selection;
+- E1-04 missing-data refusal;
+- E1-05 injected tool failure recovery;
+- E1-06 irrelevant-but-plausible forecast vs actual trap.
+
+E1-06 deliberately replaces the earlier cross-office-delegation smoke task in
+the controlled pair. Delegation changes the available organizational capability,
+so it belongs in a later QuanTrade-specific capability/ablation experiment rather
+than the clean same-tools Direct-vs-Institutional comparison.
+
+The shared EvalFixturePlane is recreated for every trial to prevent state leakage.
+The Direct baseline keeps the same model, frozen task packet, ToolRegistry grants,
+WorkOrder tool budget and deterministic fixture tools, while intentionally
+omitting durable Workspace, cross-office delegation, institutional messages and
+artifact promotion.
+
+A live runner exists at `scripts/run_e1_live.py`. It requires GEMINI_API_KEY
+from the environment, defaults to one task × both treatments × one repeat, and
+writes both a SQLite trial database and JSON report. Experimental task failures
+are recorded as results rather than converted into CI failures.
+
+The full 6 × 2 × 3 calibration run is not authorized merely by merging this code.
+First run the one-task live smoke, inspect rate limits and model/runtime contract,
+then expand.
