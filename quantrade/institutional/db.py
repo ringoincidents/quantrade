@@ -6,6 +6,81 @@ import sqlite3
 SCHEMA = """
 PRAGMA foreign_keys = ON;
 
+CREATE TABLE IF NOT EXISTS clients (
+  client_id TEXT PRIMARY KEY,
+  base_currency TEXT NOT NULL,
+  status TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS client_profile_versions (
+  profile_version_id TEXT PRIMARY KEY,
+  client_id TEXT NOT NULL REFERENCES clients(client_id),
+  version INTEGER NOT NULL,
+  profile_json TEXT NOT NULL,
+  effective_at TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  UNIQUE(client_id, version)
+);
+
+CREATE TABLE IF NOT EXISTS client_goals (
+  goal_id TEXT PRIMARY KEY,
+  client_id TEXT NOT NULL REFERENCES clients(client_id),
+  name TEXT NOT NULL,
+  target_amount REAL NOT NULL,
+  target_date TEXT NOT NULL,
+  priority TEXT NOT NULL,
+  required INTEGER NOT NULL,
+  metadata_json TEXT NOT NULL,
+  status TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS client_cashflows (
+  cashflow_id TEXT PRIMARY KEY,
+  client_id TEXT NOT NULL REFERENCES clients(client_id),
+  flow_type TEXT NOT NULL,
+  amount REAL NOT NULL,
+  cadence TEXT NOT NULL,
+  start_date TEXT NOT NULL,
+  end_date TEXT,
+  reserved INTEGER NOT NULL,
+  label TEXT NOT NULL,
+  metadata_json TEXT NOT NULL,
+  status TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS capital_plans (
+  capital_plan_id TEXT PRIMARY KEY,
+  client_id TEXT NOT NULL REFERENCES clients(client_id),
+  as_of TEXT NOT NULL,
+  input_json TEXT NOT NULL,
+  result_json TEXT NOT NULL,
+  policy_version TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS investment_mandates (
+  mandate_id TEXT PRIMARY KEY,
+  client_id TEXT NOT NULL REFERENCES clients(client_id),
+  capital_plan_id TEXT NOT NULL REFERENCES capital_plans(capital_plan_id),
+  mandate_json TEXT NOT NULL,
+  status TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS autonomous_work_triggers (
+  trigger_id TEXT PRIMARY KEY,
+  mandate_id TEXT NOT NULL REFERENCES investment_mandates(mandate_id),
+  trigger_type TEXT NOT NULL,
+  fingerprint TEXT NOT NULL UNIQUE,
+  work_order_id TEXT REFERENCES work_orders(work_order_id),
+  payload_json TEXT NOT NULL,
+  status TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS employees (
   employee_id TEXT PRIMARY KEY,
   office_id TEXT NOT NULL,
