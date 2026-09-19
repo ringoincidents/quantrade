@@ -35,6 +35,14 @@ CREATE TABLE IF NOT EXISTS work_orders (
   updated_at TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS work_order_links (
+  parent_work_order_id TEXT NOT NULL REFERENCES work_orders(work_order_id),
+  child_work_order_id TEXT NOT NULL REFERENCES work_orders(work_order_id),
+  relation TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  PRIMARY KEY (parent_work_order_id, child_work_order_id)
+);
+
 CREATE TABLE IF NOT EXISTS tasks (
   task_id TEXT PRIMARY KEY,
   work_order_id TEXT NOT NULL REFERENCES work_orders(work_order_id),
