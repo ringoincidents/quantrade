@@ -205,6 +205,84 @@ class ClientCapitalAutonomyTests(unittest.TestCase):
         self.assertEqual("IPRO", row["recipient_office"])
         self.assertFalse(json.loads(row["authority_scope_json"])["trade"])
 
+    def test_twelve_month_horizon_has_exactly_twelve_monthly_slots(self):
+        self.capital.add_cashflow(
+            "CLIENT-FIXTURE",
+            flow_type="EXPENSE",
+            amount=100_000,
+            cadence="MONTHLY",
+            start_date="2026-01-01",
+            label="reserved monthly fixture",
+            reserved=True,
+        )
+        cpid = self.capital.build_capital_plan(
+            "CLIENT-FIXTURE",
+            liquid_assets=20_000_000,
+            as_of="2026-01-01",
+        )
+        plan = self.capital.get_capital_plan(cpid)
+        self.assertEqual(1_200_000, plan["scheduled_reserved_outflows"])
+
+    def test_future_income_is_not_counted_as_current_surplus_but_enters_goal_schedule(self):
+        self.capital.add_goal(
+            "CLIENT-FIXTURE",
+            "Two year fixture goal",
+            12_000_000,
+            "2028-01-01",
+            metadata={"funding_bucket": "investment"},
+        )
+        before_id = self.capital.build_capital_plan(
+            "CLIENT-FIXTURE",
+            liquid_assets=6_000_000,
+            as_of="2026-01-01",
+        )
+        before = self.capital.get_capital_plan(before_id)
+        self.assertTrue(any(
+            c["type"] == "GOAL_UNREACHABLE_WITHIN_PLANNING_SEARCH"
+            for c in before["conflicts"]
+        ))
+
+        self.capital.add_cashflow(
+            "CLIENT-FIXTURE",
+            flow_type="INCOME",
+            amount=1_000_000,
+            cadence="MONTHLY",
+            start_date="2026-07-01",
+            label="future income fixture",
+        )
+        after_id = self.capital.build_capital_plan(
+            "CLIENT-FIXTURE",
+            liquid_assets=6_000_000,
+            as_of="2026-01-01",
+        )
+        after = self.capital.get_capital_plan(after_id)
+        self.assertEqual(0.0, after["recurring_monthly_income"])
+        self.assertEqual(0.0, after["monthly_investable_surplus"])
+        self.assertEqual(0.0, after["required_return_pct"])
+        self.assertFalse(any(
+            c["type"] == "GOAL_UNREACHABLE_WITHIN_PLANNING_SEARCH"
+            for c in after["conflicts"]
+        ))
+
+    def test_ended_monthly_income_is_not_current_surplus(self):
+        self.capital.add_cashflow(
+            "CLIENT-FIXTURE",
+            flow_type="INCOME",
+            amount=2_000_000,
+            cadence="MONTHLY",
+            start_date="2025-01-01",
+            end_date="2025-12-31",
+            label="ended income fixture",
+        )
+        cpid = self.capital.build_capital_plan(
+            "CLIENT-FIXTURE",
+            liquid_assets=6_000_000,
+            as_of="2026-01-01",
+        )
+        plan = self.capital.get_capital_plan(cpid)
+        self.assertEqual(0.0, plan["recurring_monthly_income"])
+        self.assertEqual(0.0, plan["monthly_investable_surplus"])
+
     def test_client_capital_and_autonomous_work_are_auditable(self):
         cpid, mid = self._normal_plan_and_mandate()
         AutonomousWorkEngine(self.capital).evaluate(

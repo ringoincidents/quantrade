@@ -28,23 +28,24 @@ def _months_between(start: date, end: date) -> int:
     return max(0, (end.year - start.year) * 12 + end.month - start.month)
 
 
-def _monthly_rate_for_target(
+def _monthly_rate_for_target_schedule(
     principal: float,
-    monthly_contribution: float,
-    months: int,
+    monthly_contributions: list[float],
     target: float,
 ) -> float | None:
-    """Solve a deterministic monthly rate. None means target is not reachable
-    inside the bounded planning search (-99% to +200% annualized equivalent).
+    """Solve a deterministic rate over a time-indexed contribution schedule.
+
+    Contributions are applied at each month end, matching the ordinary-annuity
+    convention used by the earlier constant-contribution implementation.
     """
-    if months <= 0:
+    if not monthly_contributions:
         return 0.0 if principal >= target else None
 
     def fv(rate: float) -> float:
-        if abs(rate) < 1e-12:
-            return principal + monthly_contribution * months
-        growth = (1.0 + rate) ** months
-        return principal * growth + monthly_contribution * ((growth - 1.0) / rate)
+        value = float(principal)
+        for contribution in monthly_contributions:
+            value = value * (1.0 + rate) + float(contribution)
+        return value
 
     if fv(0.0) >= target:
         return 0.0
@@ -69,7 +70,7 @@ def _annualize(monthly_rate: float | None) -> float | None:
 
 @dataclass(frozen=True)
 class CapitalPlanningPolicy:
-    version: str = "client_capital_policy_p1_4a"
+    version: str = "client_capital_policy_epoch_a_time_indexed_v2"
     liquidity_horizon_months: int = 12
 
 
@@ -249,21 +250,73 @@ class ClientCapitalRuntime:
         return out
 
     @staticmethod
-    def _occurs_within(flow: dict, as_of: date, horizon_months: int) -> int:
-        start = date.fromisoformat(flow["start_date"])
-        horizon_index = horizon_months
-        start_index = _months_between(as_of, start)
-        if start < as_of:
-            start_index = 0
-        if start_index > horizon_index:
+    def _month_index(value: date) -> int:
+        return value.year * 12 + value.month - 1
+
+    @classmethod
+    def _occurs_within(cls, flow: dict, as_of: date, horizon_months: int) -> int:
+        """Count occurrences in [as_of month, as_of month + horizon_months).
+
+        A 12-month planning horizon therefore contains exactly 12 monthly slots,
+        not 13. Monthly cashflows use month-level planning granularity.
+        """
+        if horizon_months <= 0:
             return 0
+        start = date.fromisoformat(flow["start_date"])
+        as_index = cls._month_index(as_of)
+        horizon_end_exclusive = as_index + horizon_months
+        start_index = cls._month_index(start)
+
         if flow["cadence"] == "ONE_TIME":
-            return 1 if start >= as_of else 0
-        end_index = horizon_index
+            return int(start >= as_of and start_index < horizon_end_exclusive)
+
+        first = max(as_index, start_index)
+        last = horizon_end_exclusive - 1
         if flow.get("end_date"):
             end = date.fromisoformat(flow["end_date"])
-            end_index = min(end_index, _months_between(as_of, end))
-        return max(0, end_index - start_index + 1)
+            if end < as_of:
+                return 0
+            last = min(last, cls._month_index(end))
+        return max(0, last - first + 1)
+
+    @staticmethod
+    def _monthly_flow_active_on(flow: dict, as_of: date) -> bool:
+        if flow["cadence"] != "MONTHLY":
+            return False
+        start = date.fromisoformat(flow["start_date"])
+        if start > as_of:
+            return False
+        if flow.get("end_date") and date.fromisoformat(flow["end_date"]) < as_of:
+            return False
+        return True
+
+    @classmethod
+    def _monthly_contribution_schedule(
+        cls, cashflows: list[dict], as_of: date, months: int
+    ) -> list[float]:
+        """Return investable monthly surplus using each flow's actual active window."""
+        schedule: list[float] = []
+        base_index = cls._month_index(as_of)
+        for offset in range(max(0, months)):
+            month_index = base_index + offset
+            income = 0.0
+            expense = 0.0
+            for flow in cashflows:
+                if flow["cadence"] != "MONTHLY":
+                    continue
+                start_index = cls._month_index(date.fromisoformat(flow["start_date"]))
+                if month_index < start_index:
+                    continue
+                if flow.get("end_date"):
+                    end_index = cls._month_index(date.fromisoformat(flow["end_date"]))
+                    if month_index > end_index:
+                        continue
+                if flow["flow_type"] == "INCOME":
+                    income += float(flow["amount"])
+                else:
+                    expense += float(flow["amount"])
+            schedule.append(max(0.0, income - expense))
+        return schedule
 
     def build_capital_plan(
         self,
@@ -291,7 +344,7 @@ class ClientCapitalRuntime:
             count = self._occurs_within(flow, as_of_date, horizon)
             if flow["flow_type"] == "EXPENSE" and flow["reserved"]:
                 scheduled_reserved_outflows += float(flow["amount"]) * count
-            if flow["cadence"] == "MONTHLY":
+            if self._monthly_flow_active_on(flow, as_of_date):
                 if flow["flow_type"] == "INCOME":
                     recurring_monthly_income += float(flow["amount"])
                 elif flow["flow_type"] == "EXPENSE":
@@ -316,10 +369,12 @@ class ClientCapitalRuntime:
                 })
                 continue
             months = _months_between(as_of_date, date.fromisoformat(goal["target_date"]))
-            monthly_rate = _monthly_rate_for_target(
+            contribution_schedule = self._monthly_contribution_schedule(
+                cashflows, as_of_date, months
+            )
+            monthly_rate = _monthly_rate_for_target_schedule(
                 investable_now + float(portfolio_value),
-                monthly_contribution,
-                months,
+                contribution_schedule,
                 float(goal["target_amount"]),
             )
             annual = _annualize(monthly_rate)
@@ -385,6 +440,7 @@ class ClientCapitalRuntime:
                 "required return is a deterministic planning rate, not a forecast",
                 "risk tolerance is never inferred from LLM behavior",
                 "taxes/inflation are included only if supplied as explicit cashflows or goal assumptions",
+                "monthly contribution assumptions are time-indexed to recorded cashflow start/end months",
             ],
         }
         cpid = _id("CAP")
