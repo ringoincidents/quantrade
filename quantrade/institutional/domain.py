@@ -17,6 +17,7 @@ class EventTriageAction(str, Enum):
 
 class CaseStatus(str, Enum):
     OPEN = "OPEN"
+    INSTITUTIONAL_REVIEW = "INSTITUTIONAL_REVIEW"
     RESEARCH = "RESEARCH"
     PORTFOLIO_REVIEW = "PORTFOLIO_REVIEW"
     RISK_REVIEW = "RISK_REVIEW"
