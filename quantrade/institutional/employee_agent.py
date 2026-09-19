@@ -141,6 +141,7 @@ class EmployeeAgent:
     ) -> dict:
         wsid, workspace = self._workspace(employee_id, work_order_id)
         return {
+            "allowed_actions": sorted(self.ALLOWED_ACTIONS),
             "employee": self._employee(employee_id),
             "work_order": self._work_order(work_order_id),
             "task": self._task(task_id),
@@ -231,19 +232,35 @@ class EmployeeAgent:
             p = action.payload
 
             if action.kind == "TOOL":
-                output = self.tools.invoke(
-                    employee_id=employee_id,
-                    work_order_id=work_order_id,
-                    task_id=current_task,
-                    tool_name=p["tool_name"],
-                    arguments=p.get("arguments", {}),
-                )
+                # Tool/data failures are observations for an autonomous employee,
+                # not automatically fatal worker-process failures. ToolRegistry
+                # persists the failed invocation; the next model context exposes
+                # it through recent_tool_results so the employee can retry,
+                # choose another source, or finish with an explicit limitation.
+                try:
+                    output = self.tools.invoke(
+                        employee_id=employee_id,
+                        work_order_id=work_order_id,
+                        task_id=current_task,
+                        tool_name=p["tool_name"],
+                        arguments=p.get("arguments", {}),
+                    )
+                    tool_result = {
+                        "tool_name": p["tool_name"],
+                        "label": p.get("label"),
+                        "status": "COMPLETED",
+                        "output": output,
+                    }
+                except Exception as exc:
+                    tool_result = {
+                        "tool_name": p.get("tool_name"),
+                        "label": p.get("label"),
+                        "status": "ERROR",
+                        "error_type": type(exc).__name__,
+                        "error": str(exc),
+                    }
                 wsid, state = self._workspace(employee_id, work_order_id)
-                state.setdefault("tool_outputs", []).append({
-                    "tool_name": p["tool_name"],
-                    "label": p.get("label"),
-                    "output": output,
-                })
+                state.setdefault("tool_outputs", []).append(tool_result)
                 self.org.save_workspace_state(wsid, state)
 
             elif action.kind == "UPDATE_PLAN":
