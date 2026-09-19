@@ -338,6 +338,17 @@ class ClientCapitalRuntime:
         required_return = max(required_returns) if required_returns else 0.0
         ceiling = profile.get("max_planning_return_pct")
         conflicts = []
+        for item in goal_analysis:
+            if (
+                item.get("funding_bucket") == "investment"
+                and item.get("reachable_in_planning_search") is False
+            ):
+                conflicts.append({
+                    "type": "GOAL_UNREACHABLE_WITHIN_PLANNING_SEARCH",
+                    "goal_id": item["goal_id"],
+                    "name": item["name"],
+                    "action": "review goal/timeline/contribution; do not manufacture an extreme return assumption",
+                })
         if ceiling is not None and required_return > float(ceiling):
             conflicts.append({
                 "type": "REQUIRED_RETURN_ABOVE_CLIENT_PLANNING_CEILING",
