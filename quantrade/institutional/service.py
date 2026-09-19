@@ -27,7 +27,8 @@ class ImmutableRecordError(ValueError):
 
 
 TRANSITIONS = {
-    CaseStatus.OPEN: {CaseStatus.RESEARCH},
+    CaseStatus.OPEN: {CaseStatus.INSTITUTIONAL_REVIEW, CaseStatus.RESEARCH},
+    CaseStatus.INSTITUTIONAL_REVIEW: {CaseStatus.COMMITTEE},
     CaseStatus.RESEARCH: {CaseStatus.PORTFOLIO_REVIEW},
     CaseStatus.PORTFOLIO_REVIEW: {CaseStatus.RISK_REVIEW},
     CaseStatus.RISK_REVIEW: {CaseStatus.ADVERSARIAL_REVIEW},
@@ -300,19 +301,155 @@ class InstitutionalKernel:
             })
         return pid
 
-    def add_challenge(self, case_id: str, thesis: str, counter_thesis: str, unresolved: bool = True) -> str:
+    def add_challenge(
+        self,
+        case_id: str,
+        thesis: str,
+        counter_thesis: str,
+        unresolved: bool = True,
+        *,
+        office: str = "ARU",
+    ) -> str:
         cid = _id("CHL")
         with self.conn:
             self.conn.execute(
                 """INSERT INTO challenges
-                (challenge_id,case_id,thesis_challenged,counter_thesis,unresolved,created_at)
-                VALUES (?,?,?,?,?,?)""",
-                (cid, case_id, thesis, counter_thesis, int(unresolved), _now()),
+                (challenge_id,case_id,thesis_challenged,counter_thesis,unresolved,
+                 created_at,office)
+                VALUES (?,?,?,?,?,?,?)""",
+                (cid, case_id, thesis, counter_thesis, int(unresolved), _now(), office),
             )
             self._ledger("Case", case_id, "CHALLENGE_RECORDED", {
-                "challenge_id": cid, "unresolved": unresolved
+                "challenge_id": cid, "unresolved": unresolved, "office": office
             })
         return cid
+
+    def _latest_current_position(self, case_id: str, office: str) -> dict | None:
+        row = self.conn.execute(
+            """SELECT p.* FROM institutional_positions p
+            WHERE p.case_id=? AND p.office=?
+              AND NOT EXISTS (
+                SELECT 1 FROM institutional_positions newer
+                WHERE newer.supersedes_id=p.position_id
+              )
+            ORDER BY p.created_at DESC LIMIT 1""",
+            (case_id, office),
+        ).fetchone()
+        return dict(row) if row else None
+
+    def committee_readiness(self, case_id: str) -> dict:
+        """Compute Committee entry from durable artifacts, never stage order."""
+        if not self.conn.execute(
+            "SELECT 1 FROM cases WHERE case_id=?", (case_id,)
+        ).fetchone():
+            raise KeyError(case_id)
+
+        evidence = self.conn.execute(
+            """SELECT evidence_id FROM evidence
+            WHERE case_id=? ORDER BY created_at DESC LIMIT 1""",
+            (case_id,),
+        ).fetchone()
+        portfolio_position = self._latest_current_position(case_id, "SPMG")
+        risk_position = self._latest_current_position(case_id, "IPRO")
+        risk = self.conn.execute(
+            """SELECT r.assessment_id,r.snapshot_id
+            FROM risk_assessments r
+            JOIN portfolio_snapshots s ON s.snapshot_id=r.snapshot_id
+            WHERE r.case_id=? AND s.case_id=?
+            ORDER BY r.created_at DESC LIMIT 1""",
+            (case_id, case_id),
+        ).fetchone()
+        challenge = self.conn.execute(
+            """SELECT challenge_id FROM challenges
+            WHERE case_id=? AND office='ARU'
+            ORDER BY created_at DESC LIMIT 1""",
+            (case_id,),
+        ).fetchone()
+        unresolved = [
+            r["challenge_id"] for r in self.conn.execute(
+                """SELECT challenge_id FROM challenges
+                WHERE case_id=? AND office='ARU' AND unresolved=1
+                ORDER BY created_at""",
+                (case_id,),
+            )
+        ]
+
+        artifacts = {
+            "evidence_id": evidence["evidence_id"] if evidence else None,
+            "portfolio_position_id": (
+                portfolio_position["position_id"] if portfolio_position else None
+            ),
+            "risk_assessment_id": risk["assessment_id"] if risk else None,
+            "portfolio_snapshot_id": risk["snapshot_id"] if risk else None,
+            "risk_position_id": risk_position["position_id"] if risk_position else None,
+            "adversarial_challenge_id": (
+                challenge["challenge_id"] if challenge else None
+            ),
+        }
+        missing = [
+            name for name, artifact_id in artifacts.items()
+            if artifact_id is None
+        ]
+        # Snapshot is a required dependency of RiskAssessment, not a separate
+        # human workstream. Keep it explicit in artifacts but avoid duplicate
+        # missing messages when the assessment itself is absent.
+        if (
+            "risk_assessment_id" in missing
+            and "portfolio_snapshot_id" in missing
+        ):
+            missing.remove("portfolio_snapshot_id")
+
+        return {
+            "ready": not missing,
+            "artifacts": artifacts,
+            "missing": missing,
+            "unresolved_challenge_ids": unresolved,
+        }
+
+    def enter_committee(self, case_id: str) -> dict:
+        """Enter Committee only when the parallel artifact gate is satisfied."""
+        readiness = self.committee_readiness(case_id)
+        if not readiness["ready"]:
+            raise InvalidTransition(
+                "Committee artifact gate missing: " + ", ".join(readiness["missing"])
+            )
+
+        row = self.conn.execute(
+            "SELECT status FROM cases WHERE case_id=?", (case_id,)
+        ).fetchone()
+        current = CaseStatus(row["status"])
+        allowed = {
+            CaseStatus.OPEN,
+            CaseStatus.INSTITUTIONAL_REVIEW,
+            CaseStatus.RESEARCH,
+            CaseStatus.PORTFOLIO_REVIEW,
+            CaseStatus.RISK_REVIEW,
+            CaseStatus.ADVERSARIAL_REVIEW,
+        }
+        if current not in allowed:
+            raise InvalidTransition(
+                f"{current.value} cannot enter COMMITTEE through artifact gate"
+            )
+
+        with self.conn:
+            self.conn.execute(
+                """UPDATE cases SET status=?,version=version+1
+                WHERE case_id=?""",
+                (CaseStatus.COMMITTEE.value, case_id),
+            )
+            self._ledger(
+                "Case",
+                case_id,
+                "COMMITTEE_GATE_ENTERED",
+                {
+                    "from": current.value,
+                    "artifacts": readiness["artifacts"],
+                    "unresolved_challenge_ids": readiness[
+                        "unresolved_challenge_ids"
+                    ],
+                },
+            )
+        return readiness
 
     def build_committee_package(
         self, case_id: str, proposed_action: str, unresolved_questions: list[str]
