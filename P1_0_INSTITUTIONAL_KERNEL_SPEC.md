@@ -193,27 +193,37 @@ The hash chain is a prototype integrity mechanism, not a claim of tamper-proof s
 
 ## Event → Case policy
 
-Implement a deterministic interface such as:
+Implement deterministic Event triage separately from Case importance.
 
-`class EscalationPolicy: evaluate(event, context) -> EscalationResult`
+Stage 1 — Event triage:
+`class EventTriagePolicy: evaluate(event, context) -> EventTriageResult`
 
 Result must distinguish:
 - INTERNAL_LOG
-- OPEN_CASE_LOW
-- OPEN_CASE_MEDIUM
-- OPEN_CASE_HIGH
+- OPEN_CASE
+
+Stage 2 — Case materiality, only after institutional review:
+- LOW
+- MEDIUM
+- HIGH
+
+An Event must never be labelled LOW/MEDIUM/HIGH merely because it matched the rule that opened a Case. The Case first receives Research / Portfolio / Risk / Adversarial / Committee work; only then is Founder-attention materiality assigned.
 
 Do not hard-code “price moved X%” as a universal investment policy unless it is explicitly fixture/demo policy. Production thresholds remain future policy decisions.
 
 P1 tests should use synthetic fixtures:
 - routine dividend/observation event → INTERNAL_LOG
-- synthetic policy-limit approach event → OPEN_CASE_HIGH
+- synthetic policy-limit approach event → OPEN_CASE with materiality unset
+- after review, fixture materiality is assigned and routed
 
 ## Founder routing
+
+Materiality is assigned after institutional review, not at Event ingestion.
 
 - LOW Case: can resolve internally and be logged.
 - MEDIUM Case: appears in periodic Founder Briefing queue, not immediate Founder Desk.
 - HIGH Case: enters Founder Desk.
+- A Case with materiality not yet assessed cannot enter Founder Desk.
 - Policy exception / authority breach may force HIGH later, but P1.0 can expose the extension point without inventing final policy.
 
 ## Case state machine
