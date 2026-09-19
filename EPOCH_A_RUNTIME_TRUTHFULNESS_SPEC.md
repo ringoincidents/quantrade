@@ -74,3 +74,29 @@ After this vertical proof:
 4. minimal P1.3F parallel artifact readiness gate;
 5. restart/recovery integration test;
 6. only then attach scheduling/event triggers.
+
+
+## Durable claim / recovery slice
+
+Epoch A now adds a versioned migration layer and durable worker leases.
+
+Runtime distinction:
+
+```
+Employee ownership = institutional responsibility
+Worker lease       = temporary process execution right
+```
+
+A worker crash must not permanently strand a WorkOrder. The lease expires,
+a restarted worker can reclaim the same employee-owned WorkOrder, and the
+existing Workspace remains the recovery checkpoint.
+
+Required invariants:
+1. structural changes after Epoch A are recorded in `schema_migrations`;
+2. migrations are forward-only and idempotent on restart;
+3. active leases cannot be stolen by another worker;
+4. heartbeat extends only the owning worker's live lease;
+5. expired leases can be reclaimed with a higher generation;
+6. WorkOrder and Workspace survive process restart;
+7. claim/reclaim/release remain Ledger-visible;
+8. live execution authority is unchanged.
