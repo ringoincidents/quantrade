@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS client_goals (
 
 CREATE TABLE IF NOT EXISTS client_cashflows (
   cashflow_id TEXT PRIMARY KEY,
-  client_id TEXT NOT NULL REFERENCES client_profiles(client_id),
+  client_id TEXT NOT NULL REFERENCES clients(client_id),
   flow_type TEXT NOT NULL,
   amount REAL NOT NULL,
   cadence TEXT NOT NULL,
@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS client_cashflows (
 
 CREATE TABLE IF NOT EXISTS capital_plans (
   capital_plan_id TEXT PRIMARY KEY,
-  client_id TEXT NOT NULL REFERENCES client_profiles(client_id),
+  client_id TEXT NOT NULL REFERENCES clients(client_id),
   as_of TEXT NOT NULL,
   input_json TEXT NOT NULL,
   result_json TEXT NOT NULL,
@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS capital_plans (
 
 CREATE TABLE IF NOT EXISTS investment_mandates (
   mandate_id TEXT PRIMARY KEY,
-  client_id TEXT NOT NULL REFERENCES client_profiles(client_id),
+  client_id TEXT NOT NULL REFERENCES clients(client_id),
   capital_plan_id TEXT NOT NULL REFERENCES capital_plans(capital_plan_id),
   mandate_json TEXT NOT NULL,
   status TEXT NOT NULL,
