@@ -1,0 +1,27 @@
+name: P1 Institutional Kernel Tests
+
+on:
+  pull_request:
+    paths:
+      - "quantrade/institutional/**"
+      - "tests/institutional/**"
+      - "P1_0_INSTITUTIONAL_KERNEL_SPEC.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unittest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compile institutional kernel
+        run: python -m compileall -q quantrade/institutional tests/institutional
+      - name: Run institutional tests
+        run: python -m unittest discover -s tests/institutional -p "test_*.py" -v
+      - name: Run no-broker demo
+        run: python -m quantrade.institutional.demo
