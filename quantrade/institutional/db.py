@@ -431,6 +431,47 @@ MIGRATIONS = [
                ADD COLUMN office TEXT NOT NULL DEFAULT 'ARU'""",
         ),
     ),
+    (
+        3,
+        "employee_eval_harness",
+        (
+            """CREATE TABLE eval_tasks (
+              eval_task_id TEXT PRIMARY KEY,
+              suite TEXT NOT NULL,
+              title TEXT NOT NULL,
+              objective TEXT NOT NULL,
+              fixture_json TEXT NOT NULL,
+              success_criteria_json TEXT NOT NULL,
+              hidden_checks_json TEXT NOT NULL,
+              created_at TEXT NOT NULL
+            )""",
+            """CREATE TABLE eval_trials (
+              trial_id TEXT PRIMARY KEY,
+              eval_task_id TEXT NOT NULL REFERENCES eval_tasks(eval_task_id),
+              treatment TEXT NOT NULL,
+              provider TEXT NOT NULL,
+              model TEXT NOT NULL,
+              harness TEXT NOT NULL,
+              seed_label TEXT,
+              work_order_id TEXT,
+              status TEXT NOT NULL,
+              started_at TEXT NOT NULL,
+              completed_at TEXT,
+              metrics_json TEXT NOT NULL,
+              notes_json TEXT NOT NULL
+            )""",
+            """CREATE TABLE eval_assertions (
+              assertion_id INTEGER PRIMARY KEY AUTOINCREMENT,
+              trial_id TEXT NOT NULL REFERENCES eval_trials(trial_id) ON DELETE CASCADE,
+              grader TEXT NOT NULL,
+              assertion_name TEXT NOT NULL,
+              passed INTEGER NOT NULL,
+              observed_json TEXT NOT NULL
+            )""",
+            """CREATE INDEX idx_eval_trials_task
+               ON eval_trials(eval_task_id,treatment,provider,model)""",
+        ),
+    ),
 ]
 
 

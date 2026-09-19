@@ -109,3 +109,90 @@ class AnthropicEmployeeProvider:
         if not text_blocks:
             raise ValueError("Anthropic response contained no text action")
         return self._parse_action("\n".join(text_blocks))
+
+
+
+class GeminiEmployeeProvider:
+    """Gemini adapter for low-cost/free-tier employee evaluation.
+
+    Uses generateContent because QuanTrade requires only one structured JSON
+    action per turn. Live calls require GEMINI_API_KEY and never run in CI.
+    """
+
+    provider_name = "google"
+
+    def __init__(
+        self,
+        *,
+        api_key: str | None = None,
+        model: str | None = None,
+        timeout: int = 45,
+        http_post: Callable[..., Any] = requests.post,
+    ):
+        self.api_key = api_key if api_key is not None else os.environ.get(
+            "GEMINI_API_KEY", ""
+        )
+        self.model_name = model or os.environ.get(
+            "QUANTRADE_GEMINI_MODEL", "gemini-3.8-flash"
+        )
+        self.timeout = timeout
+        self.http_post = http_post
+
+    @staticmethod
+    def _parse_action(text: str) -> ModelAction:
+        cleaned = text.strip()
+        start, end = cleaned.find("{"), cleaned.rfind("}")
+        if start < 0 or end < start:
+            raise ValueError("model response did not contain a JSON object")
+        obj = json.loads(cleaned[start:end + 1])
+        if not isinstance(obj, dict) or not isinstance(obj.get("kind"), str):
+            raise ValueError("model action must contain string kind")
+        payload = obj.get("payload", {})
+        if not isinstance(payload, dict):
+            raise ValueError("model action payload must be an object")
+        return ModelAction(obj["kind"], payload)
+
+    def next_action(self, context: dict) -> ModelAction:
+        if not self.api_key:
+            raise RuntimeError(
+                "GEMINI_API_KEY is not configured; live employee model call refused"
+            )
+        response = self.http_post(
+            (
+                "https://generativelanguage.googleapis.com/v1beta/models/"
+                f"{self.model_name}:generateContent"
+            ),
+            headers={
+                "x-goog-api-key": self.api_key,
+                "content-type": "application/json",
+            },
+            json={
+                "systemInstruction": {
+                    "parts": [{"text": EMPLOYEE_SYSTEM_PROMPT}]
+                },
+                "contents": [{
+                    "role": "user",
+                    "parts": [{
+                        "text": json.dumps(context, ensure_ascii=False)
+                    }],
+                }],
+                "generationConfig": {
+                    "responseMimeType": "application/json",
+                },
+            },
+            timeout=self.timeout,
+        )
+        if hasattr(response, "raise_for_status"):
+            response.raise_for_status()
+        data = response.json()
+        candidates = data.get("candidates") or []
+        if not candidates:
+            raise ValueError("Gemini response contained no candidate")
+        parts = candidates[0].get("content", {}).get("parts", [])
+        text = "\n".join(
+            p.get("text", "") for p in parts
+            if isinstance(p, dict) and p.get("text")
+        )
+        if not text:
+            raise ValueError("Gemini response contained no text action")
+        return self._parse_action(text)
