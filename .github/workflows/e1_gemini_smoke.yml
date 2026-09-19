@@ -1,0 +1,58 @@
+name: E1 Gemini Controlled Smoke
+
+on:
+  pull_request:
+    branches:
+      - architecture/p0-5-gap-audit
+    paths:
+      - ".github/workflows/e1_gemini_smoke.yml"
+      - "scripts/run_e1_live.py"
+      - "quantrade/institutional/**"
+
+permissions:
+  contents: read
+
+jobs:
+  e1-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      QUANTRADE_GEMINI_MODEL: gemini-3.8-flash
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Refuse to run without configured secret
+        run: |
+          if [ -z "$GEMINI_API_KEY" ]; then
+            echo "GEMINI_API_KEY repository secret is not configured."
+            exit 2
+          fi
+
+      - name: Install runtime dependency
+        run: python -m pip install requests
+
+      - name: Run paired E1-01 smoke
+        run: |
+          python scripts/run_e1_live.py \
+            --tasks E1-01 \
+            --repeats 1 \
+            --model gemini-3.8-flash \
+            --pace-seconds 2 \
+            --db e1_live.sqlite3 \
+            --report e1_live_report.json
+
+      - name: Upload experiment record
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e1-gemini-smoke
+          path: |
+            e1_live.sqlite3
+            e1_live_report.json
+          if-no-files-found: warn
+          retention-days: 30
