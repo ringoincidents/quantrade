@@ -439,6 +439,48 @@ class OrganizationRuntime:
             return None
         return wid
 
+    def claim_employee_work_order(
+        self,
+        employee_id: str,
+        *,
+        worker_id: str,
+        lease_seconds: int = 300,
+    ) -> dict | None:
+        """Lease the oldest OPEN WorkOrder already assigned to this employee.
+
+        This covers delegated child work and parent work that was resumed after
+        a dependency completed.
+        """
+        self._active_employee(employee_id)
+        row = self.conn.execute(
+            """SELECT w.work_order_id FROM work_orders w
+            LEFT JOIN work_order_leases l ON l.work_order_id=w.work_order_id
+            WHERE w.recipient_employee_id=?
+              AND w.status='OPEN'
+              AND l.work_order_id IS NULL
+            ORDER BY w.created_at LIMIT 1""",
+            (employee_id,),
+        ).fetchone()
+        if not row:
+            return None
+        token = self.acquire_work_order_lease(
+            row["work_order_id"],
+            employee_id,
+            worker_id=worker_id,
+            lease_seconds=lease_seconds,
+        )
+        return {
+            "work_order_id": row["work_order_id"],
+            "lease_token": token,
+        }
+
+    def current_work_order_lease(self, work_order_id: str) -> dict | None:
+        row = self.conn.execute(
+            "SELECT * FROM work_order_leases WHERE work_order_id=?",
+            (work_order_id,),
+        ).fetchone()
+        return dict(row) if row else None
+
     def reclaim_expired_work_order(
         self,
         employee_id: str,

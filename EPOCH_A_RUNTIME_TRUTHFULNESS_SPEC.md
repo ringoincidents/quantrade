@@ -100,3 +100,29 @@ Required invariants:
 6. WorkOrder and Workspace survive process restart;
 7. claim/reclaim/release remain Ledger-visible;
 8. live execution authority is unchanged.
+
+
+## Work dispatcher slice
+
+QuanTrade now has a synchronous `WorkDispatcher.run_once()` path that turns
+durable institutional work into an actual EmployeeAgent run.
+
+Dispatch priority:
+1. reclaim expired employee lease;
+2. resume an OPEN WorkOrder already assigned to the employee;
+3. accept an office WorkRequest and materialize/lease its child WorkOrder;
+4. claim new office-level WorkOrder;
+5. otherwise return IDLE.
+
+This is intentionally event-driven and manually invokable. It is not a 24/7
+scheduler. A future timer/event runner can invoke the same dispatcher without
+changing WorkOrder ownership, dependency, or audit semantics.
+
+A failed employee run retains its lease until expiry instead of immediately
+hot-looping the same failing work. Recovery then uses the existing reclaim path.
+
+Known next runtime debt:
+- iteration-level heartbeat for model/tool calls that may exceed a lease;
+- retry/dead-letter policy after repeated failed generations;
+- provider/tool re-registration after process restart;
+- external scheduler only when unattended recurring operation is actually needed.
