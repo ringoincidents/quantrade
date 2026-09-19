@@ -141,6 +141,7 @@ class EmployeeAgent:
     ) -> dict:
         wsid, workspace = self._workspace(employee_id, work_order_id)
         return {
+            "allowed_actions": sorted(self.ALLOWED_ACTIONS),
             "employee": self._employee(employee_id),
             "work_order": self._work_order(work_order_id),
             "task": self._task(task_id),
