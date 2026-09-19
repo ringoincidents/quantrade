@@ -1,19 +1,9 @@
-"""QuanTrade institutional runtime kernel."""
+"""QuanTrade institutional runtime kernel.
 
-from .portfolio_adapters import (
-    DeterministicRiskAdapter,
-    PortfolioRuleEventAdapter,
-    RealPortfolioSnapshotAdapter,
-    audit_portfolio_data_quality,
-)
-from .service import ImmutableRecordError, InstitutionalKernel, InvalidTransition
+P1.1 legacy portfolio/risk adapters intentionally remain outside the package
+root exports so the core kernel stays dependency-light.
+"""
 
-__all__ = [
-    "InstitutionalKernel",
-    "InvalidTransition",
-    "ImmutableRecordError",
-    "RealPortfolioSnapshotAdapter",
-    "DeterministicRiskAdapter",
-    "PortfolioRuleEventAdapter",
-    "audit_portfolio_data_quality",
-]
+from .service import InstitutionalKernel, InvalidTransition, ImmutableRecordError
+
+__all__ = ["InstitutionalKernel", "InvalidTransition", "ImmutableRecordError"]
