@@ -395,7 +395,65 @@ CREATE TABLE IF NOT EXISTS founder_desk (
   case_id TEXT PRIMARY KEY REFERENCES cases(case_id),
   created_at TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS schema_migrations (
+  version INTEGER PRIMARY KEY,
+  name TEXT NOT NULL,
+  applied_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
 """
+
+
+MIGRATIONS = [
+    (
+        1,
+        "durable_work_order_leases",
+        (
+            """CREATE TABLE work_order_leases (
+              work_order_id TEXT PRIMARY KEY REFERENCES work_orders(work_order_id) ON DELETE CASCADE,
+              employee_id TEXT NOT NULL REFERENCES employees(employee_id),
+              worker_id TEXT NOT NULL,
+              lease_token TEXT NOT NULL UNIQUE,
+              generation INTEGER NOT NULL,
+              claimed_at TEXT NOT NULL,
+              heartbeat_at TEXT NOT NULL,
+              expires_at TEXT NOT NULL
+            )""",
+            """CREATE INDEX idx_work_order_leases_expiry
+               ON work_order_leases(expires_at)""",
+        ),
+    ),
+]
+
+
+def apply_migrations(conn: sqlite3.Connection) -> None:
+    """Apply forward-only SQLite migrations exactly once.
+
+    SCHEMA remains the legacy bootstrap for now. Every structural change after
+    Epoch A is versioned here so an existing QuanTrade database can be upgraded
+    instead of silently depending on CREATE TABLE IF NOT EXISTS.
+    """
+    applied = {
+        row["version"]
+        for row in conn.execute("SELECT version FROM schema_migrations")
+    }
+    for version, name, statements in MIGRATIONS:
+        if version in applied:
+            continue
+        with conn:
+            for statement in statements:
+                conn.execute(statement)
+            conn.execute(
+                "INSERT INTO schema_migrations(version,name) VALUES (?,?)",
+                (version, name),
+            )
+
+
+def schema_version(conn: sqlite3.Connection) -> int:
+    row = conn.execute(
+        "SELECT COALESCE(MAX(version),0) AS version FROM schema_migrations"
+    ).fetchone()
+    return int(row["version"])
 
 
 def connect(path: str = ":memory:") -> sqlite3.Connection:
@@ -403,4 +461,5 @@ def connect(path: str = ":memory:") -> sqlite3.Connection:
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
     conn.executescript(SCHEMA)
+    apply_migrations(conn)
     return conn
