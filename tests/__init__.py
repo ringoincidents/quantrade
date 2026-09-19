@@ -1,0 +1,1 @@
+"""QuanTrade tests."""
