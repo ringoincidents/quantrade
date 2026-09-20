@@ -189,8 +189,10 @@ class GeminiEmployeeProvider:
                     }],
                 }],
                 "generationConfig": {
-                    "responseMimeType": "application/json",
-                    "responseSchema": {
+                    "responseFormat": {
+                        "text": {
+                            "mimeType": "application/json",
+                            "schema": {
                         "type": "object",
                         "properties": {
                             "kind": {
@@ -210,8 +212,10 @@ class GeminiEmployeeProvider:
                                 "additionalProperties": True,
                             },
                         },
-                        "required": ["kind", "payload"],
-                        "additionalProperties": False,
+                                "required": ["kind", "payload"],
+                                "additionalProperties": False,
+                            },
+                        },
                     },
                 },
             },

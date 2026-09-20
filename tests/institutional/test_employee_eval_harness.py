@@ -147,9 +147,11 @@ class EmployeeEvalHarnessTests(unittest.TestCase):
         action = provider.next_action({"work_order": {"objective": "fixture"}})
         self.assertEqual(ModelAction("UPDATE_PLAN", {"plan": {"step": "inspect"}}), action)
         self.assertIn("gemini-fixture:generateContent", captured["url"])
+        response_format = captured["kwargs"]["json"]["generationConfig"]["responseFormat"]
+        self.assertEqual("application/json", response_format["text"]["mimeType"])
         self.assertEqual(
-            "application/json",
-            captured["kwargs"]["json"]["generationConfig"]["responseMimeType"],
+            ["kind", "payload"],
+            response_format["text"]["schema"]["required"],
         )
 
     def test_gemini_provider_refuses_live_call_without_key(self):
