@@ -30,6 +30,9 @@ class E1CalibrationSuiteTests(unittest.TestCase):
             packet = self.harness.task_packet(task["eval_task_id"])
             self.assertNotIn("hidden_checks", packet)
             self.assertNotIn("expected_answer", str(packet))
+            public_packet = self.harness.model_task_packet(task["eval_task_id"])
+            self.assertNotIn("fixture", public_packet)
+            self.assertNotIn("documents", str(public_packet))
 
     def _calc_provider(self):
         return ScriptedModelProvider([

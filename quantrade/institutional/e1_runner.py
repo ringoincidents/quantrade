@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
+from datetime import datetime, timezone
 
 from .direct_agent import DirectAgentRunner
 from .e1_suite import grade_e1_trial
@@ -22,6 +23,10 @@ class E1TrialResult:
     runtime_status: str
     passed: bool
     checks: dict
+
+
+def _now_for_eval_failure() -> str:
+    return datetime.now(timezone.utc).isoformat()
 
 
 def _employee_id(treatment: str, eval_task_id: str, seed_label: str) -> str:
@@ -49,6 +54,7 @@ def run_e1_trial(
 
     harness = EmployeeEvalHarness(kernel)
     packet = harness.task_packet(eval_task_id)
+    public_packet = harness.model_task_packet(eval_task_id)
     org = OrganizationRuntime(kernel)
     tools = ToolRegistry(kernel)
     employee = org.create_employee(
@@ -64,7 +70,7 @@ def run_e1_trial(
     objective = (
         packet["objective"]
         + "\nSEALED PUBLIC TASK PACKET:\n"
-        + json.dumps(packet, ensure_ascii=False, sort_keys=True)
+        + json.dumps(public_packet, ensure_ascii=False, sort_keys=True)
     )
     work_order = org.create_work_order(
         issuer_type="SYSTEM",
@@ -90,26 +96,40 @@ def run_e1_trial(
         work_order_id=work_order,
     )
 
-    if treatment == "DIRECT_SINGLE_AGENT":
-        runtime = DirectAgentRunner(
-            kernel, tools, provider, max_iterations=max_iterations
-        ).run(
-            employee_id=employee,
-            work_order_id=work_order,
-            task_packet=packet,
+    try:
+        if treatment == "DIRECT_SINGLE_AGENT":
+            runtime = DirectAgentRunner(
+                kernel, tools, provider, max_iterations=max_iterations
+            ).run(
+                employee_id=employee,
+                work_order_id=work_order,
+                task_packet=public_packet,
+            )
+        else:
+            dispatcher = WorkDispatcher(
+                kernel,
+                org,
+                tools,
+                lambda _employee_id, _work_order_id: provider,
+                max_iterations=max_iterations,
+            )
+            runtime = dispatcher.run_once(
+                employee_id=employee,
+                worker_id=f"e1:{eval_task_id}:{seed_label}",
+            )
+
+    except Exception as exc:
+        with kernel.conn:
+            kernel.conn.execute(
+                "UPDATE work_orders SET status='FAILED',updated_at=? WHERE work_order_id=?",
+                (_now_for_eval_failure(), work_order),
+            )
+        harness.fail_trial(
+            trial,
+            error_type=type(exc).__name__,
+            error=str(exc),
         )
-    else:
-        dispatcher = WorkDispatcher(
-            kernel,
-            org,
-            tools,
-            lambda _employee_id, _work_order_id: provider,
-            max_iterations=max_iterations,
-        )
-        runtime = dispatcher.run_once(
-            employee_id=employee,
-            worker_id=f"e1:{eval_task_id}:{seed_label}",
-        )
+        raise
 
     grade = grade_e1_trial(harness, trial)
     trace = harness.grade_quantrade_trace(trial)
