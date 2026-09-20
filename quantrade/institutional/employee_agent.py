@@ -27,6 +27,7 @@ def _json(value: Any) -> str:
 class ModelAction:
     kind: str
     payload: dict
+    usage: dict | None = None
 
 
 class ModelProvider(Protocol):
@@ -191,9 +192,16 @@ class EmployeeAgent:
         with self.conn:
             self.conn.execute(
                 """UPDATE model_calls
-                SET output_action_json=?,status='COMPLETED',completed_at=?
+                SET output_action_json=?,usage_json=?,input_context_chars=?,
+                    status='COMPLETED',completed_at=?
                 WHERE model_call_id=?""",
-                (_json({"kind": action.kind, "payload": action.payload}), _now(), cid),
+                (
+                    _json({"kind": action.kind, "payload": action.payload}),
+                    _json(action.usage or {}),
+                    len(_json(context)),
+                    _now(),
+                    cid,
+                ),
             )
         self.kernel.record_activity(
             "WorkOrder", work_order_id, "MODEL_ACTION",
