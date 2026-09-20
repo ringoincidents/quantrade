@@ -115,9 +115,10 @@ class AnthropicEmployeeProvider:
         if not text_blocks:
             raise ValueError("Anthropic response contained no text action")
         action = self._parse_action("\n".join(text_blocks))
-        raw_usage = data.get("usage") or {}
-        usage = {"provider_raw": raw_usage}
-        if isinstance(raw_usage, dict):
+        raw_usage = data.get("usage")
+        usage = None
+        if isinstance(raw_usage, dict) and raw_usage:
+            usage = {"provider_raw": raw_usage}
             usage.update({
                 "input_tokens": raw_usage.get("input_tokens"),
                 "output_tokens": raw_usage.get("output_tokens"),
@@ -222,9 +223,10 @@ class GeminiEmployeeProvider:
         if not text:
             raise ValueError("Gemini response contained no text action")
         action = self._parse_action(text)
-        raw_usage = data.get("usageMetadata") or {}
-        usage = {"provider_raw": raw_usage}
-        if isinstance(raw_usage, dict):
+        raw_usage = data.get("usageMetadata")
+        usage = None
+        if isinstance(raw_usage, dict) and raw_usage:
+            usage = {"provider_raw": raw_usage}
             usage.update({
                 "input_tokens": raw_usage.get("promptTokenCount"),
                 "output_tokens": raw_usage.get("candidatesTokenCount"),
