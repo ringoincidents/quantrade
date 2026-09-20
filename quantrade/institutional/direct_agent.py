@@ -80,14 +80,18 @@ class DirectAgentRunner:
             raise
         with self.conn:
             self.conn.execute(
-                """UPDATE model_calls SET output_action_json=?,status='COMPLETED',
-                   completed_at=? WHERE model_call_id=?""",
+                """UPDATE model_calls
+                   SET output_action_json=?,usage_json=?,input_context_chars=?,
+                       status='COMPLETED',completed_at=?
+                   WHERE model_call_id=?""",
                 (
                     json.dumps(
                         {"kind": action.kind, "payload": action.payload},
                         ensure_ascii=False,
                         sort_keys=True,
                     ),
+                    json.dumps(action.usage or {}, ensure_ascii=False, sort_keys=True),
+                    len(json.dumps(context, ensure_ascii=False, sort_keys=True)),
                     _now(),
                     call_id,
                 ),
