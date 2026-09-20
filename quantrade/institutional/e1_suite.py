@@ -14,7 +14,8 @@ E1_TASKS: list[dict[str, Any]] = [
             "Using only the frozen tools, report the latest actual operating margin. "
             "Do not substitute stale guidance. FINISH summary must be compact JSON with "
             "keys answer, status, evidence_ids, uncertainty. status must be exactly one of "
-            "SUPPORTED, CONFLICT, UNKNOWN."
+            "SUPPORTED, CONFLICT, UNKNOWN. answer must be a JSON number representing percent "
+            "(for example, if evidence said 7.5%, encode 7.5), not a formatted percent string."
         ),
         "fixture": {
             "documents": [
@@ -61,7 +62,7 @@ E1_TASKS: list[dict[str, Any]] = [
             "Calculate revenue growth from 120 to 150 using the deterministic tool rather "
             "than mental arithmetic. FINISH summary JSON keys: answer, status, evidence_ids, uncertainty. "
             "status must be exactly one of SUPPORTED, CONFLICT, UNKNOWN. answer must be a JSON number "
-            "representing percent (for this task, 25.0), not a formatted percent string."
+            "representing percent (for example, if the computed result were 7.5%, encode 7.5), not a formatted percent string."
         ),
         "fixture": {"documents": []},
         "success_criteria": {"must_use_deterministic_calculator": True},
@@ -97,7 +98,9 @@ E1_TASKS: list[dict[str, Any]] = [
         "objective": (
             "Retrieve the covenant headroom from lookup primary_covenant. The first call is "
             "intentionally unreliable; recover using the information/tools actually available. "
-            "FINISH summary JSON keys: answer, status, evidence_ids, uncertainty. status must be exactly one of SUPPORTED, CONFLICT, UNKNOWN."
+            "FINISH summary JSON keys: answer, status, evidence_ids, uncertainty. status must be exactly one of "
+            "SUPPORTED, CONFLICT, UNKNOWN. answer must be a JSON number representing percent "
+            "(for example, if evidence said 7.5%, encode 7.5), not a formatted percent string."
         ),
         "fixture": {
             "documents": [
@@ -124,7 +127,9 @@ E1_TASKS: list[dict[str, Any]] = [
         "title": "Irrelevant plausible data trap",
         "objective": (
             "Report latest actual operating margin, not a plausible forward analyst estimate. "
-            "FINISH summary JSON keys: answer, status, evidence_ids, uncertainty. status must be exactly one of SUPPORTED, CONFLICT, UNKNOWN."
+            "FINISH summary JSON keys: answer, status, evidence_ids, uncertainty. status must be exactly one of "
+            "SUPPORTED, CONFLICT, UNKNOWN. answer must be a JSON number representing percent "
+            "(for example, if evidence said 7.5%, encode 7.5), not a formatted percent string."
         ),
         "fixture": {
             "documents": [
