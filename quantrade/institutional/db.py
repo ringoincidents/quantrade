@@ -472,6 +472,16 @@ MIGRATIONS = [
                ON eval_trials(eval_task_id,treatment,provider,model)""",
         ),
     ),
+    (
+        4,
+        "model_call_usage_telemetry",
+        (
+            """ALTER TABLE model_calls
+               ADD COLUMN usage_json TEXT NOT NULL DEFAULT '{}'""",
+            """ALTER TABLE model_calls
+               ADD COLUMN input_context_chars INTEGER NOT NULL DEFAULT 0""",
+        ),
+    ),
 ]
 
 
