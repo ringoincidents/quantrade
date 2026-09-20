@@ -19,6 +19,7 @@ jobs:
     env:
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       QUANTRADE_GEMINI_MODEL: gemini-3.8-flash
+      PYTHONPATH: .
     steps:
       - uses: actions/checkout@v4
 
