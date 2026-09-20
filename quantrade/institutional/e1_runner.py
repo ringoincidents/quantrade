@@ -23,6 +23,7 @@ class E1TrialResult:
     runtime_status: str
     passed: bool
     checks: dict
+    metrics: dict
 
 
 def _now_for_eval_failure() -> str:
@@ -133,7 +134,7 @@ def run_e1_trial(
 
     grade = grade_e1_trial(harness, trial)
     trace = harness.grade_quantrade_trace(trial)
-    harness.finish_trial(
+    final_metrics = harness.finish_trial(
         trial,
         metrics={
             "e1_passed": grade["passed"],
@@ -151,4 +152,5 @@ def run_e1_trial(
         runtime_status=runtime["status"],
         passed=grade["passed"],
         checks=grade["checks"],
+        metrics=final_metrics,
     )
