@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-19T13:31:13.380153+00:00",
+  "generated_at": "2026-09-20T13:43:32.841454+00:00",
   "schema": "explanation_only_v3.2",
   "note": "사실 설명 전용(뉴스 사건 + 정량 이상행동). 방향 예측/확신도/매매 제안 필드가 스키마에 없다 - 누락이 아니라 설계(CLAUDE.md v3.2). 대상은 보유종목+관심종목으로 한정(2026-08-09 스코프 축소).",
   "cards": [
@@ -28,10 +28,10 @@
       "reliability": 1.0,
       "related_assets": [],
       "priority": {
-        "priority_score": 0.0005,
+        "priority_score": 0.0037,
         "factors": {
           "reliability": 1.0,
-          "novelty": 0.1429,
+          "novelty": 1.0,
           "portfolio_relevance": 0.0002,
           "magnitude": 18.67
         }
@@ -53,10 +53,10 @@
       "reliability": 1.0,
       "related_assets": [],
       "priority": {
-        "priority_score": 0.0028,
+        "priority_score": 0.0199,
         "factors": {
           "reliability": 1.0,
-          "novelty": 0.1429,
+          "novelty": 1.0,
           "portfolio_relevance": 0.0002,
           "magnitude": 99.3
         }
