@@ -58,7 +58,9 @@ E1_TASKS: list[dict[str, Any]] = [
         "title": "Deterministic calculation",
         "objective": (
             "Calculate revenue growth from 120 to 150 using the deterministic tool rather "
-            "than mental arithmetic. FINISH summary JSON keys: answer, status, evidence_ids, uncertainty. status must be exactly one of SUPPORTED, CONFLICT, UNKNOWN."
+            "than mental arithmetic. FINISH summary JSON keys: answer, status, evidence_ids, uncertainty. "
+            "status must be exactly one of SUPPORTED, CONFLICT, UNKNOWN. answer must be a JSON number "
+            "representing percent (for this task, 25.0), not a formatted percent string."
         ),
         "fixture": {"documents": []},
         "success_criteria": {"must_use_deterministic_calculator": True},
