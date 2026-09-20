@@ -178,10 +178,33 @@ class EmployeeEvalHarness:
         if not order:
             raise KeyError(work_order_id)
 
-        model_calls = self.conn.execute(
-            """SELECT COUNT(*) c FROM model_calls WHERE work_order_id=?""",
+        model_rows = self.conn.execute(
+            """SELECT usage_json,input_context_chars FROM model_calls
+            WHERE work_order_id=? ORDER BY started_at""",
             (work_order_id,),
-        ).fetchone()["c"]
+        ).fetchall()
+        model_calls = len(model_rows)
+        usage_totals = {
+            "input_context_chars": sum(int(r["input_context_chars"] or 0) for r in model_rows),
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "total_tokens": 0,
+        }
+        usage_seen = {
+            "input_tokens": False,
+            "output_tokens": False,
+            "total_tokens": False,
+        }
+        for r in model_rows:
+            usage = json.loads(r["usage_json"] or "{}")
+            for key in usage_seen:
+                value = usage.get(key)
+                if isinstance(value, int):
+                    usage_totals[key] += value
+                    usage_seen[key] = True
+        for key, seen in usage_seen.items():
+            if not seen:
+                usage_totals[key] = None
         tool_calls = self.conn.execute(
             """SELECT COUNT(*) c FROM tool_invocations WHERE work_order_id=?""",
             (work_order_id,),
@@ -225,6 +248,7 @@ class EmployeeEvalHarness:
         observed = {
             "work_order_status": order["status"],
             "model_calls": model_calls,
+            "model_usage": usage_totals,
             "tool_calls": tool_calls,
             "tool_errors": tool_errors,
             "work_requests": requests,
