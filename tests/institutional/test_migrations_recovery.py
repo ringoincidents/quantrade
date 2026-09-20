@@ -26,22 +26,27 @@ class MigrationAndRecoveryTests(unittest.TestCase):
         legacy.close()
 
         conn = connect(self.path)
-        self.assertEqual(3, schema_version(conn))
+        self.assertEqual(4, schema_version(conn))
         columns = {
             row["name"] for row in conn.execute("PRAGMA table_info(work_order_leases)")
         }
         self.assertIn("lease_token", columns)
         self.assertIn("expires_at", columns)
+        model_columns = {
+            row["name"] for row in conn.execute("PRAGMA table_info(model_calls)")
+        }
+        self.assertIn("usage_json", model_columns)
+        self.assertIn("input_context_chars", model_columns)
         self.assertEqual(
-            3,
+            4,
             conn.execute("SELECT COUNT(*) c FROM schema_migrations").fetchone()["c"],
         )
         conn.close()
 
         reopened = connect(self.path)
-        self.assertEqual(3, schema_version(reopened))
+        self.assertEqual(4, schema_version(reopened))
         self.assertEqual(
-            3,
+            4,
             reopened.execute("SELECT COUNT(*) c FROM schema_migrations").fetchone()["c"],
         )
         reopened.close()
