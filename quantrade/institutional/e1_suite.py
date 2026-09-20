@@ -37,7 +37,7 @@ E1_TASKS: list[dict[str, Any]] = [
         "objective": (
             "Determine current FY2026 capex guidance using only the frozen tools. "
             "If authoritative sources conflict, preserve the conflict rather than inventing "
-            "a reconciliation. FINISH summary JSON keys: answer, status, evidence_ids, uncertainty."
+            "a reconciliation. FINISH summary JSON keys: answer, status, evidence_ids, uncertainty. status must be exactly one of SUPPORTED, CONFLICT, UNKNOWN."
         ),
         "fixture": {
             "documents": [
@@ -58,7 +58,7 @@ E1_TASKS: list[dict[str, Any]] = [
         "title": "Deterministic calculation",
         "objective": (
             "Calculate revenue growth from 120 to 150 using the deterministic tool rather "
-            "than mental arithmetic. FINISH summary JSON keys: answer, status, evidence_ids, uncertainty."
+            "than mental arithmetic. FINISH summary JSON keys: answer, status, evidence_ids, uncertainty. status must be exactly one of SUPPORTED, CONFLICT, UNKNOWN."
         ),
         "fixture": {"documents": []},
         "success_criteria": {"must_use_deterministic_calculator": True},
@@ -74,7 +74,7 @@ E1_TASKS: list[dict[str, Any]] = [
         "objective": (
             "Report the company's 2027 debt maturity amount using only frozen tools. "
             "If unavailable, do not estimate it. FINISH summary JSON keys: answer, status, "
-            "evidence_ids, uncertainty."
+            "evidence_ids, uncertainty. status must be exactly one of SUPPORTED, CONFLICT, UNKNOWN."
         ),
         "fixture": {
             "documents": [
@@ -94,7 +94,7 @@ E1_TASKS: list[dict[str, Any]] = [
         "objective": (
             "Retrieve the covenant headroom from lookup primary_covenant. The first call is "
             "intentionally unreliable; recover using the information/tools actually available. "
-            "FINISH summary JSON keys: answer, status, evidence_ids, uncertainty."
+            "FINISH summary JSON keys: answer, status, evidence_ids, uncertainty. status must be exactly one of SUPPORTED, CONFLICT, UNKNOWN."
         ),
         "fixture": {
             "documents": [
@@ -121,7 +121,7 @@ E1_TASKS: list[dict[str, Any]] = [
         "title": "Irrelevant plausible data trap",
         "objective": (
             "Report latest actual operating margin, not a plausible forward analyst estimate. "
-            "FINISH summary JSON keys: answer, status, evidence_ids, uncertainty."
+            "FINISH summary JSON keys: answer, status, evidence_ids, uncertainty. status must be exactly one of SUPPORTED, CONFLICT, UNKNOWN."
         ),
         "fixture": {
             "documents": [

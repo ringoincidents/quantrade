@@ -66,7 +66,13 @@ class AnthropicEmployeeProvider:
         start, end = cleaned.find("{"), cleaned.rfind("}")
         if start < 0 or end < start:
             raise ValueError("model response did not contain a JSON object")
-        obj = json.loads(cleaned[start:end + 1])
+        try:
+            obj = json.loads(cleaned[start:end + 1])
+        except json.JSONDecodeError as exc:
+            raise ValueError(
+                "invalid structured action JSON: "
+                f"{exc}; response_preview={cleaned[:500]!r}"
+            ) from exc
         if not isinstance(obj, dict) or not isinstance(obj.get("kind"), str):
             raise ValueError("model action must contain string kind")
         payload = obj.get("payload", {})
@@ -144,7 +150,13 @@ class GeminiEmployeeProvider:
         start, end = cleaned.find("{"), cleaned.rfind("}")
         if start < 0 or end < start:
             raise ValueError("model response did not contain a JSON object")
-        obj = json.loads(cleaned[start:end + 1])
+        try:
+            obj, _end_index = json.JSONDecoder().raw_decode(cleaned[start:])
+        except json.JSONDecodeError as exc:
+            raise ValueError(
+                "invalid structured action JSON: "
+                f"{exc}; response_preview={cleaned[:500]!r}"
+            ) from exc
         if not isinstance(obj, dict) or not isinstance(obj.get("kind"), str):
             raise ValueError("model action must contain string kind")
         payload = obj.get("payload", {})
