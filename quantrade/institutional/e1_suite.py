@@ -13,7 +13,8 @@ E1_TASKS: list[dict[str, Any]] = [
         "objective": (
             "Using only the frozen tools, report the latest actual operating margin. "
             "Do not substitute stale guidance. FINISH summary must be compact JSON with "
-            "keys answer, status, evidence_ids, uncertainty."
+            "keys answer, status, evidence_ids, uncertainty. status must be exactly one of "
+            "SUPPORTED, CONFLICT, UNKNOWN."
         ),
         "fixture": {
             "documents": [
