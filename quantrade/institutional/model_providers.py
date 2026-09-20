@@ -151,7 +151,7 @@ class GeminiEmployeeProvider:
         if start < 0 or end < start:
             raise ValueError("model response did not contain a JSON object")
         try:
-            obj = json.loads(cleaned[start:end + 1])
+            obj, _end_index = json.JSONDecoder().raw_decode(cleaned[start:])
         except json.JSONDecodeError as exc:
             raise ValueError(
                 "invalid structured action JSON: "
@@ -189,34 +189,7 @@ class GeminiEmployeeProvider:
                     }],
                 }],
                 "generationConfig": {
-                    "responseFormat": {
-                        "text": {
-                            "mimeType": "application/json",
-                            "schema": {
-                        "type": "object",
-                        "properties": {
-                            "kind": {
-                                "type": "string",
-                                "enum": [
-                                    "UPDATE_PLAN",
-                                    "TOOL",
-                                    "REQUEST_WORK",
-                                    "SEND_MESSAGE",
-                                    "SAVE_WORKSPACE",
-                                    "CREATE_ARTIFACT",
-                                    "FINISH",
-                                ],
-                            },
-                            "payload": {
-                                "type": "object",
-                                "additionalProperties": True,
-                            },
-                        },
-                                "required": ["kind", "payload"],
-                                "additionalProperties": False,
-                            },
-                        },
-                    },
+                    "responseMimeType": "application/json",
                 },
             },
             timeout=self.timeout,
