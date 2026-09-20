@@ -96,6 +96,22 @@ class EmployeeEvalHarness:
             "success_criteria": json.loads(row["success_criteria_json"]),
         }
 
+    def model_task_packet(self, eval_task_id: str) -> dict:
+        """Return only information intentionally visible to the model.
+
+        Fixture contents stay private to the evaluation environment and are
+        reachable only through granted tools. This prevents a model from
+        citing evidence it never retrieved.
+        """
+        packet = self.task_packet(eval_task_id)
+        return {
+            "eval_task_id": packet["eval_task_id"],
+            "suite": packet["suite"],
+            "title": packet["title"],
+            "objective": packet["objective"],
+            "success_criteria": packet["success_criteria"],
+        }
+
     def start_trial(
         self,
         eval_task_id: str,
@@ -251,6 +267,16 @@ class EmployeeEvalHarness:
             self.conn.execute(
                 "UPDATE eval_trials SET notes_json=? WHERE trial_id=?",
                 (_json(notes), trial_id),
+            )
+
+    def fail_trial(self, trial_id: str, *, error_type: str, error: str) -> None:
+        """Durably close an infrastructure/provider-failed trial."""
+        notes = {"error_type": error_type, "error": error}
+        with self.conn:
+            self.conn.execute(
+                """UPDATE eval_trials SET status='ERROR',completed_at=?,notes_json=?
+                WHERE trial_id=?""",
+                (_now(), _json(notes), trial_id),
             )
 
     def finish_trial(self, trial_id: str, *, metrics: dict | None = None) -> dict:
