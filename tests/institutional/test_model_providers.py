@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import unittest
 
-from quantrade.institutional.model_providers import (\n    AnthropicEmployeeProvider,\n    GeminiEmployeeProvider,\n)
+from quantrade.institutional.model_providers import (
+    AnthropicEmployeeProvider,
+    GeminiEmployeeProvider,
+)
 
 
 class FakeResponse:
