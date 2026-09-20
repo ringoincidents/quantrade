@@ -1,4 +1,4 @@
-name: E2-A Problem Discovery Calibration
+name: E2-A Problem Discovery Calibration\n# one-shot calibration trigger
 
 on:
   pull_request:
