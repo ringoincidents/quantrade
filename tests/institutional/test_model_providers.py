@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from quantrade.institutional.model_providers import AnthropicEmployeeProvider
+from quantrade.institutional.model_providers import (\n    AnthropicEmployeeProvider,\n    GeminiEmployeeProvider,\n)
 
 
 class FakeResponse:
@@ -32,7 +32,8 @@ class AnthropicEmployeeProviderTests(unittest.TestCase):
                 "content": [{
                     "type": "text",
                     "text": '{"kind":"TOOL","payload":{"tool_name":"data.catalog","arguments":{}}}',
-                }]
+                }],
+                "usage": {"input_tokens": 120, "output_tokens": 18},
             })
 
         provider = AnthropicEmployeeProvider(
@@ -46,6 +47,48 @@ class AnthropicEmployeeProviderTests(unittest.TestCase):
         self.assertEqual("fixture-model", calls[0][1]["json"]["model"])
         self.assertIn("available_tools", calls[0][1]["json"]["messages"][0]["content"])
         self.assertNotIn("chain_of_thought", calls[0][1]["json"])
+        self.assertEqual(120, action.usage["input_tokens"])
+        self.assertEqual(18, action.usage["output_tokens"])
+        self.assertEqual(138, action.usage["total_tokens"])
+        self.assertEqual(
+            {"input_tokens": 120, "output_tokens": 18},
+            action.usage["provider_raw"],
+        )
+
+    def test_gemini_usage_metadata_is_normalized_and_raw_preserved(self):
+        def fake_post(url, **kwargs):
+            return FakeResponse({
+                "candidates": [{
+                    "content": {
+                        "parts": [{
+                            "text": '{"kind":"FINISH","payload":{"summary":"done"}}'
+                        }]
+                    }
+                }],
+                "usageMetadata": {
+                    "promptTokenCount": 210,
+                    "candidatesTokenCount": 22,
+                    "totalTokenCount": 240,
+                    "cachedContentTokenCount": 10,
+                    "thoughtsTokenCount": 8,
+                },
+            })
+
+        provider = GeminiEmployeeProvider(
+            api_key="test-only",
+            model="fixture-gemini",
+            http_post=fake_post,
+        )
+        action = provider.next_action({"allowed_actions": ["FINISH"]})
+        self.assertEqual("FINISH", action.kind)
+        self.assertEqual(210, action.usage["input_tokens"])
+        self.assertEqual(22, action.usage["output_tokens"])
+        self.assertEqual(240, action.usage["total_tokens"])
+        self.assertEqual(10, action.usage["cached_input_tokens"])
+        self.assertEqual(8, action.usage["thoughts_tokens"])
+        self.assertEqual(
+            210, action.usage["provider_raw"]["promptTokenCount"]
+        )
 
     def test_markdown_fence_is_tolerated_but_only_json_action_is_returned(self):
         provider = AnthropicEmployeeProvider(api_key="test-only")
