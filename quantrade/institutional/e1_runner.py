@@ -139,6 +139,7 @@ def run_e1_trial(
             "e1_passed": grade["passed"],
             "runtime_status": runtime["status"],
             "model_calls": trace["observed"]["model_calls"],
+            "model_usage": trace["observed"]["model_usage"],
             "tool_calls": trace["observed"]["tool_calls"],
             "tool_errors": trace["observed"]["tool_errors"],
         },
