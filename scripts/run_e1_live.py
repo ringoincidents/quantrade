@@ -76,6 +76,7 @@ def main() -> int:
                             "passed": result.passed,
                             "runtime_status": result.runtime_status,
                             "checks": result.checks,
+                            "model_usage": result.metrics.get("model_usage"),
                             "elapsed_seconds": round(time.monotonic() - started, 3),
                         }
                     except Exception as exc:
@@ -93,10 +94,34 @@ def main() -> int:
                     print(json.dumps(row, ensure_ascii=False))
                     time.sleep(max(0.0, args.pace_seconds))
     finally:
+        usage_by_treatment = {}
+        for row in results:
+            usage = row.get("model_usage")
+            if not isinstance(usage, dict):
+                continue
+            bucket = usage_by_treatment.setdefault(
+                row["treatment"],
+                {
+                    "input_context_chars": 0,
+                    "input_tokens": 0,
+                    "output_tokens": 0,
+                    "total_tokens": 0,
+                    "trials_with_provider_usage": 0,
+                },
+            )
+            bucket["input_context_chars"] += int(
+                usage.get("input_context_chars") or 0
+            )
+            if isinstance(usage.get("total_tokens"), int):
+                bucket["trials_with_provider_usage"] += 1
+                for key in ("input_tokens", "output_tokens", "total_tokens"):
+                    bucket[key] += int(usage.get(key) or 0)
+
         summary = {
             "model": args.model,
             "tasks": selected,
             "repeats": args.repeats,
+            "usage_by_treatment": usage_by_treatment,
             "results": results,
         }
         Path(args.report).write_text(
