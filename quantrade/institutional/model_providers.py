@@ -114,7 +114,21 @@ class AnthropicEmployeeProvider:
         ]
         if not text_blocks:
             raise ValueError("Anthropic response contained no text action")
-        return self._parse_action("\n".join(text_blocks))
+        action = self._parse_action("\n".join(text_blocks))
+        raw_usage = data.get("usage") or {}
+        usage = {"provider_raw": raw_usage}
+        if isinstance(raw_usage, dict):
+            usage.update({
+                "input_tokens": raw_usage.get("input_tokens"),
+                "output_tokens": raw_usage.get("output_tokens"),
+                "total_tokens": (
+                    raw_usage.get("input_tokens", 0) + raw_usage.get("output_tokens", 0)
+                    if isinstance(raw_usage.get("input_tokens"), int)
+                    and isinstance(raw_usage.get("output_tokens"), int)
+                    else None
+                ),
+            })
+        return ModelAction(action.kind, action.payload, usage)
 
 
 
@@ -207,4 +221,15 @@ class GeminiEmployeeProvider:
         )
         if not text:
             raise ValueError("Gemini response contained no text action")
-        return self._parse_action(text)
+        action = self._parse_action(text)
+        raw_usage = data.get("usageMetadata") or {}
+        usage = {"provider_raw": raw_usage}
+        if isinstance(raw_usage, dict):
+            usage.update({
+                "input_tokens": raw_usage.get("promptTokenCount"),
+                "output_tokens": raw_usage.get("candidatesTokenCount"),
+                "total_tokens": raw_usage.get("totalTokenCount"),
+                "cached_input_tokens": raw_usage.get("cachedContentTokenCount"),
+                "thoughts_tokens": raw_usage.get("thoughtsTokenCount"),
+            })
+        return ModelAction(action.kind, action.payload, usage)
