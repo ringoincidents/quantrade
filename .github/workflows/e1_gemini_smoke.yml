@@ -18,7 +18,7 @@ jobs:
     timeout-minutes: 20
     env:
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-      QUANTRADE_GEMINI_MODEL: gemini-3.8-flash
+      QUANTRADE_GEMINI_MODEL: gemini-3.5-flash-lite
       PYTHONPATH: .
     steps:
       - uses: actions/checkout@v4
@@ -42,7 +42,7 @@ jobs:
           python scripts/run_e1_live.py \
             --tasks E1-01 \
             --repeats 1 \
-            --model gemini-3.8-flash \
+            --model gemini-3.5-flash-lite \
             --pace-seconds 2 \
             --db e1_live.sqlite3 \
             --report e1_live_report.json
