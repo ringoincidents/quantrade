@@ -1,4 +1,4 @@
-name: E2-A Problem Discovery Calibration\n# one-shot calibration trigger
+name: E2-A Problem Discovery Calibration Wave 2
 
 on:
   pull_request:
@@ -31,21 +31,24 @@ jobs:
           fi
       - name: Install runtime dependency
         run: python -m pip install requests
+      - name: Require grading and anti-leakage tests before live quota
+        run: python -m unittest discover -s tests/institutional -p "test_*.py" -v
       - name: Run E2-A three-treatment calibration
         run: |
           python scripts/run_e2a_live.py \
             --repeats 1 \
             --model gemini-3.5-flash-lite \
             --pace-seconds 20 \
-            --db e2a_calibration.sqlite3 \
-            --report e2a_calibration_report.json
+            --db e2a_calibration_wave2.sqlite3 \
+            --report e2a_calibration_wave2_report.json
       - name: Upload calibration artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: e2a-problem-discovery-calibration
+          name: e2a-problem-discovery-calibration-wave2
           path: |
-            e2a_calibration.sqlite3
-            e2a_calibration_report.json
+            e2a_calibration_wave2.sqlite3
+            e2a_calibration_wave2_report.json
           if-no-files-found: warn
           retention-days: 30
+

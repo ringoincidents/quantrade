@@ -285,7 +285,7 @@ def public_packet(case: dict[str, Any]) -> dict[str, Any]:
     return {
         "eval_task_id": case["eval_task_id"],
         "suite": "E2A-PROBLEM-DISCOVERY-V0",
-        "title": case["title"],
+        "title": "Portfolio review",
         "objective": OUTPUT_CONTRACT,
         "portfolio_snapshot": case["public"],
     }
@@ -332,6 +332,47 @@ def _summary_for_work_order(conn, work_order_id: str) -> str | None:
     return json.loads(row["payload"]).get("summary")
 
 
+def _valid_summary(summary: Any) -> bool:
+    if not isinstance(summary, dict) or not isinstance(summary.get("issues"), list):
+        return False
+    if type(summary.get("no_other_material_issues")) is not bool:
+        return False
+    for issue in summary["issues"]:
+        if not isinstance(issue, dict):
+            return False
+        if issue.get("issue_type") not in ISSUE_TYPES:
+            return False
+        if issue.get("priority") not in ("HIGH", "MEDIUM", "LOW"):
+            return False
+        if issue.get("action") not in ("IGNORE", "MONITOR", "INVESTIGATE", "RISK_REVIEW"):
+            return False
+        if not isinstance(issue.get("reason"), str) or not issue["reason"].strip():
+            return False
+        refs = issue.get("evidence_refs")
+        if not isinstance(refs, list) or not all(isinstance(r, str) and r.strip() for r in refs):
+            return False
+    return True
+
+
+def _refs(value: Any) -> set[str]:
+    if isinstance(value, dict):
+        found = {value["ref"]} if isinstance(value.get("ref"), str) else set()
+        for child in value.values():
+            found.update(_refs(child))
+        return found
+    if isinstance(value, list):
+        return set().union(*(_refs(child) for child in value))
+    return set()
+
+
+def _snapshot_paths(value: Any, prefix: str = "portfolio_snapshot") -> set[str]:
+    paths = {prefix}
+    if isinstance(value, dict):
+        for key, child in value.items():
+            paths.update(_snapshot_paths(child, prefix + "." + key))
+    return paths
+
+
 def grade_e2a_trial(harness: EmployeeEvalHarness, trial_id: str) -> dict:
     trial = harness.conn.execute(
         """SELECT t.*,e.hidden_checks_json FROM eval_trials t
@@ -346,45 +387,65 @@ def grade_e2a_trial(harness: EmployeeEvalHarness, trial_id: str) -> dict:
     summary_text = _summary_for_work_order(harness.conn, trial["work_order_id"])
     try:
         summary = json.loads(summary_text) if summary_text else {}
-    except json.JSONDecodeError:
+    except (json.JSONDecodeError, TypeError):
         summary = {}
 
-    issues = summary.get("issues") if isinstance(summary, dict) else None
-    if not isinstance(issues, list):
-        issues = []
+    contract_valid = _valid_summary(summary)
+    issues = summary.get("issues", []) if contract_valid else []
+    case = case_by_id(trial["eval_task_id"])
+    available_refs = _refs(case["public"]) | _snapshot_paths(case["public"])
+    retrieved: dict[str, set[str]] = {}
+    for row in harness.conn.execute(
+        """SELECT tool_name,output_json FROM tool_invocations
+        WHERE work_order_id=? AND status='COMPLETED'""",
+        (trial["work_order_id"],),
+    ):
+        try:
+            refs = _refs(json.loads(row["output_json"]))
+        except (json.JSONDecodeError, TypeError):
+            continue
+        retrieved.setdefault(row["tool_name"], set()).update(refs)
+        available_refs.update(refs)
 
     escalated = []
-    evidence_by_type: dict[str, list[str]] = {}
+    supported = set()
+    unsupported = []
+    all_escalated_refs = set()
     for issue in issues:
-        if not isinstance(issue, dict):
+        if issue["action"] not in ("INVESTIGATE", "RISK_REVIEW"):
             continue
-        issue_type = issue.get("issue_type")
-        action = issue.get("action")
-        if action in {"INVESTIGATE", "RISK_REVIEW"} and issue_type in ISSUE_TYPES:
-            escalated.append(issue_type)
-            refs = issue.get("evidence_refs")
-            evidence_by_type.setdefault(
-                issue_type, refs if isinstance(refs, list) else []
+        issue_type = issue["issue_type"]
+        refs = set(issue["evidence_refs"])
+        escalated.append(issue_type)
+        all_escalated_refs.update(refs)
+        provenance_ok = bool(refs) and refs <= available_refs
+        # PD-02's prior falsification conditions exist only in memory.
+        # PD-04 has a public macro clue: do not deny A legitimate inference.
+        if trial["eval_task_id"] == "E2A-PD-02" and issue_type == "THESIS_BREAK":
+            provenance_ok = provenance_ok and case["memory"]["ref"] in (
+                refs & retrieved.get("e2.investment_memory", set())
             )
+        if provenance_ok:
+            supported.add(issue_type)
+        else:
+            unsupported.append(issue_type)
 
     material = set(hidden.get("material_issue_types", []))
     escalated_set = set(escalated)
-    true_positive = material & escalated_set
-    false_positive = escalated_set - material - set(hidden.get("optional_issue_types", []))
-    recall = 1.0 if not material else len(true_positive) / len(material)
-    precision = 1.0 if not escalated_set else len(true_positive) / len(escalated_set)
+    true_positive = material & supported
+    false_positive = (escalated_set - material - set(hidden.get("optional_issue_types", []))) | set(unsupported)
+    recall = (1.0 if not material else len(true_positive) / len(material)) if contract_valid else 0.0
+    precision = (1.0 if not escalated_set else len(true_positive) / len(escalated_set)) if contract_valid else 0.0
 
     decoy_refs = set(hidden.get("decoy_refs", []))
-    decoy_escalated = any(
-        ref in decoy_refs
-        for refs in evidence_by_type.values()
-        for ref in refs
-    )
+    decoy_escalated = bool(decoy_refs & all_escalated_refs)
     no_action_expected = not material
-    no_action_observed = not escalated_set
+    no_action_observed = contract_valid and not escalated_set and summary["no_other_material_issues"]
 
     checks = {
-        "summary_is_json": bool(summary),
+        "summary_is_json": isinstance(summary, dict) and bool(summary),
+        "output_contract_valid": contract_valid,
+        "evidence_provenance_valid": contract_valid and not unsupported,
         "issues_is_list": isinstance(summary.get("issues"), list) if isinstance(summary, dict) else False,
         "material_recall": recall >= float(hidden.get("min_material_recall", 1.0)),
         "no_forbidden_false_positive": not bool(
@@ -397,6 +458,7 @@ def grade_e2a_trial(harness: EmployeeEvalHarness, trial_id: str) -> dict:
 
     observed = {
         "summary": summary,
+        "unsupported_issue_types": sorted(set(unsupported)),
         "material_issue_types": sorted(material),
         "escalated_issue_types": sorted(escalated_set),
         "true_positive_types": sorted(true_positive),
@@ -416,3 +478,4 @@ def grade_e2a_trial(harness: EmployeeEvalHarness, trial_id: str) -> dict:
             observed=observed,
         )
     return {"passed": all(checks.values()), "checks": checks, "observed": observed}
+
