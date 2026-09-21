@@ -1,0 +1,887 @@
+{
+  "aggregates": {
+    "E2A_PLUS_DIAGNOSTICS": {
+      "completed": 6,
+      "decoy_escalations": 0,
+      "false_research_count": 0,
+      "mean_material_precision": 1.0,
+      "mean_material_recall": 0.75,
+      "strict_passes": 4,
+      "trials": 6,
+      "usage": {
+        "input_context_chars": 27689,
+        "input_tokens": 12088,
+        "output_tokens": 848,
+        "total_tokens": 12936,
+        "trials_with_provider_usage": 6
+      }
+    },
+    "E2A_PLUS_DIAGNOSTICS_MEMORY": {
+      "completed": 5,
+      "decoy_escalations": 0,
+      "false_research_count": 1,
+      "mean_material_precision": 0.8,
+      "mean_material_recall": 0.6,
+      "strict_passes": 3,
+      "trials": 6,
+      "usage": {
+        "input_context_chars": 23269,
+        "input_tokens": 9637,
+        "output_tokens": 680,
+        "total_tokens": 10317,
+        "trials_with_provider_usage": 5
+      }
+    },
+    "E2A_SNAPSHOT_ONLY": {
+      "completed": 5,
+      "decoy_escalations": 0,
+      "false_research_count": 1,
+      "mean_material_precision": 0.8,
+      "mean_material_recall": 0.2,
+      "strict_passes": 1,
+      "trials": 6,
+      "usage": {
+        "input_context_chars": 9187,
+        "input_tokens": 4397,
+        "output_tokens": 374,
+        "total_tokens": 4771,
+        "trials_with_provider_usage": 5
+      }
+    }
+  },
+  "model": "gemini-3.5-flash-lite",
+  "repeats": 1,
+  "results": [
+    {
+      "checks": {
+        "evidence_provenance_valid": true,
+        "issues_is_list": true,
+        "material_recall": true,
+        "no_decoy_escalation": true,
+        "no_forbidden_false_positive": true,
+        "output_contract_valid": true,
+        "summary_is_json": true
+      },
+      "elapsed_seconds": 1.789,
+      "eval_task_id": "E2A-PD-01",
+      "model_usage": {
+        "input_context_chars": 5055,
+        "input_tokens": 2143,
+        "output_tokens": 182,
+        "total_tokens": 2325
+      },
+      "observed": {
+        "appropriate_no_action": null,
+        "decoy_escalated": false,
+        "escalated_issue_types": [
+          "FACTOR_CONCENTRATION"
+        ],
+        "false_positive_types": [],
+        "false_research_count": 0,
+        "material_issue_precision": 1.0,
+        "material_issue_recall": 1.0,
+        "material_issue_types": [
+          "FACTOR_CONCENTRATION"
+        ],
+        "summary": {
+          "issues": [
+            {
+              "action": "RISK_REVIEW",
+              "evidence_refs": [
+                "OBS-1",
+                "DIAG-PD01"
+              ],
+              "issue_type": "FACTOR_CONCENTRATION",
+              "priority": "HIGH",
+              "reason": "49% of the portfolio is concentrated in AI/data-center capex (GridCore 18%, CoolStack 16%, ChipForge 15%) with high pairwise correlations (0.73 - 0.79), creating significant single-driver vulnerability that could materially impact risk posture."
+            }
+          ],
+          "no_other_material_issues": false
+        },
+        "true_positive_types": [
+          "FACTOR_CONCENTRATION"
+        ],
+        "unsupported_issue_types": []
+      },
+      "passed": true,
+      "repeat": 1,
+      "status": "COMPLETED",
+      "tool_calls": 1,
+      "treatment": "E2A_PLUS_DIAGNOSTICS"
+    },
+    {
+      "checks": {
+        "evidence_provenance_valid": true,
+        "issues_is_list": true,
+        "material_recall": true,
+        "no_decoy_escalation": true,
+        "no_forbidden_false_positive": true,
+        "output_contract_valid": true,
+        "summary_is_json": true
+      },
+      "elapsed_seconds": 1.853,
+      "eval_task_id": "E2A-PD-01",
+      "model_usage": {
+        "input_context_chars": 5653,
+        "input_tokens": 2285,
+        "output_tokens": 186,
+        "total_tokens": 2471
+      },
+      "observed": {
+        "appropriate_no_action": null,
+        "decoy_escalated": false,
+        "escalated_issue_types": [
+          "FACTOR_CONCENTRATION"
+        ],
+        "false_positive_types": [],
+        "false_research_count": 0,
+        "material_issue_precision": 1.0,
+        "material_issue_recall": 1.0,
+        "material_issue_types": [
+          "FACTOR_CONCENTRATION"
+        ],
+        "summary": {
+          "issues": [
+            {
+              "action": "RISK_REVIEW",
+              "evidence_refs": [
+                "DIAG-PD01",
+                "OBS-1"
+              ],
+              "issue_type": "FACTOR_CONCENTRATION",
+              "priority": "HIGH",
+              "reason": "49% of the portfolio is concentrated in AI/data-center capex exposure through GridCore (18%), CoolStack (16%), and ChipForge (15%), with high pairwise correlations (0.73-0.79). This concentration could materially impact the risk posture and liquidity of the portfolio."
+            }
+          ],
+          "no_other_material_issues": true
+        },
+        "true_positive_types": [
+          "FACTOR_CONCENTRATION"
+        ],
+        "unsupported_issue_types": []
+      },
+      "passed": true,
+      "repeat": 1,
+      "status": "COMPLETED",
+      "tool_calls": 1,
+      "treatment": "E2A_PLUS_DIAGNOSTICS_MEMORY"
+    },
+    {
+      "checks": {
+        "evidence_provenance_valid": true,
+        "issues_is_list": true,
+        "material_recall": false,
+        "no_decoy_escalation": true,
+        "no_forbidden_false_positive": true,
+        "output_contract_valid": true,
+        "summary_is_json": true
+      },
+      "elapsed_seconds": 0.655,
+      "eval_task_id": "E2A-PD-01",
+      "model_usage": {
+        "input_context_chars": 2016,
+        "input_tokens": 920,
+        "output_tokens": 30,
+        "total_tokens": 950
+      },
+      "observed": {
+        "appropriate_no_action": null,
+        "decoy_escalated": false,
+        "escalated_issue_types": [],
+        "false_positive_types": [],
+        "false_research_count": 0,
+        "material_issue_precision": 1.0,
+        "material_issue_recall": 0.0,
+        "material_issue_types": [
+          "FACTOR_CONCENTRATION"
+        ],
+        "summary": {
+          "issues": [],
+          "no_other_material_issues": true
+        },
+        "true_positive_types": [],
+        "unsupported_issue_types": []
+      },
+      "passed": false,
+      "repeat": 1,
+      "status": "COMPLETED",
+      "tool_calls": 0,
+      "treatment": "E2A_SNAPSHOT_ONLY"
+    },
+    {
+      "checks": {
+        "evidence_provenance_valid": true,
+        "issues_is_list": true,
+        "material_recall": false,
+        "no_decoy_escalation": true,
+        "no_forbidden_false_positive": true,
+        "output_contract_valid": true,
+        "summary_is_json": true
+      },
+      "elapsed_seconds": 1.519,
+      "eval_task_id": "E2A-PD-02",
+      "model_usage": {
+        "input_context_chars": 4427,
+        "input_tokens": 1961,
+        "output_tokens": 68,
+        "total_tokens": 2029
+      },
+      "observed": {
+        "appropriate_no_action": null,
+        "decoy_escalated": false,
+        "escalated_issue_types": [],
+        "false_positive_types": [],
+        "false_research_count": 0,
+        "material_issue_precision": 1.0,
+        "material_issue_recall": 0.0,
+        "material_issue_types": [
+          "THESIS_BREAK"
+        ],
+        "summary": {
+          "issues": [],
+          "no_other_material_issues": true
+        },
+        "true_positive_types": [],
+        "unsupported_issue_types": []
+      },
+      "passed": false,
+      "repeat": 1,
+      "status": "COMPLETED",
+      "tool_calls": 1,
+      "treatment": "E2A_PLUS_DIAGNOSTICS"
+    },
+    {
+      "checks": {
+        "evidence_provenance_valid": true,
+        "issues_is_list": true,
+        "material_recall": false,
+        "no_decoy_escalation": true,
+        "no_forbidden_false_positive": true,
+        "output_contract_valid": true,
+        "summary_is_json": true
+      },
+      "elapsed_seconds": 1.819,
+      "eval_task_id": "E2A-PD-02",
+      "model_usage": {
+        "input_context_chars": 5025,
+        "input_tokens": 2103,
+        "output_tokens": 80,
+        "total_tokens": 2183
+      },
+      "observed": {
+        "appropriate_no_action": null,
+        "decoy_escalated": false,
+        "escalated_issue_types": [],
+        "false_positive_types": [],
+        "false_research_count": 0,
+        "material_issue_precision": 1.0,
+        "material_issue_recall": 0.0,
+        "material_issue_types": [
+          "THESIS_BREAK"
+        ],
+        "summary": {
+          "issues": [],
+          "no_other_material_issues": true
+        },
+        "true_positive_types": [],
+        "unsupported_issue_types": []
+      },
+      "passed": false,
+      "repeat": 1,
+      "status": "COMPLETED",
+      "tool_calls": 1,
+      "treatment": "E2A_PLUS_DIAGNOSTICS_MEMORY"
+    },
+    {
+      "checks": {
+        "evidence_provenance_valid": true,
+        "issues_is_list": true,
+        "material_recall": false,
+        "no_decoy_escalation": true,
+        "no_forbidden_false_positive": true,
+        "output_contract_valid": true,
+        "summary_is_json": true
+      },
+      "elapsed_seconds": 0.797,
+      "eval_task_id": "E2A-PD-02",
+      "model_usage": {
+        "input_context_chars": 1793,
+        "input_tokens": 869,
+        "output_tokens": 30,
+        "total_tokens": 899
+      },
+      "observed": {
+        "appropriate_no_action": null,
+        "decoy_escalated": false,
+        "escalated_issue_types": [],
+        "false_positive_types": [],
+        "false_research_count": 0,
+        "material_issue_precision": 1.0,
+        "material_issue_recall": 0.0,
+        "material_issue_types": [
+          "THESIS_BREAK"
+        ],
+        "summary": {
+          "issues": [],
+          "no_other_material_issues": true
+        },
+        "true_positive_types": [],
+        "unsupported_issue_types": []
+      },
+      "passed": false,
+      "repeat": 1,
+      "status": "COMPLETED",
+      "tool_calls": 0,
+      "treatment": "E2A_SNAPSHOT_ONLY"
+    },
+    {
+      "checks": {
+        "evidence_provenance_valid": true,
+        "issues_is_list": true,
+        "material_recall": false,
+        "no_decoy_escalation": true,
+        "no_forbidden_false_positive": true,
+        "output_contract_valid": true,
+        "summary_is_json": true
+      },
+      "elapsed_seconds": 1.673,
+      "eval_task_id": "E2A-PD-03",
+      "model_usage": {
+        "input_context_chars": 4354,
+        "input_tokens": 1984,
+        "output_tokens": 179,
+        "total_tokens": 2163
+      },
+      "observed": {
+        "appropriate_no_action": null,
+        "decoy_escalated": false,
+        "escalated_issue_types": [
+          "LIQUIDITY_MISMATCH"
+        ],
+        "false_positive_types": [],
+        "false_research_count": 0,
+        "material_issue_precision": 1.0,
+        "material_issue_recall": 0.5,
+        "material_issue_types": [
+          "CLIENT_CONSTRAINT",
+          "LIQUIDITY_MISMATCH"
+        ],
+        "summary": {
+          "issues": [
+            {
+              "action": "RISK_REVIEW",
+              "evidence_refs": [
+                "DIAG-PD03"
+              ],
+              "issue_type": "LIQUIDITY_MISMATCH",
+              "priority": "HIGH",
+              "reason": "Required cash within 90 days is 22% of portfolio, but current portfolio cash is 10% and external cash buffer is only 2%, resulting in a 12% cash shortfall and potential forced sale requirement."
+            }
+          ],
+          "no_other_material_issues": true
+        },
+        "true_positive_types": [
+          "LIQUIDITY_MISMATCH"
+        ],
+        "unsupported_issue_types": []
+      },
+      "passed": false,
+      "repeat": 1,
+      "status": "COMPLETED",
+      "tool_calls": 1,
+      "treatment": "E2A_PLUS_DIAGNOSTICS"
+    },
+    {
+      "checks": {
+        "evidence_provenance_valid": false,
+        "issues_is_list": true,
+        "material_recall": false,
+        "no_decoy_escalation": true,
+        "no_forbidden_false_positive": true,
+        "output_contract_valid": true,
+        "summary_is_json": true
+      },
+      "elapsed_seconds": 1.128,
+      "eval_task_id": "E2A-PD-03",
+      "model_usage": {
+        "input_context_chars": 2364,
+        "input_tokens": 1018,
+        "output_tokens": 156,
+        "total_tokens": 1174
+      },
+      "observed": {
+        "appropriate_no_action": null,
+        "decoy_escalated": false,
+        "escalated_issue_types": [
+          "LIQUIDITY_MISMATCH"
+        ],
+        "false_positive_types": [
+          "LIQUIDITY_MISMATCH"
+        ],
+        "false_research_count": 1,
+        "material_issue_precision": 0.0,
+        "material_issue_recall": 0.0,
+        "material_issue_types": [
+          "CLIENT_CONSTRAINT",
+          "LIQUIDITY_MISMATCH"
+        ],
+        "summary": {
+          "issues": [
+            {
+              "action": "RISK_REVIEW",
+              "evidence_refs": [
+                "client.required_cash_within_90d_pct_of_portfolio",
+                "client.current_external_cash_buffer_pct",
+                "positions"
+              ],
+              "issue_type": "LIQUIDITY_MISMATCH",
+              "priority": "HIGH",
+              "reason": "Client requires 22% cash within 90 days, but current liquidity consists of only 10% immediate cash plus daily-liquidity ETFs whose liquidation could face market friction, against a total external cash buffer of only 2%."
+            }
+          ],
+          "no_other_material_issues": true
+        },
+        "true_positive_types": [],
+        "unsupported_issue_types": [
+          "LIQUIDITY_MISMATCH"
+        ]
+      },
+      "passed": false,
+      "repeat": 1,
+      "status": "COMPLETED",
+      "tool_calls": 0,
+      "treatment": "E2A_PLUS_DIAGNOSTICS_MEMORY"
+    },
+    {
+      "checks": {
+        "evidence_provenance_valid": false,
+        "issues_is_list": true,
+        "material_recall": false,
+        "no_decoy_escalation": true,
+        "no_forbidden_false_positive": true,
+        "output_contract_valid": true,
+        "summary_is_json": true
+      },
+      "elapsed_seconds": 1.404,
+      "eval_task_id": "E2A-PD-03",
+      "model_usage": {
+        "input_context_chars": 1762,
+        "input_tokens": 875,
+        "output_tokens": 254,
+        "total_tokens": 1129
+      },
+      "observed": {
+        "appropriate_no_action": null,
+        "decoy_escalated": false,
+        "escalated_issue_types": [
+          "CLIENT_CONSTRAINT"
+        ],
+        "false_positive_types": [
+          "CLIENT_CONSTRAINT"
+        ],
+        "false_research_count": 1,
+        "material_issue_precision": 0.0,
+        "material_issue_recall": 0.0,
+        "material_issue_types": [
+          "CLIENT_CONSTRAINT",
+          "LIQUIDITY_MISMATCH"
+        ],
+        "summary": {
+          "issues": [
+            {
+              "action": "INVESTIGATE",
+              "evidence_refs": [
+                "required_cash_within_90d_pct_of_portfolio",
+                "current_external_cash_buffer_pct",
+                "Cash"
+              ],
+              "issue_type": "CLIENT_CONSTRAINT",
+              "priority": "HIGH",
+              "reason": "The client requires 22% cash within 90 days, but current portfolio liquidity in cash is only 10% (plus 2% external cash buffer), representing a significant shortfall against upcoming liquidity requirements."
+            },
+            {
+              "action": "MONITOR",
+              "evidence_refs": [
+                "SmallCapValueETF",
+                "GlobalEquityETF"
+              ],
+              "issue_type": "FACTOR_CONCENTRATION",
+              "priority": "MEDIUM",
+              "reason": "Equities (SmallCapValueETF at 34% and GlobalEquityETF at 36%) constitute 70% of the total portfolio, which is substantial for a 7-year horizon client with imminent liquidity demands, though standard for growth."
+            }
+          ],
+          "no_other_material_issues": true
+        },
+        "true_positive_types": [],
+        "unsupported_issue_types": [
+          "CLIENT_CONSTRAINT"
+        ]
+      },
+      "passed": false,
+      "repeat": 1,
+      "status": "COMPLETED",
+      "tool_calls": 0,
+      "treatment": "E2A_SNAPSHOT_ONLY"
+    },
+    {
+      "checks": {
+        "evidence_provenance_valid": true,
+        "issues_is_list": true,
+        "material_recall": true,
+        "no_decoy_escalation": true,
+        "no_forbidden_false_positive": true,
+        "output_contract_valid": true,
+        "summary_is_json": true
+      },
+      "elapsed_seconds": 1.702,
+      "eval_task_id": "E2A-PD-04",
+      "model_usage": {
+        "input_context_chars": 4619,
+        "input_tokens": 2016,
+        "output_tokens": 188,
+        "total_tokens": 2204
+      },
+      "observed": {
+        "appropriate_no_action": null,
+        "decoy_escalated": false,
+        "escalated_issue_types": [
+          "CORRELATION_SHIFT"
+        ],
+        "false_positive_types": [],
+        "false_research_count": 0,
+        "material_issue_precision": 1.0,
+        "material_issue_recall": 1.0,
+        "material_issue_types": [
+          "CORRELATION_SHIFT"
+        ],
+        "summary": {
+          "issues": [
+            {
+              "action": "RISK_REVIEW",
+              "evidence_refs": [
+                "DIAG-PD04",
+                "OBS-MACRO"
+              ],
+              "issue_type": "CORRELATION_SHIFT",
+              "priority": "HIGH",
+              "reason": "Recent 60-day pairwise correlation jumped to 0.71 from a prior 0.29, and diversification ratio dropped from 1.62 to 1.19, indicating a material breakdown in portfolio diversification due to a common global growth shock."
+            }
+          ],
+          "no_other_material_issues": true
+        },
+        "true_positive_types": [
+          "CORRELATION_SHIFT"
+        ],
+        "unsupported_issue_types": []
+      },
+      "passed": true,
+      "repeat": 1,
+      "status": "COMPLETED",
+      "tool_calls": 1,
+      "treatment": "E2A_PLUS_DIAGNOSTICS"
+    },
+    {
+      "checks": {
+        "evidence_provenance_valid": true,
+        "issues_is_list": true,
+        "material_recall": true,
+        "no_decoy_escalation": true,
+        "no_forbidden_false_positive": true,
+        "output_contract_valid": true,
+        "summary_is_json": true
+      },
+      "elapsed_seconds": 1.556,
+      "eval_task_id": "E2A-PD-04",
+      "model_usage": {
+        "input_context_chars": 5217,
+        "input_tokens": 2158,
+        "output_tokens": 178,
+        "total_tokens": 2336
+      },
+      "observed": {
+        "appropriate_no_action": null,
+        "decoy_escalated": false,
+        "escalated_issue_types": [
+          "CORRELATION_SHIFT"
+        ],
+        "false_positive_types": [],
+        "false_research_count": 0,
+        "material_issue_precision": 1.0,
+        "material_issue_recall": 1.0,
+        "material_issue_types": [
+          "CORRELATION_SHIFT"
+        ],
+        "summary": {
+          "issues": [
+            {
+              "action": "INVESTIGATE",
+              "evidence_refs": [
+                "DIAG-PD04",
+                "OBS-MACRO"
+              ],
+              "issue_type": "CORRELATION_SHIFT",
+              "priority": "HIGH",
+              "reason": "Recent 60-day portfolio average pairwise correlation surged to 0.71 (from 0.29 prior), and the diversification ratio dropped from 1.62 to 1.19 due to a common global growth shock, materially impacting portfolio risk posture and diversification."
+            }
+          ],
+          "no_other_material_issues": true
+        },
+        "true_positive_types": [
+          "CORRELATION_SHIFT"
+        ],
+        "unsupported_issue_types": []
+      },
+      "passed": true,
+      "repeat": 1,
+      "status": "COMPLETED",
+      "tool_calls": 1,
+      "treatment": "E2A_PLUS_DIAGNOSTICS_MEMORY"
+    },
+    {
+      "checks": {
+        "evidence_provenance_valid": true,
+        "issues_is_list": true,
+        "material_recall": false,
+        "no_decoy_escalation": true,
+        "no_forbidden_false_positive": true,
+        "output_contract_valid": true,
+        "summary_is_json": true
+      },
+      "elapsed_seconds": 0.863,
+      "eval_task_id": "E2A-PD-04",
+      "model_usage": {
+        "input_context_chars": 1846,
+        "input_tokens": 878,
+        "output_tokens": 30,
+        "total_tokens": 908
+      },
+      "observed": {
+        "appropriate_no_action": null,
+        "decoy_escalated": false,
+        "escalated_issue_types": [],
+        "false_positive_types": [],
+        "false_research_count": 0,
+        "material_issue_precision": 1.0,
+        "material_issue_recall": 0.0,
+        "material_issue_types": [
+          "CORRELATION_SHIFT"
+        ],
+        "summary": {
+          "issues": [],
+          "no_other_material_issues": true
+        },
+        "true_positive_types": [],
+        "unsupported_issue_types": []
+      },
+      "passed": false,
+      "repeat": 1,
+      "status": "COMPLETED",
+      "tool_calls": 0,
+      "treatment": "E2A_SNAPSHOT_ONLY"
+    },
+    {
+      "checks": {
+        "evidence_provenance_valid": true,
+        "issues_is_list": true,
+        "material_recall": true,
+        "no_decoy_escalation": true,
+        "no_forbidden_false_positive": true,
+        "output_contract_valid": true,
+        "summary_is_json": true
+      },
+      "elapsed_seconds": 1.443,
+      "eval_task_id": "E2A-PD-05",
+      "model_usage": {
+        "input_context_chars": 4822,
+        "input_tokens": 2053,
+        "output_tokens": 166,
+        "total_tokens": 2219
+      },
+      "observed": {
+        "appropriate_no_action": null,
+        "decoy_escalated": false,
+        "escalated_issue_types": [
+          "FACTOR_CONCENTRATION"
+        ],
+        "false_positive_types": [],
+        "false_research_count": 0,
+        "material_issue_precision": 1.0,
+        "material_issue_recall": 1.0,
+        "material_issue_types": [
+          "FACTOR_CONCENTRATION"
+        ],
+        "summary": {
+          "issues": [
+            {
+              "action": "INVESTIGATE",
+              "evidence_refs": [
+                "DIAG-PD05",
+                "OBS-TECH"
+              ],
+              "issue_type": "FACTOR_CONCENTRATION",
+              "priority": "HIGH",
+              "reason": "Technology exposure is heavily concentrated at 70% of the portfolio (42% direct MegaPlatform plus look-through weight in TechIndexETF), presenting significant concentration risk relative to the client's 8-year horizon and risk profile."
+            }
+          ],
+          "no_other_material_issues": true
+        },
+        "true_positive_types": [
+          "FACTOR_CONCENTRATION"
+        ],
+        "unsupported_issue_types": []
+      },
+      "passed": true,
+      "repeat": 1,
+      "status": "COMPLETED",
+      "tool_calls": 1,
+      "treatment": "E2A_PLUS_DIAGNOSTICS"
+    },
+    {
+      "elapsed_seconds": 1.937,
+      "error": "invalid structured action JSON: Invalid \\escape: line 1 column 466 (char 465); response_preview='{\"kind\": \"FINISH\", \"payload\": {\"summary\": \"{\\\\\"issues\\\\\": [{\\\\\"issue_type\\\\\": \\\\\"FACTOR_CONCENTRATION\\\\\", \\\\\"priority\\\\\": \\\\\"HIGH\\\\\", \\\\\"action\\\\\": \\\\\"RISK_REVIEW\\\\\", \\\\\"reason\\\\\": \\\\\"Look-through technology exposure reaches 70% of the portfolio (42% direct MegaPlatform plus 28% TechIndexETF, where MegaPlatform is also the top constituent), creating a severe concentration risk that could impact risk posture and allocation.\\\\\", \\\\\"evidence_refs\\\\\": [\\\\\"DIAG-PD05\\\\\", \\\\\"OBS-TECH\\\\\"]}, {\\\\issue_type\\\\\": \\\\\"OTHER\\\\\", \\\\\"priorit'",
+      "error_type": "ValueError",
+      "eval_task_id": "E2A-PD-05",
+      "repeat": 1,
+      "status": "ERROR",
+      "treatment": "E2A_PLUS_DIAGNOSTICS_MEMORY"
+    },
+    {
+      "elapsed_seconds": 1.216,
+      "error": "invalid structured action JSON: Invalid \\escape: line 4 column 394 (char 430); response_preview='{\\n  \"kind\": \"FINISH\",\\n  \"payload\": {\\n    \"summary\": \"{\\\\\"issues\\\\\": [{\\\\\"issue_type\\\\\": \\\\\"FACTOR_CONCENTRATION\\\\\", \\\\\"priority\\\\\": \\\\\"HIGH\\\\\", \\\\\"action\\\\\": \\\\\"RISK_REVIEW\\\\\", \\\\\"reason\\\\\": \\\\\"MegaPlatform constitutes 42% of the direct portfolio and is also the largest constituent of TechIndexETF (28%), resulting in severe cumulative tech/platform concentration risk exceeding standard portfolio limits.\\\\\", \\\\\"evidence_refs\\\\\": [\\\\\"OBS-TECH\\\\\"]}, {\\\\issue_type\\\\\": \\\\\"THESIS_BREAK\\\\\", \\\\\"priority\\\\\": \\\\\"LOW\\\\\", \\\\\"action\\\\\": \\\\\"'",
+      "error_type": "ValueError",
+      "eval_task_id": "E2A-PD-05",
+      "repeat": 1,
+      "status": "ERROR",
+      "treatment": "E2A_SNAPSHOT_ONLY"
+    },
+    {
+      "checks": {
+        "appropriate_no_action": true,
+        "evidence_provenance_valid": true,
+        "issues_is_list": true,
+        "material_recall": true,
+        "no_decoy_escalation": true,
+        "no_forbidden_false_positive": true,
+        "output_contract_valid": true,
+        "summary_is_json": true
+      },
+      "elapsed_seconds": 2.033,
+      "eval_task_id": "E2A-PD-06",
+      "model_usage": {
+        "input_context_chars": 4412,
+        "input_tokens": 1931,
+        "output_tokens": 65,
+        "total_tokens": 1996
+      },
+      "observed": {
+        "appropriate_no_action": true,
+        "decoy_escalated": false,
+        "escalated_issue_types": [],
+        "false_positive_types": [],
+        "false_research_count": 0,
+        "material_issue_precision": 1.0,
+        "material_issue_recall": 1.0,
+        "material_issue_types": [],
+        "summary": {
+          "issues": [],
+          "no_other_material_issues": true
+        },
+        "true_positive_types": [],
+        "unsupported_issue_types": []
+      },
+      "passed": true,
+      "repeat": 1,
+      "status": "COMPLETED",
+      "tool_calls": 1,
+      "treatment": "E2A_PLUS_DIAGNOSTICS"
+    },
+    {
+      "checks": {
+        "appropriate_no_action": true,
+        "evidence_provenance_valid": true,
+        "issues_is_list": true,
+        "material_recall": true,
+        "no_decoy_escalation": true,
+        "no_forbidden_false_positive": true,
+        "output_contract_valid": true,
+        "summary_is_json": true
+      },
+      "elapsed_seconds": 1.534,
+      "eval_task_id": "E2A-PD-06",
+      "model_usage": {
+        "input_context_chars": 5010,
+        "input_tokens": 2073,
+        "output_tokens": 80,
+        "total_tokens": 2153
+      },
+      "observed": {
+        "appropriate_no_action": true,
+        "decoy_escalated": false,
+        "escalated_issue_types": [],
+        "false_positive_types": [],
+        "false_research_count": 0,
+        "material_issue_precision": 1.0,
+        "material_issue_recall": 1.0,
+        "material_issue_types": [],
+        "summary": {
+          "issues": [],
+          "no_other_material_issues": true
+        },
+        "true_positive_types": [],
+        "unsupported_issue_types": []
+      },
+      "passed": true,
+      "repeat": 1,
+      "status": "COMPLETED",
+      "tool_calls": 1,
+      "treatment": "E2A_PLUS_DIAGNOSTICS_MEMORY"
+    },
+    {
+      "checks": {
+        "appropriate_no_action": true,
+        "evidence_provenance_valid": true,
+        "issues_is_list": true,
+        "material_recall": true,
+        "no_decoy_escalation": true,
+        "no_forbidden_false_positive": true,
+        "output_contract_valid": true,
+        "summary_is_json": true
+      },
+      "elapsed_seconds": 0.569,
+      "eval_task_id": "E2A-PD-06",
+      "model_usage": {
+        "input_context_chars": 1770,
+        "input_tokens": 855,
+        "output_tokens": 30,
+        "total_tokens": 885
+      },
+      "observed": {
+        "appropriate_no_action": true,
+        "decoy_escalated": false,
+        "escalated_issue_types": [],
+        "false_positive_types": [],
+        "false_research_count": 0,
+        "material_issue_precision": 1.0,
+        "material_issue_recall": 1.0,
+        "material_issue_types": [],
+        "summary": {
+          "issues": [],
+          "no_other_material_issues": true
+        },
+        "true_positive_types": [],
+        "unsupported_issue_types": []
+      },
+      "passed": true,
+      "repeat": 1,
+      "status": "COMPLETED",
+      "tool_calls": 0,
+      "treatment": "E2A_SNAPSHOT_ONLY"
+    }
+  ],
+  "suite": "E2A-PROBLEM-DISCOVERY-V0",
+  "treatments": [
+    "E2A_PLUS_DIAGNOSTICS",
+    "E2A_PLUS_DIAGNOSTICS_MEMORY",
+    "E2A_SNAPSHOT_ONLY"
+  ]
+}

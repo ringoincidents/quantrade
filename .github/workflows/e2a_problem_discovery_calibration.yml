@@ -13,6 +13,9 @@ permissions:
 
 jobs:
   e2a-calibration:
+    # Restrict the live run to the original restart transition.
+    # Later documentation commits must not consume provider quota.
+    if: github.event.before == '1de23e4695afd5b375c764f86e8d4e860f941f03'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:

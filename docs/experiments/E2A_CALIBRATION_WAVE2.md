@@ -1,6 +1,6 @@
 # E2-A calibration restart — 2026-09-21
 
-Status: grading repairs verified locally; live calibration pending.
+Status: COMPLETE — calibration exposed remaining measurement/runtime defects; no capability promotion.
 Base: PR #83, commit 1de23e4695afd5b375c764f86e8d4e860f941f03.
 Original run: https://github.com/ringoincidents/quantrade/actions/runs/35485062410
 
@@ -29,3 +29,36 @@ The grader verifies reference availability and required retrieval, not semantic 
 
 ## Next gate
 Inspect wave 2 raw outputs, errors, retrieval and grading. Address remaining case/measurement ambiguity in a versioned protocol before repeated E2-A evaluation or E2-B architecture comparison. Preserve original artifacts and append results rather than replacing earlier conclusions.
+
+## Validation and original-response audit
+- Local targeted suite: 13 tests passed, including full serialized packet checks over 18 case/treatment combinations.
+- GitHub full suite: 121 tests passed; no-broker demo passed.
+- Regraded a copy of the original SQLite artifact with the repaired grader: all original treatment scores remained 4/6 with mean recall 0.75. The original DB and model outputs were preserved. This checks the impact of grading repairs only; it cannot remove the answer hints the original models already saw.
+- CI: https://github.com/ringoincidents/quantrade/actions/runs/35593639791
+- Wave 2: https://github.com/ringoincidents/quantrade/actions/runs/35593639808
+
+## Wave 2 outcome (frozen grader; all attempts retained)
+
+| Treatment | Attempted | Completed | Strict passes | Completed-only mean recall | Completed-only tokens |
+|---|---:|---:|---:|---:|---:|
+| Snapshot | 6 | 5 | 1 | 0.20 | 4,771 |
+| + diagnostics | 6 | 6 | 4 | 0.75 | 12,936 |
+| + diagnostics + memory | 6 | 5 | 3 | 0.60 | 10,317 |
+
+The denominators differ. These are descriptive calibration outputs, not a valid superiority estimate. Token aggregates exclude errored trials and must not be labeled full experiment cost. The pipeline's success status does not mean all model trials succeeded.
+
+- PD-05 snapshot and memory treatments failed parsing invalid JSON escape sequences. Both failures remain ERROR; neither was silently retried or converted into a reasoning score.
+- PD-03 snapshot and memory treatments used real public field/asset names as references, but omitted the `portfolio_snapshot.` prefix. The provenance whitelist rejected them even though the prompt never specified that exact citation syntax. Their unsupported/false-research flags are therefore partly a measurement artifact, not demonstrated hallucination. Preserve the raw grade; define accepted public references before fresh trials.
+- PD-03 diagnostics still names a 12-point shortfall without correctly accounting for the 2-point external buffer, and the hidden grader requires two labels for one cash-need problem. Numeric correctness and issue-group semantics remain unvalidated.
+- PD-02 memory treatment called only portfolio diagnostics, never investment memory, and missed the thesis break. Having a memory tool available does not establish that the runtime will use it when needed. This contrasts with wave 1, which exposed a memory-specific title hint; one observation does not establish causation.
+- PD-06 all three treatments correctly chose no further research.
+
+## Decision / next experiment
+Do not promote diagnostics/memory, start E2-B, or infer that more departments will solve these defects. Next is **E2-A v1 measurement calibration**:
+1. Publish a shared, explicit public citation scheme (including snapshot fields) to every treatment and test equivalent valid references.
+2. Define gross shortfall=12 and net shortfall=10 on the common portfolio denominator; score the cash requirement as one issue group and add a deterministic numeric check.
+3. Fix the nested JSON output contract consistently across treatments; retain format failures and charge any repair calls explicitly.
+4. Measure memory/diagnostic retrieval separately from discovery success; later compare optional retrieval with a preregistered retrieval policy rather than forcing retrieval only after observing misses.
+5. Freeze the revised protocol before a balanced repeated run. No additional live calls were made after this wave.
+
+The workflow is restricted to the original restart transition so subsequent report updates cannot silently launch another paid/quota-consuming run.
