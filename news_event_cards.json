@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-23T14:27:42.947461+00:00",
+  "generated_at": "2026-09-24T14:28:05.578931+00:00",
   "schema": "explanation_only_v3.2",
   "note": "사실 설명 전용(뉴스 사건 + 정량 이상행동). 방향 예측/확신도/매매 제안 필드가 스키마에 없다 - 누락이 아니라 설계(CLAUDE.md v3.2). 대상은 보유종목+관심종목으로 한정(2026-08-09 스코프 축소).",
   "cards": [
@@ -7,27 +7,27 @@
       "market": "BTAIQ",
       "name": "바이오엑셀 테라퓨틱스",
       "event_type": "이상행동",
-      "summary": "전일 종가 대비 시가 갭 -32.3%, 최근 20일 변동성이 과거 분포 대비 100백분위",
+      "summary": "전일 종가 대비 시가 갭 -20.2%, 최근 20일 변동성이 과거 분포 대비 100백분위",
       "headlines": []
     },
     {
       "market": "VTGN",
       "name": "비스타젠 테라퓨틱스",
       "event_type": "이상행동",
-      "summary": "거래량 20일 평균 대비 938.2배, 전일 종가 대비 시가 갭 +67.9%, 최근 20일 변동성이 과거 분포 대비 94백분위",
+      "summary": "전일 종가 대비 시가 갭 -6.9%",
       "headlines": []
     },
     {
-      "market": "IONQ",
-      "name": "아이온큐",
+      "market": "ATYR",
+      "name": "어타이어 파마",
       "event_type": "이상행동",
-      "summary": "전일 종가 대비 시가 갭 +13.2%",
+      "summary": "거래량 20일 평균 대비 133.7배, 전일 종가 대비 시가 갭 +7.9%",
       "headlines": []
     }
   ],
   "change_events": [
     {
-      "timestamp": "2026-09-23T00:00:00+00:00",
+      "timestamp": "2026-09-24T00:00:00+00:00",
       "asset": {
         "symbol": "BTAIQ",
         "name": "바이오엑셀 테라퓨틱스",
@@ -36,23 +36,23 @@
       },
       "source": "news_event_cards.anomaly",
       "event_type": "가격_갭",
-      "observed_value": 0.041999999433755875,
-      "baseline": 0.06199999898672104,
-      "change": -32.26,
+      "observed_value": 0.03590000048279762,
+      "baseline": 0.04500000178813934,
+      "change": -20.22,
       "reliability": 1.0,
       "related_assets": [],
       "priority": {
-        "priority_score": 0.0009,
+        "priority_score": 0.0006,
         "factors": {
           "reliability": 1.0,
           "novelty": 0.1429,
           "portfolio_relevance": 0.0002,
-          "magnitude": 32.26
+          "magnitude": 20.22
         }
       }
     },
     {
-      "timestamp": "2026-09-23T00:00:00+00:00",
+      "timestamp": "2026-09-24T00:00:00+00:00",
       "asset": {
         "symbol": "BTAIQ",
         "name": "바이오엑셀 테라퓨틱스",
@@ -61,7 +61,7 @@
       },
       "source": "news_event_cards.anomaly",
       "event_type": "변동성_급증",
-      "observed_value": 25.44,
+      "observed_value": 24.97,
       "baseline": null,
       "change": 100.0,
       "reliability": 1.0,
@@ -77,102 +77,77 @@
       }
     },
     {
-      "timestamp": "2026-09-23T00:00:00+00:00",
+      "timestamp": "2026-09-24T00:00:00+00:00",
       "asset": {
         "symbol": "VTGN",
         "name": "비스타젠 테라퓨틱스",
+        "market_country": "US",
+        "currency": "USD"
+      },
+      "source": "news_event_cards.anomaly",
+      "event_type": "가격_갭",
+      "observed_value": 0.34450000524520874,
+      "baseline": 0.3700000047683716,
+      "change": -6.89,
+      "reliability": 1.0,
+      "related_assets": [],
+      "priority": {
+        "priority_score": 0.0001,
+        "factors": {
+          "reliability": 1.0,
+          "novelty": 0.1429,
+          "portfolio_relevance": 0.0001,
+          "magnitude": 6.89
+        }
+      }
+    },
+    {
+      "timestamp": "2026-09-24T00:00:00+00:00",
+      "asset": {
+        "symbol": "ATYR",
+        "name": "어타이어 파마",
         "market_country": "US",
         "currency": "USD"
       },
       "source": "news_event_cards.anomaly",
       "event_type": "거래량_급증",
-      "observed_value": 401712452,
-      "baseline": 428190.0,
-      "change": 938.16,
+      "observed_value": 113496772,
+      "baseline": 849145.0,
+      "change": 133.66,
       "reliability": 1.0,
       "related_assets": [],
       "priority": {
-        "priority_score": 0.0938,
+        "priority_score": 0.0535,
         "factors": {
           "reliability": 1.0,
           "novelty": 1.0,
-          "portfolio_relevance": 0.0001,
-          "magnitude": 938.16
+          "portfolio_relevance": 0.0004,
+          "magnitude": 133.66
         }
       }
     },
     {
-      "timestamp": "2026-09-23T00:00:00+00:00",
+      "timestamp": "2026-09-24T00:00:00+00:00",
       "asset": {
-        "symbol": "VTGN",
-        "name": "비스타젠 테라퓨틱스",
+        "symbol": "ATYR",
+        "name": "어타이어 파마",
         "market_country": "US",
         "currency": "USD"
       },
       "source": "news_event_cards.anomaly",
       "event_type": "가격_갭",
-      "observed_value": 0.38609999418258667,
-      "baseline": 0.23000000417232513,
-      "change": 67.87,
+      "observed_value": 0.40450000762939453,
+      "baseline": 0.375,
+      "change": 7.87,
       "reliability": 1.0,
       "related_assets": [],
       "priority": {
-        "priority_score": 0.0068,
+        "priority_score": 0.0031,
         "factors": {
           "reliability": 1.0,
           "novelty": 1.0,
-          "portfolio_relevance": 0.0001,
-          "magnitude": 67.87
-        }
-      }
-    },
-    {
-      "timestamp": "2026-09-23T00:00:00+00:00",
-      "asset": {
-        "symbol": "VTGN",
-        "name": "비스타젠 테라퓨틱스",
-        "market_country": "US",
-        "currency": "USD"
-      },
-      "source": "news_event_cards.anomaly",
-      "event_type": "변동성_급증",
-      "observed_value": 18.12,
-      "baseline": null,
-      "change": 93.9,
-      "reliability": 1.0,
-      "related_assets": [],
-      "priority": {
-        "priority_score": 0.0094,
-        "factors": {
-          "reliability": 1.0,
-          "novelty": 1.0,
-          "portfolio_relevance": 0.0001,
-          "magnitude": 93.9
-        }
-      }
-    },
-    {
-      "timestamp": "2026-09-23T00:00:00+00:00",
-      "asset": {
-        "symbol": "IONQ",
-        "name": "아이온큐",
-        "market_country": "US",
-        "currency": "USD"
-      },
-      "source": "news_event_cards.anomaly",
-      "event_type": "가격_갭",
-      "observed_value": 45.84000015258789,
-      "baseline": 40.5099983215332,
-      "change": 13.16,
-      "reliability": 1.0,
-      "related_assets": [],
-      "priority": {
-        "priority_score": 1.8582,
-        "factors": {
-          "reliability": 1.0,
-          "novelty": 1.0,
-          "portfolio_relevance": 0.1412,
-          "magnitude": 13.16
+          "portfolio_relevance": 0.0004,
+          "magnitude": 7.87
         }
       }
     }
