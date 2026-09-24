@@ -964,6 +964,91 @@
           "fact": "바이오엑셀 테라퓨틱스(BTAIQ) 비중이 0.0%인 상태에서 최근 이상행동 관련 사실이 있었습니다: 전일 종가 대비 시가 갭 -16.1%, 최근 20일 변동성이 과거 분포 대비 100백분위"
         }
       ]
+    },
+    {
+      "id": "review-2026-09-24T12:51:34.050784+00:00",
+      "generated_at": "2026-09-24T12:51:34.050784+00:00",
+      "trigger": "batch",
+      "schema": "post_trade_review_v3.2",
+      "note": "매매 이후 사람이 놓쳤을 수 있는 것을 사후에 짚어보는 기록입니다. 새 AI 판단이나 매매 제안이 아니라 이미 계산된 값을 재사용한 사실 연결이며, 생성 시점에 확정되고 이후 수정되지 않습니다.",
+      "exposure_change": {
+        "has_baseline": true,
+        "added_symbols": [
+          "ATYR"
+        ],
+        "removed_symbols": [],
+        "by_currency_pct_now": {
+          "KRW": 10.18,
+          "USD": 89.81
+        },
+        "by_country_pct_now": {
+          "KR": 10.18,
+          "US": 89.81
+        },
+        "by_currency_pct_delta": {
+          "KRW": 0.33,
+          "USD": 0.59
+        },
+        "by_country_pct_delta": {
+          "KR": 0.33,
+          "US": 0.59
+        },
+        "sector_status": "데이터 소스 미연결"
+      },
+      "allocation_gap": {
+        "concentration_matches": [
+          {
+            "rule": "집중도",
+            "symbol": "SCHD",
+            "name": "SCHD",
+            "threshold": "단일 종목 비중 30% 이상",
+            "observed": "50.37%",
+            "fact": "SCHD(SCHD) 비중이 총자산의 50.37%로 기준 30% 이상"
+          }
+        ],
+        "asset_class_target_status": "데이터 소스 미연결 — 보유 종목을 로드맵의 자산군(bond/developed_exUS/emerging/...)으로 분류할 데이터가 없어 국가/통화 노출만 비교합니다."
+      },
+      "correlation_blind_spots": {
+        "flag_threshold": 0.7,
+        "lookback_days": 90,
+        "spots": []
+      },
+      "behavior_patterns": [
+        {
+          "symbol": "BTAIQ",
+          "name": "바이오엑셀 테라퓨틱스",
+          "return_pct": -57.82000000000001,
+          "threshold_pct": -50.0,
+          "days_since_threshold": 1,
+          "fact": "바이오엑셀 테라퓨틱스(BTAIQ) 평가손익 -57.82%가 기준 -50% 이하로 2026-09-23부터 1일째이며, 그 사이 매도 없이 보유가 유지되고 있습니다."
+        }
+      ],
+      "recent_news_links": [
+        {
+          "symbol": "BTAIQ",
+          "name": "바이오엑셀 테라퓨틱스",
+          "weight_pct": 0.02,
+          "event_type": "이상행동",
+          "summary": "전일 종가 대비 시가 갭 -32.3%, 최근 20일 변동성이 과거 분포 대비 100백분위",
+          "fact": "바이오엑셀 테라퓨틱스(BTAIQ) 비중이 0.0%인 상태에서 최근 이상행동 관련 사실이 있었습니다: 전일 종가 대비 시가 갭 -32.3%, 최근 20일 변동성이 과거 분포 대비 100백분위"
+        },
+        {
+          "symbol": "VTGN",
+          "name": "비스타젠 테라퓨틱스",
+          "weight_pct": 0.01,
+          "event_type": "이상행동",
+          "summary": "거래량 20일 평균 대비 938.2배, 전일 종가 대비 시가 갭 +67.9%, 최근 20일 변동성이 과거 분포 대비 94백분위",
+          "fact": "비스타젠 테라퓨틱스(VTGN) 비중이 0.0%인 상태에서 최근 이상행동 관련 사실이 있었습니다: 거래량 20일 평균 대비 938.2배, 전일 종가 대비 시가 갭 +67.9%, 최근 20일 변동성이 과거 분포 대비 94백분위"
+        },
+        {
+          "symbol": "IONQ",
+          "name": "아이온큐",
+          "weight_pct": 13.31,
+          "event_type": "이상행동",
+          "summary": "전일 종가 대비 시가 갭 +13.2%",
+          "fact": "아이온큐(IONQ) 비중이 13.3%인 상태에서 최근 이상행동 관련 사실이 있었습니다: 전일 종가 대비 시가 갭 +13.2%"
+        }
+      ]
     }
   ]
 }
