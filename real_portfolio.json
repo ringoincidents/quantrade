@@ -1,6 +1,6 @@
 {
-  "synced_at": "2026-09-25T05:09:40.054436+00:00",
-  "cash": 27.296999999999997,
+  "synced_at": "2026-09-25T12:51:23.736434+00:00",
+  "cash": 2569.644,
   "positions": [
     {
       "symbol": "004000",
@@ -23,7 +23,7 @@
       "avg_price": "0.1067",
       "current_price": "0.0353",
       "eval_amount": 0.5648,
-      "eval_amount_krw": 770.8672799999999,
+      "eval_amount_krw": 767.90208,
       "return_pct": -66.91
     },
     {
@@ -33,10 +33,10 @@
       "currency": "USD",
       "quantity": "1",
       "avg_price": "0.3971",
-      "current_price": "0.2949",
-      "eval_amount": 0.2949,
-      "eval_amount_krw": 402.494265,
-      "return_pct": -25.729999999999997
+      "current_price": "0.2719",
+      "eval_amount": 0.2719,
+      "eval_amount_krw": 369.6752399999999,
+      "return_pct": -31.52
     },
     {
       "symbol": "IONQ",
@@ -45,22 +45,10 @@
       "currency": "USD",
       "quantity": "13",
       "avg_price": "45.3984",
-      "current_price": "44.84",
-      "eval_amount": 582.92,
-      "eval_amount_krw": 795598.3619999998,
-      "return_pct": -1.22
-    },
-    {
-      "symbol": "CTNT",
-      "name": "치타 넷 서플라이 서비스",
-      "market_country": "US",
-      "currency": "USD",
-      "quantity": "47",
-      "avg_price": "0.0337",
-      "current_price": "0.0401",
-      "eval_amount": 1.8847,
-      "eval_amount_krw": 2572.332795,
-      "return_pct": 18.990000000000002
+      "current_price": "44.6",
+      "eval_amount": 579.8,
+      "eval_amount_krw": 788296.0799999998,
+      "return_pct": -1.7500000000000002
     },
     {
       "symbol": "SCHD",
@@ -69,10 +57,10 @@
       "currency": "USD",
       "quantity": "60.799361",
       "avg_price": "33.186912",
-      "current_price": "33.09",
-      "eval_amount": 2011.850855,
-      "eval_amount_krw": 2745874.63944675,
-      "return_pct": -0.29
+      "current_price": "33.08",
+      "eval_amount": 2011.242861,
+      "eval_amount_krw": 2734485.7938155998,
+      "return_pct": -0.32
     },
     {
       "symbol": "TE",
@@ -81,10 +69,10 @@
       "currency": "USD",
       "quantity": "262",
       "avg_price": "4.71687",
-      "current_price": "3.92",
-      "eval_amount": 1027.04,
-      "eval_amount_krw": 1401755.5439999998,
-      "return_pct": -16.89
+      "current_price": "3.89",
+      "eval_amount": 1019.18,
+      "eval_amount_krw": 1385677.1279999998,
+      "return_pct": -17.53
     }
   ]
 }
