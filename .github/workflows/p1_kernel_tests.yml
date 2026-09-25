@@ -5,6 +5,9 @@ on:
     paths:
       - "quantrade/institutional/**"
       - "tests/institutional/**"
+      - "scripts/run_e2a_live.py"
+      - "scripts/verify_e2a_report.py"
+      - "docs/experiments/E2A_CALIBRATION_WAVE2_RAW.json"
       - "P1_0_INSTITUTIONAL_KERNEL_SPEC.md"
       - "P1_1_PORTFOLIO_RISK_ADAPTER_SPEC.md"
       - "P1_2_EVIDENCE_ADAPTER_SPEC.md"
@@ -30,6 +33,40 @@ jobs:
       - name: Compile institutional kernel
         run: python -m compileall -q quantrade/institutional tests/institutional
       - name: Run institutional tests
-        run: python -m unittest discover -s tests/institutional -p "test_*.py" -v
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p verification
+          python -m unittest discover -s tests/institutional -p "test_*.py" -v 2>&1 | tee verification/tests.log
       - name: Run no-broker demo
-        run: python -m quantrade.institutional.demo
+        shell: bash
+        run: |
+          set -o pipefail
+          python -m quantrade.institutional.demo | tee verification/demo.json
+          python -c 'import json; d=json.load(open("verification/demo.json")); assert d["ledger_chain_valid"] is True; assert d["broker_side_effect"] is False'
+      - name: Preserve known failure evidence without live API calls
+        shell: bash
+        env:
+          PYTHONPATH: .
+        run: |
+          set +e
+          python scripts/verify_e2a_report.py --report docs/experiments/E2A_CALIBRATION_WAVE2_RAW.json --receipt verification/wave2-receipt.json
+          result=$?
+          set -e
+          test "$result" -eq 3
+      - name: Record checked source identity
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p verification
+          git rev-parse HEAD > verification/checked-commit.txt
+          git status --porcelain > verification/worktree-status.txt
+          sha256sum scripts/verify_e2a_report.py quantrade/institutional/experiment_receipt.py docs/experiments/E2A_CALIBRATION_WAVE2_RAW.json > verification/source-sha256.txt
+      - name: Upload verification evidence (including failures)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: institutional-verification-${{ github.run_id }}-${{ github.run_attempt }}
+          path: verification/
+          if-no-files-found: error
+          retention-days: 30
