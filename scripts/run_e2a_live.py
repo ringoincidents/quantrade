@@ -11,25 +11,32 @@ from quantrade.institutional.e2a_suite import E2A_CASES, seed_e2a_tasks
 from quantrade.institutional.eval_harness import EmployeeEvalHarness
 from quantrade.institutional.model_providers import GeminiEmployeeProvider
 from quantrade.institutional.service import InstitutionalKernel
+from quantrade.institutional.experiment_receipt import verify_report
 
 
-def main() -> None:
+def main() -> int:
     parser = argparse.ArgumentParser(description="Run E2-A portfolio discovery calibration.")
     parser.add_argument("--db", default="e2a_calibration.sqlite3")
     parser.add_argument("--report", default="e2a_calibration_report.json")
+    parser.add_argument("--receipt", default="e2a_execution_receipt.json")
     parser.add_argument("--model", default="gemini-3.5-flash-lite")
     parser.add_argument("--repeats", type=int, default=1)
     parser.add_argument("--pace-seconds", type=float, default=20.0)
     args = parser.parse_args()
+
+    if args.repeats < 1 or args.repeats > 100 or not 0 <= args.pace_seconds < float("inf"):
+        parser.error("repeats must be 1..100 and pace-seconds must be finite and nonnegative")
+    outputs = [Path(args.db), Path(args.report), Path(args.receipt)]
+    if len({p.resolve() for p in outputs}) != len(outputs):
+        parser.error("db, report and receipt must be different paths")
+    if any(p.exists() for p in outputs):
+        parser.error("refusing to overwrite existing experiment evidence; choose fresh output paths")
 
     api_key = os.environ.get("GEMINI_API_KEY", "")
     if not api_key:
         raise SystemExit("GEMINI_API_KEY is required")
 
     db_path = Path(args.db)
-    if db_path.exists():
-        db_path.unlink()
-
     kernel = InstitutionalKernel(str(db_path))
     try:
         harness = EmployeeEvalHarness(kernel)
@@ -127,9 +134,11 @@ def main() -> None:
             encoding="utf-8",
         )
         print(json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True))
+        receipt = verify_report(Path(args.report), Path(args.receipt))
+        return receipt["exit_code"]
     finally:
         kernel.close()
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

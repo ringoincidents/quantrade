@@ -44,6 +44,7 @@ jobs:
             --pace-seconds 20 \
             --db e2a_calibration_wave2.sqlite3 \
             --report e2a_calibration_wave2_report.json
+      # Nonzero runner status does not prevent preserving evidence below.
       - name: Upload calibration artifact
         if: always()
         uses: actions/upload-artifact@v4
@@ -52,6 +53,7 @@ jobs:
           path: |
             e2a_calibration_wave2.sqlite3
             e2a_calibration_wave2_report.json
+            e2a_execution_receipt.json
           if-no-files-found: warn
           retention-days: 30
 
