@@ -3,8 +3,8 @@
     "BTAIQ": "2026-09-23"
   },
   "last_snapshot": {
-    "synced_at": "2026-09-24T12:48:23.461519+00:00",
-    "cash": 288.14730000000003,
+    "synced_at": "2026-09-25T12:51:23.736434+00:00",
+    "cash": 2569.644,
     "positions": [
       {
         "symbol": "004000",
@@ -25,10 +25,10 @@
         "currency": "USD",
         "quantity": "16",
         "avg_price": "0.1067",
-        "current_price": "0.045",
-        "eval_amount": 0.72,
-        "eval_amount_krw": 987.9336000000001,
-        "return_pct": -57.82000000000001
+        "current_price": "0.0353",
+        "eval_amount": 0.5648,
+        "eval_amount_krw": 767.90208,
+        "return_pct": -66.91
       },
       {
         "symbol": "VTGN",
@@ -37,10 +37,10 @@
         "currency": "USD",
         "quantity": "1",
         "avg_price": "0.3971",
-        "current_price": "0.3419",
-        "eval_amount": 0.3419,
-        "eval_amount_krw": 469.13124700000003,
-        "return_pct": -13.900000000000002
+        "current_price": "0.2719",
+        "eval_amount": 0.2719,
+        "eval_amount_krw": 369.6752399999999,
+        "return_pct": -31.52
       },
       {
         "symbol": "IONQ",
@@ -49,22 +49,10 @@
         "currency": "USD",
         "quantity": "13",
         "avg_price": "45.3984",
-        "current_price": "41.25",
-        "eval_amount": 536.25,
-        "eval_amount_krw": 735804.7125,
-        "return_pct": -9.13
-      },
-      {
-        "symbol": "ATYR",
-        "name": "어타이어 파마",
-        "market_country": "US",
-        "currency": "USD",
-        "quantity": "4",
-        "avg_price": "0.4848",
-        "current_price": "0.3986",
-        "eval_amount": 1.5944,
-        "eval_amount_krw": 2187.7240720000004,
-        "return_pct": -17.78
+        "current_price": "44.6",
+        "eval_amount": 579.8,
+        "eval_amount_krw": 788296.0799999998,
+        "return_pct": -1.7500000000000002
       },
       {
         "symbol": "SCHD",
@@ -73,10 +61,10 @@
         "currency": "USD",
         "quantity": "60.799361",
         "avg_price": "33.186912",
-        "current_price": "33.38",
-        "eval_amount": 2029.48267,
-        "eval_amount_krw": 2784714.0559871006,
-        "return_pct": 0.58
+        "current_price": "33.08",
+        "eval_amount": 2011.242861,
+        "eval_amount_krw": 2734485.7938155998,
+        "return_pct": -0.32
       },
       {
         "symbol": "TE",
@@ -85,10 +73,10 @@
         "currency": "USD",
         "quantity": "262",
         "avg_price": "4.71687",
-        "current_price": "4.01",
-        "eval_amount": 1050.62,
-        "eval_amount_krw": 1441587.2206,
-        "return_pct": -14.979999999999999
+        "current_price": "3.89",
+        "eval_amount": 1019.18,
+        "eval_amount_krw": 1385677.1279999998,
+        "return_pct": -17.53
       }
     ]
   }
