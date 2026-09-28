@@ -1,6 +1,6 @@
 {
-  "synced_at": "2026-09-28T05:40:09.336271+00:00",
-  "cash": 2586.0899999999997,
+  "synced_at": "2026-09-28T15:42:08.928671+00:00",
+  "cash": 2593.462,
   "positions": [
     {
       "symbol": "004000",
@@ -23,7 +23,7 @@
       "avg_price": "0.1067",
       "current_price": "0.0384",
       "eval_amount": 0.6144,
-      "eval_amount_krw": 836.2598399999998,
+      "eval_amount_krw": 838.6437119999999,
       "return_pct": -64.01
     },
     {
@@ -33,10 +33,10 @@
       "currency": "USD",
       "quantity": "1",
       "avg_price": "0.3971",
-      "current_price": "0.2728",
-      "eval_amount": 0.2728,
-      "eval_amount_krw": 371.30807999999996,
-      "return_pct": -31.3
+      "current_price": "0.2914",
+      "eval_amount": 0.2914,
+      "eval_amount_krw": 397.755172,
+      "return_pct": -26.61
     },
     {
       "symbol": "IONQ",
@@ -45,10 +45,10 @@
       "currency": "USD",
       "quantity": "13",
       "avg_price": "45.3984",
-      "current_price": "44.08",
-      "eval_amount": 573.04,
-      "eval_amount_krw": 779964.744,
-      "return_pct": -2.9000000000000004
+      "current_price": "46.2",
+      "eval_amount": 600.6,
+      "eval_amount_krw": 819806.988,
+      "return_pct": 1.76
     },
     {
       "symbol": "SCHD",
@@ -57,10 +57,10 @@
       "currency": "USD",
       "quantity": "60.799361",
       "avg_price": "33.186912",
-      "current_price": "33.24",
-      "eval_amount": 2020.970759,
-      "eval_amount_krw": 2750743.3000749,
-      "return_pct": 0.15
+      "current_price": "33",
+      "eval_amount": 2006.378913,
+      "eval_amount_krw": 2738667.08866674,
+      "return_pct": -0.5599999999999999
     },
     {
       "symbol": "TE",
@@ -69,10 +69,10 @@
       "currency": "USD",
       "quantity": "262",
       "avg_price": "4.71687",
-      "current_price": "3.75",
-      "eval_amount": 982.5,
-      "eval_amount_krw": 1337280.75,
-      "return_pct": -20.49
+      "current_price": "3.62",
+      "eval_amount": 948.44,
+      "eval_amount_krw": 1294601.6312000002,
+      "return_pct": -23.25
     }
   ]
 }
