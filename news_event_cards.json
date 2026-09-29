@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-28T17:49:39.558197+00:00",
+  "generated_at": "2026-09-29T16:09:24.455027+00:00",
   "schema": "explanation_only_v3.2",
   "note": "사실 설명 전용(뉴스 사건 + 정량 이상행동). 방향 예측/확신도/매매 제안 필드가 스키마에 없다 - 누락이 아니라 설계(CLAUDE.md v3.2). 대상은 보유종목+관심종목으로 한정(2026-08-09 스코프 축소).",
   "cards": [
@@ -7,13 +7,20 @@
       "market": "BTAIQ",
       "name": "바이오엑셀 테라퓨틱스",
       "event_type": "이상행동",
-      "summary": "전일 종가 대비 시가 갭 +5.3%, 최근 20일 변동성이 과거 분포 대비 92백분위",
+      "summary": "전일 종가 대비 시가 갭 -24.4%, 최근 20일 변동성이 과거 분포 대비 92백분위",
+      "headlines": []
+    },
+    {
+      "market": "VTGN",
+      "name": "비스타젠 테라퓨틱스",
+      "event_type": "이상행동",
+      "summary": "전일 종가 대비 시가 갭 -4.0%",
       "headlines": []
     }
   ],
   "change_events": [
     {
-      "timestamp": "2026-09-28T00:00:00+00:00",
+      "timestamp": "2026-09-29T00:00:00+00:00",
       "asset": {
         "symbol": "BTAIQ",
         "name": "바이오엑셀 테라퓨틱스",
@@ -22,23 +29,23 @@
       },
       "source": "news_event_cards.anomaly",
       "event_type": "가격_갭",
-      "observed_value": 0.03999999910593033,
-      "baseline": 0.03799999877810478,
-      "change": 5.26,
+      "observed_value": 0.03099999949336052,
+      "baseline": 0.04100000113248825,
+      "change": -24.39,
       "reliability": 1.0,
       "related_assets": [],
       "priority": {
-        "priority_score": 0.0011,
+        "priority_score": 0.0007,
         "factors": {
           "reliability": 1.0,
-          "novelty": 1.0,
+          "novelty": 0.1429,
           "portfolio_relevance": 0.0002,
-          "magnitude": 5.26
+          "magnitude": 24.39
         }
       }
     },
     {
-      "timestamp": "2026-09-28T00:00:00+00:00",
+      "timestamp": "2026-09-29T00:00:00+00:00",
       "asset": {
         "symbol": "BTAIQ",
         "name": "바이오엑셀 테라퓨틱스",
@@ -47,18 +54,43 @@
       },
       "source": "news_event_cards.anomaly",
       "event_type": "변동성_급증",
-      "observed_value": 20.21,
+      "observed_value": 20.51,
       "baseline": null,
-      "change": 91.8,
+      "change": 92.5,
       "reliability": 1.0,
       "related_assets": [],
       "priority": {
-        "priority_score": 0.0079,
+        "priority_score": 0.0026,
         "factors": {
           "reliability": 1.0,
-          "novelty": 0.4286,
+          "novelty": 0.1429,
           "portfolio_relevance": 0.0002,
-          "magnitude": 91.8
+          "magnitude": 92.5
+        }
+      }
+    },
+    {
+      "timestamp": "2026-09-29T00:00:00+00:00",
+      "asset": {
+        "symbol": "VTGN",
+        "name": "비스타젠 테라퓨틱스",
+        "market_country": "US",
+        "currency": "USD"
+      },
+      "source": "news_event_cards.anomaly",
+      "event_type": "가격_갭",
+      "observed_value": 0.2879999876022339,
+      "baseline": 0.30000001192092896,
+      "change": -4.0,
+      "reliability": 1.0,
+      "related_assets": [],
+      "priority": {
+        "priority_score": 0.0004,
+        "factors": {
+          "reliability": 1.0,
+          "novelty": 1.0,
+          "portfolio_relevance": 0.0001,
+          "magnitude": 4.0
         }
       }
     }
