@@ -1,18 +1,18 @@
 {
-  "synced_at": "2026-10-02T05:57:41.985179+00:00",
-  "cash": 4032.102,
+  "synced_at": "2026-10-02T13:59:24.636222+00:00",
+  "cash": 36823.4946,
   "positions": [
     {
-      "symbol": "004000",
-      "name": "롯데정밀화학",
+      "symbol": "196170",
+      "name": "알테오젠",
       "market_country": "KR",
       "currency": "KRW",
-      "quantity": "13",
-      "avg_price": "48700",
-      "current_price": "42700",
-      "eval_amount": 555100.0,
-      "eval_amount_krw": 555100.0,
-      "return_pct": -12.32
+      "quantity": "2",
+      "avg_price": "259500",
+      "current_price": "259500",
+      "eval_amount": 519000.0,
+      "eval_amount_krw": 519000.0,
+      "return_pct": 0.0
     },
     {
       "symbol": "BTAIQ",
@@ -23,7 +23,7 @@
       "avg_price": "0.1067",
       "current_price": "0.045",
       "eval_amount": 0.72,
-      "eval_amount_krw": 974.376,
+      "eval_amount_krw": 971.8703999999999,
       "return_pct": -57.82000000000001
     },
     {
@@ -33,22 +33,34 @@
       "currency": "USD",
       "quantity": "1",
       "avg_price": "0.3971",
-      "current_price": "0.291",
-      "eval_amount": 0.291,
-      "eval_amount_krw": 393.8103,
-      "return_pct": -26.71
+      "current_price": "0.2896",
+      "eval_amount": 0.2896,
+      "eval_amount_krw": 390.907872,
+      "return_pct": -27.07
     },
     {
       "symbol": "IONQ",
       "name": "아이온큐",
       "market_country": "US",
       "currency": "USD",
-      "quantity": "13",
-      "avg_price": "45.3984",
-      "current_price": "44.19",
-      "eval_amount": 574.47,
-      "eval_amount_krw": 777430.251,
-      "return_pct": -2.6599999999999997
+      "quantity": "19",
+      "avg_price": "45.124168",
+      "current_price": "45.02",
+      "eval_amount": 855.38,
+      "eval_amount_krw": 1154609.0315999999,
+      "return_pct": -0.22999999999999998
+    },
+    {
+      "symbol": "AAPL",
+      "name": "애플",
+      "market_country": "US",
+      "currency": "USD",
+      "quantity": "0.009663",
+      "avg_price": "333.209976",
+      "current_price": "332.04",
+      "eval_amount": 3.208502,
+      "eval_amount_krw": 4330.90016964,
+      "return_pct": -0.35000000000000003
     },
     {
       "symbol": "SCHD",
@@ -57,22 +69,22 @@
       "currency": "USD",
       "quantity": "60.799361",
       "avg_price": "33.186912",
-      "current_price": "32.76",
-      "eval_amount": 1991.787066,
-      "eval_amount_krw": 2695485.4364178,
-      "return_pct": -1.28
+      "current_price": "32.75",
+      "eval_amount": 1991.179072,
+      "eval_amount_krw": 2687733.3349670395,
+      "return_pct": -1.31
     },
     {
       "symbol": "TE",
       "name": "T1 에너지",
       "market_country": "US",
       "currency": "USD",
-      "quantity": "267",
-      "avg_price": "4.695955",
-      "current_price": "3.75",
-      "eval_amount": 1001.25,
-      "eval_amount_krw": 1354991.625,
-      "return_pct": -20.14
+      "quantity": "274",
+      "avg_price": "4.671788",
+      "current_price": "3.93",
+      "eval_amount": 1076.82,
+      "eval_amount_krw": 1453513.1723999998,
+      "return_pct": -15.870000000000001
     }
   ]
 }
