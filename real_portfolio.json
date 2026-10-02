@@ -1,6 +1,6 @@
 {
-  "synced_at": "2026-10-01T14:39:16.745966+00:00",
-  "cash": 4042.066,
+  "synced_at": "2026-10-02T05:57:41.985179+00:00",
+  "cash": 4032.102,
   "positions": [
     {
       "symbol": "004000",
@@ -9,10 +9,10 @@
       "currency": "KRW",
       "quantity": "13",
       "avg_price": "48700",
-      "current_price": "42650",
-      "eval_amount": 554450.0,
-      "eval_amount_krw": 554450.0,
-      "return_pct": -12.42
+      "current_price": "42700",
+      "eval_amount": 555100.0,
+      "eval_amount_krw": 555100.0,
+      "return_pct": -12.32
     },
     {
       "symbol": "BTAIQ",
@@ -21,10 +21,10 @@
       "currency": "USD",
       "quantity": "16",
       "avg_price": "0.1067",
-      "current_price": "0.0495",
-      "eval_amount": 0.792,
-      "eval_amount_krw": 1080.2088,
-      "return_pct": -53.6
+      "current_price": "0.045",
+      "eval_amount": 0.72,
+      "eval_amount_krw": 974.376,
+      "return_pct": -57.82000000000001
     },
     {
       "symbol": "VTGN",
@@ -33,10 +33,10 @@
       "currency": "USD",
       "quantity": "1",
       "avg_price": "0.3971",
-      "current_price": "0.3034",
-      "eval_amount": 0.3034,
-      "eval_amount_krw": 413.80726000000004,
-      "return_pct": -23.59
+      "current_price": "0.291",
+      "eval_amount": 0.291,
+      "eval_amount_krw": 393.8103,
+      "return_pct": -26.71
     },
     {
       "symbol": "IONQ",
@@ -45,10 +45,10 @@
       "currency": "USD",
       "quantity": "13",
       "avg_price": "45.3984",
-      "current_price": "44.37",
-      "eval_amount": 576.81,
-      "eval_amount_krw": 786711.159,
-      "return_pct": -2.26
+      "current_price": "44.19",
+      "eval_amount": 574.47,
+      "eval_amount_krw": 777430.251,
+      "return_pct": -2.6599999999999997
     },
     {
       "symbol": "SCHD",
@@ -57,10 +57,10 @@
       "currency": "USD",
       "quantity": "60.799361",
       "avg_price": "33.186912",
-      "current_price": "32.66",
-      "eval_amount": 1985.70713,
-      "eval_amount_krw": 2708305.954607,
-      "return_pct": -1.58
+      "current_price": "32.76",
+      "eval_amount": 1991.787066,
+      "eval_amount_krw": 2695485.4364178,
+      "return_pct": -1.28
     },
     {
       "symbol": "TE",
@@ -69,10 +69,10 @@
       "currency": "USD",
       "quantity": "267",
       "avg_price": "4.695955",
-      "current_price": "3.69",
-      "eval_amount": 985.23,
-      "eval_amount_krw": 1343755.1970000002,
-      "return_pct": -21.42
+      "current_price": "3.75",
+      "eval_amount": 1001.25,
+      "eval_amount_krw": 1354991.625,
+      "return_pct": -20.14
     }
   ]
 }
