@@ -628,6 +628,54 @@ class AutonomousWorkEngine:
         mandate = self.capital.get_mandate(mandate_id)
         created: list[str] = []
 
+        from .strategy_director import compile_company_strategy
+
+        strategy_directive = compile_company_strategy(
+            mandate=mandate,
+            client_state=institutional_state.get("client_state") or {},
+            portfolio_state={
+                **(institutional_state.get("portfolio_state") or {}),
+                "risk_policy_breach": bool(
+                    (institutional_state.get("risk_state") or {}).get(
+                        "policy_breach"
+                    )
+                ),
+                "material_allocation_gap": bool(
+                    (institutional_state.get("allocation_gap") or {}).get(
+                        "material"
+                    )
+                ),
+            },
+            research_state=institutional_state.get("research_state") or {},
+        )
+        institutional_state["strategy_directive"] = strategy_directive
+
+        if strategy_directive["posture"] in {
+            "LIQUIDITY_FIRST",
+            "CLIENT_REVIEW_REQUIRED",
+        }:
+            wid = self._emit(
+                mandate_id,
+                trigger_type="CLIENT_STRATEGY_DIRECTIVE",
+                payload=strategy_directive,
+                recipient_office="CCO",
+                objective=(
+                    "Coordinate the current Client Strategy Directive with Portfolio "
+                    "Management and Risk. Preserve required liquidity and explicit client "
+                    "constraints. Produce a review/rebalancing plan; do not create live "
+                    "orders or raise risk limits. Directive: "
+                    + _json(strategy_directive)
+                ),
+                urgency="HIGH",
+            )
+            if wid:
+                created.append(wid)
+
+            # Liquidity shortfall is a hard sequencing gate. Opportunity-seeking
+            # work waits until the client constraint is resolved or superseded.
+            if strategy_directive["posture"] == "LIQUIDITY_FIRST":
+                return created
+
         if mandate["planning_conflicts"]:
             wid = self._emit(
                 mandate_id,
