@@ -5,6 +5,7 @@ import unittest
 from quantrade.institutional.ceo_observer import (
     CEOImprovementPolicy,
     QuanTradeCEOObserver,
+    build_ceo_proposals_read_model,
 )
 from quantrade.institutional.strategy_director import compile_company_strategy
 
@@ -81,6 +82,33 @@ class QuanTradeCEOObserverTests(unittest.TestCase):
         self.assertIn("MODEL_COST_BOTTLENECK", issue_types)
         self.assertTrue(all(p["requires_hq_review"] for p in proposals))
         self.assertTrue(all(not p["auto_apply"] for p in proposals))
+        self.assertTrue(all(p["proposal_id"].startswith("QTPROP-") for p in proposals))
+        self.assertEqual(
+            [p["proposal_id"] for p in proposals],
+            [
+                p["proposal_id"]
+                for p in observer.review(
+                    decision_episodes=[
+                        {"workflow_latency_proxy_ms": 2000, "model_cost_usd": 0.02},
+                        {"workflow_latency_proxy_ms": 1500, "model_cost_usd": 0.03},
+                        {"workflow_latency_proxy_ms": 2500, "model_cost_usd": 0.04},
+                    ]
+                )
+            ],
+        )
+
+    def test_proposals_build_versioned_read_model(self):
+        observer = QuanTradeCEOObserver(CEOImprovementPolicy(repeat_threshold=1))
+        proposals = observer.review(
+            capability_gaps=[{"capability": "market_state_cache"}],
+        )
+        doc = build_ceo_proposals_read_model(
+            proposals,
+            generated_at="2026-10-03T08:00:00+00:00",
+        )
+        self.assertEqual("quantrade_ceo_proposals_v1", doc["schema"])
+        self.assertEqual("QUANTRADE_LLM_CEO", doc["source"])
+        self.assertEqual(proposals, doc["proposals"])
 
     def test_single_failure_does_not_spam_hq(self):
         observer = QuanTradeCEOObserver(CEOImprovementPolicy(repeat_threshold=3))
