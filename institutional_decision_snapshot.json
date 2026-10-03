@@ -1,0 +1,95 @@
+{
+  "schema": "quantrade_institutional_decision_snapshot_v1",
+  "experiment_id": "QT-LIVE-002",
+  "mode": "PAPER_REPLAY",
+  "live_execution_authorized": false,
+  "publication_status": "PARTIAL_TELEMETRY",
+  "decision_episode": {
+    "episode_id": "QT-LIVE-002-REPLAY-ENTER-NOW-V1",
+    "episode_kind": "INSTITUTIONAL_REPLAY",
+    "symbol": "BTCUSDT",
+    "linked_live_trade": false,
+    "committee_action": "ENTER_NOW",
+    "founder_route": "FOUNDER_DESK",
+    "real_founder_approval_recorded": false,
+    "broker_side_effect": false,
+    "decision_path": [
+      {
+        "stage": "RESEARCH",
+        "status": "COMPLETE"
+      },
+      {
+        "stage": "PORTFOLIO",
+        "status": "COMPLETE"
+      },
+      {
+        "stage": "RISK",
+        "status": "COMPLETE"
+      },
+      {
+        "stage": "ADVERSARIAL",
+        "status": "COMPLETE"
+      },
+      {
+        "stage": "COMMITTEE",
+        "status": "COMPLETE"
+      },
+      {
+        "stage": "DECISION_PLAN",
+        "status": "COMPLETE"
+      },
+      {
+        "stage": "EXECUTION",
+        "status": "SIMULATED"
+      }
+    ]
+  },
+  "market_context": {
+    "source_artifact": "paper_trading_snapshot.json",
+    "source_schema": "quantrade_trading_floor_v1",
+    "source_generated_at": "2026-10-03T07:08:22.567096+00:00",
+    "venue": "BINANCE_SPOT",
+    "symbol": "BTCUSDT",
+    "observed_price": 84589.26,
+    "observed_at": "2026-10-03T07:08:22.567096+00:00",
+    "source": "https://data-api.binance.vision/api/v3/ticker/price?symbol=BTCUSDT"
+  },
+  "economics": {
+    "telemetry_status": "PARTIAL",
+    "model_telemetry_available": false,
+    "model_call_count": null,
+    "input_tokens": null,
+    "output_tokens": null,
+    "reasoning_tokens": null,
+    "model_cost_usd": null,
+    "model_latency_ms": null,
+    "deterministic_feature_latency_ms": null,
+    "chart_render_latency_ms": null,
+    "workflow_latency_ms": null,
+    "market_move_during_deliberation_bps": null,
+    "fill_slippage_bps": 5,
+    "fee_usd": 0.029970029970029975,
+    "pricing_snapshot_id": null,
+    "note": "Model/token/decision-latency economics are intentionally null until persisted QT-LIVE-002 telemetry is published. Fill slippage and fee are copied from the current QT-LIVE-001 paper artifact and are not attributed to the replay."
+  },
+  "shock": {
+    "episode_present": false,
+    "severity": null,
+    "return_pct": null,
+    "window_seconds": null,
+    "containment_actions": []
+  },
+  "baseline_comparison": {
+    "available": false,
+    "results": [],
+    "note": "DIRECT_RULE / SINGLE_AGENT / INSTITUTIONAL / INSTITUTIONAL_VISION are not ranked until a comparable published replay artifact exists."
+  },
+  "projection_provenance": {
+    "role": "published_read_model",
+    "source_implementation_pr": 90,
+    "source_implementation_commit": "046927ba31399adbe4a9fdcfd432548ef4bb8ebf",
+    "source_implementation_base": "architecture/p0-5-gap-audit",
+    "source_market_artifact": "paper_trading_snapshot.json",
+    "note": "Read-only Holdings projection. The institutional replay implementation is experiment/PAPER-first and this artifact grants no execution authority."
+  }
+}
