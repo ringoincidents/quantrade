@@ -27,7 +27,27 @@ def _bars(count: int = 120):
     return rows
 
 
-def _brief(*, ready: bool, missing=None, facts=None):
+def _brief(*, ready: bool, missing=None, facts=None, invalid=None, envelope=None):
+    private_envelope = envelope or {
+        "schema": "quantrade_private_strategy_envelope_v1",
+        "normalized_facts": {},
+        "invalid_information": invalid or [],
+        "client_state": {},
+        "mandate": {
+            "planning_conflicts": [],
+            "human_approval_required_for_live_execution": True,
+        },
+        "risk_capacity": {},
+        "required_external_inputs": [
+            "current_liquid_assets_snapshot",
+            "current_portfolio_snapshot",
+        ],
+        "boundaries": {
+            "free_text_inference_performed": False,
+            "investment_decision_authority": False,
+            "public_persistence_allowed": False,
+        },
+    }
     return {
         "schema": "quantrade_private_client_strategy_brief_v1",
         "source": "LLM_HOLDINGS_CLIENT_INTELLIGENCE",
@@ -37,6 +57,8 @@ def _brief(*, ready: bool, missing=None, facts=None):
         "requested_keys": ["goals.short_term"],
         "facts": facts or [],
         "missing_information": missing or [],
+        "invalid_information": invalid or [],
+        "private_strategy_envelope": private_envelope,
         "withheld_client_office_only": [],
         "boundaries": {
             "investment_decision_authority": False,
@@ -76,6 +98,7 @@ class LiveInstitutionalPrecheckTests(unittest.TestCase):
 
     def test_private_client_values_never_enter_public_precheck(self):
         secret = "PRIVATE-CLIENT-VALUE-123"
+        private_amount = 987654321
         result = build_precheck(
             private_client_brief=_brief(
                 ready=True,
@@ -85,6 +108,35 @@ class LiveInstitutionalPrecheckTests(unittest.TestCase):
                         "value": {"secret": secret},
                     }
                 ],
+                envelope={
+                    "schema": "quantrade_private_strategy_envelope_v1",
+                    "normalized_facts": {
+                        "minimum_reserve_krw": private_amount,
+                        "preferred_max_drawdown_pct": 17.25,
+                    },
+                    "invalid_information": [],
+                    "client_state": {
+                        "liquidity_reserve": private_amount,
+                        "urgent_cash_need_amount": 1234567,
+                    },
+                    "mandate": {
+                        "max_drawdown_pct": 17.25,
+                        "planning_conflicts": [],
+                        "human_approval_required_for_live_execution": True,
+                    },
+                    "risk_capacity": {
+                        "effective_max_drawdown_pct": 17.25,
+                    },
+                    "required_external_inputs": [
+                        "current_liquid_assets_snapshot",
+                        "current_portfolio_snapshot",
+                    ],
+                    "boundaries": {
+                        "free_text_inference_performed": False,
+                        "investment_decision_authority": False,
+                        "public_persistence_allowed": False,
+                    },
+                },
             ),
             bars=_bars(),
             symbol="BTCUSDT",
@@ -95,10 +147,43 @@ class LiveInstitutionalPrecheckTests(unittest.TestCase):
 
         serialized = json.dumps(result, ensure_ascii=False)
         self.assertNotIn(secret, serialized)
+        self.assertNotIn(str(private_amount), serialized)
+        self.assertNotIn("liquidity_shortfall", serialized)
+        self.assertNotIn("max_drawdown_pct", serialized)
         self.assertTrue(result["client_context"]["strategy_ready"])
         self.assertEqual(1, result["client_context"]["available_fact_count"])
         self.assertFalse(result["client_context"]["raw_values_persisted"])
         self.assertFalse(result["privacy"]["private_client_values_in_output"])
+        self.assertFalse(result["privacy"]["private_strategy_values_in_output"])
+        self.assertTrue(
+            result["strategy_directive"]["private_constraints_applied"]
+        )
+        self.assertFalse(
+            result["strategy_directive"]["sensitive_values_persisted"]
+        )
+
+    def test_invalid_structured_client_context_still_blocks_review(self):
+        result = build_precheck(
+            private_client_brief=_brief(
+                ready=False,
+                invalid=["risk.capacity"],
+            ),
+            bars=_bars(),
+            symbol="BTCUSDT",
+            timeframe="4h",
+            market_source="fixture://binance",
+            run_id="RUN-INVALID",
+        )
+
+        self.assertEqual("CLIENT_STRATEGY_REVIEW", result["next_stage"])
+        self.assertIn(
+            "risk.capacity",
+            result["client_context"]["invalid_information_keys"],
+        )
+        self.assertEqual(
+            "CLIENT_REVIEW_REQUIRED",
+            result["strategy_directive"]["posture"],
+        )
 
     def test_ready_client_context_does_not_create_execution(self):
         result = build_precheck(
