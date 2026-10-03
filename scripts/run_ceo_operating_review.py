@@ -213,10 +213,20 @@ def main() -> None:
         encoding="utf-8",
     )
 
+    hq_outcome_count = 0
+    if (
+        isinstance(hq_outcomes, dict)
+        and hq_outcomes.get("schema") == "quantrade_hq_outcomes_v1"
+        and isinstance(hq_outcomes.get("proposals"), list)
+    ):
+        hq_outcome_count = len(hq_outcomes["proposals"])
+
     print(json.dumps({
         "history_schema": history["schema"],
         "unique_decision_episodes": len(latest_decision_episodes(history)),
         "proposal_count": len(feed["proposals"]),
+        "hq_outcomes_loaded": hq_outcomes is not None,
+        "hq_outcome_count": hq_outcome_count,
         "reviewed_at": reviewed_at,
     }, ensure_ascii=False))
 
