@@ -21,6 +21,7 @@ def _precheck(*, ready: bool = True, next_stage: str = "BOUNDED_AI_REVIEW"):
         "schema": "quantrade_institutional_case_precheck_v1",
         "run_id": "RUN-DEPT-001",
         "mode": "PAPER_PRECHECK",
+        "market_source": "https://data-api.binance.vision/api/v3/klines?symbol=BTCUSDT&interval=4h&limit=120",
         "market_state": {
             "schema": "quantrade_market_state_v1",
             "symbol": "BTCUSDT",
@@ -110,12 +111,9 @@ class DepartmentalReviewTests(unittest.TestCase):
                     {
                         "tool_name": "case.submit_research_evidence",
                         "arguments": {
-                            "source": "fixture://market-research",
-                            "fact": "Observed evidence relevant to the review.",
-                            "provenance": {
-                                "url": "fixture://market-research",
-                                "quality": "fixture",
-                            },
+                            "evidence_key": "MARKET_STATE",
+                            "source": "https://invented.invalid/fake",
+                            "fact": "invented fact that must be ignored",
                         },
                     },
                 ),
@@ -233,6 +231,78 @@ class DepartmentalReviewTests(unittest.TestCase):
         case = self.kernel.get_case(result["case_id"])
         self.assertEqual("COMMITTEE", case["status"])
         self.assertTrue(self.kernel.verify_ledger_chain())
+
+    def test_research_model_cannot_invent_canonical_source_or_fact(self):
+        coordinator = BoundedDepartmentalReview(
+            self.kernel,
+            self._provider_factory,
+        )
+        result = coordinator.run(
+            precheck=_precheck(),
+            private_strategy_envelope=_private_envelope(),
+            portfolio_snapshot={"cash_usd": 30.0, "positions": []},
+            deterministic_risk_result={"policy_breach": False},
+            risk_policy_version="fixture-risk-v1",
+        )
+
+        row = self.kernel.conn.execute(
+            "SELECT source,fact,provenance FROM evidence WHERE case_id=?",
+            (result["case_id"],),
+        ).fetchone()
+        self.assertEqual(
+            "https://data-api.binance.vision/api/v3/klines?symbol=BTCUSDT&interval=4h&limit=120",
+            row["source"],
+        )
+        self.assertNotIn("invented.invalid", row["source"])
+        self.assertNotIn("invented fact", row["fact"])
+        fact = json.loads(row["fact"])
+        self.assertEqual("BTCUSDT", fact["symbol"])
+        self.assertEqual("UPTREND", fact["trend"]["regime"])
+        provenance = json.loads(row["provenance"])
+        self.assertEqual(
+            "deterministic_market_state",
+            provenance["source_type"],
+        )
+
+    def test_unknown_evidence_key_fails_without_canonical_evidence(self):
+        def bad_provider_factory(employee_id: str, work_order_id: str):
+            office = self.kernel.conn.execute(
+                "SELECT office_id FROM employees WHERE employee_id=?",
+                (employee_id,),
+            ).fetchone()["office_id"]
+            if office == "IID":
+                return ScriptedModelProvider([
+                    ModelAction(
+                        "TOOL",
+                        {
+                            "tool_name": "case.submit_research_evidence",
+                            "arguments": {"evidence_key": "INVENTED_SOURCE"},
+                        },
+                    ),
+                    ModelAction("FINISH", {"summary": "done"}),
+                ])
+            return self._provider_factory(employee_id, work_order_id)
+
+        coordinator = BoundedDepartmentalReview(
+            self.kernel,
+            bad_provider_factory,
+            max_iterations=3,
+        )
+        with self.assertRaisesRegex(
+            DepartmentalReviewError,
+            "Research produced no canonical Evidence",
+        ):
+            coordinator.run(
+                precheck=_precheck(),
+                private_strategy_envelope=_private_envelope(),
+                portfolio_snapshot={"cash_usd": 30.0, "positions": []},
+                deterministic_risk_result={"policy_breach": False},
+                risk_policy_version="fixture-risk-v1",
+            )
+        count = self.kernel.conn.execute(
+            "SELECT COUNT(*) c FROM evidence"
+        ).fetchone()["c"]
+        self.assertEqual(0, count)
 
     def test_risk_model_cannot_override_deterministic_risk_result(self):
         coordinator = BoundedDepartmentalReview(
