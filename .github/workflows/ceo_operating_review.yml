@@ -37,14 +37,36 @@ jobs:
           path: .quantrade-arch
           persist-credentials: false
 
+      - name: Download private HQ proposal outcomes when authenticated
+        continue-on-error: true
+        env:
+          HOLDINGS_API_TOKEN: ${{ secrets.LLM_HOLDINGS_API_TOKEN }}
+          HOLDINGS_RUNTIME_URL: https://llm-holdings-runtime-production.up.railway.app
+        run: |
+          if [ -z "$HOLDINGS_API_TOKEN" ]; then
+            echo "LLM_HOLDINGS_API_TOKEN is not configured; CEO review continues without HQ feedback."
+            exit 0
+          fi
+          curl --fail --silent --show-error \
+            --retry 2 \
+            --max-time 20 \
+            -H "Authorization: Bearer $HOLDINGS_API_TOKEN" \
+            "$HOLDINGS_RUNTIME_URL/clients/quantrade/ceo/proposal-outcomes" \
+            -o hq_outcomes.json
+
       - name: Compile deterministic CEO operating review
         env:
           PYTHONPATH: .quantrade-arch
         run: |
+          EXTRA_ARGS=""
+          if [ -f hq_outcomes.json ]; then
+            EXTRA_ARGS="--hq-outcomes hq_outcomes.json"
+          fi
           python .quantrade-arch/scripts/run_ceo_operating_review.py \
             --decision-snapshot institutional_decision_snapshot.json \
             --history ceo_operating_history.json \
-            --output ceo_improvement_proposals.json
+            --output ceo_improvement_proposals.json \
+            $EXTRA_ARGS
 
       - name: Publish review state
         run: |
