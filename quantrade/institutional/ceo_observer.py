@@ -87,11 +87,23 @@ class QuanTradeCEOObserver:
         decision_episodes: list[dict[str, Any]] | None = None,
         operational_events: list[dict[str, Any]] | None = None,
         capability_gaps: list[dict[str, Any]] | None = None,
+        hq_outcomes: dict[str, Any] | None = None,
     ) -> list[dict[str, Any]]:
         decision_episodes = decision_episodes or []
         operational_events = operational_events or []
         capability_gaps = capability_gaps or []
         proposals: list[dict[str, Any]] = []
+
+        known_hq_ids: set[str] = set()
+        if hq_outcomes is not None:
+            if hq_outcomes.get("schema") != "quantrade_hq_outcomes_v1":
+                raise ValueError("unsupported HQ outcome feedback schema")
+            for item in hq_outcomes.get("proposals") or []:
+                if not isinstance(item, dict):
+                    continue
+                proposal_id = str(item.get("external_proposal_id") or "").strip()
+                if proposal_id:
+                    known_hq_ids.add(proposal_id)
 
         measured_latency = [
             float(e["workflow_latency_proxy_ms"])
@@ -190,4 +202,11 @@ class QuanTradeCEOObserver:
                 required_labs=["runtime", "quantrade"],
             ))
 
-        return proposals
+        # Exact same evidence produces the same deterministic proposal_id.
+        # If HQ already knows that id, do not blindly re-submit it. Materially
+        # changed evidence creates a new id and can be reviewed as a new claim.
+        return [
+            proposal
+            for proposal in proposals
+            if proposal["proposal_id"] not in known_hq_ids
+        ]
