@@ -53,8 +53,9 @@ class ChartWorkstationTests(unittest.TestCase):
         names = [t["name"] for t in self.tools.discover(self.employee)]
         self.assertEqual(
             [
-                "chart.candlestick_spec", "market.catalog", "market.event_scan",
-                "market.ohlcv", "technical.event_study", "technical.indicators",
+                "ai.call_gate", "chart.candlestick_spec", "market.catalog",
+                "market.event_scan", "market.ohlcv", "technical.event_study",
+                "technical.indicators", "technical.market_state",
             ],
             names,
         )
@@ -196,6 +197,53 @@ class ChartWorkstationTests(unittest.TestCase):
     def test_no_execution_capability(self):
         names = [t["name"] for t in self.tools.discover(self.employee)]
         self.assertTrue(all("broker" not in n and "submit_order" not in n for n in names))
+
+
+    def test_market_state_compiler_compresses_chart_for_ai(self):
+        data = self.market.ohlcv({"symbol": "KRX001", "timeframe": "D"})
+        state = self.tools.invoke(
+            employee_id=self.employee,
+            work_order_id=self.order,
+            tool_name="technical.market_state",
+            arguments={
+                "symbol": "KRX001",
+                "timeframe": "D",
+                "bars": data["bars"],
+            },
+        )
+        self.assertEqual("quantrade_market_state_v1", state["schema"])
+        self.assertEqual("KRX001", state["symbol"])
+        self.assertIn(state["trend"]["regime"], {"UPTREND", "DOWNTREND", "MIXED"})
+        self.assertIn("rsi14", state["momentum"])
+        self.assertIn("macd_histogram", state["trend"])
+        self.assertIn("multiple", state["volume"])
+        self.assertTrue(state["candle"]["labels"])
+
+    def test_ai_call_gate_stays_as_review_gate_not_trade_decision(self):
+        data = self.market.ohlcv({"symbol": "KRX001", "timeframe": "D"})
+        state = self.tools.invoke(
+            employee_id=self.employee,
+            work_order_id=self.order,
+            tool_name="technical.market_state",
+            arguments={
+                "symbol": "KRX001",
+                "timeframe": "D",
+                "bars": data["bars"],
+            },
+        )
+        gate = self.tools.invoke(
+            employee_id=self.employee,
+            work_order_id=self.order,
+            tool_name="ai.call_gate",
+            arguments={
+                "market_state": state,
+                "portfolio_state": {"material_allocation_gap": True},
+            },
+        )
+        self.assertTrue(gate["call_ai"])
+        self.assertIn("SPMG", gate["required_offices"])
+        self.assertNotIn("BUY", gate.values())
+        self.assertIn("cannot approve or execute", gate["policy"])
 
 
 if __name__ == "__main__":
