@@ -1,8 +1,29 @@
 {
   "schema": "quantrade_ceo_operating_history_v1",
-  "decision_episode_versions": [],
+  "decision_episode_versions": [
+    {
+      "episode_id": "QT-LIVE-002-REPLAY-ENTER-NOW-V1",
+      "evidence_hash": "e006e0cd9ae628e90706a6ba72d78153aed80414d666b45e4305dcc5382e8331",
+      "recorded_at": "2026-10-03T08:39:00.225512+00:00",
+      "publication_status": "PARTIAL_TELEMETRY",
+      "workflow_latency_proxy_ms": null,
+      "model_cost_usd": null,
+      "model_call_count": null,
+      "model_telemetry_available": false,
+      "market_move_during_deliberation_bps": null,
+      "source_provenance": {
+        "role": "published_read_model",
+        "source_implementation_pr": 90,
+        "source_implementation_commit": "046927ba31399adbe4a9fdcfd432548ef4bb8ebf",
+        "source_implementation_base": "architecture/p0-5-gap-audit",
+        "source_market_artifact": "paper_trading_snapshot.json",
+        "note": "Read-only Holdings projection. The institutional replay implementation is experiment/PAPER-first and this artifact grants no execution authority."
+      },
+      "revision": 1
+    }
+  ],
   "operational_events": [],
   "capability_gaps": [],
-  "last_reviewed_at": null,
+  "last_reviewed_at": "2026-10-03T08:39:00.225512+00:00",
   "note": "Append-only operating evidence for the QuanTrade CEO observer. Repeated publication of the same episode does not count as new evidence."
 }
