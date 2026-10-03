@@ -36,6 +36,28 @@ def _bars_from_binance(candles) -> list[dict[str, Any]]:
     ]
 
 
+def _sanitize_strategy_directive(
+    directive: dict[str, Any],
+) -> dict[str, Any]:
+    """Remove private Client financial values before public persistence."""
+
+    return {
+        "schema": directive.get("schema"),
+        "posture": directive.get("posture"),
+        "objective": directive.get("objective"),
+        "actions": list(directive.get("actions") or []),
+        "reasons": list(directive.get("reasons") or []),
+        "required_offices": list(directive.get("required_offices") or []),
+        "human_approval_required_for_live_execution": bool(
+            directive.get("human_approval_required_for_live_execution")
+        ),
+        "execution_authority": bool(directive.get("execution_authority")),
+        "private_constraints_applied": True,
+        "sensitive_values_persisted": False,
+        "policy_note": directive.get("policy_note"),
+    }
+
+
 def build_precheck(
     *,
     private_client_brief: dict[str, Any],
@@ -57,25 +79,49 @@ def build_precheck(
 
     strategy_ready = bool(private_client_brief.get("strategy_ready"))
     missing = list(private_client_brief.get("missing_information") or [])
+    invalid = list(private_client_brief.get("invalid_information") or [])
     withheld = list(
         private_client_brief.get("withheld_client_office_only") or []
     )
     facts = list(private_client_brief.get("facts") or [])
 
-    # Raw Client values are intentionally not copied into the public artifact.
-    planning_conflicts: list[str] = []
+    strategy_envelope = (
+        private_client_brief.get("private_strategy_envelope") or {}
+    )
+    if strategy_ready and (
+        strategy_envelope.get("schema")
+        != "quantrade_private_strategy_envelope_v1"
+    ):
+        raise ValueError(
+            "strategy-ready Client brief requires private strategy envelope"
+        )
+
+    private_client_state = dict(
+        strategy_envelope.get("client_state") or {}
+    )
+    private_mandate = dict(strategy_envelope.get("mandate") or {})
+    planning_conflicts = list(
+        private_mandate.get("planning_conflicts") or []
+    )
     if not strategy_ready:
         planning_conflicts.append("CLIENT_INTELLIGENCE_INCOMPLETE")
+    if invalid:
+        planning_conflicts.append("CLIENT_INFORMATION_INVALID")
+    private_mandate["planning_conflicts"] = list(
+        dict.fromkeys(planning_conflicts)
+    )
+    private_mandate[
+        "human_approval_required_for_live_execution"
+    ] = True
 
-    mandate = {
-        "planning_conflicts": planning_conflicts,
-        "human_approval_required_for_live_execution": True,
-    }
-    strategy_directive = compile_company_strategy(
-        mandate=mandate,
-        client_state={},
+    private_strategy_directive = compile_company_strategy(
+        mandate=private_mandate,
+        client_state=private_client_state,
         portfolio_state={},
         research_state={},
+    )
+    strategy_directive = _sanitize_strategy_directive(
+        private_strategy_directive
     )
 
     market_state = MarketStateCompiler.compile(
@@ -88,7 +134,7 @@ def build_precheck(
     ai_gate = AICallGate.evaluate(
         {
             "market_state": market_state,
-            "mandate_state": mandate,
+            "mandate_state": private_mandate,
             "portfolio_state": {},
             "research_state": {},
         }
@@ -114,7 +160,12 @@ def build_precheck(
             "strategy_ready": strategy_ready,
             "available_fact_count": len(facts),
             "missing_information_keys": missing,
+            "invalid_information_keys": invalid,
             "withheld_information_keys": withheld,
+            "structured_constraint_count": len(
+                (strategy_envelope.get("normalized_facts") or {})
+            ),
+            "private_strategy_envelope_applied": bool(strategy_envelope),
             "raw_values_persisted": False,
             "source_request_id": private_client_brief.get("request_id"),
             "source_brief_id": private_client_brief.get("brief_id"),
@@ -131,6 +182,7 @@ def build_precheck(
         },
         "privacy": {
             "private_client_values_in_output": False,
+            "private_strategy_values_in_output": False,
             "private_client_input_should_be_deleted_after_run": True,
         },
         "note": (
