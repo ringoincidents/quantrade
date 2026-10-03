@@ -1,0 +1,117 @@
+name: QT-LIVE-001 Paper Loop
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "23 */4 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: qt-live-001-paper-loop
+  cancel-in-progress: false
+
+jobs:
+  paper-loop:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout published state
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: published
+          fetch-depth: 0
+
+      - name: Checkout QuanTrade experiment engine
+        uses: actions/checkout@v4
+        with:
+          ref: architecture/p0-5-gap-audit
+          path: engine
+          fetch-depth: 1
+
+      - name: Restore durable paper state
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -f published/paper_trading_state.json ]; then
+            cp published/paper_trading_state.json engine/paper_trading_state.json
+          fi
+
+      - name: Run paper-only Binance observation
+        working-directory: engine
+        env:
+          PYTHONPATH: .
+        run: |
+          set -euo pipefail
+          python scripts/run_binance_paper_lab.py \
+            --symbol BTCUSDT \
+            --interval 4h \
+            --capital-usd 30 \
+            --fee-rate 0.001 \
+            --slippage-bps 5 \
+            --base-url https://data-api.binance.vision \
+            --state paper_trading_state.json \
+            --output paper_trading_snapshot.json
+
+      - name: Publish canonical paper read model
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git -C published pull --rebase origin main
+
+          cp engine/paper_trading_state.json published/paper_trading_state.json
+          cp engine/paper_trading_snapshot.json published/paper_trading_snapshot.json
+
+          python - <<'PY'
+          import json
+          import subprocess
+          from pathlib import Path
+
+          engine_sha = subprocess.check_output(
+              ["git", "-C", "engine", "rev-parse", "HEAD"],
+              text=True,
+          ).strip()
+
+          path = Path("published/paper_trading_snapshot.json")
+          payload = json.loads(path.read_text(encoding="utf-8"))
+          payload["projection_provenance"] = {
+              "role": "published_read_model",
+              "engine_branch": "architecture/p0-5-gap-audit",
+              "engine_commit": engine_sha,
+              "scheduler": ".github/workflows/qt_live_001_paper.yml",
+              "note": (
+                  "Paper-only state published for Holdings projection. "
+                  "This artifact is not execution authority."
+              ),
+          }
+          path.write_text(
+              json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          PY
+
+          git -C published config user.name "quantrade-paper-bot"
+          git -C published config user.email "actions@users.noreply.github.com"
+          git -C published add paper_trading_state.json paper_trading_snapshot.json
+
+          if git -C published diff --cached --quiet; then
+            echo "No paper-state change to publish."
+            exit 0
+          fi
+
+          git -C published commit -m "experiment: update QT-LIVE-001 paper state"
+
+          for attempt in 1 2 3; do
+            if git -C published push origin HEAD:main; then
+              exit 0
+            fi
+            echo "Push raced another state writer; retrying ($attempt/3)."
+            git -C published pull --rebase origin main
+          done
+
+          echo "Failed to publish QT-LIVE-001 state after retries."
+          exit 1
