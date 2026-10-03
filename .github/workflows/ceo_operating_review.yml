@@ -12,6 +12,7 @@ on:
 
 permissions:
   contents: write
+  id-token: write
 
 concurrency:
   group: quantrade-ceo-operating-review
@@ -37,21 +38,27 @@ jobs:
           path: .quantrade-arch
           persist-credentials: false
 
-      - name: Download private HQ proposal outcomes when authenticated
+      - name: Download private HQ proposal outcomes with GitHub OIDC
         continue-on-error: true
         env:
-          HOLDINGS_API_TOKEN: ${{ secrets.LLM_HOLDINGS_API_TOKEN }}
           HOLDINGS_RUNTIME_URL: https://llm-holdings-runtime-production.up.railway.app
+          HOLDINGS_OIDC_AUDIENCE: llm-holdings-quantrade-ceo-outcomes
         run: |
-          if [ -z "$HOLDINGS_API_TOKEN" ]; then
-            echo "LLM_HOLDINGS_API_TOKEN is not configured; CEO review continues without HQ feedback."
-            exit 0
-          fi
+          set -euo pipefail
+          OIDC_RESPONSE="$(curl --fail --silent --show-error \
+            --retry 2 \
+            --max-time 20 \
+            -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=$HOLDINGS_OIDC_AUDIENCE")"
+          OIDC_TOKEN="$(printf '%s' "$OIDC_RESPONSE" | python -c \
+            'import json,sys; print(json.load(sys.stdin)["value"])')"
+          test -n "$OIDC_TOKEN"
+          echo "::add-mask::$OIDC_TOKEN"
           curl --fail --silent --show-error \
             --retry 2 \
             --max-time 20 \
-            -H "Authorization: Bearer $HOLDINGS_API_TOKEN" \
-            "$HOLDINGS_RUNTIME_URL/clients/quantrade/ceo/proposal-outcomes" \
+            -H "Authorization: Bearer $OIDC_TOKEN" \
+            "$HOLDINGS_RUNTIME_URL/clients/quantrade/ceo/proposal-outcomes/github-oidc" \
             -o hq_outcomes.json
 
       - name: Compile deterministic CEO operating review
