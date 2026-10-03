@@ -446,21 +446,45 @@ class BoundedDepartmentalReview:
             constraints={**common_public, "evidence_refs": evidence_refs},
         )
 
-        private_risk = dict(private_strategy_envelope.get("risk_capacity") or {})
+        risk_status_for_model = {
+            "deterministic": bool(
+                deterministic_risk_result.get("deterministic", True)
+            ),
+            "llm_used_in_calculation": bool(
+                deterministic_risk_result.get("llm_used", False)
+            ),
+            "policy_breach": bool(
+                deterministic_risk_result.get("policy_breach", False)
+            ),
+            "drawdown_limit_breach": bool(
+                deterministic_risk_result.get(
+                    "drawdown_limit_breach",
+                    False,
+                )
+            ),
+            "validation_warning": deterministic_risk_result.get(
+                "validation_warning"
+            ),
+            "limitations": list(
+                deterministic_risk_result.get("limitations") or []
+            ),
+            "live_execution_authorized": False,
+        }
         risk = self._run_employee(
             employee_id=employees.risk,
             office="IPRO",
             case_id=case_id,
             objective=(
-                "Interpret the bound deterministic risk result and submit one "
-                "IPRO stance grounded in Case evidence, then finish."
+                "Interpret the bound deterministic risk status and submit one "
+                "IPRO stance grounded in Case evidence, then finish. Client "
+                "financial limits remain private to deterministic code."
             ),
             constraints={
                 **common_public,
                 "evidence_refs": evidence_refs,
-                "private_risk_capacity": private_risk,
-                "deterministic_risk_result": deterministic_risk_result,
+                "risk_status": risk_status_for_model,
                 "risk_policy_version": risk_policy_version,
+                "client_numeric_limits_visible_to_model": False,
             },
         )
 
