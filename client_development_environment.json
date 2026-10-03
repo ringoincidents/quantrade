@@ -1,0 +1,112 @@
+{
+  "schema": "quantrade_client_development_environment_v1",
+  "client": "founder",
+  "purpose": "Preserve the Founder's development-environment state and hardware investment policy so future QuanTrade client-capital allocation can evaluate development infrastructure as one governed use of distributable surplus.",
+  "updated_at": "2026-10-03",
+  "current_workstation": {
+    "ownership_status": "owned",
+    "cpu": "AMD Ryzen 5 5600",
+    "gpu": "NVIDIA GeForce RTX 4060 8GB",
+    "ram_gb": 32,
+    "storage": "1TB SSD",
+    "os": "Windows 11 Pro",
+    "current_assessment": "retain_unless_long_term_unused",
+    "capability_summary": [
+      "LLM Holdings local development",
+      "Docker and multi-service development",
+      "2D Digital Twin development",
+      "initial 3D HQ development",
+      "Blender and ordinary WebGL/Three.js work",
+      "small local LLM experimentation"
+    ],
+    "known_constraints": [
+      "8GB VRAM limits larger local LLM inference",
+      "8GB VRAM can become a constraint for heavier Unreal/Blender scenes",
+      "not intended to replace cloud GPU for large-model work"
+    ]
+  },
+  "capital_allocation_policy": {
+    "classification": "client_development_infrastructure",
+    "allocation_authority": "founder_approval_required",
+    "automatic_purchase_authorized": false,
+    "principle": "Fund development infrastructure from QuanTrade profits only when a measured development bottleneck or strategic capability need is demonstrated.",
+    "priority_rule": "Current owned hardware should be used first. Upgrade or replacement should compete with other client capital uses and should not be treated as a default destination for investment profits.",
+    "eligible_funding_source": "distributable_surplus_after_required_liquidity_and_client_obligations",
+    "decision_inputs": [
+      "realized and sustainable QuanTrade profitability",
+      "client liquidity needs",
+      "emergency reserve requirements",
+      "portfolio risk budget",
+      "development bottleneck evidence",
+      "expected productivity or capability gain",
+      "cloud alternative cost",
+      "hardware resale and depreciation",
+      "reversibility of the purchase"
+    ]
+  },
+  "purchase_triggers": [
+    {
+      "trigger": "3d_hq_active_development",
+      "condition": "TASK-056 or equivalent enters sustained active implementation and current RTX 4060 8GB materially slows iteration."
+    },
+    {
+      "trigger": "local_ai_regular_workload",
+      "condition": "Local model inference becomes recurring LLM Lab work and cloud/offload friction is measurable."
+    },
+    {
+      "trigger": "native_platform_requirement",
+      "condition": "Native iOS/macOS development creates a real requirement for Xcode-capable hardware."
+    },
+    {
+      "trigger": "cloud_cost_crossover",
+      "condition": "Recurring cloud GPU or remote-development cost becomes materially higher than owning suitable hardware over the expected use period."
+    },
+    {
+      "trigger": "workstation_unavailable",
+      "condition": "The current workstation is unavailable, unreliable, or unsuitable for the required workflow."
+    }
+  ],
+  "reference_upgrade_targets": {
+    "minimum_new_local_workstation": {
+      "ram_gb": 32,
+      "storage": "1TB NVMe",
+      "gpu": "RTX 5060 Ti 16GB class or better",
+      "role": "minimum useful local 3D and local-AI workstation"
+    },
+    "balanced_future_target": {
+      "cpu": "modern 8-12 core desktop CPU",
+      "ram_gb": 64,
+      "storage": "2TB NVMe",
+      "gpu": "RTX 5070 Ti 16GB class or equivalent",
+      "role": "preferred single workstation for LLM Holdings, 3D, Blender, local services and medium local-AI experiments"
+    },
+    "later_llm_lab_infrastructure": {
+      "ram_gb": "96-128",
+      "storage": "4TB NVMe total or more",
+      "gpu": "RTX 5090 32GB class or later equivalent",
+      "role": "only after sustained local-AI demand is demonstrated"
+    }
+  },
+  "current_decision": {
+    "action": "KEEP_CURRENT_PC",
+    "rationale": "The owned Ryzen 5 5600 / RTX 4060 8GB / 32GB / 1TB workstation is already sufficient for substantial LLM Holdings development and early 3D work. Selling it now would create a future replacement need unless it will remain unused for a long period.",
+    "review_when": [
+      "QuanTrade has sustainable distributable profits",
+      "TASK-056 or equivalent 3D work becomes active",
+      "local LLM work becomes regular",
+      "the PC would remain unused for more than about one year",
+      "hardware market or resale value changes materially"
+    ]
+  },
+  "governance": {
+    "this_artifact_is": "client_data_and_decision_context",
+    "this_artifact_is_not": [
+      "an investment signal",
+      "an automatic budget instruction",
+      "permission to sell securities",
+      "permission to purchase hardware"
+    ],
+    "human_approval_required": true,
+    "live_execution_authorized": false
+  }
+}
