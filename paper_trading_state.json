@@ -2,12 +2,23 @@
   "schema": "quantrade_paper_state_v1",
   "experiment_id": "QT-LIVE-001",
   "starting_capital_usd": 30,
-  "cash_usd": 30,
-  "position": null,
+  "cash_usd": 0,
+  "position": {
+    "symbol": "BTCUSDT",
+    "quantity": 0.0003541235902029179,
+    "entry_decision_price": 84589.26,
+    "entry_fill_price": 84631.55462999998,
+    "entry_notional_usd": 29.970029970029973,
+    "entry_fee_usd": 0.029970029970029975,
+    "entry_total_cost_usd": 30.000000000000004,
+    "opened_at": "2026-10-03T07:08:22.567096+00:00",
+    "strategy_id": "STR-BIN-TREND-CONTROL-001",
+    "entry_source": "https://data-api.binance.vision/api/v3/ticker/price?symbol=BTCUSDT"
+  },
   "realized_pnl_usd": 0,
   "closed_episodes": [],
-  "last_signal": null,
+  "last_signal": "LONG",
   "benchmark_seed_price": 84601.23,
   "benchmark_seed_at": "2026-10-03T05:26:00+00:00",
-  "updated_at": "2026-10-03T05:26:00+00:00"
+  "updated_at": "2026-10-03T07:08:22.567096+00:00"
 }
