@@ -4,14 +4,13 @@
   "mode": "PAPER",
   "live_execution_authorized": false,
   "starting_capital_usd": 30,
-  "cash_account_usd": 30,
+  "cash_account_usd": 0,
   "market_observation": {
     "venue": "BINANCE_SPOT",
     "symbol": "BTCUSDT",
-    "price": 84601.23,
-    "observed_at": "2026-10-03T05:26:00+00:00",
-    "source": "https://www.binance.com/en/price/bitcoin",
-    "source_note": "Bootstrap observation from Binance public price page. Future runner uses Binance public Spot API."
+    "price": 84589.26,
+    "observed_at": "2026-10-03T07:08:22.567096+00:00",
+    "source": "https://data-api.binance.vision/api/v3/ticker/price?symbol=BTCUSDT"
   },
   "market_scope": {
     "asset_class": "CRYPTO",
@@ -30,11 +29,39 @@
   },
   "current_validation": "EXPERIMENT_ONLY",
   "trend_control": {
-    "state": "WARMING_UP",
-    "signal": "NO_TRADE",
-    "bars_available": 0,
+    "state": "READY",
+    "signal": "LONG",
+    "bars_available": 61,
     "bars_required": 60,
+    "latest_close": 84589.26,
+    "short_sma": 84408.2595,
+    "long_sma": 84177.92399999998,
     "strategy_role": "INFRASTRUCTURE_BASELINE_NOT_VALIDATED_ALPHA"
+  },
+  "paper_account": {
+    "position": {
+      "symbol": "BTCUSDT",
+      "quantity": 0.0003541235902029179,
+      "entry_decision_price": 84589.26,
+      "entry_fill_price": 84631.55462999998,
+      "entry_notional_usd": 29.970029970029973,
+      "entry_fee_usd": 0.029970029970029975,
+      "entry_total_cost_usd": 30.000000000000004,
+      "opened_at": "2026-10-03T07:08:22.567096+00:00",
+      "strategy_id": "STR-BIN-TREND-CONTROL-001",
+      "entry_source": "https://data-api.binance.vision/api/v3/ticker/price?symbol=BTCUSDT"
+    },
+    "cash_usd": 0,
+    "position_market_value_usd": 29.955052443808075,
+    "equity_usd": 29.955052443808075,
+    "total_return_pct": -0.14982518730641825,
+    "realized_pnl_usd": 0,
+    "unrealized_net_pnl_usd": -0.07490260863573539,
+    "benchmark_value_usd_before_costs": 29.995755380861482,
+    "benchmark_return_pct_before_costs": -0.014148730461727155,
+    "closed_trade_count": 0,
+    "fee_rate_assumption": 0.001,
+    "slippage_bps_assumption": 5
   },
   "benchmark": {
     "type": "BUY_AND_HOLD_BENCHMARK",
@@ -42,21 +69,37 @@
     "seed_price": 84601.23,
     "seed_observed_at": "2026-10-03T05:26:00+00:00",
     "capital_usd": 30,
-    "fee_rate_assumption": 0.001,
-    "entry_fee_assumption_usd": 0.03,
-    "quantity": 0.000354250168703221,
-    "initial_mark_value_usd": 29.97,
-    "source": "https://www.binance.com/en/price/bitcoin"
+    "current_value_usd_before_costs": 29.995755380861482,
+    "return_pct_before_costs": -0.014148730461727155,
+    "current_mark_price": 84589.26
   },
   "trade_episodes": [],
+  "last_paper_event": {
+    "event": "PAPER_ENTRY",
+    "side": "BUY",
+    "symbol": "BTCUSDT",
+    "decision_price": 84589.26,
+    "simulated_fill_price": 84631.55462999998,
+    "quantity": 0.0003541235902029179,
+    "notional_usd": 29.970029970029973,
+    "fee_usd": 0.029970029970029975,
+    "slippage_bps": 5,
+    "at": "2026-10-03T07:08:22.567096+00:00",
+    "source": "https://data-api.binance.vision/api/v3/ticker/price?symbol=BTCUSDT"
+  },
   "transfer_rule": "Knowledge may transfer across markets. Validation does not.",
-  "experiment_state": "STARTED",
-  "next_required_observation": "Fetch at least 60 x 4h Binance Spot klines through the public API before the trend-control baseline may emit LONG/CASH.",
-  "generated_at": "2026-10-03T06:23:00+00:00",
+  "experiment_state": "RUNNING",
+  "paper_engine": {
+    "state_schema": "quantrade_paper_state_v1",
+    "real_orders_possible": false,
+    "authenticated_exchange_api_used": false
+  },
+  "generated_at": "2026-10-03T07:08:22.567096+00:00",
   "projection_provenance": {
     "role": "published_read_model",
     "engine_branch": "architecture/p0-5-gap-audit",
-    "engine_commit": "2ca20dd30e9c295a6322de30a983043a72bc5c68",
-    "note": "Published on main for read-only Holdings projection. This file is not execution authority."
+    "engine_commit": "6137f9e5d397096b5ffd9225ec8af1dd9cd3ef15",
+    "source_ci_run": 37105339409,
+    "note": "First live-data paper run; no broker side effect."
   }
 }
