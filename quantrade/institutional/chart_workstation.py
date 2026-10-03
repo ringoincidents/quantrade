@@ -239,12 +239,348 @@ class TechnicalEngine:
         }
 
 
+
+class MarketStateCompiler:
+    """Compress OHLCV into deterministic, LLM-friendly market state.
+
+    This is a calculator, not a strategy. It describes the current market
+    structure so AI employees can reason over a small structured payload
+    instead of repeatedly interpreting raw chart images.
+    """
+
+    DEFAULT_INDICATORS = (
+        {"name": "SMA", "period": 20},
+        {"name": "SMA", "period": 50},
+        {"name": "EMA", "period": 12},
+        {"name": "EMA", "period": 26},
+        {"name": "RSI", "period": 14},
+        {"name": "BOLLINGER", "period": 20, "stddev": 2.0},
+        {"name": "ATR", "period": 14},
+        {"name": "ICHIMOKU"},
+    )
+
+    @staticmethod
+    def _pct_change(start: float, end: float) -> float | None:
+        if start == 0:
+            return None
+        return (end / start - 1.0) * 100.0
+
+    @staticmethod
+    def _last_valid(series: list[Any]) -> float | None:
+        for value in reversed(series):
+            if value is not None:
+                return float(value)
+        return None
+
+    @staticmethod
+    def _std(values: list[float]) -> float | None:
+        if len(values) < 2:
+            return None
+        m = sum(values) / len(values)
+        return math.sqrt(sum((x - m) ** 2 for x in values) / len(values))
+
+    @classmethod
+    def compile(cls, args: dict) -> dict:
+        bars = args["bars"]
+        if len(bars) < 2:
+            raise ValueError("market state requires at least 2 OHLCV bars")
+
+        closes = [float(b["close"]) for b in bars]
+        opens = [float(b["open"]) for b in bars]
+        highs = [float(b["high"]) for b in bars]
+        lows = [float(b["low"]) for b in bars]
+        volumes = [float(b["volume"]) for b in bars]
+        latest = bars[-1]
+        latest_open = opens[-1]
+        latest_close = closes[-1]
+        latest_high = highs[-1]
+        latest_low = lows[-1]
+
+        indicators = TechnicalEngine.indicators({
+            "bars": bars,
+            "indicators": list(args.get("indicators") or cls.DEFAULT_INDICATORS),
+        })["series"]
+
+        ema12 = cls._last_valid(indicators.get("EMA_12", []))
+        ema26 = cls._last_valid(indicators.get("EMA_26", []))
+        macd_line = None if ema12 is None or ema26 is None else ema12 - ema26
+
+        # Compute MACD signal from the full EMA spread when available.
+        ema12_series = indicators.get("EMA_12", [])
+        ema26_series = indicators.get("EMA_26", [])
+        spread_series = [
+            float(a) - float(b)
+            for a, b in zip(ema12_series, ema26_series)
+            if a is not None and b is not None
+        ]
+        macd_signal = (
+            TechnicalEngine._ema(spread_series, 9)[-1]
+            if spread_series
+            else None
+        )
+        macd_hist = (
+            None if macd_line is None or macd_signal is None
+            else macd_line - macd_signal
+        )
+
+        returns: dict[str, float | None] = {}
+        for lookback in (1, 3, 5, 10, 20):
+            returns[f"{lookback}_bar_pct"] = (
+                cls._pct_change(closes[-lookback - 1], latest_close)
+                if len(closes) > lookback
+                else None
+            )
+
+        recent_returns = [
+            math.log(cur / prev)
+            for prev, cur in zip(closes[-21:-1], closes[-20:])
+            if prev > 0 and cur > 0
+        ]
+        realized_vol_20_pct = cls._std(recent_returns)
+        if realized_vol_20_pct is not None:
+            realized_vol_20_pct *= 100.0
+
+        prior_volumes = volumes[-21:-1] if len(volumes) >= 21 else volumes[:-1]
+        avg_volume = mean(prior_volumes) if prior_volumes else 0.0
+        volume_multiple = volumes[-1] / avg_volume if avg_volume else None
+
+        candle_range = max(0.0, latest_high - latest_low)
+        body = latest_close - latest_open
+        upper_wick = latest_high - max(latest_open, latest_close)
+        lower_wick = min(latest_open, latest_close) - latest_low
+        body_fraction = abs(body) / candle_range if candle_range else 0.0
+        labels: list[str] = []
+        if body > 0:
+            labels.append("BULLISH")
+        elif body < 0:
+            labels.append("BEARISH")
+        else:
+            labels.append("FLAT")
+        if body_fraction <= 0.1:
+            labels.append("DOJI_LIKE")
+        if candle_range and upper_wick / candle_range >= 0.55:
+            labels.append("LONG_UPPER_WICK")
+        if candle_range and lower_wick / candle_range >= 0.55:
+            labels.append("LONG_LOWER_WICK")
+
+        sma20 = cls._last_valid(indicators.get("SMA_20", []))
+        sma50 = cls._last_valid(indicators.get("SMA_50", []))
+        rsi14 = cls._last_valid(indicators.get("RSI_14", []))
+        atr14 = cls._last_valid(indicators.get("ATR_14", []))
+        bb_mid = cls._last_valid(indicators.get("BB_MID_20", []))
+        bb_upper = cls._last_valid(indicators.get("BB_UPPER_20", []))
+        bb_lower = cls._last_valid(indicators.get("BB_LOWER_20", []))
+
+        if sma20 is not None and sma50 is not None:
+            if latest_close > sma20 > sma50:
+                trend = "UPTREND"
+            elif latest_close < sma20 < sma50:
+                trend = "DOWNTREND"
+            else:
+                trend = "MIXED"
+        else:
+            trend = "INSUFFICIENT_HISTORY"
+
+        bb_position = None
+        if (
+            bb_lower is not None
+            and bb_upper is not None
+            and bb_upper > bb_lower
+        ):
+            bb_position = (latest_close - bb_lower) / (bb_upper - bb_lower)
+
+        recent_high = max(highs[-20:]) if highs else None
+        recent_low = min(lows[-20:]) if lows else None
+
+        return {
+            "schema": "quantrade_market_state_v1",
+            "symbol": args.get("symbol"),
+            "timeframe": args.get("timeframe"),
+            "timestamp": latest.get("timestamp"),
+            "bar_count": len(bars),
+            "price": {
+                "open": latest_open,
+                "high": latest_high,
+                "low": latest_low,
+                "close": latest_close,
+            },
+            "returns": returns,
+            "trend": {
+                "regime": trend,
+                "sma20": sma20,
+                "sma50": sma50,
+                "ema12": ema12,
+                "ema26": ema26,
+                "macd": macd_line,
+                "macd_signal": macd_signal,
+                "macd_histogram": macd_hist,
+            },
+            "momentum": {
+                "rsi14": rsi14,
+                "bollinger_position_0_to_1": bb_position,
+            },
+            "volatility": {
+                "atr14": atr14,
+                "atr14_pct_of_price": (
+                    atr14 / latest_close * 100.0
+                    if atr14 is not None and latest_close
+                    else None
+                ),
+                "realized_log_return_std_20_pct": realized_vol_20_pct,
+            },
+            "volume": {
+                "latest": volumes[-1],
+                "average_prior": avg_volume or None,
+                "multiple": volume_multiple,
+            },
+            "levels": {
+                "recent_high_20": recent_high,
+                "recent_low_20": recent_low,
+                "distance_to_high_20_pct": (
+                    cls._pct_change(latest_close, recent_high)
+                    if recent_high is not None
+                    else None
+                ),
+                "distance_to_low_20_pct": (
+                    cls._pct_change(latest_close, recent_low)
+                    if recent_low is not None
+                    else None
+                ),
+            },
+            "candle": {
+                "body_pct_of_open": (
+                    body / latest_open * 100.0 if latest_open else None
+                ),
+                "range_pct_of_open": (
+                    candle_range / latest_open * 100.0 if latest_open else None
+                ),
+                "upper_wick_fraction": (
+                    upper_wick / candle_range if candle_range else None
+                ),
+                "lower_wick_fraction": (
+                    lower_wick / candle_range if candle_range else None
+                ),
+                "labels": labels,
+            },
+            "ichimoku": {
+                "tenkan": cls._last_valid(
+                    indicators.get("ICHIMOKU_TENKAN", [])
+                ),
+                "kijun": cls._last_valid(
+                    indicators.get("ICHIMOKU_KIJUN", [])
+                ),
+                "span_a_raw": cls._last_valid(
+                    indicators.get("ICHIMOKU_SPAN_A_RAW", [])
+                ),
+                "span_b_raw": cls._last_valid(
+                    indicators.get("ICHIMOKU_SPAN_B_RAW", [])
+                ),
+            },
+            "interpretation_policy": (
+                "Deterministic measurements only. This state is not a buy/sell "
+                "recommendation and does not establish predictive edge."
+            ),
+        }
+
+
+class AICallGate:
+    """Cheap deterministic gate that decides whether AI review is warranted."""
+
+    @staticmethod
+    def evaluate(args: dict) -> dict:
+        state = args["market_state"]
+        mandate = args.get("mandate_state") or {}
+        research = args.get("research_state") or {}
+        portfolio = args.get("portfolio_state") or {}
+
+        reasons: list[str] = []
+        required_offices: list[str] = []
+        call_type = "NONE"
+
+        one_bar = state.get("returns", {}).get("1_bar_pct")
+        five_bar = state.get("returns", {}).get("5_bar_pct")
+        volume_multiple = state.get("volume", {}).get("multiple")
+        rsi = state.get("momentum", {}).get("rsi14")
+        trend = state.get("trend", {}).get("regime")
+        prior_trend = args.get("previous_market_state", {}).get(
+            "trend", {}
+        ).get("regime")
+
+        if mandate.get("planning_conflicts"):
+            reasons.append("CLIENT_MANDATE_CONFLICT")
+            required_offices.extend(["CCO", "SPMG"])
+            call_type = "CLIENT_STRATEGY_REVIEW"
+
+        if portfolio.get("risk_policy_breach"):
+            reasons.append("RISK_POLICY_BREACH")
+            required_offices.append("IPRO")
+            call_type = "FAST_RISK_REVIEW"
+
+        if one_bar is not None and abs(float(one_bar)) >= float(
+            args.get("shock_1bar_pct", 2.0)
+        ):
+            reasons.append("PRICE_SHOCK_1_BAR")
+            required_offices.append("IPRO")
+            call_type = "FAST_RISK_REVIEW"
+
+        if (
+            five_bar is not None
+            and abs(float(five_bar)) >= float(args.get("material_5bar_pct", 4.0))
+            and volume_multiple is not None
+            and float(volume_multiple) >= float(args.get("volume_multiple", 2.0))
+        ):
+            reasons.append("PRICE_VOLUME_REGIME_EVENT")
+            required_offices.extend(["SPMG", "IPRO"])
+            if call_type == "NONE":
+                call_type = "FULL_INVESTMENT_REVIEW"
+
+        if rsi is not None and (float(rsi) >= 80.0 or float(rsi) <= 20.0):
+            reasons.append("MOMENTUM_EXTREME")
+            required_offices.append("SPMG")
+            if call_type == "NONE":
+                call_type = "FULL_INVESTMENT_REVIEW"
+
+        if prior_trend and trend and prior_trend != trend:
+            reasons.append("TREND_REGIME_CHANGE")
+            required_offices.append("SPMG")
+            if call_type == "NONE":
+                call_type = "FULL_INVESTMENT_REVIEW"
+
+        if research.get("material_update"):
+            reasons.append("MATERIAL_RESEARCH_UPDATE")
+            required_offices.extend(["SPMG", "IPRO"])
+            if call_type == "NONE":
+                call_type = "FULL_INVESTMENT_REVIEW"
+
+        if portfolio.get("material_allocation_gap"):
+            reasons.append("MATERIAL_ALLOCATION_GAP")
+            required_offices.extend(["SPMG", "IPRO"])
+            if call_type == "NONE":
+                call_type = "FULL_INVESTMENT_REVIEW"
+
+        required_offices = list(dict.fromkeys(required_offices))
+        return {
+            "schema": "quantrade_ai_call_gate_v1",
+            "call_ai": call_type != "NONE",
+            "call_type": call_type,
+            "reasons": reasons,
+            "required_offices": required_offices,
+            "market_timestamp": state.get("timestamp"),
+            "policy": (
+                "The gate discovers review work only. It cannot approve or execute "
+                "a trade and it cannot raise client risk limits."
+            ),
+        }
+
+
 def install_chart_workstation(
     registry: ToolRegistry,
     employee_id: str,
     market: MarketDataPlane,
 ) -> None:
     engine = TechnicalEngine()
+    market_state = MarketStateCompiler()
+    ai_gate = AICallGate()
     tools = [
         (ToolDefinition(
             "market.catalog",
@@ -276,6 +612,16 @@ def install_chart_workstation(
             "Calculate forward returns from a chosen event bar for configurable horizons.",
             {"required": ["bars", "event_index", "forward_horizons"]}, True, "COMPUTE",
         ), engine.event_study),
+        (ToolDefinition(
+            "technical.market_state",
+            "Compress OHLCV into deterministic LLM-friendly price, trend, momentum, volatility, volume, level and candle features.",
+            {"required": ["bars"]}, True, "COMPUTE",
+        ), market_state.compile),
+        (ToolDefinition(
+            "ai.call_gate",
+            "Deterministically decide whether current market/client/research/portfolio state warrants AI review; never decides or executes a trade.",
+            {"required": ["market_state"]}, True, "COMPUTE",
+        ), ai_gate.evaluate),
     ]
     for definition, handler in tools:
         registry.register(definition, handler)
