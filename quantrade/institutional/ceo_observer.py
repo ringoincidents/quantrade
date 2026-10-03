@@ -93,12 +93,13 @@ class QuanTradeCEOObserver:
         capability_gaps = capability_gaps or []
         proposals: list[dict[str, Any]] = []
 
-        if len(decision_episodes) >= self.policy.repeat_threshold:
-            latencies = [
-                float(e.get("workflow_latency_proxy_ms") or 0.0)
-                for e in decision_episodes
-            ]
-            mean_latency = mean(latencies) if latencies else 0.0
+        measured_latency = [
+            float(e["workflow_latency_proxy_ms"])
+            for e in decision_episodes
+            if isinstance(e.get("workflow_latency_proxy_ms"), (int, float))
+        ]
+        if len(measured_latency) >= self.policy.repeat_threshold:
+            mean_latency = mean(measured_latency)
             if mean_latency > self.policy.latency_budget_ms:
                 proposals.append(self._proposal(
                     issue_type="DECISION_LATENCY_BOTTLENECK",
@@ -109,18 +110,20 @@ class QuanTradeCEOObserver:
                         "provider routing 또는 Runtime 실행환경 개선을 검토해 달라."
                     ),
                     evidence={
-                        "episode_count": len(decision_episodes),
+                        "episode_count": len(measured_latency),
                         "mean_workflow_latency_ms": mean_latency,
                         "budget_ms": self.policy.latency_budget_ms,
                     },
                     required_labs=["runtime", "quantrade"],
                 ))
 
-            costs = [
-                float(e.get("model_cost_usd") or 0.0)
-                for e in decision_episodes
-            ]
-            mean_cost = mean(costs) if costs else 0.0
+        measured_cost = [
+            float(e["model_cost_usd"])
+            for e in decision_episodes
+            if isinstance(e.get("model_cost_usd"), (int, float))
+        ]
+        if len(measured_cost) >= self.policy.repeat_threshold:
+            mean_cost = mean(measured_cost)
             if mean_cost > self.policy.model_cost_budget_usd_per_decision:
                 proposals.append(self._proposal(
                     issue_type="MODEL_COST_BOTTLENECK",
@@ -131,7 +134,7 @@ class QuanTradeCEOObserver:
                         "역할 통합 또는 모델 교체 실험을 요청한다."
                     ),
                     evidence={
-                        "episode_count": len(decision_episodes),
+                        "episode_count": len(measured_cost),
                         "mean_model_cost_usd": mean_cost,
                         "budget_usd": self.policy.model_cost_budget_usd_per_decision,
                     },
