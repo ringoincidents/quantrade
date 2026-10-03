@@ -11,7 +11,10 @@ from quantrade.institutional.trading_lab import (
     StrategyPassport,
     TransferClass,
     ValidationState,
+    advance_paper_state,
     build_trading_floor_snapshot,
+    new_paper_state,
+    paper_account_metrics,
     seed_buy_and_hold_benchmark,
     sma_trend_control,
 )
@@ -178,6 +181,65 @@ class TradingLabTests(unittest.TestCase):
         self.assertFalse(snapshot["live_execution_authorized"])
         self.assertEqual("EXPERIMENT_ONLY", snapshot["current_validation"])
         self.assertEqual([], snapshot["trade_episodes"])
+
+
+    def test_paper_account_enters_and_exits_without_real_execution(self):
+        state = new_paper_state(
+            starting_capital_usd=30.0,
+            benchmark_seed_price=100.0,
+            benchmark_seed_at="2026-10-03T00:00:00+00:00",
+        )
+        entry = MarketObservation(
+            venue="BINANCE_SPOT",
+            symbol="BTCUSDT",
+            price=100.0,
+            observed_at="2026-10-03T04:00:00+00:00",
+            source="fixture://entry",
+        )
+        state, event = advance_paper_state(
+            state,
+            observation=entry,
+            signal="LONG",
+            strategy_id="STR-1",
+            fee_rate=0.001,
+            slippage_bps=5.0,
+        )
+        self.assertEqual("PAPER_ENTRY", event["event"])
+        self.assertIsNotNone(state["position"])
+        self.assertGreater(state["position"]["quantity"], 0)
+        self.assertLess(state["cash_usd"], 0.001)
+
+        exit_observation = MarketObservation(
+            venue="BINANCE_SPOT",
+            symbol="BTCUSDT",
+            price=110.0,
+            observed_at="2026-10-03T08:00:00+00:00",
+            source="fixture://exit",
+        )
+        state, event = advance_paper_state(
+            state,
+            observation=exit_observation,
+            signal="CASH",
+            strategy_id="STR-1",
+            fee_rate=0.001,
+            slippage_bps=5.0,
+        )
+        self.assertEqual("PAPER_EXIT", event["event"])
+        self.assertIsNone(state["position"])
+        self.assertEqual(1, len(state["closed_episodes"]))
+        self.assertGreater(state["closed_episodes"][0]["net_pnl_usd"], 0)
+
+    def test_paper_account_metrics_compare_strategy_with_seeded_benchmark(self):
+        state = new_paper_state(
+            starting_capital_usd=30.0,
+            benchmark_seed_price=100.0,
+            benchmark_seed_at="2026-10-03T00:00:00+00:00",
+        )
+        metrics = paper_account_metrics(state, mark_price=110.0)
+        self.assertAlmostEqual(30.0, metrics["equity_usd"])
+        self.assertAlmostEqual(0.0, metrics["total_return_pct"])
+        self.assertAlmostEqual(33.0, metrics["benchmark_value_usd_before_costs"])
+        self.assertAlmostEqual(10.0, metrics["benchmark_return_pct_before_costs"])
 
 
 if __name__ == "__main__":
