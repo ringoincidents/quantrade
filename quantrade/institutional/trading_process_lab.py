@@ -355,3 +355,74 @@ def compare_episode_baselines(results: Iterable[dict[str, Any]]) -> dict[str, An
             "it does not validate a strategy or architecture."
         ),
     }
+
+
+def model_call_from_persisted_record(
+    record: dict[str, Any],
+    *,
+    role: str,
+) -> ModelCallEconomics:
+    """Adapt QuanTrade's persisted model_calls row into economics telemetry."""
+
+    import json
+    from datetime import datetime
+
+    usage_raw = record.get("usage_json")
+    if isinstance(usage_raw, str) and usage_raw:
+        usage = json.loads(usage_raw)
+    elif isinstance(usage_raw, dict):
+        usage = usage_raw
+    else:
+        usage = {}
+
+    started_raw = record.get("started_at")
+    completed_raw = record.get("completed_at")
+    latency_ms = 0.0
+    if started_raw and completed_raw:
+        started = datetime.fromisoformat(str(started_raw))
+        completed = datetime.fromisoformat(str(completed_raw))
+        latency_ms = max(0.0, (completed - started).total_seconds() * 1000.0)
+
+    return ModelCallEconomics(
+        role=role,
+        provider=str(record.get("provider") or "unknown"),
+        model=str(record.get("model") or "unknown"),
+        latency_ms=latency_ms,
+        input_tokens=int(usage.get("input_tokens") or 0),
+        cached_input_tokens=int(usage.get("cached_input_tokens") or 0),
+        output_tokens=int(usage.get("output_tokens") or 0),
+        reasoning_tokens=int(
+            usage.get("reasoning_tokens")
+            or usage.get("thoughts_tokens")
+            or 0
+        ),
+        retries=int(usage.get("retries") or 0),
+    )
+
+
+def model_calls_from_kernel(
+    conn: Any,
+    *,
+    work_order_id: str,
+    employee_roles: dict[str, str] | None = None,
+) -> tuple[ModelCallEconomics, ...]:
+    """Read real persisted QuanTrade model-call telemetry for one WorkOrder."""
+
+    employee_roles = employee_roles or {}
+    rows = conn.execute(
+        """SELECT employee_id,provider,model,usage_json,started_at,completed_at
+        FROM model_calls
+        WHERE work_order_id=? AND status='COMPLETED'
+        ORDER BY started_at""",
+        (work_order_id,),
+    ).fetchall()
+    return tuple(
+        model_call_from_persisted_record(
+            dict(row),
+            role=employee_roles.get(
+                str(row["employee_id"]),
+                str(row["employee_id"]),
+            ),
+        )
+        for row in rows
+    )
