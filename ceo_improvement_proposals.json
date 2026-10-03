@@ -1,0 +1,7 @@
+{
+  "schema": "quantrade_ceo_proposals_v1",
+  "source": "QUANTRADE_LLM_CEO",
+  "generated_at": null,
+  "proposals": [],
+  "note": "Published read model for evidence-backed operating-improvement proposals. Empty means no qualified proposal is currently published."
+}
