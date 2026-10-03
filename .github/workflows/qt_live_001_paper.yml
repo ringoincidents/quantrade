@@ -2,6 +2,11 @@ name: QT-LIVE-001 Paper Loop
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/qt_live_001_paper.yml"
   schedule:
     - cron: "23 */4 * * *"
 
