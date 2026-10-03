@@ -365,3 +365,184 @@ def build_trading_floor_snapshot(
         "transfer_rule": "Knowledge may transfer across markets. Validation does not.",
         "generated_at": datetime.now(timezone.utc).isoformat(),
     }
+
+
+def new_paper_state(
+    *,
+    starting_capital_usd: float,
+    benchmark_seed_price: float,
+    benchmark_seed_at: str,
+) -> dict[str, Any]:
+    if starting_capital_usd <= 0 or benchmark_seed_price <= 0:
+        raise ValueError("paper state requires positive capital and benchmark price")
+    return {
+        "schema": "quantrade_paper_state_v1",
+        "experiment_id": "QT-LIVE-001",
+        "starting_capital_usd": float(starting_capital_usd),
+        "cash_usd": float(starting_capital_usd),
+        "position": None,
+        "realized_pnl_usd": 0.0,
+        "closed_episodes": [],
+        "last_signal": None,
+        "benchmark_seed_price": float(benchmark_seed_price),
+        "benchmark_seed_at": benchmark_seed_at,
+        "updated_at": benchmark_seed_at,
+    }
+
+
+def advance_paper_state(
+    state: dict[str, Any],
+    *,
+    observation: MarketObservation,
+    signal: str,
+    strategy_id: str,
+    fee_rate: float = 0.001,
+    slippage_bps: float = 5.0,
+) -> tuple[dict[str, Any], dict[str, Any] | None]:
+    """Advance one deterministic paper account step.
+
+    LONG enters from cash when flat. CASH exits an existing long. The function
+    cannot place a real order; it only mutates the supplied paper-state copy.
+    """
+
+    if state.get("schema") != "quantrade_paper_state_v1":
+        raise ValueError("unsupported paper state schema")
+    if signal not in {"LONG", "CASH", "NO_TRADE"}:
+        raise ValueError(f"unsupported paper signal: {signal}")
+    if not 0 <= fee_rate < 1:
+        raise ValueError("fee_rate must be in [0, 1)")
+    if slippage_bps < 0:
+        raise ValueError("slippage_bps must be non-negative")
+
+    out = json.loads(json.dumps(state))
+    out["last_signal"] = signal
+    out["updated_at"] = observation.observed_at
+    position = out.get("position")
+    event: dict[str, Any] | None = None
+    slip = slippage_bps / 10000.0
+
+    if signal == "LONG" and position is None:
+        cash = float(out.get("cash_usd", 0.0))
+        if cash > 0:
+            fill_price = observation.price * (1.0 + slip)
+            notional = cash / (1.0 + fee_rate)
+            fee = notional * fee_rate
+            quantity = notional / fill_price
+            out["cash_usd"] = max(0.0, cash - notional - fee)
+            out["position"] = {
+                "symbol": observation.symbol,
+                "quantity": quantity,
+                "entry_decision_price": observation.price,
+                "entry_fill_price": fill_price,
+                "entry_notional_usd": notional,
+                "entry_fee_usd": fee,
+                "entry_total_cost_usd": notional + fee,
+                "opened_at": observation.observed_at,
+                "strategy_id": strategy_id,
+            }
+            event = {
+                "event": "PAPER_ENTRY",
+                "side": "BUY",
+                "symbol": observation.symbol,
+                "decision_price": observation.price,
+                "simulated_fill_price": fill_price,
+                "quantity": quantity,
+                "notional_usd": notional,
+                "fee_usd": fee,
+                "slippage_bps": slippage_bps,
+                "at": observation.observed_at,
+                "source": observation.source,
+            }
+
+    elif signal == "CASH" and position is not None:
+        quantity = float(position["quantity"])
+        fill_price = observation.price * (1.0 - slip)
+        gross_proceeds = quantity * fill_price
+        exit_fee = gross_proceeds * fee_rate
+        net_proceeds = gross_proceeds - exit_fee
+        entry_total_cost = float(position["entry_total_cost_usd"])
+        gross_pnl = gross_proceeds - float(position["entry_notional_usd"])
+        net_pnl = net_proceeds - entry_total_cost
+        episode = {
+            "episode_id": f"QT-LIVE-001-{len(out['closed_episodes']) + 1:04d}",
+            "strategy_id": strategy_id,
+            "mode": "PAPER",
+            "venue": observation.venue,
+            "symbol": observation.symbol,
+            "side": "LONG",
+            "opened_at": position["opened_at"],
+            "closed_at": observation.observed_at,
+            "entry_decision_price": position["entry_decision_price"],
+            "entry_fill_price": position["entry_fill_price"],
+            "exit_decision_price": observation.price,
+            "exit_fill_price": fill_price,
+            "quantity": quantity,
+            "entry_fee_usd": position["entry_fee_usd"],
+            "exit_fee_usd": exit_fee,
+            "slippage_bps_assumption": slippage_bps,
+            "gross_pnl_usd": gross_pnl,
+            "net_pnl_usd": net_pnl,
+            "exit_reason": "TREND_CONTROL_CASH",
+            "provenance": {
+                "entry_source": position.get("entry_source"),
+                "exit_source": observation.source,
+            },
+        }
+        out["closed_episodes"].append(episode)
+        out["realized_pnl_usd"] = float(out.get("realized_pnl_usd", 0.0)) + net_pnl
+        out["cash_usd"] = float(out.get("cash_usd", 0.0)) + net_proceeds
+        out["position"] = None
+        event = {
+            "event": "PAPER_EXIT",
+            "side": "SELL",
+            "symbol": observation.symbol,
+            "decision_price": observation.price,
+            "simulated_fill_price": fill_price,
+            "quantity": quantity,
+            "fee_usd": exit_fee,
+            "slippage_bps": slippage_bps,
+            "net_pnl_usd": net_pnl,
+            "at": observation.observed_at,
+            "source": observation.source,
+        }
+
+    if out.get("position") is not None and "entry_source" not in out["position"]:
+        out["position"]["entry_source"] = observation.source
+
+    return out, event
+
+
+def paper_account_metrics(
+    state: dict[str, Any],
+    *,
+    mark_price: float,
+    fee_rate: float = 0.001,
+) -> dict[str, Any]:
+    cash = float(state.get("cash_usd", 0.0))
+    position = state.get("position")
+    position_value = 0.0
+    unrealized_net = 0.0
+    if position:
+        quantity = float(position["quantity"])
+        position_value = quantity * mark_price
+        hypothetical_exit_fee = position_value * fee_rate
+        unrealized_net = (
+            position_value
+            - hypothetical_exit_fee
+            - float(position["entry_total_cost_usd"])
+        )
+    equity = cash + position_value
+    start = float(state["starting_capital_usd"])
+    benchmark_qty = start / float(state["benchmark_seed_price"])
+    benchmark_value = benchmark_qty * mark_price
+    return {
+        "cash_usd": cash,
+        "position_market_value_usd": position_value,
+        "equity_usd": equity,
+        "total_return_pct": ((equity / start) - 1.0) * 100.0,
+        "realized_pnl_usd": float(state.get("realized_pnl_usd", 0.0)),
+        "unrealized_net_pnl_usd": unrealized_net,
+        "benchmark_value_usd_before_costs": benchmark_value,
+        "benchmark_return_pct_before_costs": ((benchmark_value / start) - 1.0) * 100.0,
+        "closed_trade_count": len(state.get("closed_episodes", [])),
+    }
