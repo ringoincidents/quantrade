@@ -1,0 +1,59 @@
+name: CEO Operating Review
+
+on:
+  schedule:
+    - cron: '15 11 * * *'
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/ceo_operating_review.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: quantrade-ceo-operating-review
+  cancel-in-progress: false
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout published state
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Checkout institutional review engine
+        uses: actions/checkout@v4
+        with:
+          ref: architecture/p0-5-gap-audit
+          path: .quantrade-arch
+          persist-credentials: false
+
+      - name: Compile deterministic CEO operating review
+        env:
+          PYTHONPATH: .quantrade-arch
+        run: |
+          python .quantrade-arch/scripts/run_ceo_operating_review.py \
+            --decision-snapshot institutional_decision_snapshot.json \
+            --history ceo_operating_history.json \
+            --output ceo_improvement_proposals.json
+
+      - name: Publish review state
+        run: |
+          git config user.name "quantrade-ceo-review"
+          git config user.email "actions@github.com"
+          git add ceo_operating_history.json ceo_improvement_proposals.json
+          if git diff --cached --quiet; then
+            echo "No CEO operating-review state change."
+            exit 0
+          fi
+          git commit -m "ops: update CEO operating review"
+          git push
