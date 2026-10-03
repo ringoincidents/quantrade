@@ -15,6 +15,7 @@ from quantrade.institutional.trading_process_lab import (
     compare_episode_baselines,
     evaluate_decision_episode,
     latency_move_bps,
+    model_call_from_persisted_record,
 )
 
 
@@ -202,6 +203,28 @@ class TradingProcessLabTests(unittest.TestCase):
             comparison["best_observed_baseline"],
         )
         self.assertGreater(comparison["net_spread_usd"], 0)
+
+
+    def test_persisted_model_call_adapter_uses_usage_and_wall_clock(self):
+        call = model_call_from_persisted_record(
+            {
+                "provider": "fixture",
+                "model": "reasoner-v1",
+                "usage_json": (
+                    '{"input_tokens":1200,"output_tokens":300,'
+                    '"cached_input_tokens":200,"thoughts_tokens":50}'
+                ),
+                "started_at": "2026-10-03T00:00:00+00:00",
+                "completed_at": "2026-10-03T00:00:02.500000+00:00",
+            },
+            role="risk",
+        )
+        self.assertEqual("risk", call.role)
+        self.assertEqual(1200, call.input_tokens)
+        self.assertEqual(300, call.output_tokens)
+        self.assertEqual(200, call.cached_input_tokens)
+        self.assertEqual(50, call.reasoning_tokens)
+        self.assertAlmostEqual(2500.0, call.latency_ms)
 
 
 if __name__ == "__main__":
