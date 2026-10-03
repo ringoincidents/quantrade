@@ -20,14 +20,21 @@ def compile_company_strategy(
     portfolio_state = portfolio_state or {}
     research_state = research_state or {}
 
-    liquid_assets = float(client_state.get("liquid_assets") or 0.0)
+    liquid_assets_raw = client_state.get("liquid_assets")
+    liquid_assets = (
+        float(liquid_assets_raw) if liquid_assets_raw is not None else None
+    )
     reserve = float(
         client_state.get("liquidity_reserve")
         if client_state.get("liquidity_reserve") is not None
         else mandate.get("liquidity_reserve") or 0.0
     )
     urgent_cash_need = float(client_state.get("urgent_cash_need_amount") or 0.0)
-    liquidity_shortfall = max(0.0, reserve + urgent_cash_need - liquid_assets)
+    liquidity_shortfall = (
+        max(0.0, reserve + urgent_cash_need - liquid_assets)
+        if liquid_assets is not None
+        else 0.0
+    )
 
     planning_conflicts = list(mandate.get("planning_conflicts") or [])
     risk_breach = bool(portfolio_state.get("risk_policy_breach"))
