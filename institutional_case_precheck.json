@@ -1,0 +1,144 @@
+{
+  "schema": "quantrade_institutional_case_precheck_v1",
+  "experiment_id": "QT-LIVE-003",
+  "run_id": "37116164139",
+  "mode": "PAPER_PRECHECK",
+  "generated_at": "2026-10-03T10:21:57.558607+00:00",
+  "market_source": "https://data-api.binance.vision/api/v3/klines?symbol=BTCUSDT&interval=4h&limit=120",
+  "market_state": {
+    "schema": "quantrade_market_state_v1",
+    "symbol": "BTCUSDT",
+    "timeframe": "4h",
+    "timestamp": "2026-10-03T08:00:00+00:00",
+    "bar_count": 120,
+    "price": {
+      "open": 84560.0,
+      "high": 84665.88,
+      "low": 84557.36,
+      "close": 84570.67
+    },
+    "returns": {
+      "1_bar_pct": 0.01261825922420634,
+      "3_bar_pct": 0.062306246917076535,
+      "5_bar_pct": -0.8852284180671743,
+      "10_bar_pct": -0.12363691161160206,
+      "20_bar_pct": 1.5246219567314423
+    },
+    "trend": {
+      "regime": "UPTREND",
+      "sma20": 84470.29750000002,
+      "sma50": 84144.612,
+      "ema12": 84708.6530296073,
+      "ema26": 84463.35569174447,
+      "macd": 245.2973378628376,
+      "macd_signal": 282.80064655151955,
+      "macd_histogram": -37.503308688681955
+    },
+    "momentum": {
+      "rsi14": 56.84763578553366,
+      "bollinger_position_0_to_1": 0.5301807478546489
+    },
+    "volatility": {
+      "atr14": 904.6592857142844,
+      "atr14_pct_of_price": 1.0697080745774916,
+      "realized_log_return_std_20_pct": 0.5590117356344378
+    },
+    "volume": {
+      "latest": 558.20969,
+      "average_prior": 3186.0456169999998,
+      "multiple": 0.17520455043754637
+    },
+    "levels": {
+      "recent_high_20": 87220.0,
+      "recent_low_20": 82956.11,
+      "distance_to_high_20_pct": 3.1326818151020897,
+      "distance_to_low_20_pct": -1.9091252321874697
+    },
+    "candle": {
+      "body_pct_of_open": 0.012618259224217424,
+      "range_pct_of_open": 0.12833491012299442,
+      "upper_wick_fraction": 0.8773497972724182,
+      "lower_wick_fraction": 0.02432731293770106,
+      "labels": [
+        "BULLISH",
+        "DOJI_LIKE",
+        "LONG_UPPER_WICK"
+      ]
+    },
+    "ichimoku": {
+      "tenkan": 85554.0,
+      "kijun": 85060.0,
+      "span_a_raw": 85307.0,
+      "span_b_raw": 84891.5
+    },
+    "interpretation_policy": "Deterministic measurements only. This state is not a buy/sell recommendation and does not establish predictive edge."
+  },
+  "client_context": {
+    "strategy_ready": false,
+    "available_fact_count": 0,
+    "missing_information_keys": [
+      "liquidity.minimum_reserve",
+      "cashflow.essential_monthly_outflow",
+      "obligations.next_12_months",
+      "goals.short_term",
+      "goals.long_term",
+      "risk.preference",
+      "risk.capacity",
+      "capital_needs.planned_uses"
+    ],
+    "withheld_information_keys": [],
+    "raw_values_persisted": false,
+    "source_request_id": "CMREQ-C5A323CA23",
+    "source_brief_id": "CMBR-A107DBF991"
+  },
+  "strategy_directive": {
+    "schema": "quantrade_strategy_directive_v1",
+    "posture": "CLIENT_REVIEW_REQUIRED",
+    "objective": "Resolve client goal, timeline, contribution, liquidity or risk conflicts without changing policy silently.",
+    "actions": [
+      "CLIENT_PLAN_REVIEW",
+      "PAUSE_POLICY_CHANGE"
+    ],
+    "reasons": [
+      "CLIENT_PLAN_CONFLICT"
+    ],
+    "required_offices": [
+      "CCO",
+      "SPMG"
+    ],
+    "liquidity_shortfall": 0.0,
+    "investable_capital": null,
+    "required_return_pct": null,
+    "max_drawdown_pct": null,
+    "human_approval_required_for_live_execution": true,
+    "execution_authority": false,
+    "policy_note": "Difficult client goals never authorize automatic risk escalation. Conflicts are routed to review."
+  },
+  "ai_call_gate": {
+    "schema": "quantrade_ai_call_gate_v1",
+    "call_ai": true,
+    "call_type": "CLIENT_STRATEGY_REVIEW",
+    "reasons": [
+      "CLIENT_MANDATE_CONFLICT"
+    ],
+    "required_offices": [
+      "CCO",
+      "SPMG"
+    ],
+    "market_timestamp": "2026-10-03T08:00:00+00:00",
+    "policy": "The gate discovers review work only. It cannot approve or execute a trade and it cannot raise client risk limits."
+  },
+  "next_stage": "CLIENT_STRATEGY_REVIEW",
+  "authority": {
+    "ai_called": false,
+    "investment_committee_decision_created": false,
+    "decision_plan_created": false,
+    "paper_execution_created": false,
+    "live_execution_authorized": false
+  },
+  "privacy": {
+    "private_client_values_in_output": false,
+    "private_client_input_should_be_deleted_after_run": true
+  },
+  "note": "This artifact is a deterministic pre-check. It does not create a security recommendation or bypass Research / Portfolio / Risk / IC."
+}
