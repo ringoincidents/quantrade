@@ -116,3 +116,74 @@ def test_unmeasured_episodes_do_not_trigger_false_zero_cost_statistics():
 
     assert feed is not None
     assert feed["proposals"] == []
+
+
+def test_hq_outcome_feedback_suppresses_exact_same_proposal():
+    history = empty_history()
+    feed = None
+    for index in range(1, 4):
+        history, feed = run_review(
+            snapshot=_snapshot(
+                f"EP-{index}",
+                latency_ms=15000 + index,
+                model_cost_usd=0.01,
+            ),
+            history=history,
+            reviewed_at=f"2026-10-0{index}T00:00:00+00:00",
+        )
+
+    assert feed is not None
+    assert len(feed["proposals"]) == 1
+    proposal_id = feed["proposals"][0]["proposal_id"]
+
+    _, filtered = run_review(
+        snapshot=_snapshot("EP-3", latency_ms=15003, model_cost_usd=0.01),
+        history=history,
+        reviewed_at="2026-10-04T00:00:00+00:00",
+        hq_outcomes={
+            "schema": "quantrade_hq_outcomes_v1",
+            "source": "LLM_HOLDINGS_HQ",
+            "proposals": [
+                {
+                    "external_proposal_id": proposal_id,
+                    "outcome": "HQ_REVIEW_PENDING",
+                }
+            ],
+        },
+    )
+
+    assert filtered["proposals"] == []
+
+
+def test_materially_changed_evidence_can_create_new_proposal_after_hq_feedback():
+    history = empty_history()
+    feed = None
+    for index in range(1, 4):
+        history, feed = run_review(
+            snapshot=_snapshot(
+                f"EP-{index}",
+                latency_ms=15000,
+                model_cost_usd=0.01,
+            ),
+            history=history,
+            reviewed_at=f"2026-10-0{index}T00:00:00+00:00",
+        )
+    old_id = feed["proposals"][0]["proposal_id"]
+
+    history, changed = run_review(
+        snapshot=_snapshot("EP-4", latency_ms=30000, model_cost_usd=0.01),
+        history=history,
+        reviewed_at="2026-10-04T00:00:00+00:00",
+        hq_outcomes={
+            "schema": "quantrade_hq_outcomes_v1",
+            "source": "LLM_HOLDINGS_HQ",
+            "proposals": [{"external_proposal_id": old_id, "outcome": "REJECTED"}],
+        },
+    )
+
+    latency = next(
+        item
+        for item in changed["proposals"]
+        if item["issue_type"] == "DECISION_LATENCY_BOTTLENECK"
+    )
+    assert latency["proposal_id"] != old_id
