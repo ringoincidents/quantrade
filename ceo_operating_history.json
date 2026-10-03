@@ -1,0 +1,8 @@
+{
+  "schema": "quantrade_ceo_operating_history_v1",
+  "decision_episode_versions": [],
+  "operational_events": [],
+  "capability_gaps": [],
+  "last_reviewed_at": null,
+  "note": "Append-only operating evidence for the QuanTrade CEO observer. Repeated publication of the same episode does not count as new evidence."
+}
