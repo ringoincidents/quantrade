@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
 from typing import Any, Callable
 
@@ -93,28 +94,54 @@ class BoundedDepartmentalReview:
             raise ValueError("evidence reference is not attached to this Case")
         return unique
 
-    def _install_research_tool(self, employee_id: str, case_id: str) -> None:
+    def _install_research_tool(
+        self,
+        employee_id: str,
+        case_id: str,
+        *,
+        evidence_catalog: dict[str, dict[str, Any]],
+    ) -> None:
         definition = ToolDefinition(
             "case.submit_research_evidence",
-            "Submit one sourced fact to the bound Case. No trade or decision authority.",
-            {"required": ["source", "fact", "provenance"]},
+            (
+                "Promote one runtime-verified evidence item from the bound Evidence "
+                "Catalog. The model chooses evidence_key only; source/fact/provenance "
+                "are immutable runtime inputs."
+            ),
+            {"required": ["evidence_key"]},
             True,
             "ARTIFACT_WRITE",
         )
 
         def submit(args: dict) -> dict:
-            source = str(args["source"]).strip()
-            fact = str(args["fact"]).strip()
-            provenance = args["provenance"]
-            if not source or not fact or not isinstance(provenance, dict):
-                raise ValueError("research evidence requires source, fact and provenance")
+            key = str(args["evidence_key"]).strip()
+            item = evidence_catalog.get(key)
+            if item is None:
+                raise ValueError("evidence_key is not in the bound Evidence Catalog")
+            source = str(item.get("source") or "").strip()
+            fact = item.get("fact")
+            provenance = item.get("provenance")
+            if not source or not isinstance(fact, dict) or not isinstance(
+                provenance, dict
+            ):
+                raise ValueError("bound Evidence Catalog item is malformed")
             evidence_id = self.kernel.add_evidence(
                 case_id,
                 source,
-                fact,
+                json.dumps(
+                    fact,
+                    ensure_ascii=False,
+                    sort_keys=True,
+                    separators=(",", ":"),
+                ),
                 provenance,
+                fingerprint=str(item.get("fingerprint") or key),
             )
-            return {"evidence_id": evidence_id, "case_id": case_id}
+            return {
+                "evidence_id": evidence_id,
+                "case_id": case_id,
+                "evidence_key": key,
+            }
 
         self.tools.register(definition, submit)
         self.tools.grant(employee_id, definition.name)
@@ -320,7 +347,45 @@ class BoundedDepartmentalReview:
             raise DepartmentalReviewError("institutional Case was not opened")
 
         employees = self._create_employees()
-        self._install_research_tool(employees.research, case_id)
+        market_source = str(precheck.get("market_source") or "").strip()
+        if not market_source:
+            raise DepartmentalReviewError(
+                "precheck market_source is required for bounded Evidence"
+            )
+        evidence_catalog = {
+            "MARKET_STATE": {
+                "source": market_source,
+                "fact": {
+                    "schema": market_state.get("schema"),
+                    "symbol": market_state.get("symbol"),
+                    "timeframe": market_state.get("timeframe"),
+                    "timestamp": market_state.get("timestamp"),
+                    "price": market_state.get("price"),
+                    "returns": market_state.get("returns"),
+                    "trend": market_state.get("trend"),
+                    "momentum": market_state.get("momentum"),
+                    "volatility": market_state.get("volatility"),
+                    "volume": market_state.get("volume"),
+                    "levels": market_state.get("levels"),
+                    "candle": market_state.get("candle"),
+                },
+                "provenance": {
+                    "source_type": "deterministic_market_state",
+                    "precheck_run_id": precheck.get("run_id"),
+                    "market_timestamp": market_state.get("timestamp"),
+                },
+                "fingerprint": (
+                    "QT-LIVE-003:"
+                    + str(precheck.get("run_id") or "")
+                    + ":MARKET_STATE"
+                ),
+            }
+        }
+        self._install_research_tool(
+            employees.research,
+            case_id,
+            evidence_catalog=evidence_catalog,
+        )
         self._install_portfolio_tool(employees.portfolio, case_id)
         self._install_risk_tool(
             employees.risk,
@@ -342,10 +407,24 @@ class BoundedDepartmentalReview:
             office="IID",
             case_id=case_id,
             objective=(
-                "Submit one decision-relevant sourced fact for this Case, state "
-                "limitations, then finish. Do not recommend or execute a trade."
+                "Promote one decision-relevant verified Evidence Catalog item "
+                "for this Case, state limitations, then finish. Do not invent "
+                "sources or measurements and do not recommend or execute a trade."
             ),
-            constraints=common_public,
+            constraints={
+                **common_public,
+                "evidence_catalog": {
+                    key: {
+                        "source": item["source"],
+                        "fact": item["fact"],
+                    }
+                    for key, item in evidence_catalog.items()
+                },
+                "evidence_policy": (
+                    "Choose evidence_key from the catalog. Do not invent or "
+                    "rewrite source, fact, price, indicator or timestamp values."
+                ),
+            },
         )
 
         evidence_rows = self.conn.execute(
@@ -367,21 +446,45 @@ class BoundedDepartmentalReview:
             constraints={**common_public, "evidence_refs": evidence_refs},
         )
 
-        private_risk = dict(private_strategy_envelope.get("risk_capacity") or {})
+        risk_status_for_model = {
+            "deterministic": bool(
+                deterministic_risk_result.get("deterministic", True)
+            ),
+            "llm_used_in_calculation": bool(
+                deterministic_risk_result.get("llm_used", False)
+            ),
+            "policy_breach": bool(
+                deterministic_risk_result.get("policy_breach", False)
+            ),
+            "drawdown_limit_breach": bool(
+                deterministic_risk_result.get(
+                    "drawdown_limit_breach",
+                    False,
+                )
+            ),
+            "validation_warning": deterministic_risk_result.get(
+                "validation_warning"
+            ),
+            "limitations": list(
+                deterministic_risk_result.get("limitations") or []
+            ),
+            "live_execution_authorized": False,
+        }
         risk = self._run_employee(
             employee_id=employees.risk,
             office="IPRO",
             case_id=case_id,
             objective=(
-                "Interpret the bound deterministic risk result and submit one "
-                "IPRO stance grounded in Case evidence, then finish."
+                "Interpret the bound deterministic risk status and submit one "
+                "IPRO stance grounded in Case evidence, then finish. Client "
+                "financial limits remain private to deterministic code."
             ),
             constraints={
                 **common_public,
                 "evidence_refs": evidence_refs,
-                "private_risk_capacity": private_risk,
-                "deterministic_risk_result": deterministic_risk_result,
+                "risk_status": risk_status_for_model,
                 "risk_policy_version": risk_policy_version,
+                "client_numeric_limits_visible_to_model": False,
             },
         )
 
