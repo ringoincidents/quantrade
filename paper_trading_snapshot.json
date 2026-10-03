@@ -1,0 +1,62 @@
+{
+  "schema": "quantrade_trading_floor_v1",
+  "experiment_id": "QT-LIVE-001",
+  "mode": "PAPER",
+  "live_execution_authorized": false,
+  "starting_capital_usd": 30,
+  "cash_account_usd": 30,
+  "market_observation": {
+    "venue": "BINANCE_SPOT",
+    "symbol": "BTCUSDT",
+    "price": 84601.23,
+    "observed_at": "2026-10-03T05:26:00+00:00",
+    "source": "https://www.binance.com/en/price/bitcoin",
+    "source_note": "Bootstrap observation from Binance public price page. Future runner uses Binance public Spot API."
+  },
+  "market_scope": {
+    "asset_class": "CRYPTO",
+    "venue": "BINANCE_SPOT",
+    "universe": [
+      "BTCUSDT"
+    ],
+    "quote_currency": "USDT",
+    "timeframe": "4h"
+  },
+  "strategy_passport": {
+    "strategy_id": "STR-BIN-TREND-CONTROL-001",
+    "name": "Binance SMA trend control",
+    "hypothesis": "A simple short/long moving-average trend rule is useful as an infrastructure control, not as validated alpha.",
+    "validations": {}
+  },
+  "current_validation": "EXPERIMENT_ONLY",
+  "trend_control": {
+    "state": "WARMING_UP",
+    "signal": "NO_TRADE",
+    "bars_available": 0,
+    "bars_required": 60,
+    "strategy_role": "INFRASTRUCTURE_BASELINE_NOT_VALIDATED_ALPHA"
+  },
+  "benchmark": {
+    "type": "BUY_AND_HOLD_BENCHMARK",
+    "symbol": "BTCUSDT",
+    "seed_price": 84601.23,
+    "seed_observed_at": "2026-10-03T05:26:00+00:00",
+    "capital_usd": 30,
+    "fee_rate_assumption": 0.001,
+    "entry_fee_assumption_usd": 0.03,
+    "quantity": 0.000354250168703221,
+    "initial_mark_value_usd": 29.97,
+    "source": "https://www.binance.com/en/price/bitcoin"
+  },
+  "trade_episodes": [],
+  "transfer_rule": "Knowledge may transfer across markets. Validation does not.",
+  "experiment_state": "STARTED",
+  "next_required_observation": "Fetch at least 60 x 4h Binance Spot klines through the public API before the trend-control baseline may emit LONG/CASH.",
+  "generated_at": "2026-10-03T06:23:00+00:00",
+  "projection_provenance": {
+    "role": "published_read_model",
+    "engine_branch": "architecture/p0-5-gap-audit",
+    "engine_commit": "2ca20dd30e9c295a6322de30a983043a72bc5c68",
+    "note": "Published on main for read-only Holdings projection. This file is not execution authority."
+  }
+}
