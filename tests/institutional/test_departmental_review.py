@@ -334,6 +334,45 @@ class DepartmentalReviewTests(unittest.TestCase):
         )
         self.assertNotIn("model_attempted_override", risk)
 
+    def test_ipro_model_context_excludes_client_numeric_risk_limits(self):
+        coordinator = BoundedDepartmentalReview(
+            self.kernel,
+            self._provider_factory,
+        )
+        private_value = 987654321
+        coordinator.run(
+            precheck=_precheck(),
+            private_strategy_envelope=_private_envelope(),
+            portfolio_snapshot={"cash_usd": 30.0, "positions": []},
+            deterministic_risk_result={
+                "schema": "quantrade_paper_risk_assessment_v1",
+                "deterministic": True,
+                "llm_used": False,
+                "policy_breach": False,
+                "drawdown_limit_breach": False,
+                "client_max_drawdown_pct": 18,
+                "private_max_loss_krw": private_value,
+                "validation_warning": "STRATEGY_NOT_VALIDATED_AS_ALPHA",
+                "limitations": ["paper only"],
+            },
+            risk_policy_version="fixture-risk-v1",
+        )
+
+        row = self.kernel.conn.execute(
+            """SELECT m.input_context_json
+            FROM model_calls m
+            JOIN employees e ON e.employee_id=m.employee_id
+            WHERE e.office_id='IPRO'
+            ORDER BY m.started_at LIMIT 1"""
+        ).fetchone()
+        context = row["input_context_json"]
+        self.assertNotIn(str(private_value), context)
+        self.assertNotIn("private_max_loss_krw", context)
+        self.assertNotIn("client_max_drawdown_pct", context)
+        self.assertNotIn("private_risk_capacity", context)
+        self.assertIn('"policy_breach":false', context)
+        self.assertIn('"client_numeric_limits_visible_to_model":false', context)
+
     def test_role_tool_grants_are_separated(self):
         coordinator = BoundedDepartmentalReview(
             self.kernel,
