@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import hashlib
+import json
 from dataclasses import dataclass
 from statistics import mean
 from typing import Any
@@ -11,6 +13,35 @@ class CEOImprovementPolicy:
     latency_budget_ms: float = 10_000.0
     model_cost_budget_usd_per_decision: float = 0.05
     failure_rate_threshold: float = 0.15
+
+
+def _proposal_id(payload: dict[str, Any]) -> str:
+    raw = json.dumps(
+        payload,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+    digest = hashlib.sha256(raw.encode("utf-8")).hexdigest()[:20].upper()
+    return f"QTPROP-{digest}"
+
+
+def build_ceo_proposals_read_model(
+    proposals: list[dict[str, Any]],
+    *,
+    generated_at: str | None = None,
+) -> dict[str, Any]:
+    ids = [str(item.get("proposal_id") or "") for item in proposals]
+    if any(not value for value in ids):
+        raise ValueError("every CEO proposal requires proposal_id")
+    if len(ids) != len(set(ids)):
+        raise ValueError("CEO proposal ids must be unique")
+    return {
+        "schema": "quantrade_ceo_proposals_v1",
+        "source": "QUANTRADE_LLM_CEO",
+        "generated_at": generated_at,
+        "proposals": proposals,
+    }
 
 
 class QuanTradeCEOObserver:
@@ -33,15 +64,19 @@ class QuanTradeCEOObserver:
         required_labs: list[str],
         impact: str = "cross_lab",
     ) -> dict[str, Any]:
-        return {
-            "schema": "quantrade_hq_proposal_v1",
-            "source": "QUANTRADE_LLM_CEO",
+        identity_payload = {
             "issue_type": issue_type,
             "title": title,
             "summary": summary,
             "impact": impact,
             "required_labs": required_labs,
             "evidence": evidence,
+        }
+        return {
+            "schema": "quantrade_hq_proposal_v1",
+            "source": "QUANTRADE_LLM_CEO",
+            "proposal_id": _proposal_id(identity_payload),
+            **identity_payload,
             "auto_apply": False,
             "requires_hq_review": True,
         }
