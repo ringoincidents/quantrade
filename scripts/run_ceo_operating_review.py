@@ -135,6 +135,7 @@ def run_review(
     snapshot: dict[str, Any],
     history: dict[str, Any],
     reviewed_at: str,
+    hq_outcomes: dict[str, Any] | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     record = extract_decision_episode(snapshot, recorded_at=reviewed_at)
     append_episode_version(history, record)
@@ -145,6 +146,7 @@ def run_review(
         decision_episodes=latest_decision_episodes(history),
         operational_events=history["operational_events"],
         capability_gaps=history["capability_gaps"],
+        hq_outcomes=hq_outcomes,
     )
     feed = build_ceo_proposals_read_model(
         proposals,
@@ -173,6 +175,14 @@ def main() -> None:
         default="ceo_improvement_proposals.json",
     )
     parser.add_argument("--reviewed-at")
+    parser.add_argument(
+        "--hq-outcomes",
+        help=(
+            "Optional authenticated Holdings HQ outcome projection downloaded "
+            "before this process runs. If omitted, proposal generation remains "
+            "valid but cannot suppress proposals already known to HQ."
+        ),
+    )
     args = parser.parse_args()
 
     reviewed_at = args.reviewed_at or _now()
@@ -181,10 +191,17 @@ def main() -> None:
     )
     history_path = Path(args.history)
     history = load_history(history_path)
+    hq_outcomes = None
+    if args.hq_outcomes:
+        outcome_path = Path(args.hq_outcomes)
+        if outcome_path.exists():
+            hq_outcomes = json.loads(outcome_path.read_text(encoding="utf-8"))
+
     history, feed = run_review(
         snapshot=snapshot,
         history=history,
         reviewed_at=reviewed_at,
+        hq_outcomes=hq_outcomes,
     )
 
     history_path.write_text(
