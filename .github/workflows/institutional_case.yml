@@ -1,0 +1,77 @@
+name: Institutional Case Precheck
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/institutional_case.yml'
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: quantrade-institutional-case-precheck
+  cancel-in-progress: false
+
+jobs:
+  precheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout published state
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Checkout institutional engine
+        uses: actions/checkout@v4
+        with:
+          ref: architecture/p0-5-gap-audit
+          path: .quantrade-arch
+          persist-credentials: false
+
+      - name: Fetch private Client Intelligence strategy input with GitHub OIDC
+        env:
+          HOLDINGS_RUNTIME_URL: https://llm-holdings-runtime-production.up.railway.app
+          HOLDINGS_OIDC_AUDIENCE: llm-holdings-quantrade-institutional-case
+        run: |
+          set -euo pipefail
+          OIDC_RESPONSE="$(curl --fail --silent --show-error             --retry 2             --max-time 20             -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN"             "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=$HOLDINGS_OIDC_AUDIENCE")"
+          OIDC_TOKEN="$(printf '%s' "$OIDC_RESPONSE" | python -c             'import json,sys; print(json.load(sys.stdin)["value"])')"
+          test -n "$OIDC_TOKEN"
+          echo "::add-mask::$OIDC_TOKEN"
+
+          curl --fail --silent --show-error             --retry 2             --max-time 20             -X POST             -H "Authorization: Bearer $OIDC_TOKEN"             "$HOLDINGS_RUNTIME_URL/clients/quantrade/institutional-strategy-input/github-oidc"             -o client_strategy_input.json
+          chmod 600 client_strategy_input.json
+
+      - name: Run live deterministic institutional precheck
+        env:
+          PYTHONPATH: .quantrade-arch
+        run: |
+          set -euo pipefail
+          python .quantrade-arch/scripts/run_live_institutional_precheck.py             --client-brief client_strategy_input.json             --symbol BTCUSDT             --timeframe 4h             --bar-limit 120             --base-url https://data-api.binance.vision             --run-id "$GITHUB_RUN_ID"             --output institutional_case_precheck.json
+
+      - name: Delete private Client input
+        if: always()
+        run: |
+          rm -f client_strategy_input.json
+
+      - name: Publish sanitized precheck only
+        if: success()
+        run: |
+          git config user.name "quantrade-institutional-case"
+          git config user.email "actions@github.com"
+          git add institutional_case_precheck.json
+          if git diff --cached --quiet; then
+            echo "No sanitized precheck change."
+            exit 0
+          fi
+          git commit -m "experiment: update institutional Case precheck"
+          git push
