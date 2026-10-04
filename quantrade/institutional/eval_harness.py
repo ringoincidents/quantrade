@@ -49,6 +49,9 @@ class EmployeeEvalHarness:
         "QUANTRADE_INSTITUTIONAL",
         "EXTERNAL_AGENT_PRODUCT",
         "MANUAL_RELAY",
+        "E2A_SNAPSHOT_ONLY",
+        "E2A_PLUS_DIAGNOSTICS",
+        "E2A_PLUS_DIAGNOSTICS_MEMORY",
     }
 
     def __init__(self, kernel: InstitutionalKernel):
