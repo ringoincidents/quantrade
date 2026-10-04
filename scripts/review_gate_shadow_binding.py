@@ -2,6 +2,8 @@
 
 The published precheck is intentionally used instead of private Client input.
 This script compares routing intent only; it does not claim an AI call occurred.
+Unknown reasons are preserved as translation evidence instead of being silently
+discarded or assigned invented materiality.
 """
 from __future__ import annotations
 
@@ -20,27 +22,51 @@ REASON_EVENT_MAP = {
 }
 
 
-def _events_from_precheck(precheck: dict) -> list[ReviewEvent]:
-    reasons = []
-    reasons.extend(precheck.get("strategy_directive", {}).get("reasons", []))
-    reasons.extend(precheck.get("ai_call_gate", {}).get("reasons", []))
+def _reason_records(precheck: dict) -> list[dict]:
+    sources = (
+        ("strategy_directive", precheck.get("strategy_directive", {}).get("reasons", [])),
+        ("ai_call_gate", precheck.get("ai_call_gate", {}).get("reasons", [])),
+    )
+    records = []
+    seen = set()
+    for source, reasons in sources:
+        for reason in reasons:
+            key = (source, reason)
+            if key in seen:
+                continue
+            seen.add(key)
+            mapped = REASON_EVENT_MAP.get(reason)
+            records.append({
+                "source": source,
+                "reason": reason,
+                "translation_status": "MAPPED" if mapped else "UNMAPPED",
+                "mapped_event_type": mapped[0] if mapped else None,
+                "mapped_source_role": mapped[1] if mapped else None,
+            })
+    return records
 
+
+def _events_from_records(records: list[dict]) -> list[ReviewEvent]:
     events = []
     seen = set()
-    for reason in reasons:
-        mapped = REASON_EVENT_MAP.get(reason)
-        if mapped and mapped not in seen:
-            seen.add(mapped)
-            event_type, source_role = mapped
-            events.append(ReviewEvent(event_type, 0.0, source_role))
+    for record in records:
+        if record["translation_status"] != "MAPPED":
+            continue
+        mapped = (record["mapped_event_type"], record["mapped_source_role"])
+        if mapped in seen:
+            continue
+        seen.add(mapped)
+        events.append(ReviewEvent(mapped[0], 0.0, mapped[1]))
     return events
 
 
 def build_shadow_binding(precheck: dict) -> dict:
-    events = _events_from_precheck(precheck)
+    reason_records = _reason_records(precheck)
+    events = _events_from_records(reason_records)
     result = evaluate_review_need(events)
     legacy_gate = precheck.get("ai_call_gate", {})
     legacy_call_ai = legacy_gate.get("call_ai")
+    unmapped = [record for record in reason_records if record["translation_status"] == "UNMAPPED"]
 
     if legacy_call_ai is True:
         agreement = result.level != "NO_REVIEW"
@@ -50,13 +76,22 @@ def build_shadow_binding(precheck: dict) -> dict:
         agreement = None
 
     return {
-        "schema": "quantrade_review_gate_live_shadow_binding_v1",
+        "schema": "quantrade_review_gate_live_shadow_binding_v2",
         "source": {
             "schema": precheck.get("schema"),
             "experiment_id": precheck.get("experiment_id"),
             "run_id": precheck.get("run_id"),
             "mode": precheck.get("mode"),
             "private_client_values_consumed": False,
+        },
+        "reason_translation": {
+            "records": reason_records,
+            "reason_count": len(reason_records),
+            "mapped_count": len(reason_records) - len(unmapped),
+            "unmapped_count": len(unmapped),
+            "coverage_complete": not unmapped,
+            "unmapped_reasons": [record["reason"] for record in unmapped],
+            "policy": "Preserve unknown reasons; do not invent materiality or production authority.",
         },
         "translated_events": [
             {
@@ -78,6 +113,8 @@ def build_shadow_binding(precheck: dict) -> dict:
         },
         "comparison": {
             "routing_intent_agreement": agreement,
+            "translation_coverage_complete": not unmapped,
+            "requires_translation_review": bool(unmapped),
             "actual_ai_call_observed": None,
             "model_cost_usd_observed": None,
             "latency_ms_observed": None,
@@ -88,6 +125,7 @@ def build_shadow_binding(precheck: dict) -> dict:
             "existing_gate_replaced": False,
             "actual_path_changed": False,
             "ai_call_suppressed": False,
+            "unmapped_reason_auto_escalated": False,
             "investment_decision_changed": False,
             "execution_changed": False,
             "automatic_promotion_allowed": False,
