@@ -1,74 +1,72 @@
 {
   "schema": "quantrade_institutional_case_precheck_v1",
   "experiment_id": "QT-LIVE-003",
-  "run_id": "37116164139",
+  "run_id": "37176141955",
   "mode": "PAPER_PRECHECK",
-  "generated_at": "2026-10-03T10:21:57.558607+00:00",
+  "generated_at": "2026-10-04T04:08:49.279010+00:00",
   "market_source": "https://data-api.binance.vision/api/v3/klines?symbol=BTCUSDT&interval=4h&limit=120",
   "market_state": {
     "schema": "quantrade_market_state_v1",
     "symbol": "BTCUSDT",
     "timeframe": "4h",
-    "timestamp": "2026-10-03T08:00:00+00:00",
+    "timestamp": "2026-10-04T04:00:00+00:00",
     "bar_count": 120,
     "price": {
-      "open": 84560.0,
-      "high": 84665.88,
-      "low": 84557.36,
-      "close": 84570.67
+      "open": 84840.88,
+      "high": 84844.01,
+      "low": 84826.0,
+      "close": 84826.0
     },
     "returns": {
-      "1_bar_pct": 0.01261825922420634,
-      "3_bar_pct": 0.062306246917076535,
-      "5_bar_pct": -0.8852284180671743,
-      "10_bar_pct": -0.12363691161160206,
-      "20_bar_pct": 1.5246219567314423
+      "1_bar_pct": -0.01752693012223583,
+      "3_bar_pct": -0.019447800335914422,
+      "5_bar_pct": 0.18186647511970744,
+      "10_bar_pct": -0.5859878583315714,
+      "20_bar_pct": 1.4378716056232754
     },
     "trend": {
       "regime": "UPTREND",
-      "sma20": 84470.29750000002,
-      "sma50": 84144.612,
-      "ema12": 84708.6530296073,
-      "ema26": 84463.35569174447,
-      "macd": 245.2973378628376,
-      "macd_signal": 282.80064655151955,
-      "macd_histogram": -37.503308688681955
+      "sma20": 84752.8115,
+      "sma50": 84218.39079999998,
+      "ema12": 84780.61238918982,
+      "ema26": 84583.99149342922,
+      "macd": 196.62089576059952,
+      "macd_signal": 237.7973262682676,
+      "macd_histogram": -41.17643050766807
     },
     "momentum": {
-      "rsi14": 56.84763578553366,
-      "bollinger_position_0_to_1": 0.5301807478546489
+      "rsi14": 49.425170002914,
+      "bollinger_position_0_to_1": 0.5263382661540215
     },
     "volatility": {
-      "atr14": 904.6592857142844,
-      "atr14_pct_of_price": 1.0697080745774916,
-      "realized_log_return_std_20_pct": 0.5590117356344378
+      "atr14": 635.6121428571413,
+      "atr14_pct_of_price": 0.7493128791374594,
+      "realized_log_return_std_20_pct": 0.5173463108439447
     },
     "volume": {
-      "latest": 558.20969,
-      "average_prior": 3186.0456169999998,
-      "multiple": 0.17520455043754637
+      "latest": 18.52459,
+      "average_prior": 2643.166441,
+      "multiple": 0.00700848410930623
     },
     "levels": {
       "recent_high_20": 87220.0,
-      "recent_low_20": 82956.11,
-      "distance_to_high_20_pct": 3.1326818151020897,
-      "distance_to_low_20_pct": -1.9091252321874697
+      "recent_low_20": 83186.0,
+      "distance_to_high_20_pct": 2.8222478956923647,
+      "distance_to_low_20_pct": -1.933369485770875
     },
     "candle": {
-      "body_pct_of_open": 0.012618259224217424,
-      "range_pct_of_open": 0.12833491012299442,
-      "upper_wick_fraction": 0.8773497972724182,
-      "lower_wick_fraction": 0.02432731293770106,
+      "body_pct_of_open": -0.01753871482710299,
+      "range_pct_of_open": 0.021227974061554713,
+      "upper_wick_fraction": 0.17379233758972876,
+      "lower_wick_fraction": 0.0,
       "labels": [
-        "BULLISH",
-        "DOJI_LIKE",
-        "LONG_UPPER_WICK"
+        "BEARISH"
       ]
     },
     "ichimoku": {
-      "tenkan": 85554.0,
-      "kijun": 85060.0,
-      "span_a_raw": 85307.0,
+      "tenkan": 84634.82,
+      "kijun": 85088.055,
+      "span_a_raw": 84861.4375,
       "span_b_raw": 84891.5
     },
     "interpretation_policy": "Deterministic measurements only. This state is not a buy/sell recommendation and does not establish predictive edge."
@@ -86,10 +84,13 @@
       "risk.capacity",
       "capital_needs.planned_uses"
     ],
+    "invalid_information_keys": [],
     "withheld_information_keys": [],
+    "structured_constraint_count": 0,
+    "private_strategy_envelope_applied": true,
     "raw_values_persisted": false,
-    "source_request_id": "CMREQ-C5A323CA23",
-    "source_brief_id": "CMBR-A107DBF991"
+    "source_request_id": "CMREQ-153909EAF3",
+    "source_brief_id": "CMBR-CABB1F92A5"
   },
   "strategy_directive": {
     "schema": "quantrade_strategy_directive_v1",
@@ -106,12 +107,10 @@
       "CCO",
       "SPMG"
     ],
-    "liquidity_shortfall": 0.0,
-    "investable_capital": null,
-    "required_return_pct": null,
-    "max_drawdown_pct": null,
     "human_approval_required_for_live_execution": true,
     "execution_authority": false,
+    "private_constraints_applied": true,
+    "sensitive_values_persisted": false,
     "policy_note": "Difficult client goals never authorize automatic risk escalation. Conflicts are routed to review."
   },
   "ai_call_gate": {
@@ -125,7 +124,7 @@
       "CCO",
       "SPMG"
     ],
-    "market_timestamp": "2026-10-03T08:00:00+00:00",
+    "market_timestamp": "2026-10-04T04:00:00+00:00",
     "policy": "The gate discovers review work only. It cannot approve or execute a trade and it cannot raise client risk limits."
   },
   "next_stage": "CLIENT_STRATEGY_REVIEW",
@@ -138,6 +137,7 @@
   },
   "privacy": {
     "private_client_values_in_output": false,
+    "private_strategy_values_in_output": false,
     "private_client_input_should_be_deleted_after_run": true
   },
   "note": "This artifact is a deterministic pre-check. It does not create a security recommendation or bypass Research / Portfolio / Risk / IC."

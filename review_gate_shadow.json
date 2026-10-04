@@ -1,0 +1,47 @@
+{
+  "schema": "quantrade_review_gate_live_shadow_binding_v1",
+  "source": {
+    "schema": "quantrade_institutional_case_precheck_v1",
+    "experiment_id": "QT-LIVE-003",
+    "run_id": "37176141955",
+    "mode": "PAPER_PRECHECK",
+    "private_client_values_consumed": false
+  },
+  "translated_events": [
+    {
+      "event_type": "CLIENT_MANDATE_CONFLICT",
+      "source_role": "Strategy",
+      "materiality": 0.0,
+      "unresolved": false
+    }
+  ],
+  "shadow_gate": {
+    "level": "MANDATORY_REVIEW",
+    "reasons": [
+      "MANDATORY:Strategy:CLIENT_MANDATE_CONFLICT"
+    ]
+  },
+  "existing_routing_intent": {
+    "call_ai": true,
+    "call_type": "CLIENT_STRATEGY_REVIEW",
+    "reasons": [
+      "CLIENT_MANDATE_CONFLICT"
+    ]
+  },
+  "comparison": {
+    "routing_intent_agreement": true,
+    "actual_ai_call_observed": null,
+    "model_cost_usd_observed": null,
+    "latency_ms_observed": null,
+    "savings_claimed_usd": 0.0
+  },
+  "authority": {
+    "shadow_only": true,
+    "existing_gate_replaced": false,
+    "actual_path_changed": false,
+    "ai_call_suppressed": false,
+    "investment_decision_changed": false,
+    "execution_changed": false,
+    "automatic_promotion_allowed": false
+  }
+}
