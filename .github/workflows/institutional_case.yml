@@ -63,14 +63,22 @@ jobs:
         run: |
           rm -f client_strategy_input.json
 
-      - name: Publish sanitized precheck only
+      - name: Observe ReviewGate shadow against sanitized routing intent
+        if: success()
+        run: |
+          set -euo pipefail
+          PYTHONPATH=. python scripts/review_gate_shadow_binding.py \
+            --precheck institutional_case_precheck.json \
+            --output review_gate_shadow.json
+
+      - name: Publish sanitized precheck and shadow observation
         if: success()
         run: |
           git config user.name "quantrade-institutional-case"
           git config user.email "actions@github.com"
-          git add institutional_case_precheck.json
+          git add institutional_case_precheck.json review_gate_shadow.json
           if git diff --cached --quiet; then
-            echo "No sanitized precheck change."
+            echo "No sanitized precheck or shadow change."
             exit 0
           fi
           git commit -m "experiment: update institutional Case precheck"
