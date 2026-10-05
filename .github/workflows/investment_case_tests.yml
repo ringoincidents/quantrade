@@ -32,6 +32,8 @@ jobs:
         run: python -m compileall -q quantrade/capabilities tests/capabilities
       - name: Run Investment Case tests
         run: python -m unittest tests.capabilities.test_investment_case -v
+      - name: Run existing capability regression suite
+        run: python -m unittest discover -s tests/capabilities -p "test_*.py" -v
       - name: Run reference harness
         run: |
           python - <<'PY'
