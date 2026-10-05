@@ -1,11 +1,14 @@
-name: Investment Case Economics Tests
+name: Investment Office Core Tests
 
 on:
   pull_request:
     paths:
       - "quantrade/capabilities/investment_case.py"
       - "quantrade/capabilities/investment_case_evaluation.py"
+      - "quantrade/capabilities/thesis_contract.py"
+      - "quantrade/capabilities/thesis_contract_evaluation.py"
       - "tests/capabilities/test_investment_case.py"
+      - "tests/capabilities/test_thesis_contract.py"
       - "research/precedents/2026-10-05_INVESTMENT_OFFICE_DECISION_ECONOMICS_DIRECTION.md"
   push:
     branches:
@@ -13,7 +16,10 @@ on:
     paths:
       - "quantrade/capabilities/investment_case.py"
       - "quantrade/capabilities/investment_case_evaluation.py"
+      - "quantrade/capabilities/thesis_contract.py"
+      - "quantrade/capabilities/thesis_contract_evaluation.py"
       - "tests/capabilities/test_investment_case.py"
+      - "tests/capabilities/test_thesis_contract.py"
       - ".github/workflows/investment_case_tests.yml"
   workflow_dispatch:
 
@@ -32,6 +38,8 @@ jobs:
         run: python -m compileall -q quantrade/capabilities tests/capabilities
       - name: Run Investment Case tests
         run: python -m unittest tests.capabilities.test_investment_case -v
+      - name: Run Thesis Contract tests
+        run: python -m unittest tests.capabilities.test_thesis_contract -v
       - name: Run existing capability regression suite
         run: python -m unittest discover -s tests/capabilities -p "test_*.py" -v
       - name: Run reference harness
@@ -39,8 +47,14 @@ jobs:
           python - <<'PY'
           import json
           from quantrade.capabilities.investment_case_evaluation import reference_cases
-          artifact = reference_cases()
-          assert artifact["authority"]["execution_authorized"] is False
-          assert artifact["authority"]["portfolio_proposal_created"] is False
-          print(json.dumps(artifact, ensure_ascii=False, sort_keys=True))
+          from quantrade.capabilities.thesis_contract_evaluation import reference_thesis_contracts
+
+          economics = reference_cases()
+          thesis = reference_thesis_contracts()
+          assert economics["authority"]["execution_authorized"] is False
+          assert economics["authority"]["portfolio_proposal_created"] is False
+          assert thesis["authority"]["canonical_evidence_created"] is False
+          assert thesis["authority"]["thesis_truth_validated"] is False
+          assert thesis["authority"]["execution_authorized"] is False
+          print(json.dumps({"economics": economics, "thesis": thesis}, ensure_ascii=False, sort_keys=True))
           PY
