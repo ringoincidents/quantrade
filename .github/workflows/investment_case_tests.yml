@@ -13,6 +13,8 @@ on:
       - "tests/capabilities/test_thesis_contract.py"
       - "tests/capabilities/test_fundamental_evidence.py"
       - "tests/capabilities/test_dart_fundamental_provider.py"
+      - "scripts/run_dart_fundamental_probe.py"
+      - ".github/workflows/dart_fundamental_probe.yml"
       - "research/precedents/2026-10-05_INVESTMENT_OFFICE_DECISION_ECONOMICS_DIRECTION.md"
   push:
     branches:
@@ -28,6 +30,8 @@ on:
       - "tests/capabilities/test_thesis_contract.py"
       - "tests/capabilities/test_fundamental_evidence.py"
       - "tests/capabilities/test_dart_fundamental_provider.py"
+      - "scripts/run_dart_fundamental_probe.py"
+      - ".github/workflows/dart_fundamental_probe.yml"
       - ".github/workflows/investment_case_tests.yml"
   workflow_dispatch:
 
@@ -42,8 +46,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Compile Investment Case capability
-        run: python -m compileall -q quantrade/capabilities tests/capabilities
+      - name: Compile Investment Office capability
+        run: python -m compileall -q quantrade/capabilities tests/capabilities scripts/run_dart_fundamental_probe.py
       - name: Run Investment Case tests
         run: python -m unittest tests.capabilities.test_investment_case -v
       - name: Run Thesis Contract tests
