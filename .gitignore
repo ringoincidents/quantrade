@@ -2,3 +2,11 @@ __pycache__/
 *.pyc
 .env
 .env.*
+
+# TASK-101: private Client operating state belongs in LLM Holdings Runtime.
+real_portfolio.json
+portfolio_pnl_history.json
+portfolio_report.json
+portfolio_report_state.json
+post_trade_review_log.json
+post_trade_review_state.json
