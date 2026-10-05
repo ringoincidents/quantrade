@@ -1,6 +1,6 @@
 # Strategy Research Sandbox — Implementable Plan
 
-Status: **PHASE 1–3 SANDBOX IMPLEMENTED / NOT PROMOTED**  
+Status: **PHASE 1–4 COMPLETED IN SANDBOX / NOT PROMOTED**  
 Date: **2026-10-05**  
 Parent research: `2026-10-05_LLM_TRADING_FRAMEWORKS_REVIEW.md`  
 Target repository: **QuanTrade**  
@@ -24,7 +24,14 @@ Shared Holdings Runtime changes: **none required for Phase 1–3**
 - Reference harness: `quantrade/capabilities/strategy_robustness_evaluation.py`
 - Tests: `tests/capabilities/test_strategy_robustness.py`
 - Result record: `research/precedents/2026-10-05_STRATEGY_RESEARCH_SANDBOX_PHASE3_RESULT.md`
-- Phase 4+ remains proposed.
+- **QT-STRAT-004 / Phase 4: GOLDEN RUN COMPLETED**
+- Pre-registration: `research/experiments/QT-STRAT-004_PRE_REGISTRATION.md`
+- Frozen dataset: `research/experiments/QT-STRAT-004_DATASET.json`
+- Machine result: `research/experiments/QT-STRAT-004_RESULT.json`
+- Result report: `research/experiments/QT-STRAT-004_RESULT_REPORT.md`
+- Outcome: operational success, **0/4 candidates Stage-A eligible**, TEST remained closed for all candidates, no specialist/model invocation.
+- Pipeline verdict: keep as research infrastructure; no strategy/PAPER/execution promotion.
+- Phase 5 (RL/FinBERT) remains deferred.
 
 ## 1. Goal
 
