@@ -100,7 +100,30 @@ No candidate may be added, removed, or parameter-tuned after the first market
 result is observed. A future experiment may use different candidates, but it
 must receive a new experiment ID.
 
-## 5. Frozen friction model
+## 5. Frozen signal timing
+
+The safe DSL may calculate a condition using the close of bar `t`, but this
+Golden Run does **not** allow that condition to earn the return starting at the
+same close.
+
+A one-bar execution lag is frozen before data is fetched:
+
+```text
+condition computed using information through close(t-1)
+→ target position becomes effective at close(t)
+→ evaluated return is close(t) → close(t+1)
+```
+
+For the first evaluable return period, the target position is flat because no
+prior compiled condition exists.
+
+This is stricter than the Phase 2 reference compiler's immediate
+close-to-next-close convention and is chosen to avoid assuming that the exact
+closing price can be both observed and executed without delay.
+
+The final artifact must report that the one-bar lag was applied.
+
+## 7. Frozen friction model
 
 Existing QuanTrade KRX assumptions:
 
@@ -147,7 +170,7 @@ Passing does not mean validated alpha, Portfolio approval, Risk approval,
 Investment Committee approval, StrategyPassport promotion, PAPER authority, or
 execution authority.
 
-## 7. Duplicate and review budget
+## 8. Duplicate and review budget
 
 For eligible candidates:
 
@@ -168,7 +191,7 @@ external theory/source dependency.
 
 If no candidate is eligible, no specialist Work should be created.
 
-## 8. Dataset integrity requirements
+## 9. Dataset integrity requirements
 
 The runner must persist or report:
 
@@ -185,7 +208,7 @@ The dataset is considered historical price data only. This experiment does not
 claim point-in-time correctness for fundamentals, news, index membership, or
 corporate information.
 
-## 9. Experiment-level success/failure
+## 10. Experiment-level success/failure
 
 The **pipeline experiment** is successful if:
 
@@ -200,7 +223,7 @@ The experiment remains informative if every candidate fails.
 
 The experiment fails operationally if data fetch/integrity/reproducibility fails.
 
-## 10. No post-result edits rule
+## 11. No post-result edits rule
 
 After the first market result is observed, the following are frozen:
 
@@ -221,7 +244,7 @@ A code bug may be fixed only if:
 3. the fix does not introduce a result-dependent rule change;
 4. the run is marked as a new attempt under the same pre-registration.
 
-## 11. Authority invariant
+## 12. Authority invariant
 
 This experiment must always report:
 
@@ -237,7 +260,7 @@ execution_authorized = false
 live_order_possible = false
 ```
 
-## 12. Registration rule
+## 13. Registration rule
 
 This document is committed before the runner is allowed to fetch the first
 005930 market result. Its commit SHA is the pre-registration anchor and must be
