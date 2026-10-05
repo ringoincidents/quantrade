@@ -39,9 +39,13 @@ EVIDENCE_ELIGIBLE_SOURCE_KINDS = frozenset(
     {
         SourceKind.EXTERNAL_EVIDENCE.value,
         SourceKind.RUNTIME_VERIFIED.value,
-        SourceKind.CLIENT_FACT.value,
     }
 )
+
+# Client facts can be valid governed inputs to Mandate / Portfolio / Risk, but
+# they are not market evidence for an Investment Thesis merely because they are
+# true about the Client. Keep the source kind representable without granting it
+# thesis-evidence authority.
 
 
 @dataclass(frozen=True)
