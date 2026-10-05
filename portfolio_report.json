@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-28T01:35:16.845241+00:00",
+  "generated_at": "2026-10-05T01:52:56.083003+00:00",
   "schema": "portfolio_report_v3.2",
   "note": "현황 계산 + 사전 정의 규칙 해당 여부만 담는다. 매매 판단/방향 예측/확신도 필드는 스키마에 없다 - 누락이 아니라 설계.",
   "thresholds": {
@@ -9,64 +9,72 @@
     "loss_sustained_days": 60
   },
   "snapshot": {
-    "synced_at": "2026-09-27T13:11:51.232888+00:00",
-    "total_assets_krw": 5473062.0,
-    "cash_krw": 2575.0,
-    "cash_pct": 0.05,
-    "position_count": 6,
+    "synced_at": "2026-10-02T13:59:24.636222+00:00",
+    "total_assets_krw": 5857373.0,
+    "cash_krw": 36823.0,
+    "cash_pct": 0.63,
+    "position_count": 7,
     "positions": [
       {
         "symbol": "SCHD",
         "name": "SCHD",
         "market_country": "US",
-        "eval_amount_krw": 2751289.0,
-        "weight_pct": 50.27,
-        "return_pct": 0.06
+        "eval_amount_krw": 2687733.0,
+        "weight_pct": 45.89,
+        "return_pct": -1.31
       },
       {
         "symbol": "TE",
         "name": "T1 에너지",
         "market_country": "US",
-        "eval_amount_krw": 1349465.0,
-        "weight_pct": 24.66,
-        "return_pct": -19.86
+        "eval_amount_krw": 1453513.0,
+        "weight_pct": 24.82,
+        "return_pct": -15.870000000000001
       },
       {
         "symbol": "IONQ",
         "name": "아이온큐",
         "market_country": "US",
-        "eval_amount_krw": 805624.0,
-        "weight_pct": 14.72,
-        "return_pct": 0.16999999999999998
+        "eval_amount_krw": 1154609.0,
+        "weight_pct": 19.71,
+        "return_pct": -0.22999999999999998
       },
       {
-        "symbol": "004000",
-        "name": "롯데정밀화학",
+        "symbol": "196170",
+        "name": "알테오젠",
         "market_country": "KR",
-        "eval_amount_krw": 562900.0,
-        "weight_pct": 10.28,
-        "return_pct": -11.08
+        "eval_amount_krw": 519000.0,
+        "weight_pct": 8.86,
+        "return_pct": 0.0
+      },
+      {
+        "symbol": "AAPL",
+        "name": "애플",
+        "market_country": "US",
+        "eval_amount_krw": 4331.0,
+        "weight_pct": 0.07,
+        "return_pct": -0.35000000000000003
       },
       {
         "symbol": "BTAIQ",
         "name": "바이오엑셀 테라퓨틱스",
         "market_country": "US",
-        "eval_amount_krw": 837.0,
+        "eval_amount_krw": 972.0,
         "weight_pct": 0.02,
-        "return_pct": -64.01
+        "return_pct": -57.82000000000001
       },
       {
         "symbol": "VTGN",
         "name": "비스타젠 테라퓨틱스",
         "market_country": "US",
-        "eval_amount_krw": 372.0,
+        "eval_amount_krw": 391.0,
         "weight_pct": 0.01,
-        "return_pct": -31.25
+        "return_pct": -27.07
       }
     ],
     "weight_by_country_pct": {
-      "US": 89.68,
-      "KR": 10.28
+      "US": 90.52,
+      "KR": 8.86
     }
   },
   "rule_matches": [],
@@ -79,15 +87,15 @@
         "name": "SCHD",
         "sizing": {
           "recommended_range_krw": {
-            "min": 1094612,
-            "max": 1094612
+            "min": 1171475,
+            "max": 1171475
           },
           "by_strategy_krw": {
-            "단타": 1094612,
-            "스윙": 1094612,
-            "장기": 1094612
+            "단타": 1171475,
+            "스윙": 1171475,
+            "장기": 1171475
           },
-          "ceiling_krw": 1094612,
+          "ceiling_krw": 1171475,
           "inputs": {
             "volatility_pct": 0.627,
             "reference_vol_pct": 2.0,
@@ -101,17 +109,17 @@
         "name": "T1 에너지",
         "sizing": {
           "recommended_range_krw": {
-            "min": 176527,
-            "max": 882633
+            "min": 186660,
+            "max": 933298
           },
           "by_strategy_krw": {
-            "단타": 882633,
-            "스윙": 441316,
-            "장기": 176527
+            "단타": 933298,
+            "스윙": 466649,
+            "장기": 186660
           },
-          "ceiling_krw": 1094612,
+          "ceiling_krw": 1171475,
           "inputs": {
-            "volatility_pct": 4.961,
+            "volatility_pct": 5.021,
             "reference_vol_pct": 2.0,
             "per_trade_risk_budget_pct": 2.0
           }
@@ -123,17 +131,17 @@
         "name": "아이온큐",
         "sizing": {
           "recommended_range_krw": {
-            "min": 217476,
-            "max": 1087379
+            "min": 273914,
+            "max": 1171475
           },
           "by_strategy_krw": {
-            "단타": 1087379,
-            "스윙": 543690,
-            "장기": 217476
+            "단타": 1171475,
+            "스윙": 684785,
+            "장기": 273914
           },
-          "ceiling_krw": 1094612,
+          "ceiling_krw": 1171475,
           "inputs": {
-            "volatility_pct": 4.027,
+            "volatility_pct": 3.421,
             "reference_vol_pct": 2.0,
             "per_trade_risk_budget_pct": 2.0
           }
@@ -141,21 +149,43 @@
         "note": null
       },
       {
-        "symbol": "004000",
-        "name": "롯데정밀화학",
+        "symbol": "196170",
+        "name": "알테오젠",
         "sizing": {
           "recommended_range_krw": {
-            "min": 597934,
-            "max": 1094612
+            "min": 429762,
+            "max": 1171475
           },
           "by_strategy_krw": {
-            "단타": 1094612,
-            "스윙": 1094612,
-            "장기": 597934
+            "단타": 1171475,
+            "스윙": 1074405,
+            "장기": 429762
           },
-          "ceiling_krw": 1094612,
+          "ceiling_krw": 1171475,
           "inputs": {
-            "volatility_pct": 1.465,
+            "volatility_pct": 2.181,
+            "reference_vol_pct": 2.0,
+            "per_trade_risk_budget_pct": 2.0
+          }
+        },
+        "note": null
+      },
+      {
+        "symbol": "AAPL",
+        "name": "애플",
+        "sizing": {
+          "recommended_range_krw": {
+            "min": 644413,
+            "max": 1171475
+          },
+          "by_strategy_krw": {
+            "단타": 1171475,
+            "스윙": 1171475,
+            "장기": 644413
+          },
+          "ceiling_krw": 1171475,
+          "inputs": {
+            "volatility_pct": 1.454,
             "reference_vol_pct": 2.0,
             "per_trade_risk_budget_pct": 2.0
           }
@@ -167,17 +197,17 @@
         "name": "바이오엑셀 테라퓨틱스",
         "sizing": {
           "recommended_range_krw": {
-            "min": 33849,
-            "max": 169244
+            "min": 44256,
+            "max": 221278
           },
           "by_strategy_krw": {
-            "단타": 169244,
-            "스윙": 84622,
-            "장기": 33849
+            "단타": 221278,
+            "스윙": 110639,
+            "장기": 44256
           },
-          "ceiling_krw": 1094612,
+          "ceiling_krw": 1171475,
           "inputs": {
-            "volatility_pct": 25.871,
+            "volatility_pct": 21.176,
             "reference_vol_pct": 2.0,
             "per_trade_risk_budget_pct": 2.0
           }
@@ -189,17 +219,17 @@
         "name": "비스타젠 테라퓨틱스",
         "sizing": {
           "recommended_range_krw": {
-            "min": 69678,
-            "max": 348388
+            "min": 73308,
+            "max": 366541
           },
           "by_strategy_krw": {
-            "단타": 348388,
-            "스윙": 174194,
-            "장기": 69678
+            "단타": 366541,
+            "스윙": 183271,
+            "장기": 73308
           },
-          "ceiling_krw": 1094612,
+          "ceiling_krw": 1171475,
           "inputs": {
-            "volatility_pct": 12.568,
+            "volatility_pct": 12.784,
             "reference_vol_pct": 2.0,
             "per_trade_risk_budget_pct": 2.0
           }
@@ -208,16 +238,16 @@
       }
     ],
     "mdd_budget": {
-      "portfolio_unrealized_return_pct": -5.99,
+      "portfolio_unrealized_return_pct": -4.6,
       "mdd_limit_pct": -20.0,
-      "budget_usage_pct": 30.0,
+      "budget_usage_pct": 23.0,
       "note": "실제 고점 대비 낙폭(진짜 MDD)이 아니라 현재 미실현손익 기준 소진율 — real_portfolio.json은 스냅샷이라 과거 고점을 모른다."
     },
     "concentration": [
       {
         "symbol": "SCHD",
         "name": "SCHD",
-        "weight_pct": 50.27,
+        "weight_pct": 45.89,
         "threshold_pct": 30.0,
         "asset_type": "etf",
         "rule_applies": false
@@ -225,7 +255,7 @@
       {
         "symbol": "TE",
         "name": "T1 에너지",
-        "weight_pct": 24.66,
+        "weight_pct": 24.82,
         "threshold_pct": 30.0,
         "asset_type": "individual_stock",
         "rule_applies": true
@@ -233,15 +263,23 @@
       {
         "symbol": "IONQ",
         "name": "아이온큐",
-        "weight_pct": 14.72,
+        "weight_pct": 19.71,
         "threshold_pct": 30.0,
         "asset_type": "individual_stock",
         "rule_applies": true
       },
       {
-        "symbol": "004000",
-        "name": "롯데정밀화학",
-        "weight_pct": 10.28,
+        "symbol": "196170",
+        "name": "알테오젠",
+        "weight_pct": 8.86,
+        "threshold_pct": 30.0,
+        "asset_type": "individual_stock",
+        "rule_applies": true
+      },
+      {
+        "symbol": "AAPL",
+        "name": "애플",
+        "weight_pct": 0.07,
         "threshold_pct": 30.0,
         "asset_type": "individual_stock",
         "rule_applies": true
@@ -268,50 +306,65 @@
       "matrix": {
         "SCHD": {
           "SCHD": 1.0,
-          "TE": -0.212,
-          "IONQ": -0.043,
-          "004000": -0.028,
-          "BTAIQ": 0.027,
-          "VTGN": 0.005
+          "TE": -0.202,
+          "IONQ": -0.099,
+          "196170": 0.082,
+          "AAPL": 0.27,
+          "BTAIQ": 0.007,
+          "VTGN": -0.022
         },
         "TE": {
-          "SCHD": -0.212,
+          "SCHD": -0.202,
           "TE": 1.0,
-          "IONQ": 0.526,
-          "004000": 0.075,
-          "BTAIQ": 0.099,
-          "VTGN": -0.048
+          "IONQ": 0.591,
+          "196170": 0.004,
+          "AAPL": 0.018,
+          "BTAIQ": 0.093,
+          "VTGN": -0.056
         },
         "IONQ": {
-          "SCHD": -0.043,
-          "TE": 0.526,
+          "SCHD": -0.099,
+          "TE": 0.591,
           "IONQ": 1.0,
-          "004000": -0.194,
-          "BTAIQ": 0.172,
-          "VTGN": 0.09
+          "196170": 0.26,
+          "AAPL": -0.025,
+          "BTAIQ": 0.15,
+          "VTGN": 0.085
         },
-        "004000": {
-          "SCHD": -0.028,
-          "TE": 0.075,
-          "IONQ": -0.194,
-          "004000": 1.0,
-          "BTAIQ": -0.009,
-          "VTGN": -0.256
+        "196170": {
+          "SCHD": 0.082,
+          "TE": 0.004,
+          "IONQ": 0.26,
+          "196170": 1.0,
+          "AAPL": 0.128,
+          "BTAIQ": 0.041,
+          "VTGN": 0.218
+        },
+        "AAPL": {
+          "SCHD": 0.27,
+          "TE": 0.018,
+          "IONQ": -0.025,
+          "196170": 0.128,
+          "AAPL": 1.0,
+          "BTAIQ": 0.006,
+          "VTGN": -0.069
         },
         "BTAIQ": {
-          "SCHD": 0.027,
-          "TE": 0.099,
-          "IONQ": 0.172,
-          "004000": -0.009,
+          "SCHD": 0.007,
+          "TE": 0.093,
+          "IONQ": 0.15,
+          "196170": 0.041,
+          "AAPL": 0.006,
           "BTAIQ": 1.0,
-          "VTGN": 0.055
+          "VTGN": 0.068
         },
         "VTGN": {
-          "SCHD": 0.005,
-          "TE": -0.048,
-          "IONQ": 0.09,
-          "004000": -0.256,
-          "BTAIQ": 0.055,
+          "SCHD": -0.022,
+          "TE": -0.056,
+          "IONQ": 0.085,
+          "196170": 0.218,
+          "AAPL": -0.069,
+          "BTAIQ": 0.068,
           "VTGN": 1.0
         }
       },
@@ -322,44 +375,51 @@
       {
         "symbol": "SCHD",
         "name": "SCHD",
-        "return_pct": 0.06,
+        "return_pct": -1.31,
         "sell_cost_pct": 0.35,
-        "cost_adjusted_return_pct": -0.29
+        "cost_adjusted_return_pct": -1.66
       },
       {
         "symbol": "TE",
         "name": "T1 에너지",
-        "return_pct": -19.86,
+        "return_pct": -15.870000000000001,
         "sell_cost_pct": 0.35,
-        "cost_adjusted_return_pct": -20.21
+        "cost_adjusted_return_pct": -16.22
       },
       {
         "symbol": "IONQ",
         "name": "아이온큐",
-        "return_pct": 0.16999999999999998,
+        "return_pct": -0.22999999999999998,
         "sell_cost_pct": 0.35,
-        "cost_adjusted_return_pct": -0.18
+        "cost_adjusted_return_pct": -0.58
       },
       {
-        "symbol": "004000",
-        "name": "롯데정밀화학",
-        "return_pct": -11.08,
+        "symbol": "196170",
+        "name": "알테오젠",
+        "return_pct": 0.0,
         "sell_cost_pct": 0.295,
-        "cost_adjusted_return_pct": -11.375
+        "cost_adjusted_return_pct": -0.295
+      },
+      {
+        "symbol": "AAPL",
+        "name": "애플",
+        "return_pct": -0.35000000000000003,
+        "sell_cost_pct": 0.35,
+        "cost_adjusted_return_pct": -0.7
       },
       {
         "symbol": "BTAIQ",
         "name": "바이오엑셀 테라퓨틱스",
-        "return_pct": -64.01,
+        "return_pct": -57.82000000000001,
         "sell_cost_pct": 0.35,
-        "cost_adjusted_return_pct": -64.36
+        "cost_adjusted_return_pct": -58.17
       },
       {
         "symbol": "VTGN",
         "name": "비스타젠 테라퓨틱스",
-        "return_pct": -31.25,
+        "return_pct": -27.07,
         "sell_cost_pct": 0.35,
-        "cost_adjusted_return_pct": -31.6
+        "cost_adjusted_return_pct": -27.42
       }
     ]
   },
@@ -490,17 +550,17 @@
         "label": "현금성",
         "group": "안전자산",
         "target_pct": 10.0,
-        "actual_pct": 0.05,
-        "gap_pct": 9.95,
+        "actual_pct": 0.63,
+        "gap_pct": 9.37,
         "currently_mapped": true
       },
       {
         "asset_class": "기존_배당",
         "label": "배당(기존)",
         "group": "위험자산",
-        "target_pct": 45.0,
-        "actual_pct": 50.27,
-        "gap_pct": -5.27,
+        "target_pct": 30.0,
+        "actual_pct": 45.89,
+        "gap_pct": -15.89,
         "currently_mapped": true
       },
       {
@@ -516,19 +576,19 @@
         "asset_class": "기존_개별성장주",
         "label": "개별성장주(기존)",
         "group": "위험자산",
-        "target_pct": 45.0,
-        "actual_pct": 34.94,
-        "gap_pct": 10.06,
+        "target_pct": 30.0,
+        "actual_pct": 24.82,
+        "gap_pct": 5.18,
         "currently_mapped": true
       },
       {
         "asset_class": "기존_KR개별",
         "label": "국내개별(기존)",
         "group": "위험자산",
-        "target_pct": 0.0,
-        "actual_pct": 0.0,
-        "gap_pct": 0.0,
-        "currently_mapped": false
+        "target_pct": 30.0,
+        "actual_pct": 8.86,
+        "gap_pct": 21.14,
+        "currently_mapped": true
       },
       {
         "asset_class": "developed_exUS",
@@ -571,7 +631,12 @@
       {
         "symbol": "IONQ",
         "name": "아이온큐",
-        "weight_pct": 14.72
+        "weight_pct": 19.71
+      },
+      {
+        "symbol": "AAPL",
+        "name": "애플",
+        "weight_pct": 0.07
       },
       {
         "symbol": "BTAIQ",
@@ -584,28 +649,9 @@
         "weight_pct": 0.01
       }
     ],
-    "unmapped_holdings_weight_pct": 14.75,
+    "unmapped_holdings_weight_pct": 19.81,
     "note": "자산군별 목표/실제 비중과 그 차이(%p)만 나열합니다. 매핑 안 된 자산군의 갭이 0%p인 것은 정상입니다(목표도 0%로 계산). 매핑 안 된 보유종목은 unmapped_holdings에 따로 모았습니다 — 어떤 자산군에도 포함되지 않았다는 사실이며, 판단이 필요하다는 뜻은 아닙니다.",
     "monthly_gap_fill": [
-      {
-        "month": "2026-09",
-        "rank": "일병",
-        "monthly_investable_krw": 850000,
-        "allocations": [
-          {
-            "asset_class": "cash",
-            "label": "현금성",
-            "gap_pct": 9.95,
-            "amount_krw": 422664
-          },
-          {
-            "asset_class": "기존_개별성장주",
-            "label": "개별성장주(기존)",
-            "gap_pct": 10.06,
-            "amount_krw": 427336
-          }
-        ]
-      },
       {
         "month": "2026-10",
         "rank": "일병",
@@ -614,14 +660,20 @@
           {
             "asset_class": "cash",
             "label": "현금성",
-            "gap_pct": 9.95,
-            "amount_krw": 422664
+            "gap_pct": 9.37,
+            "amount_krw": 223158
           },
           {
             "asset_class": "기존_개별성장주",
             "label": "개별성장주(기존)",
-            "gap_pct": 10.06,
-            "amount_krw": 427336
+            "gap_pct": 5.18,
+            "amount_krw": 123368
+          },
+          {
+            "asset_class": "기존_KR개별",
+            "label": "국내개별(기존)",
+            "gap_pct": 21.14,
+            "amount_krw": 503474
           }
         ]
       },
@@ -633,33 +685,64 @@
           {
             "asset_class": "cash",
             "label": "현금성",
-            "gap_pct": 9.95,
-            "amount_krw": 422664
+            "gap_pct": 9.37,
+            "amount_krw": 223158
           },
           {
             "asset_class": "기존_개별성장주",
             "label": "개별성장주(기존)",
-            "gap_pct": 10.06,
-            "amount_krw": 427336
+            "gap_pct": 5.18,
+            "amount_krw": 123368
+          },
+          {
+            "asset_class": "기존_KR개별",
+            "label": "국내개별(기존)",
+            "gap_pct": 21.14,
+            "amount_krw": 503474
+          }
+        ]
+      },
+      {
+        "month": "2026-12",
+        "rank": "일병",
+        "monthly_investable_krw": 850000,
+        "allocations": [
+          {
+            "asset_class": "cash",
+            "label": "현금성",
+            "gap_pct": 9.37,
+            "amount_krw": 223158
+          },
+          {
+            "asset_class": "기존_개별성장주",
+            "label": "개별성장주(기존)",
+            "gap_pct": 5.18,
+            "amount_krw": 123368
+          },
+          {
+            "asset_class": "기존_KR개별",
+            "label": "국내개별(기존)",
+            "gap_pct": 21.14,
+            "amount_krw": 503474
           }
         ]
       }
     ]
   },
   "role_gap": {
-    "risk_asset_total_pct": 99.95,
+    "risk_asset_total_pct": 99.37,
     "rows": [
       {
         "role": "코어",
         "label": "코어",
         "target_pct": 65,
-        "actual_pct": 50.3,
-        "gap_pct": 14.7,
+        "actual_pct": 46.18,
+        "gap_pct": 18.82,
         "members": [
           {
             "symbol": "SCHD",
             "name": "SCHD",
-            "weight_pct": 50.27,
+            "weight_pct": 45.89,
             "note": null
           }
         ]
@@ -668,27 +751,28 @@
         "role": "위성-장기",
         "label": "위성-장기",
         "target_pct": 15,
-        "actual_pct": 0.0,
-        "gap_pct": 15.0,
-        "members": []
+        "actual_pct": 8.92,
+        "gap_pct": 6.08,
+        "members": [
+          {
+            "symbol": "196170",
+            "name": "알테오젠",
+            "weight_pct": 8.86,
+            "note": "추가매수 중단, 손절 없이 방치"
+          }
+        ]
       },
       {
         "role": "스윙-전술",
         "label": "스윙-전술",
         "target_pct": 15,
-        "actual_pct": 34.96,
-        "gap_pct": -19.96,
+        "actual_pct": 24.98,
+        "gap_pct": -9.98,
         "members": [
-          {
-            "symbol": "004000",
-            "name": "롯데정밀화학",
-            "weight_pct": 10.28,
-            "note": null
-          },
           {
             "symbol": "TE",
             "name": "T1 에너지",
-            "weight_pct": 24.66,
+            "weight_pct": 24.82,
             "note": null
           }
         ]
@@ -706,7 +790,12 @@
       {
         "symbol": "IONQ",
         "name": "아이온큐",
-        "weight_pct": 14.72
+        "weight_pct": 19.71
+      },
+      {
+        "symbol": "AAPL",
+        "name": "애플",
+        "weight_pct": 0.07
       },
       {
         "symbol": "BTAIQ",
@@ -719,22 +808,9 @@
         "weight_pct": 0.01
       }
     ],
-    "unmapped_holdings_weight_pct": 14.75,
+    "unmapped_holdings_weight_pct": 19.81,
     "note": "역할별 목표/실제 비중은 포트폴리오 전체가 아니라 위험자산 총액 대비입니다. 목표 비중이 없는 역할은 갭을 계산하지 않습니다 — 지어내지 않습니다.",
     "monthly_gap_fill": [
-      {
-        "month": "2026-09",
-        "rank": "일병",
-        "risk_bucket_amount_krw": 765000,
-        "rule_triggered": true,
-        "allocations": [
-          {
-            "role": "코어",
-            "label": "코어",
-            "amount_krw": 765000
-          }
-        ]
-      },
       {
         "month": "2026-10",
         "rank": "일병",
@@ -750,6 +826,19 @@
       },
       {
         "month": "2026-11",
+        "rank": "일병",
+        "risk_bucket_amount_krw": 765000,
+        "rule_triggered": true,
+        "allocations": [
+          {
+            "role": "코어",
+            "label": "코어",
+            "amount_krw": 765000
+          }
+        ]
+      },
+      {
+        "month": "2026-12",
         "rank": "일병",
         "risk_bucket_amount_krw": 765000,
         "rule_triggered": true,
