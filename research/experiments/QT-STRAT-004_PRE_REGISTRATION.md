@@ -123,7 +123,7 @@ closing price can be both observed and executed without delay.
 
 The final artifact must report that the one-bar lag was applied.
 
-## 7. Frozen friction model
+## 6. Frozen friction model
 
 Existing QuanTrade KRX assumptions:
 
@@ -150,7 +150,7 @@ so the candidate comparison is internally consistent.
 This approximation is a known limitation and is not silently upgraded after
 results.
 
-## 6. Frozen deterministic eligibility gate
+## 7. Frozen deterministic eligibility gate
 
 A candidate is **eligible for bounded specialist review** only if all are true:
 
