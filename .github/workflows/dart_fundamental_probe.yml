@@ -1,6 +1,14 @@
 name: Open DART Fundamental Probe
 
 on:
+  push:
+    branches:
+      - "direction/investment-office-decision-economics-2026-10-05"
+    paths:
+      - ".github/workflows/dart_fundamental_probe.yml"
+      - "quantrade/capabilities/dart_fundamental_provider.py"
+      - "quantrade/capabilities/fundamental_evidence.py"
+      - "scripts/run_dart_fundamental_probe.py"
   workflow_dispatch:
     inputs:
       stock_code:
@@ -33,6 +41,10 @@ jobs:
     timeout-minutes: 10
     env:
       OPEN_DART_API_KEY: ${{ secrets.OPEN_DART_API_KEY }}
+      STOCK_CODE: ${{ inputs.stock_code || '005930' }}
+      CASE_AS_OF: ${{ inputs.as_of || '2026-10-05T23:59:59+09:00' }}
+      PERIOD_FROM: ${{ inputs.period_from || '2025-01-01' }}
+      PERIOD_TO: ${{ inputs.period_to || '2025-12-31' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -56,7 +68,12 @@ jobs:
       - name: Run read-only Open DART probe
         if: steps.key.outputs.configured == 'true'
         run: |
-          python -m scripts.run_dart_fundamental_probe             --stock-code "${{ inputs.stock_code }}"             --as-of "${{ inputs.as_of }}"             --period-from "${{ inputs.period_from }}"             --period-to "${{ inputs.period_to }}"             > /tmp/dart_probe.json
+          python -m scripts.run_dart_fundamental_probe \
+            --stock-code "$STOCK_CODE" \
+            --as-of "$CASE_AS_OF" \
+            --period-from "$PERIOD_FROM" \
+            --period-to "$PERIOD_TO" \
+            > /tmp/dart_probe.json
           python - <<'PY'
           import json
           from pathlib import Path
