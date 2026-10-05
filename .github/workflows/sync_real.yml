@@ -1,6 +1,6 @@
 name: Real Portfolio Sync
 
-# TASK-101 / LLMH-043
+# TASK-101 / LLMH-045
 # 실계좌는 토스 Open API에서 조회만 하고, 현재 보유자산은 public repository에
 # 커밋하지 않는다. 짧은 GitHub Actions OIDC 토큰으로 private LLM Holdings
 # Runtime에 직접 전달한다. 주문/정정/취소 엔드포인트는 호출하지 않는다.
