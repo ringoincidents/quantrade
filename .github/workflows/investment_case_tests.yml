@@ -67,6 +67,8 @@ jobs:
         run: python -m unittest tests.capabilities.test_dart_fundamental_provider -v
       - name: Run Portfolio opportunity-cost tests
         run: python -m unittest tests.capabilities.test_portfolio_opportunity -v
+      - name: Run independent Risk Opinion tests
+        run: python -m unittest tests.capabilities.test_risk_opinion -v
       - name: Run existing capability regression suite
         run: python -m unittest discover -s tests/capabilities -p "test_*.py" -v
       - name: Run reference harness
