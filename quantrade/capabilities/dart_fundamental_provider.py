@@ -566,6 +566,10 @@ class DartFundamentalObservationProvider:
                 )
             account_id = str(row.get("account_id", "")).strip()
             account_nm = str(row.get("account_nm", "")).strip()
+            statement_division = _required_text(
+                row.get("sj_div"),
+                "sj_div",
+            )
             base = _metric_base(account_id, account_nm)
             currency = str(row.get("currency", "")).strip() or None
 
@@ -578,7 +582,8 @@ class DartFundamentalObservationProvider:
                 if amount is None:
                     continue
                 observation_id = (
-                    f"DART:{rcept_no}:{scope}:{base}:{suffix}"
+                    f"DART:{rcept_no}:{scope}:{statement_division}:"
+                    f"{base}:{suffix}"
                 )
                 if observation_id in seen_ids:
                     # DART can expose dimension/member rows with the same
@@ -602,7 +607,9 @@ class DartFundamentalObservationProvider:
                     FundamentalObservation(
                         observation_id=observation_id,
                         asset_id=f"KRX:{filing.stock_code}",
-                        metric_key=f"{base}:{suffix}",
+                        metric_key=(
+                            f"{base}:{statement_division}:{suffix}"
+                        ),
                         value=amount,
                         unit=currency or "REPORTED_UNIT",
                         currency=currency,
@@ -629,8 +636,8 @@ class DartFundamentalObservationProvider:
                             filing.report_nm
                         ),
                         normalization_method=(
-                            f"DART:{scope}:{account_id or account_nm}:"
-                            f"{field_name}"
+                            f"DART:{scope}:{statement_division}:"
+                            f"{account_id or account_nm}:{field_name}"
                         ),
                         published_at_precision="DATE",
                     )
