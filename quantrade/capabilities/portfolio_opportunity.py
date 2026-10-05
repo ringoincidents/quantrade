@@ -14,6 +14,7 @@ authority, or execution authority.
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
+from datetime import datetime, timezone
 from enum import Enum
 import math
 from typing import Sequence
@@ -87,6 +88,21 @@ def _text(value: object, field_name: str) -> str:
     return value.strip()
 
 
+def _parse_time(value: str, field_name: str) -> datetime:
+    raw = _text(value, field_name).replace("Z", "+00:00")
+    try:
+        parsed = datetime.fromisoformat(raw)
+    except ValueError as exc:
+        raise PortfolioOpportunityError(
+            f"{field_name} must be valid ISO-8601"
+        ) from exc
+    if parsed.tzinfo is None:
+        raise PortfolioOpportunityError(
+            f"{field_name} must include timezone information"
+        )
+    return parsed.astimezone(timezone.utc)
+
+
 def _finite(value: object, field_name: str) -> float:
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         raise PortfolioOpportunityError(f"{field_name} must be numeric")
@@ -146,7 +162,7 @@ def _validate_alternative(item: CapitalAlternative) -> None:
 
 def _validate_constraints(item: PortfolioConstraintSnapshot) -> None:
     _text(item.snapshot_id, "snapshot_id")
-    _text(item.as_of, "constraints as_of")
+    _parse_time(item.as_of, "constraints as_of")
     _text(item.mandate_ref, "mandate_ref")
     refs = _validate_refs(item.constraint_refs, "constraint_ref")
     if not refs:
@@ -241,6 +257,19 @@ def assess_portfolio_opportunity(
         )
 
     _validate_constraints(request.constraints)
+    case_as_of = _parse_time(
+        str(economics.case.get("as_of", "")),
+        "case as_of",
+    )
+    constraints_as_of = _parse_time(
+        request.constraints.as_of,
+        "constraints as_of",
+    )
+    if constraints_as_of > case_as_of:
+        raise PortfolioOpportunityError(
+            "Portfolio constraint snapshot cannot be after case as_of"
+        )
+
     if not request.alternatives:
         status = PortfolioReviewStatus.MISSING_CONTEXT
         reasons = ("NO_CAPITAL_ALTERNATIVES",)
