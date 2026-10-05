@@ -33,6 +33,19 @@ Shared Holdings Runtime changes: **none required for Phase 1–3**
 - Pipeline verdict: keep as research infrastructure; no strategy/PAPER/execution promotion.
 - Phase 5 (RL/FinBERT) remains deferred.
 
+## Post-Phase-4 transfer experiment
+
+- **QT-STRAT-005: MULTI-STOCK KRX TRANSFER GOLDEN RUN COMPLETED**
+- Frozen new instruments: `000660, 207940, 005380, 005490, 006400`
+- Same four QT-STRAT-004 candidate families, no parameter retuning
+- Pre-registration: `research/experiments/QT-STRAT-005_PRE_REGISTRATION.md`
+- Dataset: `research/experiments/QT-STRAT-005_DATASET.json`
+- Machine result: `research/experiments/QT-STRAT-005_RESULT.json`
+- Result report: `research/experiments/QT-STRAT-005_RESULT_REPORT.md`
+- Outcome: operational success, **0/4 candidates Stage-A eligible**, candidate TEST metrics remained closed, no specialist/model invocation
+- Evidence: QT-STRAT-004 + QT-STRAT-005 do not support the four simple technical families as default alpha candidates under the current protocol
+- Next research principle: broaden the information family rather than parameter-search nearby variants.
+
 ## 1. Goal
 
 Build the smallest safe capability that lets QuanTrade:
