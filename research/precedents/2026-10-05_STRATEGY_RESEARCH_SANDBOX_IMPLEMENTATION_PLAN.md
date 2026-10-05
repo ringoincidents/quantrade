@@ -1,6 +1,6 @@
 # Strategy Research Sandbox — Implementable Plan
 
-Status: **PHASE 1–2 SANDBOX IMPLEMENTED / NOT PROMOTED**  
+Status: **PHASE 1–3 SANDBOX IMPLEMENTED / NOT PROMOTED**  
 Date: **2026-10-05**  
 Parent research: `2026-10-05_LLM_TRADING_FRAMEWORKS_REVIEW.md`  
 Target repository: **QuanTrade**  
@@ -19,7 +19,12 @@ Shared Holdings Runtime changes: **none required for Phase 1–3**
 - End-to-end harness: `quantrade/capabilities/strategy_candidate_evaluation.py`
 - Tests: `tests/capabilities/test_strategy_candidates.py`
 - Result record: `research/precedents/2026-10-05_STRATEGY_RESEARCH_SANDBOX_PHASE2_RESULT.md`
-- Phase 3+ remains proposed.
+- **QT-STRAT-003 / Phase 3: IMPLEMENTED IN SANDBOX**
+- Robustness gate/review planner: `quantrade/capabilities/strategy_robustness.py`
+- Reference harness: `quantrade/capabilities/strategy_robustness_evaluation.py`
+- Tests: `tests/capabilities/test_strategy_robustness.py`
+- Result record: `research/precedents/2026-10-05_STRATEGY_RESEARCH_SANDBOX_PHASE3_RESULT.md`
+- Phase 4+ remains proposed.
 
 ## 1. Goal
 
