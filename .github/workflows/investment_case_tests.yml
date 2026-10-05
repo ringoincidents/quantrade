@@ -1,0 +1,44 @@
+name: Investment Case Economics Tests
+
+on:
+  pull_request:
+    paths:
+      - "quantrade/capabilities/investment_case.py"
+      - "quantrade/capabilities/investment_case_evaluation.py"
+      - "tests/capabilities/test_investment_case.py"
+      - "research/precedents/2026-10-05_INVESTMENT_OFFICE_DECISION_ECONOMICS_DIRECTION.md"
+  push:
+    branches:
+      - "direction/investment-office-decision-economics-2026-10-05"
+    paths:
+      - "quantrade/capabilities/investment_case.py"
+      - "quantrade/capabilities/investment_case_evaluation.py"
+      - "tests/capabilities/test_investment_case.py"
+      - ".github/workflows/investment_case_tests.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unittest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compile Investment Case capability
+        run: python -m compileall -q quantrade/capabilities tests/capabilities
+      - name: Run Investment Case tests
+        run: python -m unittest tests.capabilities.test_investment_case -v
+      - name: Run reference harness
+        run: |
+          python - <<'PY'
+          import json
+          from quantrade.capabilities.investment_case_evaluation import reference_cases
+          artifact = reference_cases()
+          assert artifact["authority"]["execution_authorized"] is False
+          assert artifact["authority"]["portfolio_proposal_created"] is False
+          print(json.dumps(artifact, ensure_ascii=False, sort_keys=True))
+          PY
