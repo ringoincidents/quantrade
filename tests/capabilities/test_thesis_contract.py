@@ -142,6 +142,44 @@ class ThesisContractTests(unittest.TestCase):
             artifact.completeness["all_theses_evidence_backed"]
         )
 
+    def test_client_fact_is_not_market_thesis_evidence(self):
+        contract = ThesisContractInput(
+            case_id="CASE-CLIENT-FACT",
+            as_of="2026-10-05T12:00:00+09:00",
+            observations=(
+                Observation(
+                    observation_id="CLIENT-FACT",
+                    statement="Client has a liquidity requirement.",
+                    source_ref="fixture://client-fact",
+                    source_kind=SourceKind.CLIENT_FACT.value,
+                    observed_at="2026-10-04T00:00:00+09:00",
+                ),
+            ),
+            thesis_claims=(
+                ThesisClaim(
+                    thesis_id="TH-CLIENT",
+                    statement="Client context alone does not prove market edge.",
+                    support_refs=("CLIENT-FACT",),
+                ),
+            ),
+            falsification_conditions=(
+                FalsificationCondition(
+                    condition_id="FAL-CLIENT",
+                    thesis_id="TH-CLIENT",
+                    statement="Verified market evidence is required.",
+                    observable="verified_market_evidence",
+                    evaluation_horizon="before_research_handoff",
+                ),
+            ),
+        )
+        artifact = compile_thesis_contract(contract)
+        assessment = artifact.thesis_assessments[0]
+        self.assertFalse(assessment["evidence_backed"])
+        self.assertEqual(
+            ("CLIENT-FACT",),
+            assessment["non_evidence_observation_refs"],
+        )
+
     def test_assumption_is_not_evidence(self):
         contract = ThesisContractInput(
             case_id="CASE-ASSUMPTION",
