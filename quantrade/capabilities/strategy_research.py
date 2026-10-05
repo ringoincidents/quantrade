@@ -254,6 +254,7 @@ def evaluate_strategy(
     dataset: DatasetMetadata,
     *,
     transaction_cost_bps: float = 0.0,
+    charge_terminal_liquidation: bool = False,
     periods_per_year: int = 252,
     screening_policy: ScreeningPolicy | None = None,
     evaluator: EvaluationProviderMetadata | None = None,
@@ -304,6 +305,15 @@ def evaluate_strategy(
         net_returns.append(net)
         total_cost += cost
         prior_position = position
+
+    terminal_turnover = 0.0
+    terminal_cost = 0.0
+    if charge_terminal_liquidation and prior_position != 0.0:
+        terminal_turnover = abs(prior_position)
+        terminal_cost = terminal_turnover * cost_rate
+        net_returns[-1] -= terminal_cost
+        turnover_series[-1] += terminal_turnover
+        total_cost += terminal_cost
 
     total_return = _compound(net_returns)
     gross_total_return = _compound(gross_returns)
@@ -391,6 +401,12 @@ def evaluate_strategy(
         evaluator=asdict(evaluator),
         assumptions={
             "transaction_cost_bps": transaction_cost_bps,
+            "charge_terminal_liquidation": charge_terminal_liquidation,
+            "terminal_turnover": round(terminal_turnover, 6),
+            "terminal_cost_pct_of_initial_equity": round(
+                terminal_cost * 100.0,
+                6,
+            ),
             "periods_per_year": periods_per_year,
             "position_range": [0.0, 1.0],
             "signal_timing": (
