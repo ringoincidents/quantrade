@@ -143,28 +143,53 @@ average one-way = (0.115% + 0.295%) / 2 = 0.205% = 20.5 bps
 Therefore:
 
 - `transaction_cost_bps = 20.5`
+- terminal liquidation is charged at the same 20.5 bps when a partition ends
+  with a non-zero position.
 
 The cost-adjusted BUY-HOLD control is evaluated with the same symmetric model,
-so the candidate comparison is internally consistent.
+including terminal liquidation, so the candidate comparison is internally
+consistent.
 
-This approximation is a known limitation and is not silently upgraded after
-results.
+The symmetric buy/sell approximation is a known limitation and is not silently
+upgraded after results.
 
-## 7. Frozen deterministic eligibility gate
+## 7. Frozen deterministic eligibility and test protocol
 
-A candidate is **eligible for bounded specialist review** only if all are true:
+The TEST partition is not used to choose which candidates receive bounded
+review.
+
+### Stage A — review eligibility (TRAIN + VALIDATION only)
+
+A candidate is eligible for duplicate suppression / top-K review selection only
+if all are true:
 
 1. no look-ahead/timing violation;
-2. VALIDATION return periods >= 100;
-3. TEST return periods >= 100;
+2. TRAIN return periods >= 200;
+3. VALIDATION return periods >= 100;
 4. VALIDATION net return > cost-adjusted BUY-HOLD control net return;
-5. TEST net return > cost-adjusted BUY-HOLD control net return;
-6. VALIDATION Sharpe > 0;
-7. TEST Sharpe > 0;
-8. TEST maximum drawdown >= -20%;
-9. TEST turnover per period <= 0.25.
+5. VALIDATION Sharpe > 0;
+6. VALIDATION maximum drawdown >= -20%;
+7. VALIDATION turnover per period <= 0.25.
 
-These criteria create research-review eligibility only.
+TRAIN metrics are recorded but are not optimized after observation.
+
+### Stage B — frozen TEST confirmation
+
+Only the candidates selected after Stage A are opened against the frozen TEST
+partition for final confirmation.
+
+A selected candidate is TEST-confirmed only if all are true:
+
+1. TEST return periods >= 100;
+2. TEST net return > cost-adjusted BUY-HOLD control net return;
+3. TEST Sharpe > 0;
+4. TEST maximum drawdown >= -20%;
+5. TEST turnover per period <= 0.25.
+
+The TEST result may confirm or reject the research candidate; it must not cause
+another candidate to be substituted into the selected set.
+
+These criteria create research evidence only.
 
 Passing does not mean validated alpha, Portfolio approval, Risk approval,
 Investment Committee approval, StrategyPassport promotion, PAPER authority, or
