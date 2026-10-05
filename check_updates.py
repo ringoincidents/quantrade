@@ -109,9 +109,12 @@ def handle_unkeep(market, portfolio):
 # 메시지는 사람이 요청한 것에 대한 답장이지 자동 푸시가 아니다(지시서 §2).
 
 def handle_review():
-    import post_trade_review
-    report = post_trade_review.run_ondemand()
-    send_telegram(post_trade_review.render_telegram(report))
+    # TASK-101: current Client holdings no longer live in this public repository.
+    # Do not recreate a public post-trade journal from stale/missing state.
+    send_telegram(
+        "ℹ️ 매매 사후 점검의 공개 저장소 경로는 종료되었습니다. "
+        "현재 보유자산과 이후 Performance & Learning은 private LLM Holdings Runtime에서 처리합니다."
+    )
     return True
 
 
