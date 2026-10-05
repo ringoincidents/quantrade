@@ -1,0 +1,65 @@
+name: TASK-101 Verify
+
+on:
+  pull_request:
+    paths:
+      - 'runtime_portfolio_sync.py'
+      - 'real_portfolio_sync.py'
+      - 'tests/test_runtime_portfolio_sync.py'
+      - '.github/workflows/sync_real.yml'
+      - '.github/workflows/portfolio_report.yml'
+      - '.github/workflows/post_trade_review.yml'
+      - '.github/workflows/poll.yml'
+      - '.gitignore'
+      - 'check_updates.py'
+      - 'index.html'
+      - 'architecture/PRIVATE_PORTFOLIO_RUNTIME_MIGRATION_2026-10-05.md'
+      - '.github/workflows/task101_verify.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install pytest requests
+      - name: Unit tests
+        run: python -m pytest -q tests/test_runtime_portfolio_sync.py
+      - name: Python syntax
+        run: python -m py_compile runtime_portfolio_sync.py real_portfolio_sync.py check_updates.py
+      - name: Public-state boundary
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          sync = Path(".github/workflows/sync_real.yml").read_text()
+          assert "contents: read" in sync
+          assert "id-token: write" in sync
+          assert "contents: write" not in sync
+          assert "git push" not in sync
+          assert "runtime_portfolio_sync.py" in sync
+
+          retired_report = Path(".github/workflows/portfolio_report.yml").read_text()
+          retired_review = Path(".github/workflows/post_trade_review.yml").read_text()
+          assert "schedule:" not in retired_report
+          assert "schedule:" not in retired_review
+
+          tracked = {
+              "real_portfolio.json",
+              "portfolio_pnl_history.json",
+              "portfolio_report.json",
+              "portfolio_report_state.json",
+              "post_trade_review_log.json",
+              "post_trade_review_state.json",
+          }
+          assert all(not Path(path).exists() for path in tracked)
+
+          ignore = Path(".gitignore").read_text()
+          assert tracked.issubset(set(ignore.splitlines()))
+          print("TASK-101_PUBLIC_BOUNDARY_OK")
+          PY
