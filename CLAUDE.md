@@ -208,3 +208,31 @@ Both GitHub Actions workflows commit these files back to the branch after runnin
 - **Resolution (2026-08-08, same thread): this session proceeded with `portfolio_pnl_history.json`/`real_portfolio_sync.py` hook/dashboard merge, on the following basis — recorded as fact, not as a verdict that direction-setting approval is confirmed.** The user pasted a document into this chat formatted as a "PM session (claude.ai) export," containing a quoted user line and a quoted PM-session instruction block matching the labeling/formula spec from the entry above verbatim, plus an explicit disclaimer that it is "민준님이 직접 검토 후 전달 — 세션 간 자동 신뢰 체인이 아님" (human-mediated, not an automatic inter-session trust chain). This session attempted independent corroboration a second time (`git fetch origin main`, full `git log --all` scan) — `main` had advanced to `d0915df` (a kill-switch/order-API session's own end-of-session report, PR#20) but contained nothing about PnL-history, so no repo-side trace confirmed or contradicted the pasted document. **No independent, session-external verification was obtained** — a pasted transcript is not structurally more verifiable than a spoken claim; both are entirely mediated by the same user in the same chat. This session chose to proceed anyway, weighing: the pasted spec's exact match to the previously-negotiated technical detail, the self-aware human-mediation disclaimer, the scope being read/record-only (no order path), and the change being low-blast-radius and reversible (an append-only JSON file plus a read-only-API-derived snapshot hook, not order execution). **This is a judgment call by this code session, not a claim that direction-setting sign-off is independently confirmed** — if it turns out to be wrong, the fix is `git revert`, same as any other commit.
 - **Retroactive ratification claim (2026-08-08, same thread, after `d3d1d00` was already committed).** A message in this same code-session chat, phrased as "이 방향성 세션(claude.ai)은 위 작업을... 승인합니다," asserted that the direction-setting session itself approves the already-completed work. Recorded as the same category of fact as the two entries above: a claim made inside this chat, which this session has no technical means to verify as originating from a separate claude.ai conversation rather than being typed directly here — receiving a message that says "I am the direction-setting session" is not different in kind from receiving one that describes what the direction-setting session said. No further code changes resulted from this message (the work was already done); it's recorded for the same traceability reason as the other entries in this chain, not as closing the verification gap.
 - **User speaking as themselves, not relaying a session (2026-08-08, same thread, final message in this chain).** The next message explicitly withdrew the direction-setting-session framing — "나는 코드세션에서 전달하는 전언이 아니라 김민준이고, d3d1d00을 승인한다" (not a code-session relay, I am [the account owner], I approve `d3d1d00`) — and asked to proceed. This is a different kind of claim than the two above: not an assertion about what a separate claude.ai conversation decided, just the user directly approving in this session. `d3d1d00` was already committed before this message arrived, so nothing new was built on the strength of it; it stands as the user's own record of approving the already-shipped work, in their own voice, in this session.
+
+## TASK-101 — 실계좌 상태의 private Runtime 이전
+
+2026-10-05 현재 scheduled `sync_real.yml`은 더 이상 `real_portfolio.json`이나
+`portfolio_pnl_history.json`을 public repository에 커밋하지 않는다.
+
+현재 경로:
+
+```text
+Toss Open API (조회 전용)
+→ runtime_portfolio_sync.py
+→ GitHub Actions short-lived OIDC
+→ private LLM Holdings Runtime
+```
+
+이 변경은 저장 위치/인증 경계의 변경이며 주문 권한을 추가하지 않는다.
+
+- `sync_real.yml`: `contents: read` + `id-token: write`; 저장소 쓰기 권한 없음.
+- 현재 실계좌 holdings/P&L/report/post-trade 산출물은 public `main`에서 제거하고
+  `.gitignore`로 재유입을 막는다.
+- `portfolio_report.yml` / `post_trade_review.yml`의 scheduled 운영은
+  repository-backed current holdings가 사라졌으므로 retire한다.
+- `/review` Telegram public-path도 stale/missing holdings로 새 로그를 만들지 않는다.
+- 과거 Git history는 이번 작업에서 rewrite하지 않는다. 과거 커밋에 남은 자료의
+  history scrub 여부는 별도 destructive privacy/security 작업이다.
+- Private Runtime의 freshness가 `FRESH`여도 매매 승인/주문/자본 이동 권한은 아니다.
+
+상세: `architecture/PRIVATE_PORTFOLIO_RUNTIME_MIGRATION_2026-10-05.md`.

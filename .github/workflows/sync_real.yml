@@ -1,67 +1,34 @@
 name: Real Portfolio Sync
 
-# 실계좌 잔고 **조회 전용** 동기화(real_portfolio_sync.py). 주문 실행 코드는
-# 이 저장소 어디에도 없다 — 이 워크플로가 부르는 엔드포인트는 POST /oauth2/token
-# (토큰 발급) 하나를 빼면 전부 GET(/accounts, /holdings, /buying-power,
-# /exchange-rate)이다. 스케줄 추가로 새 엔드포인트나 권한이 생기지 않았다.
+# TASK-101 / LLMH-045
+# 실계좌는 토스 Open API에서 조회만 하고, 현재 보유자산은 public repository에
+# 커밋하지 않는다. 짧은 GitHub Actions OIDC 토큰으로 private LLM Holdings
+# Runtime에 직접 전달한다. 주문/정정/취소 엔드포인트는 호출하지 않는다.
 #
-# 2026-08-02: 대시보드 최신성을 위해 하루 4회 자동 실행 추가(그 전까지는
-# workflow_dispatch 전용). 사실만 적자면 — 사람 개입 없는 실계좌 "조회"가
-# 자동으로 도는 인프라가 생겼고, 각 실행이 하는 일 자체는 이전과 동일한 GET들이며
-# 주문 코드는 추가되지 않았다. 이것이 CLAUDE.md의 Track B 기준과 어떤 관계인지에
-# 대한 판정은 방향성 세션 몫이라 여기에 적지 않는다. 이 변경은 사용자가 2026-08-02
-# 세션에서 명시적으로 승인했다.
-#
-# 시각 선정(KST = UTC+9):
-#   00:25 UTC = 09:25 KST  장 시작 직후
-#   03:25 UTC = 12:25 KST  장중
-#   07:25 UTC = 16:25 KST  장 마감(15:30) 직후 - 종가 확정분
-#   11:25 UTC = 20:25 KST  저녁 정산 반영분
-# - 한국 증권사 야간 점검이 몰리는 23:30~05:00 KST(14:30~20:00 UTC)를 전부 피했다.
-#   지시받은 17:00 UTC는 02:00 KST로 이 구간 한복판이라 옮겼다.
-# - 분(minute)을 :25로 둔 이유: daily.yml(11:00 UTC)과 정각이 겹치지 않게 하고,
-#   15분마다 도는 poll.yml의 :00/:15/:30/:45와도 어긋나게 하기 위함.
+# KST 기준: 09:25 / 12:25 / 16:25 / 20:25
 on:
   schedule:
     - cron: '25 0,3,7,11 * * *'
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+  id-token: write
 
 jobs:
   run:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     env:
       PROXY_URL: ${{ secrets.PROXY_URL }}
       TOSS_CLIENT_ID: ${{ secrets.TOSS_CLIENT_ID }}
       TOSS_CLIENT_SECRET: ${{ secrets.TOSS_CLIENT_SECRET }}
+      LLM_HOLDINGS_RUNTIME_URL: https://llm-holdings-runtime-production.up.railway.app
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
       - run: pip install requests
-      - run: python real_portfolio_sync.py
-      # 스케줄 실행이 되면서 poll.yml(15분마다)/daily.yml(11:00 UTC)과 push가
-      # 겹칠 확률이 생겼다. 단순 push는 그때 거부되고 동기화 결과가 버려진다 —
-      # 실제로 다른 워크플로에서 이 방식으로 결과를 날린 적이 있어 재시도를 넣는다.
-      # real_portfolio.json은 이 워크플로만 쓰므로 rebase 충돌 대상이 아니다.
-      - name: Commit real_portfolio.json
-        run: |
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
-          if [ ! -f real_portfolio.json ]; then echo "동기화 산출물 없음"; exit 0; fi
-          git add real_portfolio.json
-          # portfolio_pnl_history.json은 2026-08-09 이전엔 생성되지 않는다
-          # (historical_pnl_manual.json과 겹치지 않게 하는 경계일 — real_portfolio_sync.py 참고).
-          if [ -f portfolio_pnl_history.json ]; then git add portfolio_pnl_history.json; fi
-          git diff --quiet && git diff --staged --quiet && echo "변경 없음" && exit 0
-          git commit -m "Real portfolio sync"
-          for attempt in 1 2 3 4 5; do
-            if git push; then echo "push 성공 (시도 $attempt)"; exit 0; fi
-            echo "push 거부됨 - rebase 후 재시도 ($attempt/5)"
-            git pull --rebase origin main || exit 1
-            sleep $((attempt * 5))
-          done
-          echo "5회 시도 후에도 push 실패"; exit 1
+      - name: Read Toss portfolio and push to private Runtime
+        run: python runtime_portfolio_sync.py
