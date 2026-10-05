@@ -1,5 +1,8 @@
 import unittest
 
+from quantrade.capabilities.strategy_robustness_evaluation import (
+    robustness_reference_experiment,
+)
 from quantrade.capabilities.strategy_robustness import (
     CandidateReviewInput,
     RobustnessGateError,
@@ -204,6 +207,34 @@ class StrategyRobustnessTests(unittest.TestCase):
                 self._item("A", [1, 0.5, 0, 1]),
                 RobustnessPolicy(min_return_periods=1),
             )
+
+    def test_reference_experiment_rejects_costly_and_suppresses_duplicate(self):
+        artifact = robustness_reference_experiment()
+        self.assertEqual(4, artifact["input_count"])
+        self.assertEqual(2, artifact["selected_count"])
+        self.assertEqual(
+            {"SURVIVOR-A", "SURVIVOR-C"},
+            {item["candidate_id"] for item in artifact["selected"]},
+        )
+        self.assertTrue(
+            any(
+                item["candidate_id"] == "NEAR-DUPLICATE-B"
+                and item["reason"] == "NEAR_DUPLICATE_SIGNAL_PATH"
+                for item in artifact["suppressed"]
+            )
+        )
+        self.assertTrue(
+            any(
+                item["candidate_id"] == "COST-SENSITIVE-D"
+                for item in artifact["rejected"]
+            )
+        )
+        self.assertEqual("BOUNDED_REVIEW", artifact["review_gate"]["level"])
+        self.assertEqual(8, artifact["telemetry"]["specialists_planned"])
+        self.assertEqual(0, artifact["telemetry"]["specialists_invoked"])
+        self.assertEqual(0, artifact["telemetry"]["model_calls"])
+        self.assertFalse(artifact["authority"]["strategy_approved"])
+        self.assertFalse(artifact["authority"]["execution_authorized"])
 
 
 if __name__ == "__main__":
