@@ -258,14 +258,27 @@ class InstitutionalKernel:
             })
         return eid
 
-    def add_snapshot(self, case_id: str, snapshot: dict, source: str = "fixture") -> str:
+    def add_snapshot(
+        self,
+        case_id: str,
+        snapshot: dict,
+        source: str = "fixture",
+        *,
+        as_of: str | None = None,
+    ) -> str:
+        """Attach a Portfolio snapshot while preserving its source as-of time.
+
+        Historical integrations must pass the actual source snapshot timestamp.
+        created_at remains the institutional persistence time.
+        """
         sid = _id("SNP")
         now = _now()
+        snapshot_as_of = as_of or now
         with self.conn:
             self.conn.execute(
                 """INSERT INTO portfolio_snapshots
                 (snapshot_id,case_id,as_of,source,snapshot,created_at) VALUES (?,?,?,?,?,?)""",
-                (sid, case_id, now, source, _json(snapshot), now),
+                (sid, case_id, snapshot_as_of, source, _json(snapshot), now),
             )
             self._ledger("Case", case_id, "PORTFOLIO_SNAPSHOT_ATTACHED", {"snapshot_id": sid})
         return sid
