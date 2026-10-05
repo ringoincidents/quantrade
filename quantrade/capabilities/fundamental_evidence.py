@@ -51,6 +51,7 @@ class FundamentalObservation:
     revision_of: str | None = None
     restated: bool = False
     normalization_method: str = "RAW_REPORTED"
+    published_at_precision: str = "TIMESTAMP"
 
 
 @dataclass(frozen=True)
@@ -124,6 +125,7 @@ def _validate_observation(item: FundamentalObservation) -> None:
         ("source_ref", item.source_ref),
         ("evidence_ref", item.evidence_ref),
         ("normalization_method", item.normalization_method),
+        ("published_at_precision", item.published_at_precision),
     ):
         _required_text(value, field_name)
 
