@@ -168,7 +168,30 @@ Phase 2 tests cover:
 10. provider → compiler end-to-end seam;
 11. candidate → compiler → evaluator full sandbox artifact remains non-authoritative.
 
-## 9. Files
+## 9. Verification evidence
+
+GitHub Actions workflow: `Strategy Research Capability Tests`
+
+Verified commit:
+
+`afc7077f91e2d2e92b95c22f46d60d695f643b6f`
+
+Workflow run:
+
+`37253421339`
+
+Result: **SUCCESS**
+
+The run:
+
+- compiled capability/test/script modules successfully;
+- ran **19 strategy-research tests, all passing**;
+- executed the Phase 1 deterministic research harness successfully;
+- executed the Phase 2 safe candidate harness successfully.
+
+An earlier run failed after all 19 tests had already passed because the harness script was invoked as a file and therefore lacked the repository root on Python's import path. The workflow was corrected to invoke both harnesses as modules. This was a CI invocation defect, not a strategy-calculation failure, and the failed run is preserved in Actions history.
+
+## 10. Files
 
 - `quantrade/capabilities/strategy_candidates.py`
 - `quantrade/capabilities/strategy_candidate_evaluation.py`
@@ -184,7 +207,7 @@ Phase 2 tests cover:
 
 Existing Phase 1 callers remain compatible because these fields have defaults.
 
-## 10. Current boundary
+## 11. Current boundary
 
 Phase 2 does **not** implement `LLMCandidateProvider`.
 
@@ -202,7 +225,7 @@ LLM
 
 The model must never receive a bypass around the AST validator, and generated prose cannot override a deterministic rejection.
 
-## 11. Next step
+## 12. Next step
 
 QT-STRAT-003 should add the robustness gate and conditional specialist review.
 
