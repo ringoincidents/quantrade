@@ -374,8 +374,13 @@ class DepartmentalReviewTests(unittest.TestCase):
         self.assertNotIn("private_max_loss_krw", context)
         self.assertNotIn("client_max_drawdown_pct", context)
         self.assertNotIn("private_risk_capacity", context)
-        self.assertIn('"policy_breach":false', context)
-        self.assertIn('"client_numeric_limits_visible_to_model":false', context)
+
+        parsed = json.loads(context)
+        constraints = parsed["work_order"]["constraints"]
+        self.assertFalse(constraints["risk_status"]["policy_breach"])
+        self.assertFalse(
+            constraints["client_numeric_limits_visible_to_model"]
+        )
 
     def test_role_tool_grants_are_separated(self):
         coordinator = BoundedDepartmentalReview(
