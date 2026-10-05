@@ -78,10 +78,12 @@ jobs:
           from quantrade.capabilities.investment_case_evaluation import reference_cases
           from quantrade.capabilities.thesis_contract_evaluation import reference_thesis_contracts
           from quantrade.capabilities.portfolio_opportunity_evaluation import reference_portfolio_opportunities
+          from quantrade.capabilities.risk_opinion_evaluation import reference_risk_opinions
 
           economics = reference_cases()
           thesis = reference_thesis_contracts()
           portfolio = reference_portfolio_opportunities()
+          risk = reference_risk_opinions()
           assert economics["authority"]["execution_authorized"] is False
           assert economics["authority"]["portfolio_proposal_created"] is False
           assert thesis["authority"]["canonical_evidence_created"] is False
@@ -89,5 +91,7 @@ jobs:
           assert thesis["authority"]["execution_authorized"] is False
           assert portfolio["authority"]["portfolio_proposal_created"] is False
           assert portfolio["authority"]["execution_authorized"] is False
-          print(json.dumps({"economics": economics, "thesis": thesis, "portfolio": portfolio}, ensure_ascii=False, sort_keys=True))
+          assert risk["authority"]["committee_decision_created"] is False
+          assert risk["authority"]["execution_authorized"] is False
+          print(json.dumps({"economics": economics, "thesis": thesis, "portfolio": portfolio, "risk": risk}, ensure_ascii=False, sort_keys=True))
           PY
