@@ -119,10 +119,14 @@ class BoundedDepartmentalReview:
             if item is None:
                 raise ValueError("evidence_key is not in the bound Evidence Catalog")
             source = str(item.get("source") or "").strip()
+            observed_at = str(item.get("observed_at") or "").strip()
             fact = item.get("fact")
             provenance = item.get("provenance")
-            if not source or not isinstance(fact, dict) or not isinstance(
-                provenance, dict
+            if (
+                not source
+                or not observed_at
+                or not isinstance(fact, dict)
+                or not isinstance(provenance, dict)
             ):
                 raise ValueError("bound Evidence Catalog item is malformed")
             evidence_id = self.kernel.add_evidence(
@@ -135,6 +139,7 @@ class BoundedDepartmentalReview:
                     separators=(",", ":"),
                 ),
                 provenance,
+                observed_at=observed_at,
                 fingerprint=str(item.get("fingerprint") or key),
             )
             return {
@@ -369,6 +374,7 @@ class BoundedDepartmentalReview:
                     "levels": market_state.get("levels"),
                     "candle": market_state.get("candle"),
                 },
+                "observed_at": market_state.get("timestamp"),
                 "provenance": {
                     "source_type": "deterministic_market_state",
                     "precheck_run_id": precheck.get("run_id"),
@@ -416,6 +422,7 @@ class BoundedDepartmentalReview:
                 "evidence_catalog": {
                     key: {
                         "source": item["source"],
+                        "observed_at": item["observed_at"],
                         "fact": item["fact"],
                     }
                     for key, item in evidence_catalog.items()
