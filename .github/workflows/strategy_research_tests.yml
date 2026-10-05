@@ -26,6 +26,6 @@ jobs:
       - name: Run strategy research capability tests
         run: python -m unittest discover -s tests/capabilities -p "test_strategy_*.py" -v
       - name: Run deterministic strategy research harness
-        run: python scripts/run_strategy_research_evaluation.py > /tmp/strategy-research.json
+        run: python -m scripts.run_strategy_research_evaluation > /tmp/strategy-research.json
       - name: Run safe candidate harness
-        run: python scripts/run_strategy_candidate_evaluation.py > /tmp/strategy-candidates.json
+        run: python -m scripts.run_strategy_candidate_evaluation > /tmp/strategy-candidates.json
