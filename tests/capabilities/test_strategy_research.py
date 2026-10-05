@@ -170,6 +170,45 @@ class StrategyResearchTests(unittest.TestCase):
             0,
         )
 
+    def test_terminal_liquidation_cost_is_explicit_when_enabled(self):
+        bars = self._bars()
+        signals = self._signals(bars, [1, 1, 1, 1])
+        policy = ScreeningPolicy(
+            min_return_periods=1,
+            max_drawdown_pct=-100,
+            min_benchmark_excess_return_pct=-100,
+        )
+        open_ended = evaluate_strategy(
+            self._candidate(),
+            bars,
+            signals,
+            self._dataset(bars),
+            transaction_cost_bps=20.5,
+            charge_terminal_liquidation=False,
+            screening_policy=policy,
+        )
+        liquidated = evaluate_strategy(
+            self._candidate(),
+            bars,
+            signals,
+            self._dataset(bars),
+            transaction_cost_bps=20.5,
+            charge_terminal_liquidation=True,
+            screening_policy=policy,
+        )
+        self.assertLess(
+            liquidated.metrics["net_total_return_pct"],
+            open_ended.metrics["net_total_return_pct"],
+        )
+        self.assertEqual(
+            1.0,
+            liquidated.assumptions["terminal_turnover"],
+        )
+        self.assertGreater(
+            liquidated.assumptions["terminal_cost_pct_of_initial_equity"],
+            0,
+        )
+
     def test_screening_rejects_underperforming_candidate(self):
         bars = self._bars()
         evaluation = evaluate_strategy(
