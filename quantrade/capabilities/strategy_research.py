@@ -11,7 +11,7 @@ data.
 """
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from math import sqrt
 from typing import Sequence
@@ -48,6 +48,9 @@ class CandidateStrategy:
     market_scope: str
     rebalance_horizon: str
     description: str = ""
+    formula_ast: dict | None = None
+    parameter_set: dict = field(default_factory=dict)
+    generator_provider: dict = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
