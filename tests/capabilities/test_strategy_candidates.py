@@ -8,6 +8,9 @@ from quantrade.capabilities.strategy_candidates import (
     compile_position_signals,
     validate_formula,
 )
+from quantrade.capabilities.strategy_candidate_evaluation import (
+    candidate_generation_experiment,
+)
 from quantrade.capabilities.strategy_research import CandidateStrategy, PriceBar
 
 
@@ -217,6 +220,38 @@ class StrategyCandidateTests(unittest.TestCase):
                 for signal in signals
             )
         )
+
+    def test_end_to_end_candidate_experiment_stays_non_authoritative(self):
+        artifact = candidate_generation_experiment()
+        self.assertEqual(2, artifact["candidate_count"])
+        self.assertEqual(
+            [
+                "STATIC_CANDIDATE_PROVIDER",
+                "SAFE_AST_VALIDATION",
+                "PAST_ONLY_SIGNAL_COMPILER",
+                "DETERMINISTIC_STRATEGY_EVALUATOR",
+            ],
+            artifact["pipeline"],
+        )
+        self.assertFalse(artifact["authority"]["model_called"])
+        self.assertFalse(
+            artifact["authority"]["canonical_evidence_created"]
+        )
+        self.assertFalse(artifact["authority"]["strategy_approved"])
+        self.assertFalse(artifact["authority"]["execution_authorized"])
+        for result in artifact["results"]:
+            self.assertTrue(
+                result["formula_validation"]["safe_for_compilation"]
+            )
+            self.assertFalse(
+                result["formula_validation"]["arbitrary_code_execution"]
+            )
+            self.assertFalse(
+                result["signal_summary"]["future_information_required"]
+            )
+            self.assertFalse(
+                result["evaluation"]["authority"]["execution_authorized"]
+            )
 
 
 if __name__ == "__main__":
