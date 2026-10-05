@@ -246,7 +246,7 @@ class DepartmentalReviewTests(unittest.TestCase):
         )
 
         row = self.kernel.conn.execute(
-            "SELECT source,fact,provenance FROM evidence WHERE case_id=?",
+            "SELECT source,observed_at,fact,provenance FROM evidence WHERE case_id=?",
             (result["case_id"],),
         ).fetchone()
         self.assertEqual(
@@ -254,6 +254,10 @@ class DepartmentalReviewTests(unittest.TestCase):
             row["source"],
         )
         self.assertNotIn("invented.invalid", row["source"])
+        self.assertEqual(
+            "2026-10-03T08:00:00+00:00",
+            row["observed_at"],
+        )
         self.assertNotIn("invented fact", row["fact"])
         fact = json.loads(row["fact"])
         self.assertEqual("BTCUSDT", fact["symbol"])
