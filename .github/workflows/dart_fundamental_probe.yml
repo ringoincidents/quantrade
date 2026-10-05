@@ -1,0 +1,83 @@
+name: Open DART Fundamental Probe
+
+on:
+  workflow_dispatch:
+    inputs:
+      stock_code:
+        description: "KRX six-digit stock code"
+        required: true
+        default: "005930"
+        type: string
+      as_of:
+        description: "Timezone-aware Case as-of (ISO-8601)"
+        required: true
+        default: "2026-10-05T23:59:59+09:00"
+        type: string
+      period_from:
+        description: "Fiscal period lower bound YYYY-MM-DD"
+        required: true
+        default: "2025-01-01"
+        type: string
+      period_to:
+        description: "Fiscal period upper bound YYYY-MM-DD"
+        required: true
+        default: "2025-12-31"
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      OPEN_DART_API_KEY: ${{ secrets.OPEN_DART_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: "direction/investment-office-decision-economics-2026-10-05"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Verify secret configuration
+        id: key
+        shell: bash
+        run: |
+          if [ -z "$OPEN_DART_API_KEY" ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "OPEN_DART_API_KEY is not configured; live probe skipped."
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+            echo "OPEN_DART_API_KEY is configured."
+          fi
+      - name: Compile provider/probe
+        run: python -m compileall -q quantrade/capabilities scripts/run_dart_fundamental_probe.py
+      - name: Run read-only Open DART probe
+        if: steps.key.outputs.configured == 'true'
+        run: |
+          python -m scripts.run_dart_fundamental_probe             --stock-code "${{ inputs.stock_code }}"             --as-of "${{ inputs.as_of }}"             --period-from "${{ inputs.period_from }}"             --period-to "${{ inputs.period_to }}"             > /tmp/dart_probe.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          payload = json.loads(Path("/tmp/dart_probe.json").read_text())
+          assert payload["authority"]["model_called"] is False
+          assert payload["authority"]["execution_authorized"] is False
+          assert payload["provider"]["api_key_persisted"] is False
+          print(json.dumps({
+              "schema": payload["schema"],
+              "asset_id": payload["query"]["asset_id"],
+              "observation_count": len(payload["observations"]),
+              "excluded_future_observation_count": len(payload["excluded_future_observation_ids"]),
+              "provider_id": payload["provider"]["provider_id"],
+              "historical_correction_policy": payload["provider"]["historical_correction_policy"],
+          }, ensure_ascii=False, sort_keys=True))
+          PY
+      - name: Upload probe artifact
+        if: steps.key.outputs.configured == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: open-dart-fundamental-probe
+          path: /tmp/dart_probe.json
+          if-no-files-found: error
