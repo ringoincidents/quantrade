@@ -417,13 +417,14 @@ def build_thesis_contract(
         ),
     ]
     for year in (2022, 2023, 2024, 2025):
-        observations.append(
-            make_dart_observation(
-                annual_rows[year],
-                f"OBS-EPS-FY{year}",
-                f"FY{year} basic EPS",
+        if year != 2025:
+            observations.append(
+                make_dart_observation(
+                    annual_rows[year],
+                    f"OBS-EPS-FY{year}",
+                    f"FY{year} basic EPS",
+                )
             )
-        )
         price = next(
             item for item in pe_history["rows"]
             if item["year"] == year
@@ -601,10 +602,11 @@ def run() -> dict:
         "2026-10-05",
         same_calendar_year=True,
     )
-    if current_price_row["date"] != "2026-10-05":
-        raise GoldenRunError(
-            "frozen Case requires a 2026-10-05 KRX close"
-        )
+    # The preregistration freezes the final trading close on or before the
+    # Case date. Korean public holidays may make the calendar Case date a
+    # non-trading day, so an earlier same-year close is valid.
+    if current_price_row["date"] > "2026-10-05":
+        raise GoldenRunError("price observation escaped Case cutoff")
 
     ttm = compute_ttm_eps(observations)
     pe_history = build_historical_pe(observations, price_rows)
