@@ -20,6 +20,9 @@ import math
 from typing import Sequence
 
 from quantrade.capabilities.investment_case import InvestmentCaseEconomics
+from quantrade.capabilities.valuation_crosscheck import (
+    ValuationCrossCheckArtifact,
+)
 
 
 class PortfolioOpportunityError(ValueError):
@@ -67,6 +70,7 @@ class PortfolioOpportunityInput:
     case_economics: InvestmentCaseEconomics
     alternatives: tuple[CapitalAlternative, ...]
     constraints: PortfolioConstraintSnapshot
+    valuation_crosscheck: ValuationCrossCheckArtifact | None = None
 
 
 @dataclass(frozen=True)
@@ -239,6 +243,53 @@ def _case_hurdle_met(metrics: dict) -> bool:
     return value
 
 
+def _validate_crosscheck(
+    crosscheck: ValuationCrossCheckArtifact,
+    economics: InvestmentCaseEconomics,
+) -> None:
+    if crosscheck.authority.get("execution_authorized") is not False:
+        raise PortfolioOpportunityError(
+            "valuation crosscheck must be non-execution-authoritative"
+        )
+    if crosscheck.authority.get("portfolio_proposal_created") is not False:
+        raise PortfolioOpportunityError(
+            "valuation crosscheck must remain non-proposal"
+        )
+    if crosscheck.case_id != economics.case.get("case_id"):
+        raise PortfolioOpportunityError(
+            "valuation crosscheck case_id must match case economics"
+        )
+    gate = crosscheck.robust_metrics.get("valuation_gate_passed")
+    if not isinstance(gate, bool):
+        raise PortfolioOpportunityError(
+            "valuation crosscheck missing boolean valuation_gate_passed"
+        )
+    current_price = _finite(
+        crosscheck.robust_metrics.get("current_price"),
+        "valuation crosscheck current_price",
+    )
+    economics_price = _finite(
+        economics.case.get("current_price"),
+        "case current_price",
+    )
+    if abs(current_price - economics_price) > 1e-6:
+        raise PortfolioOpportunityError(
+            "valuation crosscheck current_price must match case economics"
+        )
+    hurdle = _finite(
+        crosscheck.robust_metrics.get("required_return_pct"),
+        "valuation crosscheck required_return_pct",
+    )
+    economics_hurdle = _finite(
+        economics.case.get("required_return_pct"),
+        "case required_return_pct",
+    )
+    if abs(hurdle - economics_hurdle) > 1e-6:
+        raise PortfolioOpportunityError(
+            "valuation crosscheck hurdle must match case economics"
+        )
+
+
 def assess_portfolio_opportunity(
     request: PortfolioOpportunityInput,
 ) -> PortfolioOpportunityAssessment:
@@ -257,6 +308,11 @@ def assess_portfolio_opportunity(
         )
 
     _validate_constraints(request.constraints)
+    if request.valuation_crosscheck is not None:
+        _validate_crosscheck(
+            request.valuation_crosscheck,
+            economics,
+        )
     case_as_of = _parse_time(
         str(economics.case.get("as_of", "")),
         "case as_of",
@@ -286,6 +342,21 @@ def assess_portfolio_opportunity(
                 "best_alternative_expected_return_pct": None,
                 "candidate_excess_vs_best_alternative_pct": None,
                 "return_competition_evaluated": False,
+                "valuation_crosscheck_evaluated": (
+                    request.valuation_crosscheck is not None
+                ),
+                "valuation_crosscheck_classification": (
+                    None
+                    if request.valuation_crosscheck is None
+                    else request.valuation_crosscheck.classification
+                ),
+                "valuation_gate_passed": (
+                    None
+                    if request.valuation_crosscheck is None
+                    else request.valuation_crosscheck.robust_metrics[
+                        "valuation_gate_passed"
+                    ]
+                ),
             },
             capital_headroom=_capital_headroom(
                 request.constraints,
@@ -326,6 +397,15 @@ def assess_portfolio_opportunity(
         competitive = False
         reasons.append("MANDATE_DISALLOWS_NEW_EXPOSURE")
 
+    if (
+        request.valuation_crosscheck is not None
+        and not request.valuation_crosscheck.robust_metrics[
+            "valuation_gate_passed"
+        ]
+    ):
+        competitive = False
+        reasons.append("CROSS_METHOD_VALUATION_GATE_NOT_PASSED")
+
     if not _case_hurdle_met(economics.metrics):
         competitive = False
         reasons.append("CASE_RETURN_HURDLE_NOT_MET")
@@ -364,6 +444,21 @@ def assess_portfolio_opportunity(
             "return_competition_evaluated": True,
             "alternative_count": len(request.alternatives),
             "investment_score_created": False,
+            "valuation_crosscheck_evaluated": (
+                request.valuation_crosscheck is not None
+            ),
+            "valuation_crosscheck_classification": (
+                None
+                if request.valuation_crosscheck is None
+                else request.valuation_crosscheck.classification
+            ),
+            "valuation_gate_passed": (
+                None
+                if request.valuation_crosscheck is None
+                else request.valuation_crosscheck.robust_metrics[
+                    "valuation_gate_passed"
+                ]
+            ),
         },
         capital_headroom=headroom,
         alternatives=tuple(
