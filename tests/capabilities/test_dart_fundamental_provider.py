@@ -187,6 +187,19 @@ class DartFundamentalProviderTests(unittest.TestCase):
             ),
         )
 
+    def test_corp_code_seed_mapping_avoids_archive_request(self):
+        transport = FakeDartTransport(
+            filings=[],
+            financial_payloads={},
+        )
+        resolver = DartCorpCodeResolver(
+            api_key="x" * 40,
+            transport=transport,
+            seed_mapping={"005930": "00126380"},
+        )
+        self.assertEqual("00126380", resolver.resolve("005930"))
+        self.assertEqual([], transport.calls)
+
     def test_corp_code_resolver_reads_official_zip_shape(self):
         transport = FakeDartTransport(
             filings=[],
