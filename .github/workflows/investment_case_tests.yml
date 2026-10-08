@@ -15,6 +15,8 @@ on:
       - "quantrade/capabilities/risk_opinion_evaluation.py"
       - "quantrade/capabilities/case_learning.py"
       - "quantrade/capabilities/case_learning_evaluation.py"
+      - "quantrade/capabilities/cash_flow_valuation.py"
+      - "quantrade/capabilities/fundamental_counter_research.py"
       - "tests/capabilities/test_investment_case.py"
       - "tests/capabilities/test_thesis_contract.py"
       - "tests/capabilities/test_fundamental_evidence.py"
@@ -22,6 +24,12 @@ on:
       - "tests/capabilities/test_portfolio_opportunity.py"
       - "tests/capabilities/test_risk_opinion.py"
       - "tests/capabilities/test_case_learning.py"
+      - "tests/capabilities/test_cash_flow_valuation.py"
+      - "tests/capabilities/test_fundamental_counter_research.py"
+      - "tests/capabilities/test_qt_case_001_rules.py"
+      - "tests/capabilities/test_qt_case_002_rules.py"
+      - "scripts/run_qt_case_001.py"
+      - "scripts/run_qt_case_002.py"
       - "scripts/run_dart_fundamental_probe.py"
       - ".github/workflows/dart_fundamental_probe.yml"
       - "research/precedents/2026-10-05_INVESTMENT_OFFICE_DECISION_ECONOMICS_DIRECTION.md"
@@ -37,11 +45,25 @@ on:
       - "quantrade/capabilities/dart_fundamental_provider.py"
       - "quantrade/capabilities/portfolio_opportunity.py"
       - "quantrade/capabilities/portfolio_opportunity_evaluation.py"
+      - "quantrade/capabilities/risk_opinion.py"
+      - "quantrade/capabilities/risk_opinion_evaluation.py"
+      - "quantrade/capabilities/case_learning.py"
+      - "quantrade/capabilities/case_learning_evaluation.py"
+      - "quantrade/capabilities/cash_flow_valuation.py"
+      - "quantrade/capabilities/fundamental_counter_research.py"
       - "tests/capabilities/test_investment_case.py"
       - "tests/capabilities/test_thesis_contract.py"
       - "tests/capabilities/test_fundamental_evidence.py"
       - "tests/capabilities/test_dart_fundamental_provider.py"
       - "tests/capabilities/test_portfolio_opportunity.py"
+      - "tests/capabilities/test_risk_opinion.py"
+      - "tests/capabilities/test_case_learning.py"
+      - "tests/capabilities/test_cash_flow_valuation.py"
+      - "tests/capabilities/test_fundamental_counter_research.py"
+      - "tests/capabilities/test_qt_case_001_rules.py"
+      - "tests/capabilities/test_qt_case_002_rules.py"
+      - "scripts/run_qt_case_001.py"
+      - "scripts/run_qt_case_002.py"
       - "scripts/run_dart_fundamental_probe.py"
       - ".github/workflows/dart_fundamental_probe.yml"
       - ".github/workflows/investment_case_tests.yml"
@@ -74,6 +96,14 @@ jobs:
         run: python -m unittest tests.capabilities.test_risk_opinion -v
       - name: Run Case learning/calibration tests
         run: python -m unittest tests.capabilities.test_case_learning -v
+      - name: Run cash-flow DCF tests
+        run: python -m unittest tests.capabilities.test_cash_flow_valuation -v
+      - name: Run deterministic counter-research tests
+        run: python -m unittest tests.capabilities.test_fundamental_counter_research -v
+      - name: Run QT-CASE frozen-rule tests
+        run: |
+          python -m unittest tests.capabilities.test_qt_case_001_rules -v
+          python -m unittest tests.capabilities.test_qt_case_002_rules -v
       - name: Run existing capability regression suite
         run: python -m unittest discover -s tests/capabilities -p "test_*.py" -v
       - name: Run reference harness
