@@ -20,8 +20,8 @@ permissions:
   contents: write
 
 concurrency:
-  group: qt-case-001-${{ github.ref }}
-  cancel-in-progress: true
+  group: quantrade-open-dart-live
+  cancel-in-progress: false
 
 jobs:
   golden-run:
