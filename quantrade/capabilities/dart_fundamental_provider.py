@@ -337,9 +337,23 @@ class DartCorpCodeResolver:
         *,
         api_key: str | None = None,
         transport: DartTransport | None = None,
+        seed_mapping: dict[str, str] | None = None,
     ) -> None:
         self._key = _api_key(api_key)
         self._transport = transport or UrlLibDartTransport()
+        self._seed_mapping: dict[str, str] = {}
+        for stock_code, corp_code in (seed_mapping or {}).items():
+            stock = _required_text(stock_code, "seed stock_code")
+            corp = _required_text(corp_code, "seed corp_code")
+            if not re.fullmatch(r"\d{6}", stock):
+                raise DartProviderError(
+                    "seed stock_code must be a six-digit KRX code"
+                )
+            if not re.fullmatch(r"\d{8}", corp):
+                raise DartProviderError(
+                    "seed corp_code must be an eight-digit DART code"
+                )
+            self._seed_mapping[stock] = corp
         self._by_stock: dict[str, str] | None = None
 
     def _load(self) -> dict[str, str]:
@@ -389,6 +403,8 @@ class DartCorpCodeResolver:
             raise DartProviderError(
                 "stock_code must be a six-digit KRX code"
             )
+        if code in self._seed_mapping:
+            return self._seed_mapping[code]
         if self._by_stock is None:
             self._by_stock = self._load()
         try:
@@ -413,6 +429,7 @@ class DartFundamentalObservationProvider:
         transport: DartTransport | None = None,
         config: DartProviderConfig | None = None,
         now: Callable[[], datetime] | None = None,
+        corp_code_overrides: dict[str, str] | None = None,
     ) -> None:
         self._key = _api_key(api_key)
         self._transport = transport or UrlLibDartTransport()
@@ -438,9 +455,11 @@ class DartFundamentalObservationProvider:
                 "unsupported report_codes: " + ",".join(unsupported)
             )
         self._now = now or (lambda: datetime.now(timezone.utc))
+        self._corp_code_overrides = dict(corp_code_overrides or {})
         self._resolver = DartCorpCodeResolver(
             api_key=self._key,
             transport=self._transport,
+            seed_mapping=self._corp_code_overrides,
         )
 
     @property
@@ -876,6 +895,11 @@ class DartFundamentalObservationProvider:
                 **result.provider,
                 "corp_code": corp_code,
                 "stock_code": stock_code,
+                "corp_code_resolution": (
+                    "SEEDED_VERIFIED_MAPPING"
+                    if stock_code in self._corp_code_overrides
+                    else "LIVE_CORP_CODE_ARCHIVE"
+                ),
                 "api_key_persisted": False,
                 "publication_time_precision": "DATE_CONSERVATIVE_EOD_KST",
                 "historical_correction_policy": (
