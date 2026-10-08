@@ -52,6 +52,7 @@ class FundamentalObservation:
     restated: bool = False
     normalization_method: str = "RAW_REPORTED"
     published_at_precision: str = "TIMESTAMP"
+    dimension_detail: str | None = None
 
 
 @dataclass(frozen=True)
@@ -136,6 +137,8 @@ def _validate_observation(item: FundamentalObservation) -> None:
 
     if item.currency is not None:
         _required_text(item.currency, "currency")
+    if item.dimension_detail is not None:
+        _required_text(item.dimension_detail, "dimension_detail")
 
     _parse_date(item.fiscal_period_end, "fiscal_period_end")
     published = _parse_time(item.published_at, "published_at")
