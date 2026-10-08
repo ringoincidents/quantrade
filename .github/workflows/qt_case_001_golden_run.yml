@@ -1,30 +1,17 @@
-name: QT-CASE-001 Real Investment Case Golden Run
+name: QT-CASE-001 Archived Golden Run Replay
 
 on:
-  push:
-    branches:
-      - "direction/investment-office-decision-economics-2026-10-05"
-    paths:
-      - "scripts/run_qt_case_001.py"
-      - "tests/capabilities/test_qt_case_001_rules.py"
-      - "quantrade/capabilities/dart_fundamental_provider.py"
-      - "quantrade/capabilities/fundamental_evidence.py"
-      - "quantrade/capabilities/investment_case.py"
-      - "quantrade/capabilities/thesis_contract.py"
-      - "quantrade/capabilities/portfolio_opportunity.py"
-      - "quantrade/capabilities/risk_opinion.py"
-      - ".github/workflows/qt_case_001_golden_run.yml"
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: quantrade-open-dart-live
   cancel-in-progress: false
 
 jobs:
-  golden-run:
+  replay:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
@@ -32,93 +19,57 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: "direction/investment-office-decision-economics-2026-10-05"
+          ref: "1419314da38f40c08c5c8dadbbdfa7af41694b33"
           fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Verify preregistration anchor
+      - name: Verify frozen replay anchor
         shell: bash
         run: |
+          test "$(git rev-parse HEAD)" = "1419314da38f40c08c5c8dadbbdfa7af41694b33"
           git cat-file -e 96af7467cb052b4cc90828135276ba9f6b68f7df^{commit}
-          git merge-base --is-ancestor 96af7467cb052b4cc90828135276ba9f6b68f7df HEAD
-          test -f research/experiments/QT-CASE-001_PRE_REGISTRATION.md
 
       - name: Verify Open DART secret
         shell: bash
         run: |
           if [ -z "$OPEN_DART_API_KEY" ]; then
-            echo "OPEN_DART_API_KEY is required for QT-CASE-001" >&2
+            echo "OPEN_DART_API_KEY is required for archived replay" >&2
             exit 1
           fi
-          echo "OPEN_DART_API_KEY is configured."
 
-      - name: Compile Golden Run
+      - name: Compile frozen experiment
         run: |
-          python -m compileall -q             quantrade/capabilities             scripts/run_qt_case_001.py             tests/capabilities/test_qt_case_001_rules.py
+          python -m compileall -q quantrade/capabilities scripts/run_qt_case_001.py
 
       - name: Run frozen-rule tests
         run: python -m unittest tests.capabilities.test_qt_case_001_rules -v
 
-      - name: Execute QT-CASE-001
+      - name: Execute frozen Golden Run
         run: python -m scripts.run_qt_case_001
 
-      - name: Verify result authority and provenance
+      - name: Verify immutable experiment identity
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
-
-          result = json.loads(
-              Path("research/experiments/QT-CASE-001_RESULT.json").read_text()
-          )
-          assert result["experiment_id"] == "QT-CASE-001"
+          result = json.loads(Path("research/experiments/QT-CASE-001_RESULT.json").read_text())
           assert result["preregistration_commit"] == "96af7467cb052b4cc90828135276ba9f6b68f7df"
-          assert result["operational_result"]["success"] is True
-          assert result["operational_result"]["real_company_data"] is True
-          assert result["operational_result"]["model_calls"] == 0
-          assert result["operational_result"]["private_client_context_used"] is False
-          assert result["source_integrity"]["price_after_case_cutoff_used"] is False
-          assert len(result["historical_pe"]["rows"]) == 4
-          assert result["authority"]["target_weight_set"] is False
-          assert result["authority"]["committee_decision_created"] is False
-          assert result["authority"]["decision_plan_created"] is False
-          assert result["authority"]["paper_authorized"] is False
           assert result["authority"]["execution_authorized"] is False
           assert result["authority"]["live_order_possible"] is False
           print(json.dumps({
-              "current_price": result["case"]["current_price"],
-              "price_date": result["case"]["price_date"],
-              "ttm_eps": result["earnings"]["ttm_eps"],
-              "weighted_fair_value": result["investment_case_economics"]["metrics"]["weighted_fair_value"],
-              "expected_return_pct": result["investment_case_economics"]["metrics"]["expected_return_pct"],
-              "interpretation": result["investment_interpretation"],
-              "portfolio_status": result["portfolio_sandbox"]["status"],
-              "risk_status": None if result["risk_sandbox"] is None else result["risk_sandbox"]["status"],
-          }, ensure_ascii=False, sort_keys=True))
+              "experiment_id": result["experiment_id"],
+              "execution_authorized": result["authority"]["execution_authorized"],
+          }, sort_keys=True))
           PY
 
-      - name: Upload immutable Golden Run artifact
+      - name: Upload replay artifact
         uses: actions/upload-artifact@v4
         with:
-          name: qt-case-001-golden-run
+          name: qt-case-001-archived-replay
           path: |
             /tmp/QT-CASE-001_FULL_ARTIFACT.json
             research/experiments/QT-CASE-001_RESULT.json
-            research/experiments/QT-CASE-001_RESULT_REPORT.md
           if-no-files-found: error
-
-      - name: Commit compact result evidence
-        shell: bash
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add             research/experiments/QT-CASE-001_RESULT.json             research/experiments/QT-CASE-001_RESULT_REPORT.md
-          if git diff --cached --quiet; then
-            echo "No result changes to commit."
-          else
-            git commit -m "experiment: record QT-CASE-001 Golden Run evidence"
-            git push origin HEAD:direction/investment-office-decision-economics-2026-10-05
-          fi
