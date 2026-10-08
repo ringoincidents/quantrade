@@ -16,6 +16,12 @@ from quantrade.capabilities.portfolio_opportunity import (
 from quantrade.capabilities.portfolio_opportunity_evaluation import (
     reference_portfolio_opportunities,
 )
+from quantrade.capabilities.valuation_crosscheck import (
+    ValuationCrossCheckInput,
+    ValuationMethodSnapshot,
+    ValuationScenarioSnapshot,
+    evaluate_valuation_crosscheck,
+)
 
 
 class PortfolioOpportunityTests(unittest.TestCase):
@@ -53,6 +59,44 @@ class PortfolioOpportunityTests(unittest.TestCase):
                 downside_pct=-20.0,
                 basis_refs=("fixture://core",),
             ),
+        )
+
+    def _crosscheck(self, *, mixed=False, case_id="CASE-PORT"):
+        pe = ValuationMethodSnapshot(
+            method_id="PE",
+            method_type="PE",
+            source_schema="fixture:pe",
+            current_price=100.0,
+            required_return_pct=10.0,
+            scenarios=(
+                ValuationScenarioSnapshot("bear", 0.25, 80.0),
+                ValuationScenarioSnapshot("base", 0.50, 130.0),
+                ValuationScenarioSnapshot("bull", 0.25, 180.0),
+            ),
+        )
+        dcf = ValuationMethodSnapshot(
+            method_id="DCF",
+            method_type="DCF",
+            source_schema="fixture:dcf",
+            current_price=100.0,
+            required_return_pct=10.0,
+            scenarios=(
+                ValuationScenarioSnapshot(
+                    "bear", 0.25, 70.0 if mixed else 85.0
+                ),
+                ValuationScenarioSnapshot(
+                    "base", 0.50, 100.0 if mixed else 125.0
+                ),
+                ValuationScenarioSnapshot(
+                    "bull", 0.25, 140.0 if mixed else 170.0
+                ),
+            ),
+        )
+        return evaluate_valuation_crosscheck(
+            ValuationCrossCheckInput(
+                case_id=case_id,
+                methods=(pe, dcf),
+            )
         )
 
     def _constraints(self, **overrides):
@@ -271,6 +315,72 @@ class PortfolioOpportunityTests(unittest.TestCase):
                     case_economics=bad,
                     alternatives=self._alternatives(),
                     constraints=self._constraints(),
+                )
+            )
+
+    def test_cross_method_mixed_blocks_portfolio_review(self):
+        crosscheck = self._crosscheck(mixed=True)
+        self.assertEqual(
+            "CROSS_METHOD_MIXED",
+            crosscheck.classification,
+        )
+        result = assess_portfolio_opportunity(
+            PortfolioOpportunityInput(
+                case_economics=self._case(),
+                alternatives=self._alternatives(),
+                constraints=self._constraints(),
+                valuation_crosscheck=crosscheck,
+            )
+        )
+        self.assertEqual("NOT_COMPETITIVE", result.status)
+        self.assertIn(
+            "CROSS_METHOD_VALUATION_GATE_NOT_PASSED",
+            result.reasons,
+        )
+        self.assertTrue(
+            result.opportunity_cost[
+                "valuation_crosscheck_evaluated"
+            ]
+        )
+        self.assertFalse(
+            result.opportunity_cost["valuation_gate_passed"]
+        )
+
+    def test_cross_method_confirmed_allows_normal_portfolio_gates(self):
+        crosscheck = self._crosscheck(mixed=False)
+        self.assertEqual(
+            "CROSS_METHOD_CONFIRMED",
+            crosscheck.classification,
+        )
+        result = assess_portfolio_opportunity(
+            PortfolioOpportunityInput(
+                case_economics=self._case(),
+                alternatives=self._alternatives(),
+                constraints=self._constraints(),
+                valuation_crosscheck=crosscheck,
+            )
+        )
+        self.assertEqual(
+            "ELIGIBLE_FOR_PORTFOLIO_REVIEW",
+            result.status,
+        )
+        self.assertTrue(
+            result.opportunity_cost["valuation_gate_passed"]
+        )
+
+    def test_crosscheck_case_mismatch_is_rejected(self):
+        with self.assertRaisesRegex(
+            PortfolioOpportunityError,
+            "case_id must match",
+        ):
+            assess_portfolio_opportunity(
+                PortfolioOpportunityInput(
+                    case_economics=self._case(),
+                    alternatives=self._alternatives(),
+                    constraints=self._constraints(),
+                    valuation_crosscheck=self._crosscheck(
+                        case_id="OTHER-CASE"
+                    ),
                 )
             )
 
