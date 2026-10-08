@@ -96,6 +96,7 @@ def financial_payload(
     account_id="dart_OperatingIncomeLoss",
     account_nm="영업이익",
     statement_division="IS",
+    account_detail="-",
 ):
     return {
         "status": "000",
@@ -110,7 +111,7 @@ def financial_payload(
                 "sj_nm": "손익계산서",
                 "account_id": account_id,
                 "account_nm": account_nm,
-                "account_detail": "-",
+                "account_detail": account_detail,
                 "thstrm_nm": "제 57 기",
                 "thstrm_amount": amount,
                 "thstrm_add_amount": ytd,
@@ -323,6 +324,51 @@ class DartFundamentalProviderTests(unittest.TestCase):
             "DART:OFS:",
             result.observations[0]["normalization_method"],
         )
+
+    def test_dimensional_duplicate_account_rows_are_preserved(self):
+        receipt = "20260315000123"
+        payload = financial_payload(
+            receipt,
+            amount="1,000",
+            account_id="dart_ChangesInConsolidatedCompanies",
+            account_nm="연결범위변동",
+            statement_division="SCE",
+            account_detail="Member A",
+        )
+        second = dict(payload["list"][0])
+        second["account_detail"] = "Member B"
+        second["thstrm_amount"] = "2,000"
+        payload["list"].append(second)
+
+        transport = FakeDartTransport(
+            filings=[
+                filing(
+                    receipt,
+                    "사업보고서 (2025.12)",
+                    "20260315",
+                )
+            ],
+            financial_payloads={
+                ("2025", "11011", "CFS"): payload
+            },
+        )
+        result = self._provider(transport).query(
+            FundamentalQuery(
+                asset_id="KRX:005930",
+                as_of="2026-03-16T00:00:00+09:00",
+                fiscal_period_end_from="2025-12-31",
+                fiscal_period_end_to="2025-12-31",
+            )
+        )
+        self.assertEqual(2, len(result.observations))
+        keys = {item["metric_key"] for item in result.observations}
+        self.assertEqual(2, len(keys))
+        self.assertTrue(all(":DIM:" in key for key in keys))
+        details = {
+            item["dimension_detail"]
+            for item in result.observations
+        }
+        self.assertEqual({"Member A", "Member B"}, details)
 
     def test_metric_filter_runs_after_dart_normalization(self):
         receipt = "20260315000123"
