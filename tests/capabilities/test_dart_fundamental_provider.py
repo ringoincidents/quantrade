@@ -11,6 +11,7 @@ from quantrade.capabilities.dart_fundamental_provider import (
     DartPointInTimeUnavailable,
     DartProviderConfig,
     DartProviderError,
+    UrlLibDartTransport,
 )
 from quantrade.capabilities.fundamental_evidence import FundamentalQuery
 
@@ -121,6 +122,49 @@ def financial_payload(
             }
         ],
     }
+
+
+class DartTransportRetryTests(unittest.TestCase):
+    def test_json_transport_retries_truncated_response(self):
+        class SequenceTransport(UrlLibDartTransport):
+            def __init__(self):
+                super().__init__(
+                    max_attempts=3,
+                    retry_backoff_seconds=0.0,
+                )
+                self.calls = 0
+
+            def _request(self, endpoint, params):
+                self.calls += 1
+                if self.calls == 1:
+                    return b'{"status":"000","list":[{"broken":"x'
+                return b'{"status":"000","list":[]}'
+
+        transport = SequenceTransport()
+        payload = transport.get_json("fixture.json", {"secret": "hidden"})
+        self.assertEqual("000", payload["status"])
+        self.assertEqual(2, transport.calls)
+
+    def test_json_transport_fails_after_retry_bound(self):
+        class BrokenTransport(UrlLibDartTransport):
+            def __init__(self):
+                super().__init__(
+                    max_attempts=2,
+                    retry_backoff_seconds=0.0,
+                )
+                self.calls = 0
+
+            def _request(self, endpoint, params):
+                self.calls += 1
+                return b'{"status":"000","list":['
+
+        transport = BrokenTransport()
+        with self.assertRaisesRegex(
+            DartProviderError,
+            "after 2 attempts",
+        ):
+            transport.get_json("fixture.json", {})
+        self.assertEqual(2, transport.calls)
 
 
 class DartFundamentalProviderTests(unittest.TestCase):
