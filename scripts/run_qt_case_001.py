@@ -585,7 +585,13 @@ def run() -> dict:
     provider = DartFundamentalObservationProvider(
         config=DartProviderConfig(
             report_codes=("11011", "11012"),
-        )
+        ),
+        corp_code_overrides={
+            # Verified in the successful 2026-10-08 Open DART live probe
+            # (run 37769222168, artifact 11547247557). This is a static
+            # provider identifier cache, not market/valuation data.
+            "005930": "00126380",
+        },
     )
     fundamental_result = provider.query(
         FundamentalQuery(
@@ -819,6 +825,13 @@ def run() -> dict:
         },
         "source_integrity": {
             "open_dart_provider": fundamental["provider"],
+            "corp_code_seed_provenance": {
+                "stock_code": "005930",
+                "corp_code": "00126380",
+                "verified_live_run_id": 37769222168,
+                "verified_artifact_id": 11547247557,
+                "economic_input": False,
+            },
             "fundamental_observation_count": len(observations),
             "fundamental_payload_sha256": canonical_hash(fundamental),
             "selected_evidence": selected_evidence,
