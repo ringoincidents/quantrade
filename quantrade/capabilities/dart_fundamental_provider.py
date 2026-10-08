@@ -21,6 +21,7 @@ later correction. A future XBRL-by-receipt parser can close that gap.
 from __future__ import annotations
 
 import calendar
+import hashlib
 from dataclasses import dataclass, replace
 from datetime import date, datetime, timedelta, timezone
 import io
@@ -272,6 +273,14 @@ def _parse_amount(value: object) -> float | None:
         return float(normalized)
     except ValueError as exc:
         raise DartProviderError(f"invalid DART amount: {raw}") from exc
+
+
+def _dimension_token(account_detail: str) -> tuple[str | None, str | None]:
+    raw = account_detail.strip()
+    if not raw or raw == "-":
+        return None, None
+    digest = hashlib.sha256(raw.encode("utf-8")).hexdigest()[:12]
+    return raw, f"DIM:{digest}"
 
 
 def _metric_base(account_id: str, account_nm: str) -> str:
@@ -571,6 +580,9 @@ class DartFundamentalObservationProvider:
                 "sj_div",
             )
             base = _metric_base(account_id, account_nm)
+            dimension_detail, dimension_suffix = _dimension_token(
+                str(row.get("account_detail", ""))
+            )
             currency = str(row.get("currency", "")).strip() or None
 
             amount_fields = (
@@ -581,14 +593,19 @@ class DartFundamentalObservationProvider:
                 amount = _parse_amount(row.get(field_name))
                 if amount is None:
                     continue
+                metric_key = f"{base}:{statement_division}:{suffix}"
                 observation_id = (
                     f"DART:{rcept_no}:{scope}:{statement_division}:"
                     f"{base}:{suffix}"
                 )
+                if dimension_suffix is not None:
+                    metric_key = f"{metric_key}:{dimension_suffix}"
+                    observation_id = (
+                        f"{observation_id}:{dimension_suffix}"
+                    )
                 if observation_id in seen_ids:
-                    # DART can expose dimension/member rows with the same
-                    # standard account ID. Preserve only unambiguous rows in
-                    # this first provider slice; force later normalization work
+                    # Even after preserving account_detail dimensions, an
+                    # exact duplicate identity remains ambiguous. Fail closed
                     # instead of silently summing or picking one.
                     raise DartProviderError(
                         f"ambiguous duplicate financial metric: "
@@ -602,14 +619,17 @@ class DartFundamentalObservationProvider:
                 evidence_ref = (
                     f"{source_ref}#account={account_id or account_nm}"
                     f"&field={field_name}&scope={scope}"
+                    + (
+                        f"&dimension={dimension_suffix}"
+                        if dimension_suffix is not None
+                        else ""
+                    )
                 )
                 result.append(
                     FundamentalObservation(
                         observation_id=observation_id,
                         asset_id=f"KRX:{filing.stock_code}",
-                        metric_key=(
-                            f"{base}:{statement_division}:{suffix}"
-                        ),
+                        metric_key=metric_key,
                         value=amount,
                         unit=currency or "REPORTED_UNIT",
                         currency=currency,
@@ -638,8 +658,14 @@ class DartFundamentalObservationProvider:
                         normalization_method=(
                             f"DART:{scope}:{statement_division}:"
                             f"{account_id or account_nm}:{field_name}"
+                            + (
+                                f":{dimension_suffix}"
+                                if dimension_suffix is not None
+                                else ""
+                            )
                         ),
                         published_at_precision="DATE",
+                        dimension_detail=dimension_detail,
                     )
                 )
         return tuple(result)
