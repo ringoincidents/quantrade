@@ -28,6 +28,7 @@ import io
 import json
 import os
 import re
+import time
 from typing import Callable, Iterable, Protocol
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
@@ -105,10 +106,20 @@ class UrlLibDartTransport:
         base_url: str = DART_BASE_URL,
         timeout_seconds: float = 20.0,
         user_agent: str = "QuanTrade/1.0 OpenDART",
+        max_attempts: int = 3,
+        retry_backoff_seconds: float = 1.0,
     ) -> None:
         self.base_url = base_url.rstrip("/")
         self.timeout_seconds = timeout_seconds
         self.user_agent = user_agent
+        if max_attempts < 1:
+            raise DartProviderError("max_attempts must be positive")
+        if retry_backoff_seconds < 0:
+            raise DartProviderError(
+                "retry_backoff_seconds cannot be negative"
+            )
+        self.max_attempts = max_attempts
+        self.retry_backoff_seconds = retry_backoff_seconds
 
     def _request(self, endpoint: str, params: dict[str, object]) -> bytes:
         query = urlencode(
@@ -130,18 +141,34 @@ class UrlLibDartTransport:
             return response.read()
 
     def get_json(self, endpoint: str, params: dict[str, object]) -> dict:
-        payload = self._request(endpoint, params)
-        try:
-            decoded = json.loads(payload.decode("utf-8"))
-        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
-            raise DartProviderError(
-                f"Open DART returned invalid JSON for {endpoint}"
-            ) from exc
-        if not isinstance(decoded, dict):
-            raise DartProviderError(
-                f"Open DART JSON root must be an object for {endpoint}"
-            )
-        return decoded
+        last_error: Exception | None = None
+        for attempt in range(1, self.max_attempts + 1):
+            try:
+                payload = self._request(endpoint, params)
+                decoded = json.loads(payload.decode("utf-8"))
+                if not isinstance(decoded, dict):
+                    raise DartProviderError(
+                        "Open DART JSON root must be an object "
+                        f"for {endpoint}"
+                    )
+                return decoded
+            except (
+                UnicodeDecodeError,
+                json.JSONDecodeError,
+                TimeoutError,
+                OSError,
+            ) as exc:
+                last_error = exc
+                if attempt >= self.max_attempts:
+                    break
+                if self.retry_backoff_seconds:
+                    time.sleep(
+                        self.retry_backoff_seconds * attempt
+                    )
+        raise DartProviderError(
+            "Open DART transport returned incomplete/invalid JSON "
+            f"for {endpoint} after {self.max_attempts} attempts"
+        ) from last_error
 
     def get_bytes(self, endpoint: str, params: dict[str, object]) -> bytes:
         return self._request(endpoint, params)
