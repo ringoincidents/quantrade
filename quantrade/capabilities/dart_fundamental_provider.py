@@ -163,6 +163,7 @@ class DartProviderConfig:
     allow_ofs_fallback: bool = True
     max_list_pages: int = 50
     page_count: int = 100
+    report_codes: tuple[str, ...] = tuple(REPORT_CODES)
 
 
 def _required_text(value: object, field_name: str) -> str:
@@ -397,6 +398,18 @@ class DartFundamentalObservationProvider:
             raise DartProviderError("page_count must be between 1 and 100")
         if self._config.max_list_pages < 1:
             raise DartProviderError("max_list_pages must be positive")
+        if not self._config.report_codes:
+            raise DartProviderError("report_codes must not be empty")
+        if len(self._config.report_codes) != len(set(self._config.report_codes)):
+            raise DartProviderError("report_codes must be unique")
+        unsupported = [
+            code for code in self._config.report_codes
+            if code not in REPORT_CODES
+        ]
+        if unsupported:
+            raise DartProviderError(
+                "unsupported report_codes: " + ",".join(unsupported)
+            )
         self._now = now or (lambda: datetime.now(timezone.utc))
         self._resolver = DartCorpCodeResolver(
             api_key=self._key,
@@ -730,7 +743,7 @@ class DartFundamentalObservationProvider:
 
         collected: list[FundamentalObservation] = []
         for business_year in range(lower.year, upper.year + 1):
-            for report_code in REPORT_CODES:
+            for report_code in self._config.report_codes:
                 scope, rows = self._fetch_report_rows(
                     corp_code,
                     business_year=business_year,
