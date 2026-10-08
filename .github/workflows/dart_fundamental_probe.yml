@@ -2,14 +2,6 @@ name: Open DART Fundamental Probe
 # Live probe retrigger marker: secret configured
 
 on:
-  push:
-    branches:
-      - "direction/investment-office-decision-economics-2026-10-05"
-    paths:
-      - ".github/workflows/dart_fundamental_probe.yml"
-      - "quantrade/capabilities/dart_fundamental_provider.py"
-      - "quantrade/capabilities/fundamental_evidence.py"
-      - "scripts/run_dart_fundamental_probe.py"
   workflow_dispatch:
     inputs:
       stock_code:
@@ -37,8 +29,8 @@ permissions:
   contents: read
 
 concurrency:
-  group: open-dart-probe-${{ github.ref }}
-  cancel-in-progress: true
+  group: quantrade-open-dart-live
+  cancel-in-progress: false
 
 jobs:
   probe:
