@@ -27,6 +27,7 @@ from urllib.request import Request, urlopen
 
 from quantrade.capabilities.dart_fundamental_provider import (
     DartFundamentalObservationProvider,
+    DartProviderConfig,
 )
 from quantrade.capabilities.fundamental_evidence import FundamentalQuery
 from quantrade.capabilities.investment_case import (
@@ -581,7 +582,11 @@ def build_thesis_contract(
 
 
 def run() -> dict:
-    provider = DartFundamentalObservationProvider()
+    provider = DartFundamentalObservationProvider(
+        config=DartProviderConfig(
+            report_codes=("11011", "11012"),
+        )
+    )
     fundamental_result = provider.query(
         FundamentalQuery(
             asset_id=ASSET_ID,
