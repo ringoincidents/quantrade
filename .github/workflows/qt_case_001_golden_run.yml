@@ -7,6 +7,12 @@ on:
     paths:
       - "scripts/run_qt_case_001.py"
       - "tests/capabilities/test_qt_case_001_rules.py"
+      - "quantrade/capabilities/dart_fundamental_provider.py"
+      - "quantrade/capabilities/fundamental_evidence.py"
+      - "quantrade/capabilities/investment_case.py"
+      - "quantrade/capabilities/thesis_contract.py"
+      - "quantrade/capabilities/portfolio_opportunity.py"
+      - "quantrade/capabilities/risk_opinion.py"
       - ".github/workflows/qt_case_001_golden_run.yml"
   workflow_dispatch:
 
