@@ -1,4 +1,5 @@
 name: Open DART Fundamental Probe
+# Live probe retrigger marker: secret configured
 
 on:
   push:
