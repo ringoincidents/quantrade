@@ -171,7 +171,25 @@ class UrlLibDartTransport:
         ) from last_error
 
     def get_bytes(self, endpoint: str, params: dict[str, object]) -> bytes:
-        return self._request(endpoint, params)
+        last_error: Exception | None = None
+        for attempt in range(1, self.max_attempts + 1):
+            try:
+                return self._request(endpoint, params)
+            except (
+                TimeoutError,
+                OSError,
+            ) as exc:
+                last_error = exc
+                if attempt >= self.max_attempts:
+                    break
+                if self.retry_backoff_seconds:
+                    time.sleep(
+                        self.retry_backoff_seconds * attempt
+                    )
+        raise DartProviderError(
+            "Open DART transport failed to return bytes "
+            f"for {endpoint} after {self.max_attempts} attempts"
+        ) from last_error
 
 
 @dataclass(frozen=True)
