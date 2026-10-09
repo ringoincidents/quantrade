@@ -677,6 +677,7 @@ class DartFundamentalObservationProvider:
         scope: str,
         retrieved_at: str,
         prior_filing: DartFiling | None,
+        requested_metric_keys: frozenset[str] | None = None,
     ) -> tuple[FundamentalObservation, ...]:
         result: list[FundamentalObservation] = []
         seen_ids: set[str] = set()
@@ -716,6 +717,18 @@ class DartFundamentalObservationProvider:
                     observation_id = (
                         f"{observation_id}:{dimension_suffix}"
                     )
+
+                # A bounded query should not be blocked by ambiguous rows for
+                # unrelated accounts elsewhere in the same DART statement.
+                # Filter on the fully normalized key before enforcing
+                # duplicate identity. Exact requested metrics still fail
+                # closed if they are themselves ambiguous.
+                if (
+                    requested_metric_keys is not None
+                    and metric_key not in requested_metric_keys
+                ):
+                    continue
+
                 if observation_id in seen_ids:
                     # Even after preserving account_detail dimensions, an
                     # exact duplicate identity remains ambiguous. Fail closed
@@ -855,6 +868,12 @@ class DartFundamentalObservationProvider:
             for filing in filings
         }
 
+        requested_metric_keys = (
+            frozenset(request.metric_keys)
+            if request.metric_keys
+            else None
+        )
+
         collected: list[FundamentalObservation] = []
         for business_year in range(lower.year, upper.year + 1):
             for report_code in self._config.report_codes:
@@ -947,6 +966,7 @@ class DartFundamentalObservationProvider:
                         scope=scope,
                         retrieved_at=retrieved_at,
                         prior_filing=prior,
+                        requested_metric_keys=requested_metric_keys,
                     )
                 )
 
