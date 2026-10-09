@@ -338,9 +338,23 @@ class DartCorpCodeResolver:
         api_key: str | None = None,
         transport: DartTransport | None = None,
         seed_mapping: dict[str, str] | None = None,
+        archive_max_attempts: int = 3,
+        archive_retry_backoff_seconds: float = 1.0,
     ) -> None:
         self._key = _api_key(api_key)
         self._transport = transport or UrlLibDartTransport()
+        if archive_max_attempts < 1:
+            raise DartProviderError(
+                "archive_max_attempts must be positive"
+            )
+        if archive_retry_backoff_seconds < 0:
+            raise DartProviderError(
+                "archive_retry_backoff_seconds cannot be negative"
+            )
+        self._archive_max_attempts = archive_max_attempts
+        self._archive_retry_backoff_seconds = (
+            archive_retry_backoff_seconds
+        )
         self._seed_mapping: dict[str, str] = {}
         for stock_code, corp_code in (seed_mapping or {}).items():
             stock = _required_text(stock_code, "seed stock_code")
@@ -357,22 +371,62 @@ class DartCorpCodeResolver:
         self._by_stock: dict[str, str] | None = None
 
     def _load(self) -> dict[str, str]:
-        payload = self._transport.get_bytes(
-            "corpCode.xml",
-            {"crtfc_key": self._key},
-        )
-        try:
-            with zipfile.ZipFile(io.BytesIO(payload)) as archive:
-                names = archive.namelist()
-                if not names:
-                    raise DartProviderError(
-                        "Open DART corpCode archive is empty"
+        xml_bytes: bytes | None = None
+        last_error: Exception | None = None
+        last_payload: bytes | None = None
+
+        for attempt in range(1, self._archive_max_attempts + 1):
+            payload = self._transport.get_bytes(
+                "corpCode.xml",
+                {"crtfc_key": self._key},
+            )
+            last_payload = payload
+            try:
+                with zipfile.ZipFile(io.BytesIO(payload)) as archive:
+                    names = archive.namelist()
+                    if not names:
+                        raise DartProviderError(
+                            "Open DART corpCode archive is empty"
+                        )
+                    xml_bytes = archive.read(names[0])
+                break
+            except (zipfile.BadZipFile, KeyError) as exc:
+                last_error = exc
+                if attempt >= self._archive_max_attempts:
+                    break
+                if self._archive_retry_backoff_seconds:
+                    time.sleep(
+                        self._archive_retry_backoff_seconds * attempt
                     )
-                xml_bytes = archive.read(names[0])
-        except (zipfile.BadZipFile, KeyError) as exc:
+
+        if xml_bytes is None:
+            status_note = ""
+            if last_payload:
+                try:
+                    decoded = json.loads(
+                        last_payload.decode("utf-8")
+                    )
+                except (
+                    UnicodeDecodeError,
+                    json.JSONDecodeError,
+                ):
+                    decoded = None
+                if isinstance(decoded, dict):
+                    status = str(
+                        decoded.get("status", "")
+                    ).strip()
+                    message = str(
+                        decoded.get("message", "")
+                    ).strip()
+                    if status:
+                        status_note += f" status={status}"
+                    if message:
+                        status_note += f" message={message}"
             raise DartProviderError(
-                "Open DART corpCode response is not a valid zip"
-            ) from exc
+                "Open DART corpCode response was not a valid zip "
+                f"after {self._archive_max_attempts} attempts"
+                + status_note
+            ) from last_error
 
         try:
             root = ET.fromstring(xml_bytes)
