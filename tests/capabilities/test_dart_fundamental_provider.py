@@ -522,6 +522,53 @@ class DartFundamentalProviderTests(unittest.TestCase):
         }
         self.assertEqual({"Member A", "Member B"}, details)
 
+    def test_bounded_metric_query_ignores_unrelated_ambiguous_rows(self):
+        receipt = "20260315000123"
+        payload = financial_payload(
+            receipt,
+            amount="10,000",
+            account_id="dart_OperatingIncomeLoss",
+            account_nm="영업이익",
+            statement_division="IS",
+        )
+        unrelated = dict(payload["list"][0])
+        unrelated["sj_div"] = "BS"
+        unrelated["account_id"] = ""
+        unrelated["account_nm"] = "기타투자자산"
+        unrelated["thstrm_amount"] = "1,000"
+        duplicate = dict(unrelated)
+        duplicate["thstrm_amount"] = "2,000"
+        payload["list"].extend((unrelated, duplicate))
+
+        transport = FakeDartTransport(
+            filings=[
+                filing(
+                    receipt,
+                    "사업보고서 (2025.12)",
+                    "20260315",
+                )
+            ],
+            financial_payloads={
+                ("2025", "11011", "CFS"): payload
+            },
+        )
+        result = self._provider(transport).query(
+            FundamentalQuery(
+                asset_id="KRX:005930",
+                as_of="2026-03-16T00:00:00+09:00",
+                metric_keys=(
+                    "OPERATING_INCOME:IS:CURRENT_PERIOD",
+                ),
+                fiscal_period_end_from="2025-12-31",
+                fiscal_period_end_to="2025-12-31",
+            )
+        )
+        self.assertEqual(1, len(result.observations))
+        self.assertEqual(
+            "OPERATING_INCOME:IS:CURRENT_PERIOD",
+            result.observations[0]["metric_key"],
+        )
+
     def test_metric_filter_runs_after_dart_normalization(self):
         receipt = "20260315000123"
         transport = FakeDartTransport(
