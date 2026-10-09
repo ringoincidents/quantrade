@@ -125,6 +125,49 @@ def financial_payload(
 
 
 class DartTransportRetryTests(unittest.TestCase):
+    def test_bytes_transport_retries_timeout(self):
+        class SequenceTransport(UrlLibDartTransport):
+            def __init__(self):
+                super().__init__(
+                    max_attempts=3,
+                    retry_backoff_seconds=0.0,
+                )
+                self.calls = 0
+
+            def _request(self, endpoint, params):
+                self.calls += 1
+                if self.calls == 1:
+                    raise TimeoutError("fixture timeout")
+                return b"ok"
+
+        transport = SequenceTransport()
+        self.assertEqual(
+            b"ok",
+            transport.get_bytes("fixture.bin", {}),
+        )
+        self.assertEqual(2, transport.calls)
+
+    def test_bytes_transport_fails_after_retry_bound(self):
+        class BrokenTransport(UrlLibDartTransport):
+            def __init__(self):
+                super().__init__(
+                    max_attempts=2,
+                    retry_backoff_seconds=0.0,
+                )
+                self.calls = 0
+
+            def _request(self, endpoint, params):
+                self.calls += 1
+                raise OSError("fixture network failure")
+
+        transport = BrokenTransport()
+        with self.assertRaisesRegex(
+            DartProviderError,
+            "after 2 attempts",
+        ):
+            transport.get_bytes("fixture.bin", {})
+        self.assertEqual(2, transport.calls)
+
     def test_json_transport_retries_truncated_response(self):
         class SequenceTransport(UrlLibDartTransport):
             def __init__(self):
