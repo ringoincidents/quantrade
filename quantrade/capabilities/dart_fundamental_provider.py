@@ -836,6 +836,20 @@ class DartFundamentalObservationProvider:
             begin=filing_begin,
             end=filing_end,
         )
+        mismatched_stock_codes = sorted(
+            {
+                filing.stock_code
+                for filing in filings
+                if filing.stock_code
+                and filing.stock_code != stock_code
+            }
+        )
+        if mismatched_stock_codes:
+            raise DartProviderError(
+                "resolved corp_code does not match requested stock_code: "
+                f"requested={stock_code} observed="
+                + ",".join(mismatched_stock_codes)
+            )
         filing_by_receipt = {
             filing.rcept_no: filing
             for filing in filings
