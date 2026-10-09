@@ -1,0 +1,1569 @@
+{
+  "authority": {
+    "canonical_evidence_created": false,
+    "execution_authorized": false,
+    "investment_decision_created": false,
+    "live_order_possible": false,
+    "model_called": false,
+    "paper_promotion_authorized": false,
+    "portfolio_proposal_created": false,
+    "risk_limit_changed": false,
+    "strategy_approved": false
+  },
+  "candidates": [
+    {
+      "candidate": {
+        "candidate_id": "CAND-SMA-5-20",
+        "description": "",
+        "formula_ast": {
+          "left": {
+            "op": "SMA",
+            "window": 5
+          },
+          "op": "GT",
+          "right": {
+            "op": "SMA",
+            "window": 20
+          }
+        },
+        "generator_provider": {
+          "capital_effect": false,
+          "deterministic": true,
+          "implementation": "quantrade-static-fixture-provider",
+          "license": "repository-license",
+          "model_access": false,
+          "network_access": false,
+          "provider_id": "quantrade.static.strategy_candidates.v1",
+          "status": "SANDBOX",
+          "version_or_revision": "v1"
+        },
+        "market_scope": "KRX:005930",
+        "name": "SMA 5/20 trend",
+        "parameter_set": {
+          "long_window": 20,
+          "short_window": 5
+        },
+        "rebalance_horizon": "DAILY",
+        "source_ref": "QT-STRAT-004_PRE_REGISTRATION",
+        "source_type": "PRE_REGISTERED_STATIC"
+      },
+      "stage_a": {
+        "checks": {
+          "train_return_periods_gte_200": true,
+          "validation_beats_cost_adjusted_control": false,
+          "validation_mdd_gte_minus_20": false,
+          "validation_return_periods_gte_100": true,
+          "validation_sharpe_gt_0": true,
+          "validation_turnover_lte_0_25": true
+        },
+        "eligible": false,
+        "validation_excess_vs_cost_adjusted_control_pct": -83.444181
+      },
+      "stage_b": null,
+      "test": null,
+      "timing": {
+        "future_information_required": false,
+        "one_bar_execution_lag": true
+      },
+      "train": {
+        "assumptions": {
+          "benchmark": "BUY_AND_HOLD_SAME_PRICE_SERIES_BEFORE_COSTS",
+          "charge_terminal_liquidation": true,
+          "periods_per_year": 252,
+          "position_range": [
+            0.0,
+            1.0
+          ],
+          "signal_timing": "target_position at bar i applies only to return i→i+1; information_cutoff must be <= effective_at",
+          "terminal_cost_pct_of_initial_equity": 0.0,
+          "terminal_turnover": 0.0,
+          "transaction_cost_bps": 20.5
+        },
+        "authority": {
+          "canonical_evidence_created": false,
+          "execution_authorized": false,
+          "investment_decision_created": false,
+          "live_order_possible": false,
+          "portfolio_proposal_created": false,
+          "risk_limit_changed": false
+        },
+        "candidate": {
+          "candidate_id": "CAND-SMA-5-20",
+          "description": "",
+          "formula_ast": {
+            "left": {
+              "op": "SMA",
+              "window": 5
+            },
+            "op": "GT",
+            "right": {
+              "op": "SMA",
+              "window": 20
+            }
+          },
+          "generator_provider": {
+            "capital_effect": false,
+            "deterministic": true,
+            "implementation": "quantrade-static-fixture-provider",
+            "license": "repository-license",
+            "model_access": false,
+            "network_access": false,
+            "provider_id": "quantrade.static.strategy_candidates.v1",
+            "status": "SANDBOX",
+            "version_or_revision": "v1"
+          },
+          "market_scope": "KRX:005930",
+          "name": "SMA 5/20 trend",
+          "parameter_set": {
+            "long_window": 20,
+            "short_window": 5
+          },
+          "rebalance_horizon": "DAILY",
+          "source_ref": "QT-STRAT-004_PRE_REGISTRATION",
+          "source_type": "PRE_REGISTERED_STATIC"
+        },
+        "dataset": {
+          "as_of_end": "2024-12-30T15:30:00+09:00",
+          "as_of_start": "2022-01-03T15:30:00+09:00",
+          "dataset_id": "QT-STRAT-004:005930:train:fd19aebd91cd",
+          "point_in_time": true,
+          "point_in_time_evidence_ref": "sha256:fd19aebd91cd68d03fbfc41b417e195944b6f06ef6c5a225fb3ff7a6fb6a2c6b",
+          "provider": "naver-finance-historical",
+          "source": "https://api.finance.naver.com/siseJson.naver",
+          "version_or_revision": "requestType=1;timeframe=day"
+        },
+        "evaluator": {
+          "capability": "StrategyEvaluator",
+          "capital_effect": false,
+          "deterministic": true,
+          "evidence_effect": "NON_CANONICAL",
+          "implementation": "quantrade-native-deterministic",
+          "license": "repository-license",
+          "network_access": false,
+          "provider_id": "quantrade.native.strategy_evaluator.v1",
+          "status": "SANDBOX",
+          "version_or_revision": "v1"
+        },
+        "metrics": {
+          "annualized_return_pct": -3.553902,
+          "benchmark_excess_return_pct": 22.312092,
+          "benchmark_total_return_pct": -32.315522,
+          "calmar": -0.143719,
+          "coverage_pct": 100.0,
+          "estimated_transaction_cost_pct_of_initial_equity": 9.43,
+          "gross_total_return_pct": -1.082065,
+          "max_single_period_loss_pct": -3.697479,
+          "maximum_drawdown_pct": -24.728067,
+          "net_total_return_pct": -10.00343,
+          "return_periods": 734,
+          "sharpe": -0.166268,
+          "sortino": -0.242348,
+          "turnover_per_period": 0.06267,
+          "turnover_total": 46.0,
+          "volatility_annualized_pct": 15.007078
+        },
+        "schema": "quantrade_strategy_evaluation_v1",
+        "screening": {
+          "automatic_promotion_allowed": false,
+          "disposition": "SURVIVES_DETERMINISTIC_SCREEN",
+          "policy": {
+            "max_drawdown_pct": -100.0,
+            "max_turnover_per_period": null,
+            "min_benchmark_excess_return_pct": -100.0,
+            "min_return_periods": 1
+          },
+          "reasons": [],
+          "strategy_approved": false
+        },
+        "validation": {
+          "lookahead_detected": false,
+          "missing_data_imputed": false,
+          "point_in_time_declared": true,
+          "point_in_time_evidence_ref": "sha256:fd19aebd91cd68d03fbfc41b417e195944b6f06ef6c5a225fb3ff7a6fb6a2c6b",
+          "price_bar_count": 735,
+          "signal_count": 734
+        }
+      },
+      "validation": {
+        "assumptions": {
+          "benchmark": "BUY_AND_HOLD_SAME_PRICE_SERIES_BEFORE_COSTS",
+          "charge_terminal_liquidation": true,
+          "periods_per_year": 252,
+          "position_range": [
+            0.0,
+            1.0
+          ],
+          "signal_timing": "target_position at bar i applies only to return i→i+1; information_cutoff must be <= effective_at",
+          "terminal_cost_pct_of_initial_equity": 0.205,
+          "terminal_turnover": 1.0,
+          "transaction_cost_bps": 20.5
+        },
+        "authority": {
+          "canonical_evidence_created": false,
+          "execution_authorized": false,
+          "investment_decision_created": false,
+          "live_order_possible": false,
+          "portfolio_proposal_created": false,
+          "risk_limit_changed": false
+        },
+        "candidate": {
+          "candidate_id": "CAND-SMA-5-20",
+          "description": "",
+          "formula_ast": {
+            "left": {
+              "op": "SMA",
+              "window": 5
+            },
+            "op": "GT",
+            "right": {
+              "op": "SMA",
+              "window": 20
+            }
+          },
+          "generator_provider": {
+            "capital_effect": false,
+            "deterministic": true,
+            "implementation": "quantrade-static-fixture-provider",
+            "license": "repository-license",
+            "model_access": false,
+            "network_access": false,
+            "provider_id": "quantrade.static.strategy_candidates.v1",
+            "status": "SANDBOX",
+            "version_or_revision": "v1"
+          },
+          "market_scope": "KRX:005930",
+          "name": "SMA 5/20 trend",
+          "parameter_set": {
+            "long_window": 20,
+            "short_window": 5
+          },
+          "rebalance_horizon": "DAILY",
+          "source_ref": "QT-STRAT-004_PRE_REGISTRATION",
+          "source_type": "PRE_REGISTERED_STATIC"
+        },
+        "dataset": {
+          "as_of_end": "2025-12-30T15:30:00+09:00",
+          "as_of_start": "2025-01-02T15:30:00+09:00",
+          "dataset_id": "QT-STRAT-004:005930:validation:fd19aebd91cd",
+          "point_in_time": true,
+          "point_in_time_evidence_ref": "sha256:fd19aebd91cd68d03fbfc41b417e195944b6f06ef6c5a225fb3ff7a6fb6a2c6b",
+          "provider": "naver-finance-historical",
+          "source": "https://api.finance.naver.com/siseJson.naver",
+          "version_or_revision": "requestType=1;timeframe=day"
+        },
+        "evaluator": {
+          "capability": "StrategyEvaluator",
+          "capital_effect": false,
+          "deterministic": true,
+          "evidence_effect": "NON_CANONICAL",
+          "implementation": "quantrade-native-deterministic",
+          "license": "repository-license",
+          "network_access": false,
+          "provider_id": "quantrade.native.strategy_evaluator.v1",
+          "status": "SANDBOX",
+          "version_or_revision": "v1"
+        },
+        "metrics": {
+          "annualized_return_pct": 42.355671,
+          "benchmark_excess_return_pct": -84.353841,
+          "benchmark_total_return_pct": 124.531835,
+          "calmar": 1.654588,
+          "coverage_pct": 100.0,
+          "estimated_transaction_cost_pct_of_initial_equity": 3.69,
+          "gross_total_return_pct": 45.429033,
+          "max_single_period_loss_pct": -5.580558,
+          "maximum_drawdown_pct": -25.598924,
+          "net_total_return_pct": 40.177994,
+          "return_periods": 241,
+          "sharpe": 1.369644,
+          "sortino": 2.236803,
+          "turnover_per_period": 0.074689,
+          "turnover_total": 18.0,
+          "volatility_annualized_pct": 28.814185
+        },
+        "schema": "quantrade_strategy_evaluation_v1",
+        "screening": {
+          "automatic_promotion_allowed": false,
+          "disposition": "SURVIVES_DETERMINISTIC_SCREEN",
+          "policy": {
+            "max_drawdown_pct": -100.0,
+            "max_turnover_per_period": null,
+            "min_benchmark_excess_return_pct": -100.0,
+            "min_return_periods": 1
+          },
+          "reasons": [],
+          "strategy_approved": false
+        },
+        "validation": {
+          "lookahead_detected": false,
+          "missing_data_imputed": false,
+          "point_in_time_declared": true,
+          "point_in_time_evidence_ref": "sha256:fd19aebd91cd68d03fbfc41b417e195944b6f06ef6c5a225fb3ff7a6fb6a2c6b",
+          "price_bar_count": 242,
+          "signal_count": 241
+        }
+      }
+    },
+    {
+      "candidate": {
+        "candidate_id": "CAND-SMA-20-60",
+        "description": "",
+        "formula_ast": {
+          "left": {
+            "op": "SMA",
+            "window": 20
+          },
+          "op": "GT",
+          "right": {
+            "op": "SMA",
+            "window": 60
+          }
+        },
+        "generator_provider": {
+          "capital_effect": false,
+          "deterministic": true,
+          "implementation": "quantrade-static-fixture-provider",
+          "license": "repository-license",
+          "model_access": false,
+          "network_access": false,
+          "provider_id": "quantrade.static.strategy_candidates.v1",
+          "status": "SANDBOX",
+          "version_or_revision": "v1"
+        },
+        "market_scope": "KRX:005930",
+        "name": "SMA 20/60 trend",
+        "parameter_set": {
+          "long_window": 60,
+          "short_window": 20
+        },
+        "rebalance_horizon": "DAILY",
+        "source_ref": "QT-STRAT-004_PRE_REGISTRATION",
+        "source_type": "PRE_REGISTERED_STATIC"
+      },
+      "stage_a": {
+        "checks": {
+          "train_return_periods_gte_200": true,
+          "validation_beats_cost_adjusted_control": false,
+          "validation_mdd_gte_minus_20": true,
+          "validation_return_periods_gte_100": true,
+          "validation_sharpe_gt_0": true,
+          "validation_turnover_lte_0_25": true
+        },
+        "eligible": false,
+        "validation_excess_vs_cost_adjusted_control_pct": -32.355126
+      },
+      "stage_b": null,
+      "test": null,
+      "timing": {
+        "future_information_required": false,
+        "one_bar_execution_lag": true
+      },
+      "train": {
+        "assumptions": {
+          "benchmark": "BUY_AND_HOLD_SAME_PRICE_SERIES_BEFORE_COSTS",
+          "charge_terminal_liquidation": true,
+          "periods_per_year": 252,
+          "position_range": [
+            0.0,
+            1.0
+          ],
+          "signal_timing": "target_position at bar i applies only to return i→i+1; information_cutoff must be <= effective_at",
+          "terminal_cost_pct_of_initial_equity": 0.0,
+          "terminal_turnover": 0.0,
+          "transaction_cost_bps": 20.5
+        },
+        "authority": {
+          "canonical_evidence_created": false,
+          "execution_authorized": false,
+          "investment_decision_created": false,
+          "live_order_possible": false,
+          "portfolio_proposal_created": false,
+          "risk_limit_changed": false
+        },
+        "candidate": {
+          "candidate_id": "CAND-SMA-20-60",
+          "description": "",
+          "formula_ast": {
+            "left": {
+              "op": "SMA",
+              "window": 20
+            },
+            "op": "GT",
+            "right": {
+              "op": "SMA",
+              "window": 60
+            }
+          },
+          "generator_provider": {
+            "capital_effect": false,
+            "deterministic": true,
+            "implementation": "quantrade-static-fixture-provider",
+            "license": "repository-license",
+            "model_access": false,
+            "network_access": false,
+            "provider_id": "quantrade.static.strategy_candidates.v1",
+            "status": "SANDBOX",
+            "version_or_revision": "v1"
+          },
+          "market_scope": "KRX:005930",
+          "name": "SMA 20/60 trend",
+          "parameter_set": {
+            "long_window": 60,
+            "short_window": 20
+          },
+          "rebalance_horizon": "DAILY",
+          "source_ref": "QT-STRAT-004_PRE_REGISTRATION",
+          "source_type": "PRE_REGISTERED_STATIC"
+        },
+        "dataset": {
+          "as_of_end": "2024-12-30T15:30:00+09:00",
+          "as_of_start": "2022-01-03T15:30:00+09:00",
+          "dataset_id": "QT-STRAT-004:005930:train:fd19aebd91cd",
+          "point_in_time": true,
+          "point_in_time_evidence_ref": "sha256:fd19aebd91cd68d03fbfc41b417e195944b6f06ef6c5a225fb3ff7a6fb6a2c6b",
+          "provider": "naver-finance-historical",
+          "source": "https://api.finance.naver.com/siseJson.naver",
+          "version_or_revision": "requestType=1;timeframe=day"
+        },
+        "evaluator": {
+          "capability": "StrategyEvaluator",
+          "capital_effect": false,
+          "deterministic": true,
+          "evidence_effect": "NON_CANONICAL",
+          "implementation": "quantrade-native-deterministic",
+          "license": "repository-license",
+          "network_access": false,
+          "provider_id": "quantrade.native.strategy_evaluator.v1",
+          "status": "SANDBOX",
+          "version_or_revision": "v1"
+        },
+        "metrics": {
+          "annualized_return_pct": -8.971857,
+          "benchmark_excess_return_pct": 8.364097,
+          "benchmark_total_return_pct": -32.315522,
+          "calmar": -0.30392,
+          "coverage_pct": 100.0,
+          "estimated_transaction_cost_pct_of_initial_equity": 3.28,
+          "gross_total_return_pct": -21.421456,
+          "max_single_period_loss_pct": -10.301508,
+          "maximum_drawdown_pct": -29.520436,
+          "net_total_return_pct": -23.951425,
+          "return_periods": 734,
+          "sharpe": -0.487661,
+          "sortino": -0.651716,
+          "turnover_per_period": 0.021798,
+          "turnover_total": 16.0,
+          "volatility_annualized_pct": 16.468067
+        },
+        "schema": "quantrade_strategy_evaluation_v1",
+        "screening": {
+          "automatic_promotion_allowed": false,
+          "disposition": "SURVIVES_DETERMINISTIC_SCREEN",
+          "policy": {
+            "max_drawdown_pct": -100.0,
+            "max_turnover_per_period": null,
+            "min_benchmark_excess_return_pct": -100.0,
+            "min_return_periods": 1
+          },
+          "reasons": [],
+          "strategy_approved": false
+        },
+        "validation": {
+          "lookahead_detected": false,
+          "missing_data_imputed": false,
+          "point_in_time_declared": true,
+          "point_in_time_evidence_ref": "sha256:fd19aebd91cd68d03fbfc41b417e195944b6f06ef6c5a225fb3ff7a6fb6a2c6b",
+          "price_bar_count": 735,
+          "signal_count": 734
+        }
+      },
+      "validation": {
+        "assumptions": {
+          "benchmark": "BUY_AND_HOLD_SAME_PRICE_SERIES_BEFORE_COSTS",
+          "charge_terminal_liquidation": true,
+          "periods_per_year": 252,
+          "position_range": [
+            0.0,
+            1.0
+          ],
+          "signal_timing": "target_position at bar i applies only to return i→i+1; information_cutoff must be <= effective_at",
+          "terminal_cost_pct_of_initial_equity": 0.205,
+          "terminal_turnover": 1.0,
+          "transaction_cost_bps": 20.5
+        },
+        "authority": {
+          "canonical_evidence_created": false,
+          "execution_authorized": false,
+          "investment_decision_created": false,
+          "live_order_possible": false,
+          "portfolio_proposal_created": false,
+          "risk_limit_changed": false
+        },
+        "candidate": {
+          "candidate_id": "CAND-SMA-20-60",
+          "description": "",
+          "formula_ast": {
+            "left": {
+              "op": "SMA",
+              "window": 20
+            },
+            "op": "GT",
+            "right": {
+              "op": "SMA",
+              "window": 60
+            }
+          },
+          "generator_provider": {
+            "capital_effect": false,
+            "deterministic": true,
+            "implementation": "quantrade-static-fixture-provider",
+            "license": "repository-license",
+            "model_access": false,
+            "network_access": false,
+            "provider_id": "quantrade.static.strategy_candidates.v1",
+            "status": "SANDBOX",
+            "version_or_revision": "v1"
+          },
+          "market_scope": "KRX:005930",
+          "name": "SMA 20/60 trend",
+          "parameter_set": {
+            "long_window": 60,
+            "short_window": 20
+          },
+          "rebalance_horizon": "DAILY",
+          "source_ref": "QT-STRAT-004_PRE_REGISTRATION",
+          "source_type": "PRE_REGISTERED_STATIC"
+        },
+        "dataset": {
+          "as_of_end": "2025-12-30T15:30:00+09:00",
+          "as_of_start": "2025-01-02T15:30:00+09:00",
+          "dataset_id": "QT-STRAT-004:005930:validation:fd19aebd91cd",
+          "point_in_time": true,
+          "point_in_time_evidence_ref": "sha256:fd19aebd91cd68d03fbfc41b417e195944b6f06ef6c5a225fb3ff7a6fb6a2c6b",
+          "provider": "naver-finance-historical",
+          "source": "https://api.finance.naver.com/siseJson.naver",
+          "version_or_revision": "requestType=1;timeframe=day"
+        },
+        "evaluator": {
+          "capability": "StrategyEvaluator",
+          "capital_effect": false,
+          "deterministic": true,
+          "evidence_effect": "NON_CANONICAL",
+          "implementation": "quantrade-native-deterministic",
+          "license": "repository-license",
+          "network_access": false,
+          "provider_id": "quantrade.native.strategy_evaluator.v1",
+          "status": "SANDBOX",
+          "version_or_revision": "v1"
+        },
+        "metrics": {
+          "annualized_return_pct": 97.013099,
+          "benchmark_excess_return_pct": -33.264786,
+          "benchmark_total_return_pct": 124.531835,
+          "calmar": 6.612365,
+          "coverage_pct": 100.0,
+          "estimated_transaction_cost_pct_of_initial_equity": 0.82,
+          "gross_total_return_pct": 92.856565,
+          "max_single_period_loss_pct": -5.765408,
+          "maximum_drawdown_pct": -14.671467,
+          "net_total_return_pct": 91.267049,
+          "return_periods": 241,
+          "sharpe": 2.287701,
+          "sortino": 3.758096,
+          "turnover_per_period": 0.016598,
+          "turnover_total": 4.0,
+          "volatility_annualized_pct": 31.893314
+        },
+        "schema": "quantrade_strategy_evaluation_v1",
+        "screening": {
+          "automatic_promotion_allowed": false,
+          "disposition": "SURVIVES_DETERMINISTIC_SCREEN",
+          "policy": {
+            "max_drawdown_pct": -100.0,
+            "max_turnover_per_period": null,
+            "min_benchmark_excess_return_pct": -100.0,
+            "min_return_periods": 1
+          },
+          "reasons": [],
+          "strategy_approved": false
+        },
+        "validation": {
+          "lookahead_detected": false,
+          "missing_data_imputed": false,
+          "point_in_time_declared": true,
+          "point_in_time_evidence_ref": "sha256:fd19aebd91cd68d03fbfc41b417e195944b6f06ef6c5a225fb3ff7a6fb6a2c6b",
+          "price_bar_count": 242,
+          "signal_count": 241
+        }
+      }
+    },
+    {
+      "candidate": {
+        "candidate_id": "CAND-MOM-20",
+        "description": "",
+        "formula_ast": {
+          "left": {
+            "op": "RETURN",
+            "window": 20
+          },
+          "op": "GT",
+          "right": {
+            "op": "CONST",
+            "value": 0.0
+          }
+        },
+        "generator_provider": {
+          "capital_effect": false,
+          "deterministic": true,
+          "implementation": "quantrade-static-fixture-provider",
+          "license": "repository-license",
+          "model_access": false,
+          "network_access": false,
+          "provider_id": "quantrade.static.strategy_candidates.v1",
+          "status": "SANDBOX",
+          "version_or_revision": "v1"
+        },
+        "market_scope": "KRX:005930",
+        "name": "20-day momentum",
+        "parameter_set": {
+          "return_window": 20,
+          "threshold": 0.0
+        },
+        "rebalance_horizon": "DAILY",
+        "source_ref": "QT-STRAT-004_PRE_REGISTRATION",
+        "source_type": "PRE_REGISTERED_STATIC"
+      },
+      "stage_a": {
+        "checks": {
+          "train_return_periods_gte_200": true,
+          "validation_beats_cost_adjusted_control": false,
+          "validation_mdd_gte_minus_20": false,
+          "validation_return_periods_gte_100": true,
+          "validation_sharpe_gt_0": true,
+          "validation_turnover_lte_0_25": true
+        },
+        "eligible": false,
+        "validation_excess_vs_cost_adjusted_control_pct": -66.92675
+      },
+      "stage_b": null,
+      "test": null,
+      "timing": {
+        "future_information_required": false,
+        "one_bar_execution_lag": true
+      },
+      "train": {
+        "assumptions": {
+          "benchmark": "BUY_AND_HOLD_SAME_PRICE_SERIES_BEFORE_COSTS",
+          "charge_terminal_liquidation": true,
+          "periods_per_year": 252,
+          "position_range": [
+            0.0,
+            1.0
+          ],
+          "signal_timing": "target_position at bar i applies only to return i→i+1; information_cutoff must be <= effective_at",
+          "terminal_cost_pct_of_initial_equity": 0.0,
+          "terminal_turnover": 0.0,
+          "transaction_cost_bps": 20.5
+        },
+        "authority": {
+          "canonical_evidence_created": false,
+          "execution_authorized": false,
+          "investment_decision_created": false,
+          "live_order_possible": false,
+          "portfolio_proposal_created": false,
+          "risk_limit_changed": false
+        },
+        "candidate": {
+          "candidate_id": "CAND-MOM-20",
+          "description": "",
+          "formula_ast": {
+            "left": {
+              "op": "RETURN",
+              "window": 20
+            },
+            "op": "GT",
+            "right": {
+              "op": "CONST",
+              "value": 0.0
+            }
+          },
+          "generator_provider": {
+            "capital_effect": false,
+            "deterministic": true,
+            "implementation": "quantrade-static-fixture-provider",
+            "license": "repository-license",
+            "model_access": false,
+            "network_access": false,
+            "provider_id": "quantrade.static.strategy_candidates.v1",
+            "status": "SANDBOX",
+            "version_or_revision": "v1"
+          },
+          "market_scope": "KRX:005930",
+          "name": "20-day momentum",
+          "parameter_set": {
+            "return_window": 20,
+            "threshold": 0.0
+          },
+          "rebalance_horizon": "DAILY",
+          "source_ref": "QT-STRAT-004_PRE_REGISTRATION",
+          "source_type": "PRE_REGISTERED_STATIC"
+        },
+        "dataset": {
+          "as_of_end": "2024-12-30T15:30:00+09:00",
+          "as_of_start": "2022-01-03T15:30:00+09:00",
+          "dataset_id": "QT-STRAT-004:005930:train:fd19aebd91cd",
+          "point_in_time": true,
+          "point_in_time_evidence_ref": "sha256:fd19aebd91cd68d03fbfc41b417e195944b6f06ef6c5a225fb3ff7a6fb6a2c6b",
+          "provider": "naver-finance-historical",
+          "source": "https://api.finance.naver.com/siseJson.naver",
+          "version_or_revision": "requestType=1;timeframe=day"
+        },
+        "evaluator": {
+          "capability": "StrategyEvaluator",
+          "capital_effect": false,
+          "deterministic": true,
+          "evidence_effect": "NON_CANONICAL",
+          "implementation": "quantrade-native-deterministic",
+          "license": "repository-license",
+          "network_access": false,
+          "provider_id": "quantrade.native.strategy_evaluator.v1",
+          "status": "SANDBOX",
+          "version_or_revision": "v1"
+        },
+        "metrics": {
+          "annualized_return_pct": -10.451568,
+          "benchmark_excess_return_pct": 4.819088,
+          "benchmark_total_return_pct": -32.315522,
+          "calmar": -0.355599,
+          "coverage_pct": 100.0,
+          "estimated_transaction_cost_pct_of_initial_equity": 11.48,
+          "gross_total_return_pct": -18.639867,
+          "max_single_period_loss_pct": -4.416793,
+          "maximum_drawdown_pct": -29.391429,
+          "net_total_return_pct": -27.496434,
+          "return_periods": 734,
+          "sharpe": -0.678385,
+          "sortino": -0.922551,
+          "turnover_per_period": 0.076294,
+          "turnover_total": 56.0,
+          "volatility_annualized_pct": 14.679228
+        },
+        "schema": "quantrade_strategy_evaluation_v1",
+        "screening": {
+          "automatic_promotion_allowed": false,
+          "disposition": "SURVIVES_DETERMINISTIC_SCREEN",
+          "policy": {
+            "max_drawdown_pct": -100.0,
+            "max_turnover_per_period": null,
+            "min_benchmark_excess_return_pct": -100.0,
+            "min_return_periods": 1
+          },
+          "reasons": [],
+          "strategy_approved": false
+        },
+        "validation": {
+          "lookahead_detected": false,
+          "missing_data_imputed": false,
+          "point_in_time_declared": true,
+          "point_in_time_evidence_ref": "sha256:fd19aebd91cd68d03fbfc41b417e195944b6f06ef6c5a225fb3ff7a6fb6a2c6b",
+          "price_bar_count": 735,
+          "signal_count": 734
+        }
+      },
+      "validation": {
+        "assumptions": {
+          "benchmark": "BUY_AND_HOLD_SAME_PRICE_SERIES_BEFORE_COSTS",
+          "charge_terminal_liquidation": true,
+          "periods_per_year": 252,
+          "position_range": [
+            0.0,
+            1.0
+          ],
+          "signal_timing": "target_position at bar i applies only to return i→i+1; information_cutoff must be <= effective_at",
+          "terminal_cost_pct_of_initial_equity": 0.205,
+          "terminal_turnover": 1.0,
+          "transaction_cost_bps": 20.5
+        },
+        "authority": {
+          "canonical_evidence_created": false,
+          "execution_authorized": false,
+          "investment_decision_created": false,
+          "live_order_possible": false,
+          "portfolio_proposal_created": false,
+          "risk_limit_changed": false
+        },
+        "candidate": {
+          "candidate_id": "CAND-MOM-20",
+          "description": "",
+          "formula_ast": {
+            "left": {
+              "op": "RETURN",
+              "window": 20
+            },
+            "op": "GT",
+            "right": {
+              "op": "CONST",
+              "value": 0.0
+            }
+          },
+          "generator_provider": {
+            "capital_effect": false,
+            "deterministic": true,
+            "implementation": "quantrade-static-fixture-provider",
+            "license": "repository-license",
+            "model_access": false,
+            "network_access": false,
+            "provider_id": "quantrade.static.strategy_candidates.v1",
+            "status": "SANDBOX",
+            "version_or_revision": "v1"
+          },
+          "market_scope": "KRX:005930",
+          "name": "20-day momentum",
+          "parameter_set": {
+            "return_window": 20,
+            "threshold": 0.0
+          },
+          "rebalance_horizon": "DAILY",
+          "source_ref": "QT-STRAT-004_PRE_REGISTRATION",
+          "source_type": "PRE_REGISTERED_STATIC"
+        },
+        "dataset": {
+          "as_of_end": "2025-12-30T15:30:00+09:00",
+          "as_of_start": "2025-01-02T15:30:00+09:00",
+          "dataset_id": "QT-STRAT-004:005930:validation:fd19aebd91cd",
+          "point_in_time": true,
+          "point_in_time_evidence_ref": "sha256:fd19aebd91cd68d03fbfc41b417e195944b6f06ef6c5a225fb3ff7a6fb6a2c6b",
+          "provider": "naver-finance-historical",
+          "source": "https://api.finance.naver.com/siseJson.naver",
+          "version_or_revision": "requestType=1;timeframe=day"
+        },
+        "evaluator": {
+          "capability": "StrategyEvaluator",
+          "capital_effect": false,
+          "deterministic": true,
+          "evidence_effect": "NON_CANONICAL",
+          "implementation": "quantrade-native-deterministic",
+          "license": "repository-license",
+          "network_access": false,
+          "provider_id": "quantrade.native.strategy_evaluator.v1",
+          "status": "SANDBOX",
+          "version_or_revision": "v1"
+        },
+        "metrics": {
+          "annualized_return_pct": 59.940814,
+          "benchmark_excess_return_pct": -67.83641,
+          "benchmark_total_return_pct": 124.531835,
+          "calmar": 2.8458,
+          "coverage_pct": 100.0,
+          "estimated_transaction_cost_pct_of_initial_equity": 6.15,
+          "gross_total_return_pct": 66.61626,
+          "max_single_period_loss_pct": -5.580558,
+          "maximum_drawdown_pct": -21.062903,
+          "net_total_return_pct": 56.695425,
+          "return_periods": 241,
+          "sharpe": 1.703587,
+          "sortino": 2.80469,
+          "turnover_per_period": 0.124481,
+          "turnover_total": 30.0,
+          "volatility_annualized_pct": 30.265814
+        },
+        "schema": "quantrade_strategy_evaluation_v1",
+        "screening": {
+          "automatic_promotion_allowed": false,
+          "disposition": "SURVIVES_DETERMINISTIC_SCREEN",
+          "policy": {
+            "max_drawdown_pct": -100.0,
+            "max_turnover_per_period": null,
+            "min_benchmark_excess_return_pct": -100.0,
+            "min_return_periods": 1
+          },
+          "reasons": [],
+          "strategy_approved": false
+        },
+        "validation": {
+          "lookahead_detected": false,
+          "missing_data_imputed": false,
+          "point_in_time_declared": true,
+          "point_in_time_evidence_ref": "sha256:fd19aebd91cd68d03fbfc41b417e195944b6f06ef6c5a225fb3ff7a6fb6a2c6b",
+          "price_bar_count": 242,
+          "signal_count": 241
+        }
+      }
+    },
+    {
+      "candidate": {
+        "candidate_id": "CAND-ZSCORE-MR-20",
+        "description": "",
+        "formula_ast": {
+          "left": {
+            "op": "ZSCORE",
+            "window": 20
+          },
+          "op": "LT",
+          "right": {
+            "op": "CONST",
+            "value": -1.0
+          }
+        },
+        "generator_provider": {
+          "capital_effect": false,
+          "deterministic": true,
+          "implementation": "quantrade-static-fixture-provider",
+          "license": "repository-license",
+          "model_access": false,
+          "network_access": false,
+          "provider_id": "quantrade.static.strategy_candidates.v1",
+          "status": "SANDBOX",
+          "version_or_revision": "v1"
+        },
+        "market_scope": "KRX:005930",
+        "name": "20-day z-score mean reversion",
+        "parameter_set": {
+          "threshold": -1.0,
+          "zscore_window": 20
+        },
+        "rebalance_horizon": "DAILY",
+        "source_ref": "QT-STRAT-004_PRE_REGISTRATION",
+        "source_type": "PRE_REGISTERED_STATIC"
+      },
+      "stage_a": {
+        "checks": {
+          "train_return_periods_gte_200": true,
+          "validation_beats_cost_adjusted_control": false,
+          "validation_mdd_gte_minus_20": true,
+          "validation_return_periods_gte_100": true,
+          "validation_sharpe_gt_0": true,
+          "validation_turnover_lte_0_25": true
+        },
+        "eligible": false,
+        "validation_excess_vs_cost_adjusted_control_pct": -122.364298
+      },
+      "stage_b": null,
+      "test": null,
+      "timing": {
+        "future_information_required": false,
+        "one_bar_execution_lag": true
+      },
+      "train": {
+        "assumptions": {
+          "benchmark": "BUY_AND_HOLD_SAME_PRICE_SERIES_BEFORE_COSTS",
+          "charge_terminal_liquidation": true,
+          "periods_per_year": 252,
+          "position_range": [
+            0.0,
+            1.0
+          ],
+          "signal_timing": "target_position at bar i applies only to return i→i+1; information_cutoff must be <= effective_at",
+          "terminal_cost_pct_of_initial_equity": 0.0,
+          "terminal_turnover": 0.0,
+          "transaction_cost_bps": 20.5
+        },
+        "authority": {
+          "canonical_evidence_created": false,
+          "execution_authorized": false,
+          "investment_decision_created": false,
+          "live_order_possible": false,
+          "portfolio_proposal_created": false,
+          "risk_limit_changed": false
+        },
+        "candidate": {
+          "candidate_id": "CAND-ZSCORE-MR-20",
+          "description": "",
+          "formula_ast": {
+            "left": {
+              "op": "ZSCORE",
+              "window": 20
+            },
+            "op": "LT",
+            "right": {
+              "op": "CONST",
+              "value": -1.0
+            }
+          },
+          "generator_provider": {
+            "capital_effect": false,
+            "deterministic": true,
+            "implementation": "quantrade-static-fixture-provider",
+            "license": "repository-license",
+            "model_access": false,
+            "network_access": false,
+            "provider_id": "quantrade.static.strategy_candidates.v1",
+            "status": "SANDBOX",
+            "version_or_revision": "v1"
+          },
+          "market_scope": "KRX:005930",
+          "name": "20-day z-score mean reversion",
+          "parameter_set": {
+            "threshold": -1.0,
+            "zscore_window": 20
+          },
+          "rebalance_horizon": "DAILY",
+          "source_ref": "QT-STRAT-004_PRE_REGISTRATION",
+          "source_type": "PRE_REGISTERED_STATIC"
+        },
+        "dataset": {
+          "as_of_end": "2024-12-30T15:30:00+09:00",
+          "as_of_start": "2022-01-03T15:30:00+09:00",
+          "dataset_id": "QT-STRAT-004:005930:train:fd19aebd91cd",
+          "point_in_time": true,
+          "point_in_time_evidence_ref": "sha256:fd19aebd91cd68d03fbfc41b417e195944b6f06ef6c5a225fb3ff7a6fb6a2c6b",
+          "provider": "naver-finance-historical",
+          "source": "https://api.finance.naver.com/siseJson.naver",
+          "version_or_revision": "requestType=1;timeframe=day"
+        },
+        "evaluator": {
+          "capability": "StrategyEvaluator",
+          "capital_effect": false,
+          "deterministic": true,
+          "evidence_effect": "NON_CANONICAL",
+          "implementation": "quantrade-native-deterministic",
+          "license": "repository-license",
+          "network_access": false,
+          "provider_id": "quantrade.native.strategy_evaluator.v1",
+          "status": "SANDBOX",
+          "version_or_revision": "v1"
+        },
+        "metrics": {
+          "annualized_return_pct": -5.045285,
+          "benchmark_excess_return_pct": 18.318292,
+          "benchmark_total_return_pct": -32.315522,
+          "calmar": -0.190802,
+          "coverage_pct": 100.0,
+          "estimated_transaction_cost_pct_of_initial_equity": 23.37,
+          "gross_total_return_pct": 8.674136,
+          "max_single_period_loss_pct": -4.528302,
+          "maximum_drawdown_pct": -26.442504,
+          "net_total_return_pct": -13.997229,
+          "return_periods": 734,
+          "sharpe": -0.269251,
+          "sortino": -0.422333,
+          "turnover_per_period": 0.155313,
+          "turnover_total": 114.0,
+          "volatility_annualized_pct": 15.053113
+        },
+        "schema": "quantrade_strategy_evaluation_v1",
+        "screening": {
+          "automatic_promotion_allowed": false,
+          "disposition": "SURVIVES_DETERMINISTIC_SCREEN",
+          "policy": {
+            "max_drawdown_pct": -100.0,
+            "max_turnover_per_period": null,
+            "min_benchmark_excess_return_pct": -100.0,
+            "min_return_periods": 1
+          },
+          "reasons": [],
+          "strategy_approved": false
+        },
+        "validation": {
+          "lookahead_detected": false,
+          "missing_data_imputed": false,
+          "point_in_time_declared": true,
+          "point_in_time_evidence_ref": "sha256:fd19aebd91cd68d03fbfc41b417e195944b6f06ef6c5a225fb3ff7a6fb6a2c6b",
+          "price_bar_count": 735,
+          "signal_count": 734
+        }
+      },
+      "validation": {
+        "assumptions": {
+          "benchmark": "BUY_AND_HOLD_SAME_PRICE_SERIES_BEFORE_COSTS",
+          "charge_terminal_liquidation": true,
+          "periods_per_year": 252,
+          "position_range": [
+            0.0,
+            1.0
+          ],
+          "signal_timing": "target_position at bar i applies only to return i→i+1; information_cutoff must be <= effective_at",
+          "terminal_cost_pct_of_initial_equity": 0.0,
+          "terminal_turnover": 0.0,
+          "transaction_cost_bps": 20.5
+        },
+        "authority": {
+          "canonical_evidence_created": false,
+          "execution_authorized": false,
+          "investment_decision_created": false,
+          "live_order_possible": false,
+          "portfolio_proposal_created": false,
+          "risk_limit_changed": false
+        },
+        "candidate": {
+          "candidate_id": "CAND-ZSCORE-MR-20",
+          "description": "",
+          "formula_ast": {
+            "left": {
+              "op": "ZSCORE",
+              "window": 20
+            },
+            "op": "LT",
+            "right": {
+              "op": "CONST",
+              "value": -1.0
+            }
+          },
+          "generator_provider": {
+            "capital_effect": false,
+            "deterministic": true,
+            "implementation": "quantrade-static-fixture-provider",
+            "license": "repository-license",
+            "model_access": false,
+            "network_access": false,
+            "provider_id": "quantrade.static.strategy_candidates.v1",
+            "status": "SANDBOX",
+            "version_or_revision": "v1"
+          },
+          "market_scope": "KRX:005930",
+          "name": "20-day z-score mean reversion",
+          "parameter_set": {
+            "threshold": -1.0,
+            "zscore_window": 20
+          },
+          "rebalance_horizon": "DAILY",
+          "source_ref": "QT-STRAT-004_PRE_REGISTRATION",
+          "source_type": "PRE_REGISTERED_STATIC"
+        },
+        "dataset": {
+          "as_of_end": "2025-12-30T15:30:00+09:00",
+          "as_of_start": "2025-01-02T15:30:00+09:00",
+          "dataset_id": "QT-STRAT-004:005930:validation:fd19aebd91cd",
+          "point_in_time": true,
+          "point_in_time_evidence_ref": "sha256:fd19aebd91cd68d03fbfc41b417e195944b6f06ef6c5a225fb3ff7a6fb6a2c6b",
+          "provider": "naver-finance-historical",
+          "source": "https://api.finance.naver.com/siseJson.naver",
+          "version_or_revision": "requestType=1;timeframe=day"
+        },
+        "evaluator": {
+          "capability": "StrategyEvaluator",
+          "capital_effect": false,
+          "deterministic": true,
+          "evidence_effect": "NON_CANONICAL",
+          "implementation": "quantrade-native-deterministic",
+          "license": "repository-license",
+          "network_access": false,
+          "provider_id": "quantrade.native.strategy_evaluator.v1",
+          "status": "SANDBOX",
+          "version_or_revision": "v1"
+        },
+        "metrics": {
+          "annualized_return_pct": 1.315667,
+          "benchmark_excess_return_pct": -123.273958,
+          "benchmark_total_return_pct": 124.531835,
+          "calmar": 0.09349,
+          "coverage_pct": 100.0,
+          "estimated_transaction_cost_pct_of_initial_equity": 4.92,
+          "gross_total_return_pct": 6.380571,
+          "max_single_period_loss_pct": -5.970408,
+          "maximum_drawdown_pct": -14.072823,
+          "net_total_return_pct": 1.257877,
+          "return_periods": 241,
+          "sharpe": 0.167277,
+          "sortino": 0.250848,
+          "turnover_per_period": 0.099585,
+          "turnover_total": 24.0,
+          "volatility_annualized_pct": 12.389809
+        },
+        "schema": "quantrade_strategy_evaluation_v1",
+        "screening": {
+          "automatic_promotion_allowed": false,
+          "disposition": "REJECTED_DETERMINISTIC_SCREEN",
+          "policy": {
+            "max_drawdown_pct": -100.0,
+            "max_turnover_per_period": null,
+            "min_benchmark_excess_return_pct": -100.0,
+            "min_return_periods": 1
+          },
+          "reasons": [
+            "BENCHMARK_UNDERPERFORMANCE:-123.273958<-100.0"
+          ],
+          "strategy_approved": false
+        },
+        "validation": {
+          "lookahead_detected": false,
+          "missing_data_imputed": false,
+          "point_in_time_declared": true,
+          "point_in_time_evidence_ref": "sha256:fd19aebd91cd68d03fbfc41b417e195944b6f06ef6c5a225fb3ff7a6fb6a2c6b",
+          "price_bar_count": 242,
+          "signal_count": 241
+        }
+      }
+    }
+  ],
+  "control": {
+    "test": {
+      "assumptions": {
+        "benchmark": "BUY_AND_HOLD_SAME_PRICE_SERIES_BEFORE_COSTS",
+        "charge_terminal_liquidation": true,
+        "periods_per_year": 252,
+        "position_range": [
+          0.0,
+          1.0
+        ],
+        "signal_timing": "target_position at bar i applies only to return i→i+1; information_cutoff must be <= effective_at",
+        "terminal_cost_pct_of_initial_equity": 0.205,
+        "terminal_turnover": 1.0,
+        "transaction_cost_bps": 20.5
+      },
+      "authority": {
+        "canonical_evidence_created": false,
+        "execution_authorized": false,
+        "investment_decision_created": false,
+        "live_order_possible": false,
+        "portfolio_proposal_created": false,
+        "risk_limit_changed": false
+      },
+      "candidate": {
+        "candidate_id": "CONTROL-BUY-HOLD",
+        "description": "",
+        "formula_ast": null,
+        "generator_provider": {},
+        "market_scope": "KRX:005930",
+        "name": "Cost-adjusted buy and hold control",
+        "parameter_set": {},
+        "rebalance_horizon": "DAILY",
+        "source_ref": "QT-STRAT-004_PRE_REGISTRATION",
+        "source_type": "PRE_REGISTERED_CONTROL"
+      },
+      "dataset": {
+        "as_of_end": "2026-09-30T15:30:00+09:00",
+        "as_of_start": "2026-01-02T15:30:00+09:00",
+        "dataset_id": "QT-STRAT-004:005930:test:fd19aebd91cd",
+        "point_in_time": true,
+        "point_in_time_evidence_ref": "sha256:fd19aebd91cd68d03fbfc41b417e195944b6f06ef6c5a225fb3ff7a6fb6a2c6b",
+        "provider": "naver-finance-historical",
+        "source": "https://api.finance.naver.com/siseJson.naver",
+        "version_or_revision": "requestType=1;timeframe=day"
+      },
+      "evaluator": {
+        "capability": "StrategyEvaluator",
+        "capital_effect": false,
+        "deterministic": true,
+        "evidence_effect": "NON_CANONICAL",
+        "implementation": "quantrade-native-deterministic",
+        "license": "repository-license",
+        "network_access": false,
+        "provider_id": "quantrade.native.strategy_evaluator.v1",
+        "status": "SANDBOX",
+        "version_or_revision": "v1"
+      },
+      "metrics": {
+        "annualized_return_pct": 178.874831,
+        "benchmark_excess_return_pct": -0.837933,
+        "benchmark_total_return_pct": 109.727626,
+        "calmar": 4.169912,
+        "coverage_pct": 100.0,
+        "estimated_transaction_cost_pct_of_initial_equity": 0.41,
+        "gross_total_return_pct": 109.727626,
+        "max_single_period_loss_pct": -13.385827,
+        "maximum_drawdown_pct": -42.896552,
+        "net_total_return_pct": 108.889693,
+        "return_periods": 181,
+        "sharpe": 1.63356,
+        "sortino": 2.553451,
+        "turnover_per_period": 0.01105,
+        "turnover_total": 2.0,
+        "volatility_annualized_pct": 84.371788
+      },
+      "schema": "quantrade_strategy_evaluation_v1",
+      "screening": {
+        "automatic_promotion_allowed": false,
+        "disposition": "SURVIVES_DETERMINISTIC_SCREEN",
+        "policy": {
+          "max_drawdown_pct": -100.0,
+          "max_turnover_per_period": null,
+          "min_benchmark_excess_return_pct": -100.0,
+          "min_return_periods": 1
+        },
+        "reasons": [],
+        "strategy_approved": false
+      },
+      "validation": {
+        "lookahead_detected": false,
+        "missing_data_imputed": false,
+        "point_in_time_declared": true,
+        "point_in_time_evidence_ref": "sha256:fd19aebd91cd68d03fbfc41b417e195944b6f06ef6c5a225fb3ff7a6fb6a2c6b",
+        "price_bar_count": 182,
+        "signal_count": 181
+      }
+    },
+    "train": {
+      "assumptions": {
+        "benchmark": "BUY_AND_HOLD_SAME_PRICE_SERIES_BEFORE_COSTS",
+        "charge_terminal_liquidation": true,
+        "periods_per_year": 252,
+        "position_range": [
+          0.0,
+          1.0
+        ],
+        "signal_timing": "target_position at bar i applies only to return i→i+1; information_cutoff must be <= effective_at",
+        "terminal_cost_pct_of_initial_equity": 0.205,
+        "terminal_turnover": 1.0,
+        "transaction_cost_bps": 20.5
+      },
+      "authority": {
+        "canonical_evidence_created": false,
+        "execution_authorized": false,
+        "investment_decision_created": false,
+        "live_order_possible": false,
+        "portfolio_proposal_created": false,
+        "risk_limit_changed": false
+      },
+      "candidate": {
+        "candidate_id": "CONTROL-BUY-HOLD",
+        "description": "",
+        "formula_ast": null,
+        "generator_provider": {},
+        "market_scope": "KRX:005930",
+        "name": "Cost-adjusted buy and hold control",
+        "parameter_set": {},
+        "rebalance_horizon": "DAILY",
+        "source_ref": "QT-STRAT-004_PRE_REGISTRATION",
+        "source_type": "PRE_REGISTERED_CONTROL"
+      },
+      "dataset": {
+        "as_of_end": "2024-12-30T15:30:00+09:00",
+        "as_of_start": "2022-01-03T15:30:00+09:00",
+        "dataset_id": "QT-STRAT-004:005930:train:fd19aebd91cd",
+        "point_in_time": true,
+        "point_in_time_evidence_ref": "sha256:fd19aebd91cd68d03fbfc41b417e195944b6f06ef6c5a225fb3ff7a6fb6a2c6b",
+        "provider": "naver-finance-historical",
+        "source": "https://api.finance.naver.com/siseJson.naver",
+        "version_or_revision": "requestType=1;timeframe=day"
+      },
+      "evaluator": {
+        "capability": "StrategyEvaluator",
+        "capital_effect": false,
+        "deterministic": true,
+        "evidence_effect": "NON_CANONICAL",
+        "implementation": "quantrade-native-deterministic",
+        "license": "repository-license",
+        "network_access": false,
+        "provider_id": "quantrade.native.strategy_evaluator.v1",
+        "status": "SANDBOX",
+        "version_or_revision": "v1"
+      },
+      "metrics": {
+        "annualized_return_pct": -12.664995,
+        "benchmark_excess_return_pct": -0.278347,
+        "benchmark_total_return_pct": -32.315522,
+        "calmar": -0.2934,
+        "coverage_pct": 100.0,
+        "estimated_transaction_cost_pct_of_initial_equity": 0.41,
+        "gross_total_return_pct": -32.315522,
+        "max_single_period_loss_pct": -10.301508,
+        "maximum_drawdown_pct": -43.166287,
+        "net_total_return_pct": -32.593869,
+        "return_periods": 734,
+        "sharpe": -0.396944,
+        "sortino": -0.573192,
+        "turnover_per_period": 0.002725,
+        "turnover_total": 2.0,
+        "volatility_annualized_pct": 25.756789
+      },
+      "schema": "quantrade_strategy_evaluation_v1",
+      "screening": {
+        "automatic_promotion_allowed": false,
+        "disposition": "SURVIVES_DETERMINISTIC_SCREEN",
+        "policy": {
+          "max_drawdown_pct": -100.0,
+          "max_turnover_per_period": null,
+          "min_benchmark_excess_return_pct": -100.0,
+          "min_return_periods": 1
+        },
+        "reasons": [],
+        "strategy_approved": false
+      },
+      "validation": {
+        "lookahead_detected": false,
+        "missing_data_imputed": false,
+        "point_in_time_declared": true,
+        "point_in_time_evidence_ref": "sha256:fd19aebd91cd68d03fbfc41b417e195944b6f06ef6c5a225fb3ff7a6fb6a2c6b",
+        "price_bar_count": 735,
+        "signal_count": 734
+      }
+    },
+    "validation": {
+      "assumptions": {
+        "benchmark": "BUY_AND_HOLD_SAME_PRICE_SERIES_BEFORE_COSTS",
+        "charge_terminal_liquidation": true,
+        "periods_per_year": 252,
+        "position_range": [
+          0.0,
+          1.0
+        ],
+        "signal_timing": "target_position at bar i applies only to return i→i+1; information_cutoff must be <= effective_at",
+        "terminal_cost_pct_of_initial_equity": 0.205,
+        "terminal_turnover": 1.0,
+        "transaction_cost_bps": 20.5
+      },
+      "authority": {
+        "canonical_evidence_created": false,
+        "execution_authorized": false,
+        "investment_decision_created": false,
+        "live_order_possible": false,
+        "portfolio_proposal_created": false,
+        "risk_limit_changed": false
+      },
+      "candidate": {
+        "candidate_id": "CONTROL-BUY-HOLD",
+        "description": "",
+        "formula_ast": null,
+        "generator_provider": {},
+        "market_scope": "KRX:005930",
+        "name": "Cost-adjusted buy and hold control",
+        "parameter_set": {},
+        "rebalance_horizon": "DAILY",
+        "source_ref": "QT-STRAT-004_PRE_REGISTRATION",
+        "source_type": "PRE_REGISTERED_CONTROL"
+      },
+      "dataset": {
+        "as_of_end": "2025-12-30T15:30:00+09:00",
+        "as_of_start": "2025-01-02T15:30:00+09:00",
+        "dataset_id": "QT-STRAT-004:005930:validation:fd19aebd91cd",
+        "point_in_time": true,
+        "point_in_time_evidence_ref": "sha256:fd19aebd91cd68d03fbfc41b417e195944b6f06ef6c5a225fb3ff7a6fb6a2c6b",
+        "provider": "naver-finance-historical",
+        "source": "https://api.finance.naver.com/siseJson.naver",
+        "version_or_revision": "requestType=1;timeframe=day"
+      },
+      "evaluator": {
+        "capability": "StrategyEvaluator",
+        "capital_effect": false,
+        "deterministic": true,
+        "evidence_effect": "NON_CANONICAL",
+        "implementation": "quantrade-native-deterministic",
+        "license": "repository-license",
+        "network_access": false,
+        "provider_id": "quantrade.native.strategy_evaluator.v1",
+        "status": "SANDBOX",
+        "version_or_revision": "v1"
+      },
+      "metrics": {
+        "annualized_return_pct": 131.989232,
+        "benchmark_excess_return_pct": -0.909661,
+        "benchmark_total_return_pct": 124.531835,
+        "calmar": 8.996321,
+        "coverage_pct": 100.0,
+        "estimated_transaction_cost_pct_of_initial_equity": 0.41,
+        "gross_total_return_pct": 124.531835,
+        "max_single_period_loss_pct": -5.765408,
+        "maximum_drawdown_pct": -14.671467,
+        "net_total_return_pct": 123.622175,
+        "return_periods": 241,
+        "sharpe": 2.625146,
+        "sortino": 4.377807,
+        "turnover_per_period": 0.008299,
+        "turnover_total": 2.0,
+        "volatility_annualized_pct": 34.345303
+      },
+      "schema": "quantrade_strategy_evaluation_v1",
+      "screening": {
+        "automatic_promotion_allowed": false,
+        "disposition": "SURVIVES_DETERMINISTIC_SCREEN",
+        "policy": {
+          "max_drawdown_pct": -100.0,
+          "max_turnover_per_period": null,
+          "min_benchmark_excess_return_pct": -100.0,
+          "min_return_periods": 1
+        },
+        "reasons": [],
+        "strategy_approved": false
+      },
+      "validation": {
+        "lookahead_detected": false,
+        "missing_data_imputed": false,
+        "point_in_time_declared": true,
+        "point_in_time_evidence_ref": "sha256:fd19aebd91cd68d03fbfc41b417e195944b6f06ef6c5a225fb3ff7a6fb6a2c6b",
+        "price_bar_count": 242,
+        "signal_count": 241
+      }
+    }
+  },
+  "dataset": {
+    "duplicate_dates": false,
+    "endpoint": "https://api.finance.naver.com/siseJson.naver",
+    "first_trading_date": "2022-01-03",
+    "http_status": 200,
+    "last_trading_date": "2026-09-30",
+    "non_positive_close_count": 0,
+    "params": {
+      "endTime": "20260930",
+      "requestType": 1,
+      "startTime": "20220103",
+      "symbol": "005930",
+      "timeframe": "day"
+    },
+    "row_count": 1159,
+    "sha256": "fd19aebd91cd68d03fbfc41b417e195944b6f06ef6c5a225fb3ff7a6fb6a2c6b",
+    "strictly_increasing_dates": true
+  },
+  "experiment_id": "QT-STRAT-004",
+  "frozen_cost_model": {
+    "periods_per_year": 252,
+    "source_assumptions": {
+      "fee_each_side_pct": 0.015,
+      "sell_tax_pct": 0.18,
+      "slippage_each_side_pct": 0.1,
+      "symmetric_average_one_way_pct": 0.205
+    },
+    "terminal_liquidation_charged": true,
+    "transaction_cost_bps": 20.5
+  },
+  "market_scope": {
+    "asset_class": "KRX_EQUITY",
+    "bar_type": "DAILY",
+    "requested_end": "2026-09-30",
+    "requested_start": "2022-01-03",
+    "scope_id": "KRX:005930",
+    "symbol": "005930"
+  },
+  "partition_counts": {
+    "test": {
+      "bar_count": 182,
+      "first_trading_date": "2026-01-02",
+      "last_trading_date": "2026-09-30",
+      "return_periods": 181
+    },
+    "train": {
+      "bar_count": 735,
+      "first_trading_date": "2022-01-03",
+      "last_trading_date": "2024-12-30",
+      "return_periods": 734
+    },
+    "validation": {
+      "bar_count": 242,
+      "first_trading_date": "2025-01-02",
+      "last_trading_date": "2025-12-30",
+      "return_periods": 241
+    }
+  },
+  "pipeline_result": {
+    "alpha_found_required_for_success": false,
+    "candidate_count": 4,
+    "operational_success": true,
+    "selected_count": 0,
+    "stage_a_eligible_count": 0,
+    "test_confirmed_count": 0
+  },
+  "preregistration_commit": "8ea6b3ff2a08466923bb78df49cdbfb26f83b599",
+  "review_planning": {
+    "independence_status": "NOT_INVOKED",
+    "review_gate": {
+      "event_count": 0,
+      "level": "NO_REVIEW",
+      "reasons": [
+        "NO_MATERIAL_OR_UNRESOLVED_EVENT"
+      ]
+    },
+    "specialist_work_requests": [],
+    "specialists_invoked": 0,
+    "specialists_planned": 0
+  },
+  "schema": "quantrade_qt_strat_004_golden_run_v1",
+  "selection": {
+    "selected_ids_before_test": [],
+    "signal_similarity_threshold": 0.95,
+    "stage_a_eligible_ids": [],
+    "suppressed": [],
+    "test_confirmed_ids": [],
+    "test_opened_only_for_selected": true,
+    "top_k": 2
+  }
+}
