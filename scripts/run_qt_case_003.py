@@ -683,7 +683,13 @@ def run() -> dict:
     provider = DartFundamentalObservationProvider(
         config=DartProviderConfig(
             report_codes=("11011", "11012"),
-        )
+        ),
+        corp_code_overrides={
+            # Provider identifier only, not an economic input. The provider
+            # independently verifies that returned DART filings carry stock
+            # code 006400 before using any financial row.
+            "006400": "00126362",
+        },
     )
     fundamental_result = provider.query(
         FundamentalQuery(
@@ -1019,6 +1025,12 @@ def run() -> dict:
             "price_source": price_meta,
             "price_after_case_cutoff_used": False,
             "target_selected_before_live_case_result": True,
+            "corp_code_seed": {
+                "stock_code": "006400",
+                "corp_code": "00126362",
+                "economic_input": False,
+                "verified_against_live_filing_stock_code": True,
+            },
         },
         "earnings": {
             "fy2025_eps": ttm_eps["fy2025_eps"],
