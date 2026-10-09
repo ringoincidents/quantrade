@@ -266,6 +266,46 @@ class DartFundamentalProviderTests(unittest.TestCase):
         )
         self.assertEqual("00126380", resolver.resolve("005930"))
 
+    def test_seeded_corp_code_must_match_filing_stock_code(self):
+        receipt = "20260315000123"
+        transport = FakeDartTransport(
+            filings=[
+                filing(
+                    receipt,
+                    "사업보고서 (2025.12)",
+                    "20260315",
+                    stock_code="005930",
+                )
+            ],
+            financial_payloads={},
+        )
+        provider = DartFundamentalObservationProvider(
+            api_key="x" * 40,
+            transport=transport,
+            corp_code_overrides={"006400": "00126380"},
+            now=lambda: datetime(
+                2026,
+                10,
+                5,
+                4,
+                0,
+                0,
+                tzinfo=timezone.utc,
+            ),
+        )
+        with self.assertRaisesRegex(
+            DartProviderError,
+            "does not match requested stock_code",
+        ):
+            provider.query(
+                FundamentalQuery(
+                    asset_id="KRX:006400",
+                    as_of="2026-03-16T00:00:00+09:00",
+                    fiscal_period_end_from="2025-12-31",
+                    fiscal_period_end_to="2025-12-31",
+                )
+            )
+
     def test_current_report_becomes_pit_fundamental_observation(self):
         receipt = "20260315000123"
         transport = FakeDartTransport(
