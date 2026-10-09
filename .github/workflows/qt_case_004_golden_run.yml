@@ -1,0 +1,165 @@
+name: QT-CASE-004 Hyundai Motor Untouched Holdout
+
+on:
+  push:
+    branches:
+      - "direction/investment-office-decision-economics-2026-10-05"
+    paths:
+      - "scripts/run_qt_case_004.py"
+      - "tests/capabilities/test_qt_case_004_rules.py"
+      - "quantrade/capabilities/dart_fundamental_provider.py"
+      - "quantrade/capabilities/fundamental_semantics.py"
+      - "quantrade/capabilities/valuation_method_applicability.py"
+      - "quantrade/capabilities/cash_flow_valuation.py"
+      - "quantrade/capabilities/fundamental_counter_research.py"
+      - "quantrade/capabilities/valuation_crosscheck.py"
+      - "quantrade/capabilities/investment_case.py"
+      - "quantrade/capabilities/portfolio_opportunity.py"
+      - "quantrade/capabilities/risk_opinion.py"
+      - ".github/workflows/qt_case_004_golden_run.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: quantrade-open-dart-live
+  cancel-in-progress: false
+
+jobs:
+  holdout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      OPEN_DART_API_KEY: ${{ secrets.OPEN_DART_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: "direction/investment-office-decision-economics-2026-10-05"
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Verify preregistration anchor
+        shell: bash
+        run: |
+          git cat-file -e 5c7f5696479c3787843abca8799e937950f2daff^{commit}
+          git merge-base --is-ancestor 5c7f5696479c3787843abca8799e937950f2daff HEAD
+          test -f research/experiments/QT-CASE-004_PRE_REGISTRATION.md
+
+      - name: Verify Open DART secret
+        shell: bash
+        run: |
+          if [ -z "$OPEN_DART_API_KEY" ]; then
+            echo "OPEN_DART_API_KEY is required for QT-CASE-004" >&2
+            exit 1
+          fi
+
+      - name: Compile untouched holdout
+        run: |
+          python -m compileall -q             quantrade/capabilities             scripts/run_qt_case_004.py             tests/capabilities/test_qt_case_004_rules.py
+
+      - name: Run applicability and routing tests
+        run: |
+          python -m unittest tests.capabilities.test_fundamental_semantics -v
+          python -m unittest tests.capabilities.test_valuation_method_applicability -v
+          python -m unittest tests.capabilities.test_valuation_crosscheck -v
+          python -m unittest tests.capabilities.test_portfolio_opportunity -v
+          python -m unittest tests.capabilities.test_qt_case_004_rules -v
+
+      - name: Execute QT-CASE-004
+        run: python -m scripts.run_qt_case_004
+
+      - name: Verify holdout invariants
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          r = json.loads(
+              Path("research/experiments/QT-CASE-004_RESULT.json").read_text()
+          )
+
+          assert r["experiment_id"] == "QT-CASE-004"
+          assert r["preregistration_commit"] == "5c7f5696479c3787843abca8799e937950f2daff"
+          assert r["case"]["asset_id"] == "KRX:005380"
+          assert r["operational_result"]["success"] is True
+          assert r["operational_result"]["untouched_issuer_holdout"] is True
+          assert r["operational_result"]["method_parameters_tuned_after_result"] is False
+          assert r["operational_result"]["model_calls"] == 0
+          assert r["operational_result"]["private_client_context_used"] is False
+          assert r["source_integrity"]["price_after_case_cutoff_used"] is False
+          assert r["source_integrity"]["target_selected_before_live_case_result"] is True
+          assert r["source_integrity"]["corp_code_verified_by_live_filing_stock_code"] is True
+
+          for key in ("pe_semantic", "dcf_semantic"):
+              assert r[key]["validation"]["account_name_fallback_used"] is False
+              assert r[key]["validation"]["issuer_specific_alias_inference_used"] is False
+
+          assert r["pe_method"]["authority"]["substitute_method_selected"] is False
+          assert r["dcf_method"]["authority"]["substitute_method_selected"] is False
+
+          if r["cross_method_status"] == "INCOMPLETE_REQUIRED_METHODS":
+              assert r["valuation_crosscheck"] is None
+              assert r["portfolio_sandbox"] is None
+              assert r["risk_sandbox"] is None
+          else:
+              assert r["cross_method_status"] == "READY"
+              assert r["valuation_crosscheck"] is not None
+              gate = r["valuation_crosscheck"]["robust_metrics"]["valuation_gate_passed"]
+              if not gate:
+                  assert r["portfolio_sandbox"]["status"] == "NOT_COMPETITIVE"
+                  assert "CROSS_METHOD_VALUATION_GATE_NOT_PASSED" in r["portfolio_sandbox"]["reasons"]
+
+          authority = r["authority"]
+          assert authority["target_weight_set"] is False
+          assert authority["committee_decision_created"] is False
+          assert authority["founder_decision_created"] is False
+          assert authority["decision_plan_created"] is False
+          assert authority["paper_authorized"] is False
+          assert authority["execution_authorized"] is False
+          assert authority["live_order_possible"] is False
+
+          print(json.dumps({
+              "corp_code": r["source_integrity"]["corp_code"],
+              "current_price": r["case"]["current_price"],
+              "pe_semantic": r["pe_semantic"]["status"],
+              "dcf_semantic": r["dcf_semantic"]["status"],
+              "pe_method": r["pe_method"]["status"],
+              "pe_reasons": r["pe_method"]["reasons"],
+              "dcf_method": r["dcf_method"]["status"],
+              "dcf_reasons": r["dcf_method"]["reasons"],
+              "cross_method_status": r["cross_method_status"],
+              "classification": None if r["valuation_crosscheck"] is None else r["valuation_crosscheck"]["classification"],
+              "robust_expected_return_pct": None if r["valuation_crosscheck"] is None else r["valuation_crosscheck"]["robust_metrics"]["expected_return_pct"],
+              "counter_flags": None if r["counter_research"] is None else r["counter_research"]["flags"],
+              "portfolio_status": None if r["portfolio_sandbox"] is None else r["portfolio_sandbox"]["status"],
+              "risk_status": None if r["risk_sandbox"] is None else r["risk_sandbox"]["status"],
+          }, ensure_ascii=False, sort_keys=True))
+          PY
+
+      - name: Upload immutable holdout artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: qt-case-004-holdout
+          path: |
+            /tmp/QT-CASE-004_FULL_ARTIFACT.json
+            research/experiments/QT-CASE-004_RESULT.json
+            research/experiments/QT-CASE-004_RESULT_REPORT.md
+          if-no-files-found: error
+
+      - name: Commit compact holdout evidence
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git pull --rebase origin direction/investment-office-decision-economics-2026-10-05
+          git add             research/experiments/QT-CASE-004_RESULT.json             research/experiments/QT-CASE-004_RESULT_REPORT.md
+          if git diff --cached --quiet; then
+            echo "No result changes to commit."
+          else
+            git commit -m "experiment: record QT-CASE-004 untouched holdout evidence"
+            git push origin HEAD:direction/investment-office-decision-economics-2026-10-05
+          fi
