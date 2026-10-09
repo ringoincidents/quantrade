@@ -1,32 +1,17 @@
-name: QT-CASE-003 Samsung SDI Holdout Golden Run
+name: QT-CASE-003 Archived Holdout Failure Replay
 
 on:
-  push:
-    branches:
-      - "direction/investment-office-decision-economics-2026-10-05"
-    paths:
-      - "scripts/run_qt_case_003.py"
-      - "quantrade/capabilities/cash_flow_valuation.py"
-      - "quantrade/capabilities/fundamental_counter_research.py"
-      - "quantrade/capabilities/valuation_crosscheck.py"
-      - "quantrade/capabilities/dart_fundamental_provider.py"
-      - "quantrade/capabilities/fundamental_evidence.py"
-      - "quantrade/capabilities/investment_case.py"
-      - "quantrade/capabilities/thesis_contract.py"
-      - "quantrade/capabilities/portfolio_opportunity.py"
-      - "quantrade/capabilities/risk_opinion.py"
-      - ".github/workflows/qt_case_003_golden_run.yml"
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: quantrade-open-dart-live
   cancel-in-progress: false
 
 jobs:
-  golden-run:
+  replay:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
@@ -34,116 +19,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: "direction/investment-office-decision-economics-2026-10-05"
+          ref: "a02b6700dfa6461ea0d476d46ee7bb0fdcbea526"
           fetch-depth: 0
-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-
-      - name: Verify preregistration anchor
-        shell: bash
+      - name: Verify frozen failure source
         run: |
+          test "$(git rev-parse HEAD)" = "a02b6700dfa6461ea0d476d46ee7bb0fdcbea526"
           git cat-file -e bf59d2b3b147d2a2864c151ba7751a3b136563ed^{commit}
-          git merge-base --is-ancestor bf59d2b3b147d2a2864c151ba7751a3b136563ed HEAD
-          test -f research/experiments/QT-CASE-003_PRE_REGISTRATION.md
-
-      - name: Verify Open DART secret
-        shell: bash
+      - name: Replay frozen holdout
         run: |
-          if [ -z "$OPEN_DART_API_KEY" ]; then
-            echo "OPEN_DART_API_KEY is required for QT-CASE-003" >&2
-            exit 1
-          fi
-
-      - name: Compile holdout run
-        run: |
-          python -m compileall -q             quantrade/capabilities             scripts/run_qt_case_001.py             scripts/run_qt_case_002.py             scripts/run_qt_case_003.py
-
-      - name: Run reusable valuation / routing tests
-        run: |
-          python -m unittest tests.capabilities.test_cash_flow_valuation -v
-          python -m unittest tests.capabilities.test_fundamental_counter_research -v
-          python -m unittest tests.capabilities.test_valuation_crosscheck -v
-          python -m unittest tests.capabilities.test_portfolio_opportunity -v
-
-      - name: Execute QT-CASE-003
-        run: python -m scripts.run_qt_case_003
-
-      - name: Verify holdout invariants
-        run: |
-          python - <<'PY'
-          import json
-          from pathlib import Path
-
-          result = json.loads(
-              Path("research/experiments/QT-CASE-003_RESULT.json").read_text()
-          )
-          assert result["experiment_id"] == "QT-CASE-003"
-          assert result["preregistration_commit"] == "bf59d2b3b147d2a2864c151ba7751a3b136563ed"
-          assert result["case"]["asset_id"] == "KRX:006400"
-          assert result["operational_result"]["success"] is True
-          assert result["operational_result"]["company_holdout"] is True
-          assert result["operational_result"]["method_parameters_tuned_after_result"] is False
-          assert result["operational_result"]["model_calls"] == 0
-          assert result["operational_result"]["private_client_context_used"] is False
-          assert result["source_integrity"]["price_after_case_cutoff_used"] is False
-          assert result["valuation_crosscheck"]["classification"] in {
-              "CROSS_METHOD_CONFIRMED",
-              "CROSS_METHOD_MIXED",
-              "CROSS_METHOD_REJECTED",
-          }
-
-          gate = result["valuation_crosscheck"]["robust_metrics"]["valuation_gate_passed"]
-          portfolio = result["portfolio_sandbox"]
-          if not gate:
-              assert portfolio["status"] == "NOT_COMPETITIVE"
-              assert "CROSS_METHOD_VALUATION_GATE_NOT_PASSED" in portfolio["reasons"]
-
-          authority = result["authority"]
-          assert authority["target_weight_set"] is False
-          assert authority["committee_decision_created"] is False
-          assert authority["founder_decision_created"] is False
-          assert authority["decision_plan_created"] is False
-          assert authority["paper_authorized"] is False
-          assert authority["execution_authorized"] is False
-          assert authority["live_order_possible"] is False
-
-          print(json.dumps({
-              "asset_id": result["case"]["asset_id"],
-              "current_price": result["case"]["current_price"],
-              "ttm_eps": result["earnings"]["ttm_eps"],
-              "pe_expected_return_pct": result["pe_economics"]["metrics"]["expected_return_pct"],
-              "dcf_expected_return_pct": result["cash_flow_dcf"]["metrics"]["expected_return_pct"],
-              "classification": result["valuation_crosscheck"]["classification"],
-              "valuation_gate_passed": gate,
-              "robust_expected_return_pct": result["valuation_crosscheck"]["robust_metrics"]["expected_return_pct"],
-              "counter_flags": result["counter_research"]["flags"],
-              "portfolio_status": portfolio["status"],
-              "risk_status": None if result["risk_sandbox"] is None else result["risk_sandbox"]["status"],
-          }, ensure_ascii=False, sort_keys=True))
-          PY
-
-      - name: Upload immutable Golden Run artifact
+          set +e
+          python -m scripts.run_qt_case_003 > /tmp/qt-case-003-replay.log 2>&1
+          code=$?
+          cat /tmp/qt-case-003-replay.log
+          test "$code" -ne 0
+          grep -F "BasicEarningsLossPerShare:IS:CURRENT_PERIOD count=0" /tmp/qt-case-003-replay.log
+      - name: Upload failure replay log
         uses: actions/upload-artifact@v4
         with:
-          name: qt-case-003-golden-run
-          path: |
-            /tmp/QT-CASE-003_FULL_ARTIFACT.json
-            research/experiments/QT-CASE-003_RESULT.json
-            research/experiments/QT-CASE-003_RESULT_REPORT.md
+          name: qt-case-003-archived-failure-replay
+          path: /tmp/qt-case-003-replay.log
           if-no-files-found: error
-
-      - name: Commit compact result evidence
-        shell: bash
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git pull --rebase origin direction/investment-office-decision-economics-2026-10-05
-          git add             research/experiments/QT-CASE-003_RESULT.json             research/experiments/QT-CASE-003_RESULT_REPORT.md
-          if git diff --cached --quiet; then
-            echo "No result changes to commit."
-          else
-            git commit -m "experiment: record QT-CASE-003 holdout evidence"
-            git push origin HEAD:direction/investment-office-decision-economics-2026-10-05
-          fi
