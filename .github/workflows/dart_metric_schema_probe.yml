@@ -1,12 +1,6 @@
 name: DART Metric Schema Probe
 
 on:
-  push:
-    branches:
-      - "direction/investment-office-decision-economics-2026-10-05"
-    paths:
-      - "scripts/run_dart_metric_schema_probe.py"
-      - ".github/workflows/dart_metric_schema_probe.yml"
   workflow_dispatch:
 
 permissions:
