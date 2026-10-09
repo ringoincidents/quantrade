@@ -200,6 +200,61 @@ class DartFundamentalProviderTests(unittest.TestCase):
         self.assertEqual("00126380", resolver.resolve("005930"))
         self.assertEqual([], transport.calls)
 
+    def test_corp_code_resolver_retries_invalid_zip(self):
+        valid_transport = FakeDartTransport(
+            filings=[],
+            financial_payloads={},
+        )
+
+        class SequenceTransport:
+            def __init__(self):
+                self.calls = 0
+
+            def get_bytes(self, endpoint, params):
+                self.calls += 1
+                if self.calls == 1:
+                    return b'{"status":"020","message":"temporary"}'
+                return valid_transport.get_bytes(endpoint, params)
+
+            def get_json(self, endpoint, params):
+                raise AssertionError(endpoint)
+
+        transport = SequenceTransport()
+        resolver = DartCorpCodeResolver(
+            api_key="x" * 40,
+            transport=transport,
+            archive_max_attempts=2,
+            archive_retry_backoff_seconds=0.0,
+        )
+        self.assertEqual("00126380", resolver.resolve("005930"))
+        self.assertEqual(2, transport.calls)
+
+    def test_corp_code_resolver_reports_final_dart_status(self):
+        class BrokenTransport:
+            def __init__(self):
+                self.calls = 0
+
+            def get_bytes(self, endpoint, params):
+                self.calls += 1
+                return b'{"status":"020","message":"request limit"}'
+
+            def get_json(self, endpoint, params):
+                raise AssertionError(endpoint)
+
+        transport = BrokenTransport()
+        resolver = DartCorpCodeResolver(
+            api_key="x" * 40,
+            transport=transport,
+            archive_max_attempts=2,
+            archive_retry_backoff_seconds=0.0,
+        )
+        with self.assertRaisesRegex(
+            DartProviderError,
+            "after 2 attempts status=020",
+        ):
+            resolver.resolve("005930")
+        self.assertEqual(2, transport.calls)
+
     def test_corp_code_resolver_reads_official_zip_shape(self):
         transport = FakeDartTransport(
             filings=[],
