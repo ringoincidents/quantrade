@@ -1,12 +1,6 @@
 name: Verify Hyundai Motor DART Identity
 
 on:
-  push:
-    branches:
-      - "direction/investment-office-decision-economics-2026-10-05"
-    paths:
-      - "scripts/run_issuer_identity_probe_005380.py"
-      - ".github/workflows/verify_issuer_identity_005380.yml"
   workflow_dispatch:
 
 permissions:
