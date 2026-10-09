@@ -1,25 +1,17 @@
-name: QT-CASE-003-CORR-001 Semantic Correction
+name: QT-CASE-003-CORR-001 Archived Replay
 
 on:
-  push:
-    branches:
-      - "direction/investment-office-decision-economics-2026-10-05"
-    paths:
-      - "scripts/run_qt_case_003_corr_001.py"
-      - "quantrade/capabilities/fundamental_semantics.py"
-      - "quantrade/capabilities/valuation_method_applicability.py"
-      - ".github/workflows/qt_case_003_corr_001.yml"
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: quantrade-open-dart-live
   cancel-in-progress: false
 
 jobs:
-  correction:
+  replay:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
@@ -27,69 +19,32 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: "direction/investment-office-decision-economics-2026-10-05"
+          ref: "92c2c77ac93941a55cd47450c2aafe18e68e33d5"
           fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Verify correction preregistration
+      - name: Verify frozen correction source
         run: |
+          test "$(git rev-parse HEAD)" = "92c2c77ac93941a55cd47450c2aafe18e68e33d5"
           git cat-file -e 1c52896c63cae1f8398dfd276e936e813007e4bb^{commit}
-          git merge-base --is-ancestor 1c52896c63cae1f8398dfd276e936e813007e4bb HEAD
-      - name: Compile and test applicability gates
-        run: |
-          python -m compileall -q quantrade/capabilities scripts/run_qt_case_003_corr_001.py
-          python -m unittest tests.capabilities.test_fundamental_semantics -v
-          python -m unittest tests.capabilities.test_valuation_method_applicability -v
-      - name: Execute correction
+      - name: Replay correction
         run: python -m scripts.run_qt_case_003_corr_001
-      - name: Verify correction boundaries
+      - name: Verify non-authority
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
-          r = json.loads(
-              Path("research/experiments/QT-CASE-003-CORR-001_RESULT.json").read_text()
-          )
-          assert r["experiment_id"] == "QT-CASE-003-CORR-001"
-          assert r["preregistration_commit"] == "1c52896c63cae1f8398dfd276e936e813007e4bb"
-          assert r["pe_semantic"]["validation"]["account_name_fallback_used"] is False
-          assert r["dcf_semantic"]["validation"]["account_name_fallback_used"] is False
-          assert r["pe_method"]["authority"]["substitute_method_selected"] is False
-          assert r["dcf_method"]["authority"]["substitute_method_selected"] is False
-          assert r["authority"]["paper_authorized"] is False
+          r = json.loads(Path("research/experiments/QT-CASE-003-CORR-001_RESULT.json").read_text())
           assert r["authority"]["execution_authorized"] is False
-          print(json.dumps({
-              "pe_semantic": r["pe_semantic"]["status"],
-              "dcf_semantic": r["dcf_semantic"]["status"],
-              "pe_method": r["pe_method"]["status"],
-              "pe_reasons": r["pe_method"]["reasons"],
-              "dcf_method": r["dcf_method"]["status"],
-              "dcf_reasons": r["dcf_method"]["reasons"],
-              "cross_method_status": r["cross_method_status"],
-              "classification": None if r["valuation_crosscheck"] is None else r["valuation_crosscheck"]["classification"],
-              "portfolio": None if r["portfolio_sandbox"] is None else r["portfolio_sandbox"]["status"],
-          }, ensure_ascii=False, sort_keys=True))
+          assert r["authority"]["live_order_possible"] is False
           PY
-      - name: Upload correction artifact
+      - name: Upload replay artifact
         uses: actions/upload-artifact@v4
         with:
-          name: qt-case-003-corr-001
+          name: qt-case-003-corr-001-archived-replay
           path: |
             /tmp/QT-CASE-003-CORR-001_FULL_ARTIFACT.json
             research/experiments/QT-CASE-003-CORR-001_RESULT.json
             research/experiments/QT-CASE-003-CORR-001_RESULT_REPORT.md
           if-no-files-found: error
-      - name: Commit compact correction evidence
-        shell: bash
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git pull --rebase origin direction/investment-office-decision-economics-2026-10-05
-          git add research/experiments/QT-CASE-003-CORR-001_RESULT.json research/experiments/QT-CASE-003-CORR-001_RESULT_REPORT.md
-          if git diff --cached --quiet; then
-            echo "No result changes."
-          else
-            git commit -m "experiment: record QT-CASE-003 semantic correction"
-            git push origin HEAD:direction/investment-office-decision-economics-2026-10-05
-          fi
