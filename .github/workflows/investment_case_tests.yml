@@ -18,6 +18,8 @@ on:
       - "quantrade/capabilities/cash_flow_valuation.py"
       - "quantrade/capabilities/fundamental_counter_research.py"
       - "quantrade/capabilities/fundamental_semantics.py"
+      - "quantrade/capabilities/issuer_identity.py"
+      - "quantrade/data/issuer_identity_registry_v1.json"
       - "quantrade/capabilities/valuation_crosscheck.py"
       - "quantrade/capabilities/valuation_method_applicability.py"
       - "tests/capabilities/test_investment_case.py"
@@ -30,6 +32,8 @@ on:
       - "tests/capabilities/test_cash_flow_valuation.py"
       - "tests/capabilities/test_fundamental_counter_research.py"
       - "tests/capabilities/test_fundamental_semantics.py"
+      - "tests/capabilities/test_issuer_identity.py"
+      - "tests/capabilities/test_qt_case_004_rules.py"
       - "tests/capabilities/test_valuation_crosscheck.py"
       - "tests/capabilities/test_valuation_method_applicability.py"
       - "tests/capabilities/test_qt_case_001_rules.py"
@@ -58,6 +62,8 @@ on:
       - "quantrade/capabilities/cash_flow_valuation.py"
       - "quantrade/capabilities/fundamental_counter_research.py"
       - "quantrade/capabilities/fundamental_semantics.py"
+      - "quantrade/capabilities/issuer_identity.py"
+      - "quantrade/data/issuer_identity_registry_v1.json"
       - "quantrade/capabilities/valuation_crosscheck.py"
       - "quantrade/capabilities/valuation_method_applicability.py"
       - "tests/capabilities/test_investment_case.py"
@@ -70,6 +76,8 @@ on:
       - "tests/capabilities/test_cash_flow_valuation.py"
       - "tests/capabilities/test_fundamental_counter_research.py"
       - "tests/capabilities/test_fundamental_semantics.py"
+      - "tests/capabilities/test_issuer_identity.py"
+      - "tests/capabilities/test_qt_case_004_rules.py"
       - "tests/capabilities/test_valuation_crosscheck.py"
       - "tests/capabilities/test_valuation_method_applicability.py"
       - "tests/capabilities/test_qt_case_001_rules.py"
@@ -114,6 +122,10 @@ jobs:
         run: python -m unittest tests.capabilities.test_fundamental_counter_research -v
       - name: Run semantic fundamental applicability tests
         run: python -m unittest tests.capabilities.test_fundamental_semantics -v
+      - name: Run issuer identity registry tests
+        run: python -m unittest tests.capabilities.test_issuer_identity -v
+      - name: Run QT-CASE-004 frozen-rule tests
+        run: python -m unittest tests.capabilities.test_qt_case_004_rules -v
       - name: Run cross-method valuation tests
         run: python -m unittest tests.capabilities.test_valuation_crosscheck -v
       - name: Run valuation-method applicability tests
