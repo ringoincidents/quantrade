@@ -17,6 +17,7 @@ on:
       - "quantrade/capabilities/case_learning_evaluation.py"
       - "quantrade/capabilities/cash_flow_valuation.py"
       - "quantrade/capabilities/fundamental_counter_research.py"
+      - "quantrade/capabilities/fundamental_semantics.py"
       - "quantrade/capabilities/valuation_crosscheck.py"
       - "tests/capabilities/test_investment_case.py"
       - "tests/capabilities/test_thesis_contract.py"
@@ -27,6 +28,7 @@ on:
       - "tests/capabilities/test_case_learning.py"
       - "tests/capabilities/test_cash_flow_valuation.py"
       - "tests/capabilities/test_fundamental_counter_research.py"
+      - "tests/capabilities/test_fundamental_semantics.py"
       - "tests/capabilities/test_valuation_crosscheck.py"
       - "tests/capabilities/test_qt_case_001_rules.py"
       - "tests/capabilities/test_qt_case_002_rules.py"
@@ -53,6 +55,7 @@ on:
       - "quantrade/capabilities/case_learning_evaluation.py"
       - "quantrade/capabilities/cash_flow_valuation.py"
       - "quantrade/capabilities/fundamental_counter_research.py"
+      - "quantrade/capabilities/fundamental_semantics.py"
       - "quantrade/capabilities/valuation_crosscheck.py"
       - "tests/capabilities/test_investment_case.py"
       - "tests/capabilities/test_thesis_contract.py"
@@ -63,6 +66,7 @@ on:
       - "tests/capabilities/test_case_learning.py"
       - "tests/capabilities/test_cash_flow_valuation.py"
       - "tests/capabilities/test_fundamental_counter_research.py"
+      - "tests/capabilities/test_fundamental_semantics.py"
       - "tests/capabilities/test_valuation_crosscheck.py"
       - "tests/capabilities/test_qt_case_001_rules.py"
       - "tests/capabilities/test_qt_case_002_rules.py"
@@ -104,6 +108,8 @@ jobs:
         run: python -m unittest tests.capabilities.test_cash_flow_valuation -v
       - name: Run deterministic counter-research tests
         run: python -m unittest tests.capabilities.test_fundamental_counter_research -v
+      - name: Run semantic fundamental applicability tests
+        run: python -m unittest tests.capabilities.test_fundamental_semantics -v
       - name: Run cross-method valuation tests
         run: python -m unittest tests.capabilities.test_valuation_crosscheck -v
       - name: Run QT-CASE frozen-rule tests
