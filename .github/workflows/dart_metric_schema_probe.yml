@@ -1,0 +1,35 @@
+name: DART Metric Schema Probe
+
+on:
+  push:
+    branches:
+      - "direction/investment-office-decision-economics-2026-10-05"
+    paths:
+      - "scripts/run_dart_metric_schema_probe.py"
+      - ".github/workflows/dart_metric_schema_probe.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quantrade-open-dart-live
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      OPEN_DART_API_KEY: ${{ secrets.OPEN_DART_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: "direction/investment-office-decision-economics-2026-10-05"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compile schema probe
+        run: python -m compileall -q scripts/run_dart_metric_schema_probe.py
+      - name: Run schema probe
+        run: python -m scripts.run_dart_metric_schema_probe
