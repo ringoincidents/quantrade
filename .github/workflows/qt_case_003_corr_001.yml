@@ -1,0 +1,50 @@
+name: QT-CASE-003-CORR-001 Archived Replay
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quantrade-open-dart-live
+  cancel-in-progress: false
+
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      OPEN_DART_API_KEY: ${{ secrets.OPEN_DART_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: "92c2c77ac93941a55cd47450c2aafe18e68e33d5"
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Verify frozen correction source
+        run: |
+          test "$(git rev-parse HEAD)" = "92c2c77ac93941a55cd47450c2aafe18e68e33d5"
+          git cat-file -e 1c52896c63cae1f8398dfd276e936e813007e4bb^{commit}
+      - name: Replay correction
+        run: python -m scripts.run_qt_case_003_corr_001
+      - name: Verify non-authority
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r = json.loads(Path("research/experiments/QT-CASE-003-CORR-001_RESULT.json").read_text())
+          assert r["authority"]["execution_authorized"] is False
+          assert r["authority"]["live_order_possible"] is False
+          PY
+      - name: Upload replay artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: qt-case-003-corr-001-archived-replay
+          path: |
+            /tmp/QT-CASE-003-CORR-001_FULL_ARTIFACT.json
+            research/experiments/QT-CASE-003-CORR-001_RESULT.json
+            research/experiments/QT-CASE-003-CORR-001_RESULT_REPORT.md
+          if-no-files-found: error
