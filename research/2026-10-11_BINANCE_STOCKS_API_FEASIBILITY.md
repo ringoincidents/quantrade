@@ -103,3 +103,14 @@ Licensed 1m/5m OHLCV Provider (if distinct)
 ```
 
 Under no circumstance use classic crypto spot `/api/v3/order` as a substitute for Binance Stocks equity `/sapi/v1/equity/order/place`; nor mistake bStocks trading pair tickers for traditional stock symbols.
+
+
+## 6. 2026-10-11 screenshot follow-up — product catalog visible, trade eligibility unverified
+
+- **New observed evidence:** Founder-provided screenshot of their Binance mobile app showing `TradFi > Stocks`, `US Stocks` and `ETFs` filters, a visible US-equity quote catalog (`MU`, `NVDA`, `TSLA`, `AAPL`, etc.), and `Closed` market session labels.
+- **Observation status:** `CATALOG_UI_VISIBLE` = CONFIRMED from user screenshot; screenshot itself is **not uploaded to public GitHub**.
+- **Still not demonstrated:** instrument detail screen, actual account-specific equity onboarding/permission, Preview order availability, read-only `/sapi/v1/equity/market/exchangeInfo` API access, order endpoint authorization, market-data history, live trade execution.
+- **Interpretation:** UI listing is product-discovery evidence only. It does **not** prove Korean resident eligibility or signed stock-order API permissions. Stock session being `Closed` is not an API/error symptom by itself.
+- **Next manual safe check:** in the app, open e.g. NVDA/AAPL detail to inspect if `Buy` and `Sell`/order-preview are available, with no purchase, no conversion and no funding; report any region/onboarding notice. Do not submit an order and do not post identity information, balances or credentials.
+- **Official confirmation:** [Binance Stocks FAQ](https://www.binance.com/en/support/faq/detail/a7469c7703524024b5bc2d492b03639d) explicitly describes jurisdiction-dependent access and trade preview; [official Stocks Market Data API](https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/market-data) states `GET /sapi/v1/equity/market/exchangeInfo` and `GET /sapi/v1/equity/market/quote` require API key without signed order authorization, and lists tradability and fractional-order constraints.
+- **Gate updated:** `UI CATALOG DISCOVERY=PASS`; `ACCOUNT_ELIGIBILITY=UNKNOWN`; `API_READ_ONLY=UNTESTED`; `DATA/BACKTEST=BLOCKED_PENDING_SOURCE`; `LIVE_EXECUTION=FORBIDDEN`.
