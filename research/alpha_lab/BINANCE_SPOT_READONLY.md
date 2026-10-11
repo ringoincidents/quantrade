@@ -46,3 +46,23 @@ The first command accesses keyless public data. The second checks API permission
 ## Next gates
 
 Account authenticated GET with user-owned key + controlled hosting; truthful per-symbol minimum order requirements and current fees; auditable historical OHLCV and complete bar semantics; trade-cost-inclusive backtest; paper trading; deterministic stop and persistent reconciliation; and only subsequently an explicit separate live-trading authorization.
+
+
+## Railway provisioning attempt and free fallback (2026-10-11 KST)
+
+The Founder approved a dedicated Railway QuanTrade read-only worker. The actual `create_project(name="quantrade-alpha-readonly")` call was **blocked by Railway** with:
+
+`Free plan resource provision limit exceeded. Please upgrade to provision more resources!`
+
+Therefore **no new Railway project or service exists** and no additional Railway deployment costs were incurred. Existing Holdings services remain unchanged. Do not imply the Founder has a deployed Binance worker.
+
+**Free, reversible fallback: GitHub Actions manual read-only probe.** A workflow `.github/workflows/binance_spot_manual_connection.yml` has been added on the **draft PR branch only**, with `workflow_dispatch` and GitHub repository secrets. No private keys are supplied or stored by the assistant. It needs review/merge to the default branch before manual UI dispatch is available.
+
+Only after manual PR approval and merge:
+1. Open `https://github.com/ringoincidents/quantrade/settings/secrets/actions` while signed in as repository administrator.
+2. Add two **Actions repository secrets** named `QUANTRADE_BINANCE_API_KEY` and `QUANTRADE_BINANCE_API_SECRET` using the dedicated read-only Binance key. Do not put them in GitHub Variables, chat, commits or issue text.
+3. Open repository **Actions**, choose **QuanTrade Binance Spot Manual Read-Only Connection Check**, click **Run workflow**.
+4. The workflow prints **only** `public_data: OK/FAILED`, `private_account: VERIFIED_READ_ONLY/FAILED` and `orders_enabled: false`; it does not print asset balances, API keys or signatures. It never creates orders.
+5. Failure may result from Binance jurisdiction/account eligibility, GitHub-hosted runner IP restrictions or clock/network drift. Never evade Binance location/IP restrictions as a fix.
+
+This fallback is **not an always-on bot** and does **not** provide a fixed public IP for trading permissions. If the Founder specifically wants dedicated Railway execution, they must authorize a paid Railway plan or wait for resources to be freed; no upgrade has been performed.
