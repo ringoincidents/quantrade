@@ -114,3 +114,14 @@ Under no circumstance use classic crypto spot `/api/v3/order` as a substitute fo
 - **Next manual safe check:** in the app, open e.g. NVDA/AAPL detail to inspect if `Buy` and `Sell`/order-preview are available, with no purchase, no conversion and no funding; report any region/onboarding notice. Do not submit an order and do not post identity information, balances or credentials.
 - **Official confirmation:** [Binance Stocks FAQ](https://www.binance.com/en/support/faq/detail/a7469c7703524024b5bc2d492b03639d) explicitly describes jurisdiction-dependent access and trade preview; [official Stocks Market Data API](https://developers.binance.com/en/docs/catalog/advanced-trading-stocks-trading/api/rest-api/market-data) states `GET /sapi/v1/equity/market/exchangeInfo` and `GET /sapi/v1/equity/market/quote` require API key without signed order authorization, and lists tradability and fractional-order constraints.
 - **Gate updated:** `UI CATALOG DISCOVERY=PASS`; `ACCOUNT_ELIGIBILITY=UNKNOWN`; `API_READ_ONLY=UNTESTED`; `DATA/BACKTEST=BLOCKED_PENDING_SOURCE`; `LIVE_EXECUTION=FORBIDDEN`.
+
+
+## 7. 2026-10-11 screenshot follow-up — NVDA order UI present
+
+- User screenshot in current conversation confirms `Stocks > NVDA` order-entry screen, active-looking `Buy` tab, `Sell` tab, `Market` selector, `Preview` control and order/position panels.
+- Screen displays `Mkt Closed`, `Min 5.17 USDC`, `Pay From 0 USDC`, `Max Buy 0`, `Open Orders (0)`, `Positions (0)`.
+- **Evidence class:** `ORDER_UI_VISIBLE` / `NO_LIVE_ORDER_ATTEMPTED`; minimum visible is screenshot-specific display, not immutable exchange-wide rule.
+- **Not proven:** preview accepted for non-zero order, identity/jurisdiction/account permission, whether any order would be accepted, API key setup/permission, signed request, fills.
+- **Do not fund the account or submit live orders for verification.** UI supports discovery; access tests can happen later safely with read-only API endpoints if available.
+- **Next product-development decision:** proceed with isolated local fee-aware paper-only simulator using synthetic or licensed datasets; forbid real-order routes. Separate API market metadata adapter only after a least-privilege key is issued and appropriate access confirmed.
+- Updated gate: `CATALOG=PASS`; `NVDA_ORDER_UI=PASS`; `PREVIEW_NONZERO=UNTESTED`; `ACCOUNT_ELIGIBILITY=UNCONFIRMED`; `STOCKS_API_READ_ONLY=UNTESTED`; `LIVE_ORDER=UNAUTHORIZED`.
