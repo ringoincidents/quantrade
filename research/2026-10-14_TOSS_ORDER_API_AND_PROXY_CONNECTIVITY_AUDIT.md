@@ -84,3 +84,15 @@ Potential causes (not proven): server down, proxy daemon stopped/not listening, 
 ### Follow-up criterion
 
 Incident remains **BLOCKED: EXTERNAL VPS ACCESS REQUIRED**, not RESOLVED, until one fresh GET-only sync succeeds and source-of-truth Runtime reflects the new snapshot. No automated retry loop, live order enablement, or fabricated verification.
+
+## 8. Incident recovery confirmed after Founder restarted the Vultr server
+
+- Date: 2026-10-14, after Founder reported manually restarting the existing Vultr VPS.
+- Action: reran failed read-only `Real Portfolio Sync` GitHub Actions workflow run `38515068936` (third attempt), job `115831607270`.
+- Workflow: **COMPLETED / SUCCESS**, including `Read Toss portfolio and push to private Runtime` step.
+- Log observed: `프록시 경유 IP: 141.164.41.178`; `기대 IP(141.164.41.178) 일치 여부: True`; `Private Runtime portfolio sync complete: status=FRESH ... synced_at=2026-10-14T11:38:15.509836+00:00` (2026-10-14 20:38:15 KST). Private snapshot ID and position contents intentionally not replicated into the public repo.
+- Evidence: https://github.com/ringoincidents/quantrade/actions/runs/38515068936
+- Verdict: **RESTORE VERIFIED FOR THE READ-ONLY TOSS PORTFOLIO SYNC PATH**. Existing proxy, fixed egress IP, Toss OAuth/GET and Holdings OIDC ingest worked in this attempt. 
+- Root cause caution: manual restart preceded success, but it does not establish whether the previous fault was the VM itself, a proxy daemon, resource exhaustion, or network/firewall state. No postmortem root cause confirmed. A successful snapshot does not demonstrate always-on reliability.
+- Live trading status: **NOT IMPLEMENTED / NOT AUTHORIZED / NOT TESTED**; `autoexec.py::place_sell_order` remains intentionally fail-closed. No capital-moving requests were sent by this recovery.
+- Next safe work: optional recurring read-only proxy heartbeat/alert without publishing private data, broker-neutral fee-aware paper simulator, typed disabled execution adapter & independent authorization/reconciliation tests. Do not enable orders from this incident alone.
