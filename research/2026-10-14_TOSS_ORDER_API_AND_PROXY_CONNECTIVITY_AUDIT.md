@@ -64,3 +64,23 @@ Potential causes (not proven): server down, proxy daemon stopped/not listening, 
 - Strategy discovery, robust net fee/slippage/tax P&L and paper trading remain necessary; possessing a live order endpoint is not a profitability edge.
 - Reconcile with issue #126 (after-cost simulator) and open draft PR #124 (Binance paper simulator) **before** starting overlapping implementation; reuse broker-neutral paper-ledger components but not Binance-specific fees or exchange semantics.
 - No live order was attempted, created, cancelled or modified in this audit.
+
+## 7. Live recovery attempt (2026-10-14 ~20:30 KST)
+
+- Authorized scope: re-run existing `Real Portfolio Sync` (GET-only brokerage and OIDC private portfolio snapshot); **no order, no credential rotation, no proxy firewall change, no VM modification**.
+- Action actually taken: GitHub `rerun_failed_workflow_run_jobs` succeeded for `run_id=38515068936`.
+- New attempt: job `115828335613` **completed FAILURE**. Logs show `urllib3.exceptions.ConnectTimeoutError` to existing Vultr proxy `141.164.41.178:3128` after 10 seconds; `requests.exceptions.ProxyError` raised while fetching `https://api.ipify.org`. OAuth/account/portfolio phase never began.
+- Evidence: https://github.com/ringoincidents/quantrade/actions/runs/38515068936
+- Observed root boundary: GitHub execution is healthy, external proxy endpoint unreachable. Cannot yet determine whether Vultr VM is powered down, service stopped, firewall blocks inbound, or route/hostname/credentials changed. A connection timeout is **not** proof of a specific root cause.
+- Access limitation: Current connected control tools permit GitHub & Railway operations but do **not** expose the user's Vultr instance management or SSH. No attempt to reconstruct credentials, expose secrets or bypass the allowlist is authorized.
+
+### Founder-side minimal unblock (requires Vultr account console)
+
+1. In Vultr's web portal: **Products > Compute**, locate the existing instance matching the configured fixed IP. Check **Running/Stopped**, IPv4 and server/network status.
+2. If stopped: start the instance; if running but unresponsive, consider **Server Restart** after confirming the instance is not hosting unrelated critical services. **Do not click Reinstall** (destroys contents). Official references: https://docs.vultr.com/products/compute/instances/cloud-compute/management/restart-instance and https://docs.vultr.com/products/compute/instances/cloud-compute/connection/vultr-console.
+3. If still failing, use **View Console** (web-based, works without SSH) to inspect proxy listener/service and local host firewall. Determine actual daemon name before any service restart; TCP port 3128 alone does not prove Squid is installed. Do not expose an unauthenticated open proxy.
+4. Once restored, rerun the **GET-only** GitHub Actions `sync_real.yml`; it must verify exact fixed egress IP and successful private-runtime ingestion. Then re-run GET-only order/sellable-quantity probe if needed. **Neither authorizes POST /api/v1/orders.**
+
+### Follow-up criterion
+
+Incident remains **BLOCKED: EXTERNAL VPS ACCESS REQUIRED**, not RESOLVED, until one fresh GET-only sync succeeds and source-of-truth Runtime reflects the new snapshot. No automated retry loop, live order enablement, or fabricated verification.
