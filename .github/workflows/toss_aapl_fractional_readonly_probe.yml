@@ -1,0 +1,30 @@
+name: AAPL Fractional Read-only Probe
+
+# GET-only; no orders, no recurring schedule.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'toss_aapl_fractional_readonly_probe.py'
+      - '.github/workflows/toss_aapl_fractional_readonly_probe.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+      - name: GET-only account/order preflight
+        env:
+          PROXY_URL: ${{ secrets.PROXY_URL }}
+          TOSS_CLIENT_ID: ${{ secrets.TOSS_CLIENT_ID }}
+          TOSS_CLIENT_SECRET: ${{ secrets.TOSS_CLIENT_SECRET }}
+        run: python toss_aapl_fractional_readonly_probe.py
