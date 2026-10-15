@@ -136,31 +136,31 @@ class TossDryRunTests(unittest.TestCase):
 
 
 
-    def test_aapl_fractional_sell_exact_six_places_matches_official_spec(self):
+    def test_aapl_synthetic_fractional_sell_six_places_matches_official_spec(self):
         paper = intent(symbol="AAPL", market_country="US", side="SELL",
-                       order_type="MARKET", price=None, quantity=D("0.009663"),
+                       order_type="MARKET", price=None, quantity=D("0.012345"),
                        client_order_id="aapl-sell-fraction-test")
         self.assertEqual(paper.payload(), {
             "symbol": "AAPL", "side": "SELL", "orderType": "MARKET",
-            "quantity": "0.009663", "clientOrderId": "aapl-sell-fraction-test",
+            "quantity": "0.012345", "clientOrderId": "aapl-sell-fraction-test",
             "timeInForce": "DAY",
         })
 
-    def test_aapl_fractional_paper_sale_within_ny_regular_session(self):
+    def test_synthetic_aapl_fractional_paper_sale_within_ny_regular_session(self):
         # 2026-10-15 14:00 UTC is 10:00 EDT (regular session).
         t = datetime(2026, 10, 15, 14, 0, tzinfo=UTC)
         order = intent(symbol="AAPL", market_country="US", side="SELL",
-                       order_type="MARKET", price=None, quantity=D("0.009663"))
+                       order_type="MARKET", price=None, quantity=D("0.012345"))
         context = ctx(now=t, quote_at=t - timedelta(seconds=2),
                       reference_price=D("320"), max_notional=D("100"),
-                      sellable_quantity=D("0.009663"))
+                      sellable_quantity=D("0.012345"))
         gw = OfflineTossPaperGateway()
-        self.assertEqual(gw.preview(order, context)["referenceNotional"], "3.092160")
+        self.assertEqual(gw.preview(order, context)["referenceNotional"], "3.950400")
         result = gw.submit(order, context)
-        gw.fill(order.client_order_id, quantity=D("0.009663"),
+        gw.fill(order.client_order_id, quantity=D("0.012345"),
                 price=D("320"), fee=D("0"))
         self.assertEqual(result.snapshot()["status"], "FILLED")
-        self.assertEqual(result.snapshot()["filledQuantity"], "0.009663")
+        self.assertEqual(result.snapshot()["filledQuantity"], "0.012345")
         self.assertEqual(len(gw.orders), 1)
 
     def test_fractional_rejected_for_buy_limit_or_korean_share(self):
@@ -174,17 +174,17 @@ class TossDryRunTests(unittest.TestCase):
         ]
         for params in variants:
             with self.subTest(params=params), self.assertRaises(DryRunRejected):
-                intent(quantity=D("0.009663"), **params).payload()
+                intent(quantity=D("0.012345"), **params).payload()
 
     def test_fractional_more_than_six_places_fails_closed(self):
         with self.assertRaises(DryRunRejected):
             intent(symbol="AAPL", market_country="US", side="SELL",
                    order_type="MARKET", price=None,
-                   quantity=D("0.0096631")).payload()
+                   quantity=D("0.0123451")).payload()
 
     def test_fractional_requires_us_regular_session_not_just_market_open(self):
         order = intent(symbol="AAPL", market_country="US", side="SELL",
-                       order_type="MARKET", price=None, quantity=D("0.009663"))
+                       order_type="MARKET", price=None, quantity=D("0.012345"))
         # In October daylight time: 13:29 UTC is 09:29 EDT; 19:00 UTC is 15:00 EDT.
         for t in (datetime(2026, 10, 15, 13, 29, tzinfo=UTC),
                   datetime(2026, 10, 15, 19, 0, tzinfo=UTC),
@@ -193,18 +193,18 @@ class TossDryRunTests(unittest.TestCase):
                 OfflineTossPaperGateway().preview(
                     order, ctx(now=t, quote_at=t - timedelta(seconds=2),
                                reference_price=D("320"),
-                               sellable_quantity=D("0.009663"),
+                               sellable_quantity=D("0.012345"),
                                max_notional=D("100")))
 
     def test_fractional_sellable_quantity_must_cover_full_position(self):
         t = datetime(2026, 10, 15, 14, tzinfo=UTC)
         order = intent(symbol="AAPL", market_country="US", side="SELL",
-                       order_type="MARKET", price=None, quantity=D("0.009663"))
+                       order_type="MARKET", price=None, quantity=D("0.012345"))
         with self.assertRaises(DryRunRejected):
             OfflineTossPaperGateway().preview(
                 order, ctx(now=t, quote_at=t - timedelta(seconds=2),
                            reference_price=D("320"), max_notional=D("100"),
-                           sellable_quantity=D("0.009662")))
+                           sellable_quantity=D("0.012344")))
 
 
 if __name__ == "__main__":
