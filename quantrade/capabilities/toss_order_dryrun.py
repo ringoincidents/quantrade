@@ -5,20 +5,25 @@ It does NOT import Toss account sync helpers or accept API credentials. It must
 never be wired into autoexec.py as an execution provider without independent
 Risk, Approval, order-reconciliation and live-operational verification.
 
-Order fields are consistent with Toss order schema as documented in the
-2026-08-05 research mirror; check latest official spec before implementing any
-separate production connector. Offline output is not a broker acknowledgment.
+Order fields cross-checked against Toss first-party OpenAPI v1.2.24
+(https://openapi.tossinvest.com/openapi-docs/latest/openapi.json).
+US SELL MARKET supports up to 6 decimal quantity places during the regular
+session until one hour before close. Broker eligibility is unverified and
+this offline output is never a broker acknowledgment.
 """
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 from decimal import Decimal, InvalidOperation
 import re
 from typing import Literal
+from zoneinfo import ZoneInfo
 
 
-_SYMBOL = re.compile(r"(?:[0-9A-Z]{6}|[A-Z][A-Z0-9.\-]{0,11})\Z")
+_KR_SYMBOL = re.compile(r"[0-9A-Z]{6}\Z")
+_US_SYMBOL = re.compile(r"[A-Z][A-Z0-9.\-]{0,11}\Z")
+_US_EASTERN = ZoneInfo("America/New_York")
 _CLIENT_ID = re.compile(r"[a-zA-Z0-9_-]{1,36}\Z")
 Side = Literal["BUY", "SELL"]
 OrderType = Literal["LIMIT", "MARKET"]
@@ -54,10 +59,17 @@ class OrderIntent:
     client_order_id: str
     price: Decimal | None = None
     time_in_force: str = "DAY"
+    market_country: Literal["KR", "US"] = "KR"
+
+    @property
+    def fractional(self) -> bool:
+        qty = dec(self.quantity, positive=True)
+        return qty != qty.to_integral_value()
 
     def payload(self) -> dict[str, object]:
-        if not _SYMBOL.fullmatch(self.symbol):
-            raise DryRunRejected("invalid stock symbol")
+        symbol_re = {"KR": _KR_SYMBOL, "US": _US_SYMBOL}.get(self.market_country)
+        if symbol_re is None or symbol_re.fullmatch(self.symbol) is None:
+            raise DryRunRejected("invalid stock symbol or market")
         if self.side not in ("BUY", "SELL"):
             raise DryRunRejected("invalid side")
         if self.order_type not in ("LIMIT", "MARKET"):
@@ -67,9 +79,11 @@ class OrderIntent:
         if self.time_in_force != "DAY":
             raise DryRunRejected("DAY only in conservative paper contract")
         qty = dec(self.quantity, positive=True)
-        # US fractions are intentionally disabled until sessions/rules are verified.
-        if qty != qty.to_integral_value():
-            raise DryRunRejected("whole shares only")
+        if self.fractional:
+            if not (self.market_country == "US" and self.side == "SELL" and self.order_type == "MARKET"):
+                raise DryRunRejected("fractional quantity requires US MARKET SELL")
+            if max(0, -qty.as_tuple().exponent) > 6:
+                raise DryRunRejected("fractional quantity exceeds six decimal places")
         payload: dict[str, object] = {
             "symbol": self.symbol,
             "side": self.side,
@@ -103,7 +117,7 @@ class PaperContext:
 
 def check_context(intent: OrderIntent, ctx: PaperContext, *, max_quote_age_seconds: int = 20) -> Decimal:
     """Fail-closed risk check using synthetic balances, not client account state."""
-    p = intent.payload()
+    intent.payload()
     if ctx.stopped:
         raise DryRunRejected("kill switch is on")
     if not ctx.simulated_approval:
@@ -112,6 +126,13 @@ def check_context(intent: OrderIntent, ctx: PaperContext, *, max_quote_age_secon
         raise DryRunRejected("market closed")
     if ctx.now.tzinfo is None or ctx.quote_at.tzinfo is None:
         raise DryRunRejected("timezone-aware timestamps required")
+    if intent.fractional:
+        # OpenAPI v1.2.24: 09:30–15:00 New York time on eligible trading days.
+        # market_open is separate and must come from a real exchange calendar
+        # in production; this toy clock rule does not establish tradability.
+        ny_time = ctx.now.astimezone(_US_EASTERN)
+        if ny_time.weekday() >= 5 or not (time(9, 30) <= ny_time.time() < time(15, 0)):
+            raise DryRunRejected("US fractional order outside allowed session")
     age = ctx.now - ctx.quote_at
     if not (timedelta(0) <= age <= timedelta(seconds=max_quote_age_seconds)):
         raise DryRunRejected("future or stale market data")
