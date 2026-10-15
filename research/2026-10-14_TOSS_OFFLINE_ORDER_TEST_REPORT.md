@@ -1,7 +1,7 @@
 # QuanTrade: Toss Securities offline order-contract test (14 October 2026)
 
 - Record ID: QT-TEST-2026-10-14-TOSS-OFFLINE-001
-- Status: **LOCAL TEST PASS / PR VALIDATION PENDING / ZERO BROKER ORDERS**
+- Status: **PR CI VERIFIED (20 / 20) / REAL READ-ONLY API PREFLIGHT VERIFIED / ZERO BROKER ORDERS**
 - Scope: isolated Research/Paper provider, NOT autoexec.py production execution
 - Precedent: [Toss order/API proxy audit](2026-10-14_TOSS_ORDER_API_AND_PROXY_CONNECTIVITY_AUDIT.md), [QuanTrade canonical vision](../QUANTRADE_CANONICAL_VISION.md), [Execution Capability Provider contract](../architecture/TRADING_CAPABILITY_PROVIDER_CONTRACT.md), issue #126.
 
@@ -32,3 +32,15 @@ Tested: body mapping, KR & US ticker convention, LIMIT/MARKET, malformed/negativ
 2. Add durable paper ledger, matched order lifecycle/fees, restarts, mock ambiguous timeout handling and broker-neutral backtester; reuse relevant components of PR #124 without copying Binance fees.
 3. Separate actual execution process from public GitHub Actions; add independent Risk + Founder-governed order authority and persistent kill switch, holdings reconciliation, and fail-closed outage handling.
 4. Seek a new explicit narrow live-order authorization for a named instrument, side, quantity, order type, limit price, maximum loss/budget and allowed window only after prior safety gates pass. Do not interpret "test" as blanket capital movement approval.
+
+
+## 2026-10-15 first-party fractional order reconciliation + live GET verification
+
+- Source-of-truth: Toss Securities official server-owned OpenAPI 3.1 spec **v1.2.24**, https://openapi.tossinvest.com/openapi-docs/latest/openapi.json (retrieved 2026-10-15). OrderCreateQuantityBased expressly permits `quantity` with **up to six decimal places** exclusively for `US + MARKET + SELL`. Fractional quantity orders are accepted only from the opening of US regular hours until one hour before the regular close. No fractional BUY quantity / LIMIT sell. Source example uses AAPL, SELL, MARKET, quantity 0.5.
+- Previous text and code incorrectly stated **all fractional quantities unsupported**; corrected the standalone offline contract, not `autoexec.py`.
+- Public test scenarios use **fictional AAPL fractional quantities**; real client position size and account identifiers are not stored in GitHub.
+- Tests now cover fractional SELL, scale >6 rejection, MARKET-only, SELL-only, US-only, seasonal New York clock boundary, insufficient synthetic inventory and full paper fill. **20 / 20 passed** independently in GitHub Actions (see PR #127 workflow results).
+- User authorized safe feasibility experiment. We additionally executed a **read-only actual-account diagnostic** using the previously configured GitHub Actions → Vultr fixed-egress proxy → Toss OAuth + `GET /api/v1/accounts`, `GET /api/v1/holdings`, `GET /api/v1/sellable-quantity?symbol=AAPL`, `GET /api/v1/orders?status=OPEN`. Workflow run https://github.com/ringoincidents/quantrade/actions/runs/38712284664 **SUCCESS** (2026-10-15T09:21:19Z), coarse-grained outcome: AAPL fractional holding within supported precision exists, available quantity covers the position, no pending AAPL SELL order.
+- Read-only evidence makes account/access feasibility stronger but **does not prove live order POST entitlement or execution/settlement**. No SELL was submitted and no order scheduled.
+- Gate outcome: `OFFLINE_CONTRACT_PASS`, `LIVE_GET_PASS`, `LIVE_POST_NOT_ATTEMPTED`, `LIVE_ORDER_NOT_AUTHORIZED_BY_THIS_STUDY`.
+- Next test must be a separately guarded live execution path, with live account state recheck, max-size cap, day/session validation, broker acknowledgement handling, idempotency >10-minute replay safety, timeout/fill reconciliation, durable audit, kill switch and explicit narrow order authorization; no CI success promotes capital permission.
