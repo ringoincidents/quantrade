@@ -1,0 +1,60 @@
+name: Toss One-Time AAPL Fractional Sell
+
+# Authorized one-time tiny fractional sell; future year is date-blocked.
+# GitHub cron may be delayed, so code verifies the live US calendar.
+on:
+  pull_request:
+    paths:
+      - 'toss_one_shot_aapl.py'
+      - 'tests/test_toss_one_shot_aapl.py'
+      - '.github/workflows/toss_aapl_once.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'toss_one_shot_aapl.py'
+      - 'tests/test_toss_one_shot_aapl.py'
+      - '.github/workflows/toss_aapl_once.yml'
+  schedule:
+    - cron: '40 13 15 10 *'  # 2026-10-15 22:40 KST, Oct 15 every year
+  workflow_dispatch:
+
+concurrency:
+  group: quantrade-toss-aapl-20261015-one-time
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  one-shot:
+    if: github.event_name == 'schedule' || github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      PROXY_URL: ${{ secrets.PROXY_URL }}
+      TOSS_CLIENT_ID: ${{ secrets.TOSS_CLIENT_ID }}
+      TOSS_CLIENT_SECRET: ${{ secrets.TOSS_CLIENT_SECRET }}
+      TOSS_LIVE_ORDER_GATE: EXPLICIT_ONE_SHOT
+      ONE_SHOT_MODE: ${{ github.event_name == 'schedule' && 'LIVE_ONCE' || 'READ_ONLY' }}
+      ONE_SHOT_CONFIRMATION: ${{ github.event_name == 'schedule' && 'CONFIRM_AAPL_FRACTIONAL_MARKET_SELL' || '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+      - name: Broker interaction (GET-only except one guarded scheduled trade)
+        run: python toss_one_shot_aapl.py
+
+  offline-verification:
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Run isolated mock broker tests (no credentials)
+        run: python -m unittest discover -s tests -p 'test_toss_one_shot_aapl.py' -v
