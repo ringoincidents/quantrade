@@ -45,14 +45,14 @@ def load_claims(reddit_path,meta_path):
     for r in read_csv(meta_path):
         if r['first_seen_historically_verified'].lower()!='false':raise ValueError('future eligible? forbidden in retrospective report')
         val=int(r['direction'])
-        if val not in (-1,1):raise ValueError('bad meta direction')
+        if val not in (-1,0,1):raise ValueError('bad meta direction')
         out.append(dict(id=r['claim_id'],platform=r['platform'],date=r['post_date_et'],thread=r['thread_url'],layer=r['discourse_layer'],direction=val,category=r['category'],first_seen_verified=False,selection='retrospective'))
     return out
 
 def run(prices,claims,horizons=(1,3,5)):
     if not prices:return None
     maxh=max(horizons)
-    calendar=session_dates(min(prices),max(prices))
+    calendar=session_dates(min(min(prices),min(cl['date'] for cl in claims)),max(prices))
     idx={d:i for i,d in enumerate(calendar)}
     records=[]
     for c in claims:
