@@ -18,7 +18,7 @@
 
 ```bash
 # Python 3.11+, 외부 라이브러리 설치 없음
-python -m unittest discover -s research/social-event-study/collector_v1/tests -v
+PYTHONPATH=research/social-event-study/collector_v1 python -m unittest discover -s research/social-event-study/collector_v1/tests -v
 # 실제 요청 없이 URL 설계 점검
 python research/social-event-study/collector_v1/collector.py --dry-run --naver --root /tmp/quantrade-study
 # 접속 가능한 환경에서, 공식 GDELT 공개 API 사용
