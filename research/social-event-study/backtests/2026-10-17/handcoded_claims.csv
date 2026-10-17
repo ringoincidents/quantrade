@@ -1,0 +1,9 @@
+claim_id,platform,post_date_et,thread_url,discourse_layer,direction,category,first_seen_historically_verified,selection_method
+META-004,reddit,2026-07-27,https://www.reddit.com/r/soxl/comments/1v828iu/its_time_to_admit_it_flaky_was_right/,meta,-1,reputation_revision,false,retrospective_purpose_selected
+META-005,reddit,2026-07-30,https://www.reddit.com/r/soxl/comments/1vay6w3/good_thing_i_held_a_bit_longer/,meta,1,capitulation_exhaustion,false,retrospective_purpose_selected
+META-006,reddit,2026-10-02,https://www.reddit.com/r/soxl/comments/1wvx45p/just_went_all_in/,meta,-1,herd_warning,false,retrospective_purpose_selected
+META-006-ORIGINAL,reddit,2026-10-02,https://www.reddit.com/r/soxl/comments/1wvx45p/just_went_all_in/,direct,1,all_in_after_rally,false,retrospective_purpose_selected
+DC-012,dc_stockus,2026-09-27,https://gall.dcinside.com/mgallery/board/view/?id=stockus&no=17852254,direct,1,high_conviction_buy,false,retrospective_purpose_selected
+DC-013,dc_stockus,2026-10-01,https://gall.dcinside.com/mgallery/board/view/?id=stockus&no=17881767,direct,-1,partial_sell,false,retrospective_purpose_selected
+DC-018,dc_stockus,2026-10-07,https://gall.dcinside.com/mgallery/board/view/?id=stockus&no=17928763,direct,1,positive_close_forecast,false,retrospective_purpose_selected
+DC-019,dc_stockus,2026-10-09,https://gall.dcinside.com/mgallery/board/view/?id=stockus&no=17941583,meta,-1,skeptical_bounce,false,retrospective_purpose_selected
