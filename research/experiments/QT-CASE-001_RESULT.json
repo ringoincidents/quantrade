@@ -1,0 +1,774 @@
+{
+  "authority": {
+    "canonical_evidence_created": false,
+    "committee_decision_created": false,
+    "decision_plan_created": false,
+    "execution_authorized": false,
+    "founder_decision_created": false,
+    "live_order_possible": false,
+    "paper_authorized": false,
+    "real_client_portfolio_proposal_created": false,
+    "risk_policy_changed": false,
+    "target_weight_set": false
+  },
+  "case": {
+    "as_of": "2026-10-05T23:59:59+09:00",
+    "asset_id": "KRX:005930",
+    "case_id": "QT-CASE-001:KRX:005930",
+    "currency": "KRW",
+    "current_price": 276000.0,
+    "price_date": "2026-10-02",
+    "required_return_pct": 15.0,
+    "valuation_horizon_days": 365
+  },
+  "earnings": {
+    "fy2025_eps": 6605.0,
+    "h1_2025_ytd_eps": 1929.0,
+    "h1_2026_ytd_eps": 17950.0,
+    "ttm_eps": 22626.0,
+    "ttm_formula": "FY2025 EPS + 2026-H1 YTD EPS - 2025-H1 YTD EPS"
+  },
+  "experiment_id": "QT-CASE-001",
+  "historical_pe": {
+    "outlier_removal_applied": false,
+    "p25": 9.77650528,
+    "p50": 14.4501946,
+    "p75": 22.82397726,
+    "rows": [
+      {
+        "annual_eps": 8057.0,
+        "eps_evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20230307000542#account=ifrs-full_BasicEarningsLossPerShare&field=thstrm_amount&scope=CFS",
+        "eps_observation_id": "DART:20230307000542:CFS:IS:DART_ACCOUNT:ifrs-full_BasicEarningsLossPerShare:CURRENT_PERIOD",
+        "pe": 6.86359687228497,
+        "price_date": "2022-12-29",
+        "year": 2022,
+        "year_end_close": 55300.0
+      },
+      {
+        "annual_eps": 2131.0,
+        "eps_evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240312000736#account=ifrs-full_BasicEarningsLossPerShare&field=thstrm_amount&scope=CFS",
+        "eps_observation_id": "DART:20240312000736:CFS:IS:DART_ACCOUNT:ifrs-full_BasicEarningsLossPerShare:CURRENT_PERIOD",
+        "pe": 36.83716564992961,
+        "price_date": "2023-12-28",
+        "year": 2023,
+        "year_end_close": 78500.0
+      },
+      {
+        "annual_eps": 4950.0,
+        "eps_evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250311001085#account=ifrs-full_BasicEarningsLossPerShare&field=thstrm_amount&scope=CFS",
+        "eps_observation_id": "DART:20250311001085:CFS:IS:DART_ACCOUNT:ifrs-full_BasicEarningsLossPerShare:CURRENT_PERIOD",
+        "pe": 10.747474747474747,
+        "price_date": "2024-12-30",
+        "year": 2024,
+        "year_end_close": 53200.0
+      },
+      {
+        "annual_eps": 6605.0,
+        "eps_evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260310002820#account=ifrs-full_BasicEarningsLossPerShare&field=thstrm_amount&scope=CFS",
+        "eps_observation_id": "DART:20260310002820:CFS:IS:DART_ACCOUNT:ifrs-full_BasicEarningsLossPerShare:CURRENT_PERIOD",
+        "pe": 18.152914458743375,
+        "price_date": "2025-12-30",
+        "year": 2025,
+        "year_end_close": 119900.0
+      }
+    ]
+  },
+  "investment_case_economics": {
+    "authority": {
+      "canonical_evidence_created": false,
+      "committee_decision_created": false,
+      "decision_plan_created": false,
+      "execution_authorized": false,
+      "live_order_possible": false,
+      "model_called": false,
+      "paper_authorized": false,
+      "portfolio_proposal_created": false,
+      "position_size_set": false,
+      "risk_limit_changed": false,
+      "risk_opinion_created": false,
+      "thesis_validated": false
+    },
+    "case": {
+      "as_of": "2026-10-05T23:59:59+09:00",
+      "asset_id": "KRX:005930",
+      "case_id": "QT-CASE-001:KRX:005930",
+      "currency": "KRW",
+      "current_price": 276000.0,
+      "required_return_pct": 15.0,
+      "scenario_count": 3,
+      "valuation_horizon_days": 365
+    },
+    "consensus_comparison": null,
+    "metrics": {
+      "expected_excess_over_hurdle_pct": 16.391408,
+      "expected_return_hurdle_met": true,
+      "expected_return_pct": 31.391408,
+      "fair_value_std": 160548.009136,
+      "highest_scenario_fair_value": 619698.371288,
+      "highest_scenario_return_pct": 124.528395,
+      "lowest_scenario_fair_value": 176962.566748,
+      "lowest_scenario_return_pct": -35.883128,
+      "probability_of_meeting_return_hurdle": 0.75,
+      "probability_of_price_loss": 0.25,
+      "required_return_pct": 15.0,
+      "scenario_dispersion_pct_of_current": 58.169569,
+      "weighted_fair_value": 362640.286054
+    },
+    "scenarios": [
+      {
+        "assumption_refs": [
+          "ASM-TTM-PERSISTENCE",
+          "QT-CASE-001_PRE_REGISTRATION"
+        ],
+        "evidence_refs": [
+          "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260310002820#account=ifrs-full_BasicEarningsLossPerShare&field=thstrm_amount&scope=CFS",
+          "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250814003156#account=ifrs-full_BasicEarningsLossPerShare&field=thstrm_add_amount&scope=CFS",
+          "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260814003699#account=ifrs-full_BasicEarningsLossPerShare&field=thstrm_add_amount&scope=CFS",
+          "sha256:8645ff61be8fabe204727aa8e8632a1702454533b878684696ab620db1e2b747"
+        ],
+        "fair_value": 176962.56674828214,
+        "input_kind": "ASSUMPTION",
+        "investment_authority": false,
+        "label": "Bear",
+        "probability": 0.25,
+        "scenario_id": "BEAR",
+        "scenario_return_pct": -35.883128,
+        "thesis_note": "QT-CASE-001 preregistered EPS/P-E scenario."
+      },
+      {
+        "assumption_refs": [
+          "ASM-TTM-PERSISTENCE",
+          "QT-CASE-001_PRE_REGISTRATION"
+        ],
+        "evidence_refs": [
+          "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260310002820#account=ifrs-full_BasicEarningsLossPerShare&field=thstrm_amount&scope=CFS",
+          "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250814003156#account=ifrs-full_BasicEarningsLossPerShare&field=thstrm_add_amount&scope=CFS",
+          "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260814003699#account=ifrs-full_BasicEarningsLossPerShare&field=thstrm_add_amount&scope=CFS",
+          "sha256:8645ff61be8fabe204727aa8e8632a1702454533b878684696ab620db1e2b747"
+        ],
+        "fair_value": 326950.1030899456,
+        "input_kind": "ASSUMPTION",
+        "investment_authority": false,
+        "label": "Base",
+        "probability": 0.5,
+        "scenario_id": "BASE",
+        "scenario_return_pct": 18.460182,
+        "thesis_note": "QT-CASE-001 preregistered EPS/P-E scenario."
+      },
+      {
+        "assumption_refs": [
+          "ASM-TTM-PERSISTENCE",
+          "QT-CASE-001_PRE_REGISTRATION"
+        ],
+        "evidence_refs": [
+          "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260310002820#account=ifrs-full_BasicEarningsLossPerShare&field=thstrm_amount&scope=CFS",
+          "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250814003156#account=ifrs-full_BasicEarningsLossPerShare&field=thstrm_add_amount&scope=CFS",
+          "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260814003699#account=ifrs-full_BasicEarningsLossPerShare&field=thstrm_add_amount&scope=CFS",
+          "sha256:8645ff61be8fabe204727aa8e8632a1702454533b878684696ab620db1e2b747"
+        ],
+        "fair_value": 619698.3712877671,
+        "input_kind": "ASSUMPTION",
+        "investment_authority": false,
+        "label": "Bull",
+        "probability": 0.25,
+        "scenario_id": "BULL",
+        "scenario_return_pct": 124.528395,
+        "thesis_note": "QT-CASE-001 preregistered EPS/P-E scenario."
+      }
+    ],
+    "schema": "quantrade_investment_case_economics_v1",
+    "validation": {
+      "arithmetic_only": true,
+      "assumptions_validated_as_true": false,
+      "currency_explicit": true,
+      "current_price_positive": true,
+      "fair_values_positive": true,
+      "probability_sum": 1.0,
+      "probability_tolerance": 1e-06,
+      "scenario_ids_unique": true,
+      "valuation_horizon_explicit": true
+    }
+  },
+  "investment_interpretation": "HURDLE_CLEARED",
+  "mode": "RESEARCH_PAPER_ONLY",
+  "operational_result": {
+    "analyst_consensus_used": false,
+    "model_calls": 0,
+    "portfolio_context_is_synthetic": true,
+    "private_client_context_used": false,
+    "real_company_data": true,
+    "risk_context_is_synthetic": true,
+    "risk_invoked": true,
+    "success": true
+  },
+  "portfolio_sandbox": {
+    "alternatives": [
+      {
+        "alternative_id": "SANDBOX-CASH",
+        "alternative_type": "CASH",
+        "basis_refs": [
+          "QT-CASE-001_PRE_REGISTRATION:SANDBOX"
+        ],
+        "downside_pct": 0.0,
+        "expected_return_pct": 3.0,
+        "input_kind": "ALTERNATIVE_EXPECTATION",
+        "investment_authority": false
+      },
+      {
+        "alternative_id": "SANDBOX-CORE",
+        "alternative_type": "CORE_BENCHMARK",
+        "basis_refs": [
+          "QT-CASE-001_PRE_REGISTRATION:SANDBOX"
+        ],
+        "downside_pct": null,
+        "expected_return_pct": 8.0,
+        "input_kind": "ALTERNATIVE_EXPECTATION",
+        "investment_authority": false
+      }
+    ],
+    "authority": {
+      "canonical_evidence_created": false,
+      "committee_decision_created": false,
+      "decision_plan_created": false,
+      "execution_authorized": false,
+      "live_order_possible": false,
+      "model_called": false,
+      "paper_authorized": false,
+      "portfolio_proposal_created": false,
+      "portfolio_review_eligibility_created": true,
+      "risk_limit_changed": false,
+      "risk_opinion_created": false,
+      "target_weight_set": false,
+      "thesis_validated": false
+    },
+    "capital_headroom": {
+      "candidate_downside_pct": -35.883128,
+      "concentration_headroom_pct": 10.0,
+      "deterministic_upper_bound_pct": 5.57365,
+      "liquidity_headroom_pct": 10.0,
+      "risk_limited_headroom_pct": 5.57365,
+      "target_weight_proposed": false,
+      "upper_bound_is_not_target_weight": true
+    },
+    "case_id": "QT-CASE-001:KRX:005930",
+    "constraints": {
+      "as_of": "2026-10-05T23:00:00+09:00",
+      "available_downside_budget_pct": 2.0,
+      "constraint_refs": [
+        "QT-CASE-001_PRE_REGISTRATION:SANDBOX"
+      ],
+      "current_asset_weight_pct": 0.0,
+      "current_liquidity_pct": 20.0,
+      "mandate_allows_new_exposure": true,
+      "mandate_ref": "QT-CASE-001_PRE_REGISTRATION:SANDBOX",
+      "max_asset_weight_pct": 10.0,
+      "minimum_liquidity_reserve_pct": 10.0,
+      "snapshot_id": "QT-CASE-001-SANDBOX-PORTFOLIO"
+    },
+    "opportunity_cost": {
+      "alternative_count": 2,
+      "best_alternative_expected_return_pct": 8.0,
+      "best_alternative_id": "SANDBOX-CORE",
+      "best_alternative_type": "CORE_BENCHMARK",
+      "candidate_excess_vs_best_alternative_pct": 23.391408,
+      "candidate_expected_return_pct": 31.391408,
+      "investment_score_created": false,
+      "return_competition_evaluated": true
+    },
+    "reasons": [
+      "CLEARS_RETURN_AND_HEADROOM_GATES"
+    ],
+    "schema": "quantrade_portfolio_opportunity_v1",
+    "status": "ELIGIBLE_FOR_PORTFOLIO_REVIEW"
+  },
+  "preregistration_commit": "96af7467cb052b4cc90828135276ba9f6b68f7df",
+  "risk_sandbox": {
+    "authority": {
+      "canonical_evidence_created": false,
+      "committee_decision_created": false,
+      "decision_plan_created": false,
+      "execution_authorized": false,
+      "live_order_possible": false,
+      "model_called": false,
+      "paper_authorized": false,
+      "portfolio_proposal_created": false,
+      "risk_limit_changed": false,
+      "risk_opinion_created": true,
+      "risk_veto_present": false,
+      "target_weight_set": false
+    },
+    "candidate": {
+      "asset_id": "KRX:005930",
+      "estimated_exit_days": null,
+      "max_abs_correlation_to_portfolio": null,
+      "risk_refs": [
+        "QT-CASE-001:BEAR_SCENARIO"
+      ],
+      "uses_leverage": false,
+      "worst_case_return_pct": -35.883128
+    },
+    "case_id": "QT-CASE-001:KRX:005930",
+    "limits": {
+      "portfolio_opportunity_upper_bound_pct": 5.57365,
+      "risk_ceiling_is_not_target_weight": true,
+      "risk_downside_budget_ceiling_pct": 5.57365,
+      "risk_position_ceiling_pct": 5.57365,
+      "risk_single_asset_headroom_pct": 10.0,
+      "target_weight_set": false
+    },
+    "policy": {
+      "as_of": "2026-10-05T22:00:00+09:00",
+      "leverage_allowed": false,
+      "max_abs_correlation_to_portfolio": null,
+      "max_exit_days": null,
+      "max_incremental_downside_budget_pct": 2.0,
+      "max_portfolio_drawdown_pct": -20.0,
+      "max_single_asset_weight_pct": 10.0,
+      "policy_id": "QT-CASE-001-SANDBOX-RISK",
+      "policy_refs": [
+        "QT-CASE-001_PRE_REGISTRATION:SANDBOX"
+      ],
+      "require_correlation_data": false,
+      "require_liquidity_data": false
+    },
+    "reasons": [
+      "NO_ADDITIONAL_RISK_LIMIT_REQUIRED"
+    ],
+    "schema": "quantrade_risk_opinion_v1",
+    "state": {
+      "as_of": "2026-10-05T22:30:00+09:00",
+      "current_asset_weight_pct": 0.0,
+      "current_portfolio_drawdown_pct": -5.0,
+      "snapshot_id": "QT-CASE-001-SANDBOX-RISK-STATE",
+      "state_refs": [
+        "QT-CASE-001_PRE_REGISTRATION:SANDBOX"
+      ]
+    },
+    "status": "PASS"
+  },
+  "scenario_inputs": {
+    "base": {
+      "eps_multiplier": 1.0,
+      "fair_value": 326950.1030899456,
+      "pe": 14.450194603109061,
+      "probability": 0.5,
+      "scenario_eps": 22626.0
+    },
+    "bear": {
+      "eps_multiplier": 0.8,
+      "fair_value": 176962.56674828214,
+      "pe": 9.776505278677304,
+      "probability": 0.25,
+      "scenario_eps": 18100.8
+    },
+    "bull": {
+      "eps_multiplier": 1.2,
+      "fair_value": 619698.3712877671,
+      "pe": 22.823977256539933,
+      "probability": 0.25,
+      "scenario_eps": 27151.2
+    }
+  },
+  "schema": "quantrade_qt_case_001_result_v1",
+  "source_integrity": {
+    "corp_code_seed_provenance": {
+      "corp_code": "00126380",
+      "economic_input": false,
+      "stock_code": "005930",
+      "verified_artifact_id": 11547247557,
+      "verified_live_run_id": 37769222168
+    },
+    "fundamental_observation_count": 42,
+    "fundamental_payload_sha256": "242e3283f8b1037055c41e21b75d85d175fac8373d2eb485bdf0fcb04deda8f1",
+    "open_dart_provider": {
+      "api_key_persisted": false,
+      "capital_authority": false,
+      "corp_code": "00126380",
+      "corp_code_resolution": "SEEDED_VERIFIED_MAPPING",
+      "historical_correction_policy": "FAIL_CLOSED_UNTIL_XBRL_BY_RECEIPT",
+      "model_required": false,
+      "network_required": true,
+      "point_in_time_capable": true,
+      "provider_id": "OPEN_DART",
+      "provider_version": "fnlttSinglAcntAll+list+corpCode:v1",
+      "publication_time_precision": "DATE_CONSERVATIVE_EOD_KST",
+      "source_license": "Open DART public API; verify source filing",
+      "stock_code": "005930"
+    },
+    "price_after_case_cutoff_used": false,
+    "price_source": {
+      "endpoint": "https://api.finance.naver.com/siseJson.naver",
+      "first_trading_date": "2022-01-03",
+      "http_status": 200,
+      "last_trading_date": "2026-10-02",
+      "params": {
+        "endTime": "20261005",
+        "requestType": 1,
+        "startTime": "20220101",
+        "symbol": "005930",
+        "timeframe": "day"
+      },
+      "provider": "naver-finance-historical",
+      "row_count": 1161,
+      "sha256": "8645ff61be8fabe204727aa8e8632a1702454533b878684696ab620db1e2b747"
+    },
+    "selected_evidence": [
+      {
+        "evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20230307000542#account=ifrs-full_BasicEarningsLossPerShare&field=thstrm_amount&scope=CFS",
+        "fiscal_period_end": "2022-12-31",
+        "metric_key": "DART_ACCOUNT:ifrs-full_BasicEarningsLossPerShare:IS:CURRENT_PERIOD",
+        "observation_id": "DART:20230307000542:CFS:IS:DART_ACCOUNT:ifrs-full_BasicEarningsLossPerShare:CURRENT_PERIOD",
+        "published_at": "2023-03-07T23:59:59+09:00",
+        "restated": false,
+        "revision_id": null,
+        "source_document_id": "20230307000542",
+        "unit": "KRW",
+        "value": 8057.0
+      },
+      {
+        "evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240312000736#account=ifrs-full_BasicEarningsLossPerShare&field=thstrm_amount&scope=CFS",
+        "fiscal_period_end": "2023-12-31",
+        "metric_key": "DART_ACCOUNT:ifrs-full_BasicEarningsLossPerShare:IS:CURRENT_PERIOD",
+        "observation_id": "DART:20240312000736:CFS:IS:DART_ACCOUNT:ifrs-full_BasicEarningsLossPerShare:CURRENT_PERIOD",
+        "published_at": "2024-03-12T23:59:59+09:00",
+        "restated": false,
+        "revision_id": null,
+        "source_document_id": "20240312000736",
+        "unit": "KRW",
+        "value": 2131.0
+      },
+      {
+        "evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250311001085#account=ifrs-full_BasicEarningsLossPerShare&field=thstrm_amount&scope=CFS",
+        "fiscal_period_end": "2024-12-31",
+        "metric_key": "DART_ACCOUNT:ifrs-full_BasicEarningsLossPerShare:IS:CURRENT_PERIOD",
+        "observation_id": "DART:20250311001085:CFS:IS:DART_ACCOUNT:ifrs-full_BasicEarningsLossPerShare:CURRENT_PERIOD",
+        "published_at": "2025-03-11T23:59:59+09:00",
+        "restated": false,
+        "revision_id": null,
+        "source_document_id": "20250311001085",
+        "unit": "KRW",
+        "value": 4950.0
+      },
+      {
+        "evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250814003156#account=ifrs-full_BasicEarningsLossPerShare&field=thstrm_add_amount&scope=CFS",
+        "fiscal_period_end": "2025-06-30",
+        "metric_key": "DART_ACCOUNT:ifrs-full_BasicEarningsLossPerShare:IS:CURRENT_YTD",
+        "observation_id": "DART:20250814003156:CFS:IS:DART_ACCOUNT:ifrs-full_BasicEarningsLossPerShare:CURRENT_YTD",
+        "published_at": "2025-08-14T23:59:59+09:00",
+        "restated": false,
+        "revision_id": null,
+        "source_document_id": "20250814003156",
+        "unit": "KRW",
+        "value": 1929.0
+      },
+      {
+        "evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260310002820#account=ifrs-full_BasicEarningsLossPerShare&field=thstrm_amount&scope=CFS",
+        "fiscal_period_end": "2025-12-31",
+        "metric_key": "DART_ACCOUNT:ifrs-full_BasicEarningsLossPerShare:IS:CURRENT_PERIOD",
+        "observation_id": "DART:20260310002820:CFS:IS:DART_ACCOUNT:ifrs-full_BasicEarningsLossPerShare:CURRENT_PERIOD",
+        "published_at": "2026-03-10T23:59:59+09:00",
+        "restated": false,
+        "revision_id": null,
+        "source_document_id": "20260310002820",
+        "unit": "KRW",
+        "value": 6605.0
+      },
+      {
+        "evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260814003699#account=ifrs-full_BasicEarningsLossPerShare&field=thstrm_add_amount&scope=CFS",
+        "fiscal_period_end": "2026-06-30",
+        "metric_key": "DART_ACCOUNT:ifrs-full_BasicEarningsLossPerShare:IS:CURRENT_YTD",
+        "observation_id": "DART:20260814003699:CFS:IS:DART_ACCOUNT:ifrs-full_BasicEarningsLossPerShare:CURRENT_YTD",
+        "published_at": "2026-08-14T23:59:59+09:00",
+        "restated": false,
+        "revision_id": null,
+        "source_document_id": "20260814003699",
+        "unit": "KRW",
+        "value": 17950.0
+      }
+    ]
+  },
+  "thesis_contract": {
+    "as_of": "2026-10-05T23:59:59+09:00",
+    "authority": {
+      "canonical_evidence_created": false,
+      "committee_decision_created": false,
+      "decision_plan_created": false,
+      "execution_authorized": false,
+      "live_order_possible": false,
+      "model_called": false,
+      "paper_authorized": false,
+      "portfolio_proposal_created": false,
+      "position_size_set": false,
+      "risk_opinion_created": false,
+      "thesis_truth_validated": false
+    },
+    "case_id": "QT-CASE-001:KRX:005930",
+    "completeness": {
+      "all_theses_evidence_backed": true,
+      "all_theses_falsifiable": true,
+      "all_theses_have_counter_research": true,
+      "assumption_count": 1,
+      "counter_claim_count": 1,
+      "falsification_condition_count": 1,
+      "inference_count": 7,
+      "observation_count": 11,
+      "theses_with_counter_research": 1,
+      "theses_with_evidence_backing": 1,
+      "theses_without_eligible_evidence": 0,
+      "thesis_count": 1
+    },
+    "nodes": {
+      "assumptions": [
+        {
+          "assumption_id": "ASM-TTM-PERSISTENCE",
+          "provenance_refs": [
+            "QT-CASE-001_PRE_REGISTRATION"
+          ],
+          "rationale": "QT-CASE-001 preregistered simplifying valuation assumption; not Evidence.",
+          "statement": "Frozen TTM basic EPS is a reasonable central one-year earnings anchor."
+        }
+      ],
+      "counter_claims": [
+        {
+          "basis_refs": [
+            "INF-TTM-EPS",
+            "INF-PE-DISTRIBUTION"
+          ],
+          "counter_id": "COUNTER-CYCLICALITY",
+          "statement": "Samsung earnings and market valuation multiples are cyclical/regime-sensitive; the TTM earnings anchor and historical P/E distribution may be unstable.",
+          "thesis_id": "THESIS-QT-CASE-001"
+        }
+      ],
+      "falsification_conditions": [
+        {
+          "condition_id": "FALSIFY-TTM-EPS-80",
+          "evaluation_horizon": "next_two_reported_quarters_or_365_days_whichever_first",
+          "observable": "reconstructed_ttm_basic_eps",
+          "statement": "Reconstructed TTM basic EPS falls below 80% of the frozen QT-CASE-001 TTM EPS (22626.000000 KRW).",
+          "thesis_id": "THESIS-QT-CASE-001"
+        }
+      ],
+      "inferences": [
+        {
+          "inference_id": "INF-TTM-EPS",
+          "input_refs": [
+            "OBS-EPS-FY2025",
+            "OBS-EPS-H1-2025",
+            "OBS-EPS-H1-2026"
+          ],
+          "statement": "Frozen TTM basic EPS = 22626.000000 KRW, calculated as FY2025 + 2026-H1 YTD - 2025-H1 YTD."
+        },
+        {
+          "inference_id": "INF-PE-2022",
+          "input_refs": [
+            "OBS-PRICE-YE-2022",
+            "OBS-EPS-FY2022"
+          ],
+          "statement": "2022 ex-post historical P/E = 6.863597x."
+        },
+        {
+          "inference_id": "INF-PE-2023",
+          "input_refs": [
+            "OBS-PRICE-YE-2023",
+            "OBS-EPS-FY2023"
+          ],
+          "statement": "2023 ex-post historical P/E = 36.837166x."
+        },
+        {
+          "inference_id": "INF-PE-2024",
+          "input_refs": [
+            "OBS-PRICE-YE-2024",
+            "OBS-EPS-FY2024"
+          ],
+          "statement": "2024 ex-post historical P/E = 10.747475x."
+        },
+        {
+          "inference_id": "INF-PE-2025",
+          "input_refs": [
+            "OBS-PRICE-YE-2025",
+            "OBS-EPS-FY2025"
+          ],
+          "statement": "2025 ex-post historical P/E = 18.152914x."
+        },
+        {
+          "inference_id": "INF-PE-DISTRIBUTION",
+          "input_refs": [
+            "INF-PE-2022",
+            "INF-PE-2023",
+            "INF-PE-2024",
+            "INF-PE-2025"
+          ],
+          "statement": "Frozen historical P/E distribution: P25=9.776505x, P50=14.450195x, P75=22.823977x."
+        },
+        {
+          "inference_id": "INF-VALUATION-RESULT",
+          "input_refs": [
+            "INF-TTM-EPS",
+            "INF-PE-DISTRIBUTION",
+            "OBS-PRICE-CASE",
+            "ASM-TTM-PERSISTENCE"
+          ],
+          "statement": "Pre-registered scenario valuation produced weighted fair value 362640.286054 KRW and expected return 31.391408%. Economic hurdle result=HURDLE_CLEARED."
+        }
+      ],
+      "observations": [
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-EPS-FY2025",
+          "observed_at": "2026-03-10T23:59:59+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260310002820#account=ifrs-full_BasicEarningsLossPerShare&field=thstrm_amount&scope=CFS",
+          "statement": "FY2025 basic EPS: 6605.0 KRW"
+        },
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-EPS-H1-2025",
+          "observed_at": "2025-08-14T23:59:59+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250814003156#account=ifrs-full_BasicEarningsLossPerShare&field=thstrm_add_amount&scope=CFS",
+          "statement": "2025-H1 YTD basic EPS: 1929.0 KRW"
+        },
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-EPS-H1-2026",
+          "observed_at": "2026-08-14T23:59:59+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260814003699#account=ifrs-full_BasicEarningsLossPerShare&field=thstrm_add_amount&scope=CFS",
+          "statement": "2026-H1 YTD basic EPS: 17950.0 KRW"
+        },
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-PRICE-CASE",
+          "observed_at": "2026-10-02T15:30:00+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://api.finance.naver.com/siseJson.naver#sha256=8645ff61be8fabe204727aa8e8632a1702454533b878684696ab620db1e2b747&date=2026-10-02",
+          "statement": "Case-date close: 276000.0 KRW"
+        },
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-EPS-FY2022",
+          "observed_at": "2023-03-07T23:59:59+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20230307000542#account=ifrs-full_BasicEarningsLossPerShare&field=thstrm_amount&scope=CFS",
+          "statement": "FY2022 basic EPS: 8057.0 KRW"
+        },
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-PRICE-YE-2022",
+          "observed_at": "2022-12-29T15:30:00+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://api.finance.naver.com/siseJson.naver#sha256=8645ff61be8fabe204727aa8e8632a1702454533b878684696ab620db1e2b747&date=2022-12-29",
+          "statement": "2022 year-end close: 55300.0 KRW"
+        },
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-EPS-FY2023",
+          "observed_at": "2024-03-12T23:59:59+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240312000736#account=ifrs-full_BasicEarningsLossPerShare&field=thstrm_amount&scope=CFS",
+          "statement": "FY2023 basic EPS: 2131.0 KRW"
+        },
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-PRICE-YE-2023",
+          "observed_at": "2023-12-28T15:30:00+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://api.finance.naver.com/siseJson.naver#sha256=8645ff61be8fabe204727aa8e8632a1702454533b878684696ab620db1e2b747&date=2023-12-28",
+          "statement": "2023 year-end close: 78500.0 KRW"
+        },
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-EPS-FY2024",
+          "observed_at": "2025-03-11T23:59:59+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250311001085#account=ifrs-full_BasicEarningsLossPerShare&field=thstrm_amount&scope=CFS",
+          "statement": "FY2024 basic EPS: 4950.0 KRW"
+        },
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-PRICE-YE-2024",
+          "observed_at": "2024-12-30T15:30:00+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://api.finance.naver.com/siseJson.naver#sha256=8645ff61be8fabe204727aa8e8632a1702454533b878684696ab620db1e2b747&date=2024-12-30",
+          "statement": "2024 year-end close: 53200.0 KRW"
+        },
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-PRICE-YE-2025",
+          "observed_at": "2025-12-30T15:30:00+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://api.finance.naver.com/siseJson.naver#sha256=8645ff61be8fabe204727aa8e8632a1702454533b878684696ab620db1e2b747&date=2025-12-30",
+          "statement": "2025 year-end close: 119900.0 KRW"
+        }
+      ],
+      "thesis_claims": [
+        {
+          "statement": "The pre-registered scenario economics clear the 15% expected-return hurdle at the frozen Case price.",
+          "support_refs": [
+            "INF-VALUATION-RESULT"
+          ],
+          "thesis_id": "THESIS-QT-CASE-001"
+        }
+      ]
+    },
+    "schema": "quantrade_thesis_contract_v1",
+    "thesis_assessments": [
+      {
+        "assumption_refs": [
+          "ASM-TTM-PERSISTENCE"
+        ],
+        "counter_claim_ids": [
+          "COUNTER-CYCLICALITY"
+        ],
+        "counter_research_present": true,
+        "eligible_evidence_observation_refs": [
+          "OBS-EPS-FY2025",
+          "OBS-EPS-H1-2025",
+          "OBS-EPS-H1-2026",
+          "OBS-PRICE-YE-2022",
+          "OBS-EPS-FY2022",
+          "OBS-PRICE-YE-2023",
+          "OBS-EPS-FY2023",
+          "OBS-PRICE-YE-2024",
+          "OBS-EPS-FY2024",
+          "OBS-PRICE-YE-2025",
+          "OBS-PRICE-CASE"
+        ],
+        "evidence_backed": true,
+        "falsification_condition_ids": [
+          "FALSIFY-TTM-EPS-80"
+        ],
+        "falsification_defined": true,
+        "investment_authority": false,
+        "non_evidence_observation_refs": [],
+        "support_leaf_refs": [
+          "OBS-EPS-FY2025",
+          "OBS-EPS-H1-2025",
+          "OBS-EPS-H1-2026",
+          "OBS-PRICE-YE-2022",
+          "OBS-EPS-FY2022",
+          "OBS-PRICE-YE-2023",
+          "OBS-EPS-FY2023",
+          "OBS-PRICE-YE-2024",
+          "OBS-EPS-FY2024",
+          "OBS-PRICE-YE-2025",
+          "OBS-PRICE-CASE",
+          "ASM-TTM-PERSISTENCE"
+        ],
+        "thesis_id": "THESIS-QT-CASE-001",
+        "thesis_truth_validated": false
+      }
+    ]
+  }
+}
