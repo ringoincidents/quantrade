@@ -1,0 +1,46 @@
+name: SOXL research news and attention metadata
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 */3 * * *'
+permissions:
+  contents: write
+concurrency:
+  group: research-social-metadata
+  cancel-in-progress: false
+jobs:
+  collect:
+    if: github.repository == 'ringoincidents/quantrade'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Run local-data research validator tests
+        env:
+          PYTHONPATH: research/social-event-study/collector_v1
+        run: |
+          python -m unittest discover -s research/social-event-study/collector_v1/tests -v
+      - name: Read public GDELT metadata and optional official Naver DataLab
+        env:
+          NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
+          NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
+        run: |
+          python research/social-event-study/collector_v1/collector.py \
+            --root research/social-event-study/live --naver
+      - name: Commit only dated read-only research metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'quantrade-research-bot'
+          git config user.email 'quantrade-research-bot@users.noreply.github.com'
+          git add research/social-event-study/live/
+          if git diff --cached --quiet; then
+            echo 'No new snapshot'; exit 0
+          fi
+          git commit -m 'data(research): record dated news and search-attention metadata snapshot [skip ci]'
+          git push origin HEAD:${{ github.ref_name }}
