@@ -1,0 +1,8 @@
+case_id,platform,published_date,source_url,discourse_layer,meta_type,implied_direction,brief_ko,first_seen_known,eligible_for_prospective_test
+ADD-001,reddit_soxl,2026-10-16,https://www.reddit.com/r/soxl/comments/1x7px3s/soxl_why_you_should_buy_it_with_both_hands_at_94/,direct,buy_the_dip,bullish,94달러에서 매수하라고 강하게 주장하는 원글,false,false
+ADD-002,reddit_soxl,2026-10-16,https://www.reddit.com/r/soxl/comments/1x7px3s/soxl_why_you_should_buy_it_with_both_hands_at_94/,meta,inverse_crowd_forum,bearish,매수체결 직후 같은 글을 보고 불안하다고 풍자하는 댓글,false,false
+ADD-003,reddit_soxl,2026-10-16,https://www.reddit.com/r/soxl/comments/1x7px3s/soxl_why_you_should_buy_it_with_both_hands_at_94/,meta,information_quality,neutral,SOXL 차트만으로 기술적 분석을 하는 태도를 비판하고 반도체 지수 확인 권유,false,false
+ADD-004,reddit_soxl,2026-10-16,https://www.reddit.com/r/soxl/comments/1x7mpa0/soxl_to_80/,meta,information_quality,neutral,근거 없는 임의 가격목표를 제시하는 댓글을 비판,false,false
+ADD-005,reddit_soxl,2026-10-16,https://www.reddit.com/r/soxl/comments/1x7qsto/thinking_of_entering_here_after_hours/,direct,uncertain_entry,ambiguous,장후 진입 의사와 손절폭 질문에 추가하락 우려 및 분할 진입 답변 병존,false,false
+ADD-006,reddit_wsb,2026-10-16,https://www.reddit.com/r/wallstreetbets/comments/1x7chad/16000000_on_amd_and_soxl_sold_it_all/,direct,risk_off,bearish,대규모 이익 실현을 자칭하며 당분간 신규 주식 매수하지 않겠다는 게시물,false,false
+ADD-007,reddit_soxl,2026-10-16,https://www.reddit.com/r/soxl/comments/1x7ae0a/sox_just_notched_a_7session_losing_streakwhats/,meta,price_history_interpretation,ambiguous,연속 하락 후 다음날 반등과 더 긴 기간 하락의 차이를 설명하며 바닥 단정 경고,false,false
