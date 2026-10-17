@@ -1,0 +1,150 @@
+{
+  "status": "DESCRIPTIVE_ONLY_NO_PREDICTION_NO_CAUSALITY",
+  "data": {
+    "price_sessions": 44,
+    "curated_posts": 29,
+    "exact_timestamps": 0,
+    "predictive_eligible": 0,
+    "sources": [
+      "reddit"
+    ]
+  },
+  "nonrepresentative_note": "Hand-selected reddit items and curated events. Posts in same thread are correlated. Date-only publication precision cannot establish price-leading order.",
+  "events": [
+    {
+      "event_id": "JUL_DROP_2026",
+      "kind": "down",
+      "selection": "RETROSPECTIVE_CASE_STUDY_NOT_RANDOM",
+      "start": "2026-07-24",
+      "end": "2026-07-29",
+      "start_to_end_change_pct": -32.76,
+      "pre_start_close_to_end_change_pct": -41.59,
+      "phases": {
+        "before": {
+          "sessions_observed": 4,
+          "requested_sessions": 5,
+          "observations": 0,
+          "bullish": 0,
+          "bearish": 0,
+          "neutral": 0,
+          "balance_bull_minus_bear": null,
+          "missing_posts_not_zero_sentiment": true,
+          "returns_as_of_only": false
+        },
+        "during": {
+          "sessions_observed": 4,
+          "requested_sessions": 4,
+          "observations": 4,
+          "bullish": 1,
+          "bearish": 0,
+          "neutral": 3,
+          "balance_bull_minus_bear": 1.0,
+          "missing_posts_not_zero_sentiment": false,
+          "returns_as_of_only": false
+        },
+        "after": {
+          "sessions_observed": 5,
+          "requested_sessions": 5,
+          "observations": 4,
+          "bullish": 2,
+          "bearish": 1,
+          "neutral": 1,
+          "balance_bull_minus_bear": 0.333,
+          "missing_posts_not_zero_sentiment": false,
+          "returns_as_of_only": false
+        }
+      },
+      "complete_after_window": true
+    },
+    {
+      "event_id": "SEP_RALLY_2026",
+      "kind": "up",
+      "selection": "RETROSPECTIVE_CASE_STUDY_NOT_RANDOM",
+      "start": "2026-09-17",
+      "end": "2026-09-22",
+      "start_to_end_change_pct": 32.34,
+      "pre_start_close_to_end_change_pct": 46.15,
+      "phases": {
+        "before": {
+          "sessions_observed": 5,
+          "requested_sessions": 5,
+          "observations": 6,
+          "bullish": 4,
+          "bearish": 2,
+          "neutral": 0,
+          "balance_bull_minus_bear": 0.333,
+          "missing_posts_not_zero_sentiment": false,
+          "returns_as_of_only": false
+        },
+        "during": {
+          "sessions_observed": 4,
+          "requested_sessions": 4,
+          "observations": 5,
+          "bullish": 2,
+          "bearish": 1,
+          "neutral": 2,
+          "balance_bull_minus_bear": 0.333,
+          "missing_posts_not_zero_sentiment": false,
+          "returns_as_of_only": false
+        },
+        "after": {
+          "sessions_observed": 5,
+          "requested_sessions": 5,
+          "observations": 6,
+          "bullish": 3,
+          "bearish": 3,
+          "neutral": 0,
+          "balance_bull_minus_bear": 0.0,
+          "missing_posts_not_zero_sentiment": false,
+          "returns_as_of_only": false
+        }
+      },
+      "complete_after_window": true
+    },
+    {
+      "event_id": "OCT_DROP_2026",
+      "kind": "down",
+      "selection": "RETROSPECTIVE_CASE_STUDY_NOT_RANDOM",
+      "start": "2026-10-08",
+      "end": "2026-10-16",
+      "start_to_end_change_pct": -34.26,
+      "pre_start_close_to_end_change_pct": -41.04,
+      "phases": {
+        "before": {
+          "sessions_observed": 5,
+          "requested_sessions": 5,
+          "observations": 0,
+          "bullish": 0,
+          "bearish": 0,
+          "neutral": 0,
+          "balance_bull_minus_bear": null,
+          "missing_posts_not_zero_sentiment": true,
+          "returns_as_of_only": false
+        },
+        "during": {
+          "sessions_observed": 7,
+          "requested_sessions": 7,
+          "observations": 4,
+          "bullish": 1,
+          "bearish": 3,
+          "neutral": 0,
+          "balance_bull_minus_bear": -0.5,
+          "missing_posts_not_zero_sentiment": false,
+          "returns_as_of_only": false
+        },
+        "after": {
+          "sessions_observed": 0,
+          "requested_sessions": 5,
+          "observations": 0,
+          "bullish": 0,
+          "bearish": 0,
+          "neutral": 0,
+          "balance_bull_minus_bear": null,
+          "missing_posts_not_zero_sentiment": true,
+          "returns_as_of_only": false
+        }
+      },
+      "complete_after_window": false
+    }
+  ]
+}
