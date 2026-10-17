@@ -1,0 +1,7 @@
+case_id,platform,published_kst,source_url,discourse_level,category,implied_direction,summary_ko,first_seen_at_utc,predictive_eligible,rights,popularity_time_verified
+QT-META-015,dc_stockus,2026-04-28T18:28:06+09:00,https://gall.dcinside.com/mgallery/board/view/?id=stockus&no=15427908,L2,inverse_own_position,bullish,본인이 SOXS를 샀다는 사실을 SOXL 상승의 역지표로 농담,,false,public_url_qualitative_only,false
+QT-META-016,dc_stockus,2026-04-28T01:17:49+09:00,https://gall.dcinside.com/mgallery/board/view/?id=stockus&no=15419725,L2,cyclic_leverage_retail_behavior,ambiguous,SOXL과 SOXS 반복진입과 손절 및 투자자 갈등 패턴 풍자,,false,public_url_qualitative_only,false
+QT-META-017,dc_stockus,2026-04-24T20:52:51+09:00,https://gall.dcinside.com/mgallery/board/view/?id=stockus&no=15376430,L2,other_forum_flow_rumor,conditional,토스커뮤니티는 신규매수보다 기존 보유자 익절만 보인다는 주장 근거 미검증,,false,public_url_qualitative_only,false
+QT-META-018,dc_stockus,2026-04-28T16:10:05+09:00,https://gall.dcinside.com/mgallery/board/view/?id=stockus&no=15426048,L2,panic_ridicule,bearish,SOXL 120달러 이상 매수자들의 구제요청에 회의적인 반응,,false,public_url_qualitative_only,false
+QT-META-019,reddit_soxl,2026-07-21,https://www.reddit.com/r/soxl/comments/1v2rz7b/youre_welcome/,L2,inverse_own_trade,bullish,자신이 매도했기 때문에 SOXL이 오른다는 농담과 동조댓글,,false,public_url_qualitative_only,false
+QT-META-020,dc_stockus,2026-04-28T18:54:32+09:00,https://gall.dcinside.com/mgallery/board/view/?id=stockus&no=15428522,L1,extreme_price_decline,bearish,SOXL 특정 고점가격대로 장기간 돌아가지 못할 수 있다는 주장,,false,public_url_qualitative_only,false
