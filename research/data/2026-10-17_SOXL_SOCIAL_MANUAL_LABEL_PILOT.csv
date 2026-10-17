@@ -1,0 +1,8 @@
+item_id,platform,post_date_et,source_url,third_party_sentiment_score,human_direction,category,timestamp_precision,predictive_eligible
+R1,reddit,2026-10-16,https://www.reddit.com/r/wallstreetbets/comments/1x7c5j6/comment/ph67m6k/,-0.683,1,explicit_buy,date_only,false
+R2,reddit,2026-10-16,https://www.reddit.com/r/wallstreetbets/comments/1x7c5j6/comment/ph5cjsk/,0.501,1,explicit_accumulation,date_only,false
+R3,reddit,2026-10-16,https://www.reddit.com/r/wallstreetbets/comments/1x7c5j6/comment/ph6aht3/,0.077,-1,falling_knife_caution,date_only,false
+R4,reddit,2026-10-16,https://www.reddit.com/r/wallstreetbets/comments/1x7c5j6/comment/ph5z3js/,0.925,0,loss_reporting_not_forward_prediction,date_only,false
+R5,reddit,2026-10-16,https://www.reddit.com/r/wallstreetbets/comments/1x7c5j6/comment/ph5w8at/,0.000,1,oversold_bullish_lean,date_only,false
+R6,reddit,2026-10-16,https://www.reddit.com/r/wallstreetbets/comments/1x7qdzy/comment/ph6pe24/,0.840,0,buy_but_self_doubt,date_only,false
+R7,reddit,2026-10-16,https://www.reddit.com/r/thetagang/comments/1x6ao6d/comment/ph5g3j0/,-0.105,0,market_risk_discussion,date_only,false
