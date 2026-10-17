@@ -1,0 +1,37 @@
+{
+  "asof_utc": "2026-10-17T06:51:18+00:00",
+  "status": "DISCOVERY_SNAPSHOT_NOT_POLL",
+  "fixed_queries_attempted": 9,
+  "new_verified_same_day_posts": 0,
+  "qualitative_historical_sources_added": 5,
+  "forward_eligible_records": 0,
+  "gallery_coverage": {
+    "krstock": {
+      "fixed_alias_queries": 3,
+      "verified_new_posts_today": 0,
+      "added_historical_sources": 1,
+      "population_sentiment": "UNKNOWN",
+      "full_index_coverage": false,
+      "reason": "Search results are incomplete and older posts may appear despite date filters."
+    },
+    "stockus": {
+      "fixed_alias_queries": 3,
+      "verified_new_posts_today": 0,
+      "added_historical_sources": 4,
+      "population_sentiment": "UNKNOWN",
+      "full_index_coverage": false,
+      "reason": "Search results are incomplete and older posts may appear despite date filters."
+    },
+    "tenbagger": {
+      "fixed_alias_queries": 3,
+      "verified_new_posts_today": 0,
+      "added_historical_sources": 0,
+      "population_sentiment": "UNKNOWN",
+      "full_index_coverage": false,
+      "reason": "Search results are incomplete and older posts may appear despite date filters."
+    }
+  },
+  "soxl_market_session_status": "WEEKEND_CLOSED",
+  "interpretation": "No current-day posts verified in this limited search; NOT evidence of zero posts or neutral sentiment.",
+  "alpha_validation": "NOT_TESTED"
+}
