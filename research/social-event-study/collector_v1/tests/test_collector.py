@@ -60,4 +60,12 @@ class Tests(unittest.TestCase):
    r=collect(NOW,t,http=lambda u,**kw:{'articles':[]})
    self.assertEqual(r['social_forum_api_access'],'NOT_AUTHORIZED')
    self.assertEqual(r['live_forum_posts_ingested'],0)
+ def test_dedupe_keys_across_news_topics(self):
+  d={};a=gdelt_articles('SOXL',ART,iso(NOW),d)
+  b=gdelt_articles('chip_stocks',ART,iso(NOW+dt.timedelta(hours=1)),d)
+  self.assertEqual(a[0]['first_seen_utc'],b[0]['first_seen_utc'])
+ def test_sanitized_metadata_excludes_original_article_body(self):
+  r=gdelt_articles('x',ART,iso(NOW),{})
+  self.assertNotIn('body',r[0])
+  self.assertNotIn('username',r[0])
 if __name__=='__main__':unittest.main()
