@@ -1,0 +1,19 @@
+{
+  "record_id": "ST-SOXL-SNAPSHOT-20261017-01",
+  "known_by_kst": "2026-10-17T16:08:40+09:00",
+  "page_url": "https://stocktwits.com/symbol/SOXL",
+  "displayed_market": "NYSEArca",
+  "displayed_price_usd": 93.67,
+  "displayed_price_date": "2026-10-16",
+  "displayed_regular_session_pct": -12.74,
+  "displayed_sentiment_score": 84,
+  "displayed_sentiment_label": "Extremely Bullish",
+  "sentiment_calculation_window": "rolling 24h; not synchronized with price close",
+  "collection_method": "public webpage manual inspection via indexed content",
+  "snapshot_completeness": "partial public page",
+  "license_to_bulk_collect": "not established",
+  "historical_first_seen_precise": "unavailable for individual messages",
+  "source_population": "Stocktwits symbol stream; undefined eligible denominator",
+  "tradable_signal": "NOT VALIDATED",
+  "interpretation": "single opposing price-vs-recent-forum-sentiment observation; not a correlation or bottom signal"
+}
