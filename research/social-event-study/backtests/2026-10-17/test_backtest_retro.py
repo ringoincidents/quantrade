@@ -1,10 +1,12 @@
 import unittest
 from backtest_retro import run,read_price,load_claims
 from pathlib import Path
+import os
 
 BASE=Path(__file__).parent
-PRICE=Path('/mnt/data/quantrade_social_event_lab/soxl_daily_2026_selected.csv')
-REDDIT=Path('/mnt/data/quantrade_social_event_lab/manual_samples_v0.csv')
+DATA=Path(os.environ.get('QT_SOCIAL_DATA_DIR', BASE.parents[1] / '2026-10-17'))
+PRICE=DATA/'soxl_daily_2026_selected.csv'
+REDDIT=DATA/'manual_samples_v0.csv'
 
 class Tests(unittest.TestCase):
     @classmethod
