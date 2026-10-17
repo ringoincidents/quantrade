@@ -4,7 +4,7 @@
 
 ## Data and reproducibility
 - Event provenance: [2026 event inventory](./2026-10-17_SEMICONDUCTOR_2026_EVENT_CAUSAL_MAP_V0.md), Issue #129.
-- [14 selected event-day observations](./data/2026-10-17_SEMICONDUCTOR_EVENT_RETURNS_SELECTED.csv) manually transcribed from three public daily-close tables:
+- [14 selected event-reaction trading-day observations](./data/2026-10-17_SEMICONDUCTOR_EVENT_RETURNS_SELECTED.csv) manually transcribed from three public daily-close tables:
   - https://chartexchange.com/symbol/nasdaq-soxx/historical/
   - https://chartexchange.com/symbol/nasdaq-qqq/historical/
   - https://chartexchange.com/symbol/nyse-soxl/historical/
@@ -19,13 +19,14 @@
 
 | Source story group | Dates | SOXX > QQQ | SOXX < QQQ | Median relative | Average relative |
 |---|---:|---:|---:|---:|---:|
-| demand_guidance (earnings/forecast) | 7 | 4 | 3 | +0.536 pp | +0.405 pp |
+| demand_guidance (earnings/forecast) | 7 | 5 | 2 | +0.577 pp | +0.560 pp |
 | macro_credit | 5 | 1 | 4 | -1.674 pp | -0.994 pp |
 | price_regime (historical rally markers) | 2 | 2 | 0 | +1.740 pp | +1.740 pp |
 
 Notable observations and falsifying examples:
 - Feb 26 Nvidia earnings: SOXX -3.043%; QQQ -1.206%; SOXL -9.073%. Strong earnings are *not* sufficient for an ETF rally.
 - Jun 25 Micron results: SOXX +3.940%; QQQ +0.811%; SOXL +10.036%.
+- Sep 30 Micron after-close release, mapped to Oct 1: SOXX +1.352%; QQQ +0.306%; SOXL +3.943%; relative +1.046pp.
 - Aug 18 oil/yields: SOXX -4.960%; QQQ -1.693%; SOXL -14.802%.
 - Oct 14 inflation/funding shock: SOXX -4.501%; QQQ -1.966%; SOXL -13.350%.
 - Oct 15 TSMC Q3 record results but broader selloff: SOXX -0.907%; QQQ -0.130%; SOXL -2.886%.
@@ -38,7 +39,7 @@ These are not tradable strategy returns or forecasts.
 
 ## WHY NOT SIGNIFICANT
 1. 14 hand-selected historical events (and shared Oct 14–16 shock cluster) **violate independence and sample-selection assumptions**.
-2. Event-time precision unresolved: event before/after market close changes the correct comparison date. **Sep 30 Micron release date must be verified**.
+2. Event-time precision matters. **Micron's Sep 30 release was accepted at 16:02:22 ET, after the US regular close** (SEC 8-K: https://www.sec.gov/Archives/edgar/data/723125/0000723125-26-000018-index.html). Its return is correctly measured on the first next regular session, **Oct 1**, instead of Sep 30. Timing for other events remains to be fully audited.
 3. News overlaps: yields, debt financing, geopolitical conditions, and corporate earnings coincide.
 4. `SOXX - QQQ` ignores style/beta and constituent differences, and neither is SOXL's index.
 5. ETF displayed daily percentage may differ from NAV/adjusted returns due distributions or market close quality.
