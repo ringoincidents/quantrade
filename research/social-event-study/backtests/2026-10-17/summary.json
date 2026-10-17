@@ -1,0 +1,53 @@
+{
+  "status": "RETROSPECTIVE_SELECTED_CLAIMS_NOT_TRADABLE_NOT_STATISTICALLY_VALIDATED",
+  "price_sessions_available": 44,
+  "data_gaps_preserved": true,
+  "claims_total": 37,
+  "independent_thread_dates_NOT_established": true,
+  "all_historical_first_seen_verified_count": 0,
+  "units_collapsed_by_platform_thread_date_layer": 24,
+  "hypothetical_close_anchor": "first later NYSE trading session close (not an executable tested order)",
+  "group_summary": {
+    "direct": {
+      "1": {
+        "n_evaluable_directional_units": 11,
+        "n_directionally_correct": 5,
+        "hit_rate_descriptive": 0.4545,
+        "median_market_return_pct": 0.342
+      },
+      "3": {
+        "n_evaluable_directional_units": 10,
+        "n_directionally_correct": 6,
+        "hit_rate_descriptive": 0.6,
+        "median_market_return_pct": 11.568
+      },
+      "5": {
+        "n_evaluable_directional_units": 10,
+        "n_directionally_correct": 6,
+        "hit_rate_descriptive": 0.6,
+        "median_market_return_pct": 15.399
+      }
+    },
+    "meta": {
+      "1": {
+        "n_evaluable_directional_units": 4,
+        "n_directionally_correct": 4,
+        "hit_rate_descriptive": 1,
+        "median_market_return_pct": -0.326
+      },
+      "3": {
+        "n_evaluable_directional_units": 4,
+        "n_directionally_correct": 3,
+        "hit_rate_descriptive": 0.75,
+        "median_market_return_pct": -4.256
+      },
+      "5": {
+        "n_evaluable_directional_units": 3,
+        "n_directionally_correct": 2,
+        "hit_rate_descriptive": 0.6667,
+        "median_market_return_pct": 22.254
+      }
+    }
+  },
+  "warning": "No population random sampling, first-seen timestamps, independent event clusters, or authorized historical action."
+}
