@@ -58,3 +58,23 @@ python -m unittest discover -s tests -v
 2. 2026-10-17 이후 충분한 관측과 가격이 실제로 도래한 다음, 모델 A(가격)·B(+뉴스)·C(+직접 심리)·D(+2차 심리)를 동일 미사용 세션에 평가.
 3. 단지 같은 시점에 상관이 있거나 종가 기준 부호가 맞는 것으로는 검증 통과 불가. 수수료 차감 성과와 위험한 실패 사례를 요구.
 4. 다른 결과가 나오면 부정 결과를 그대로 기록. **연구는 거래 권한을 주지 않음**.
+
+## GitHub에서 바로 재실행 (2026-10-17 추가)
+
+이 저장소 `main`에 검산에 필요한 **통합 CSV와 백테스트 엔진**을 연결했다. Python 환경에 `pandas` 및 `exchange-calendars`가 있을 때 아래 명령으로 68개 주장·35개 묶음 결과를 재생성한다. 가격 누락은 NULL로 보존하고 2022년 주장을 2023년 가격에 잘못 연결하는 버그를 수정했으며, 기존 2026 회귀 테스트 9개를 재통과했다.
+
+```bash
+python research/social-event-study/backtests/2026-10-17/backtest_retro.py \
+  --prices research/social-event-study/backtests/2026-10-17/combined_verified_selected_daily_2023_2026.csv \
+  --reddit research/social-event-study/2026-10-17/manual_samples_v0.csv \
+  --claims research/social-event-study/backtests/2026-10-17/all_meta_claims_2022_2026.csv \
+  --out local-social-study-output
+```
+
+- [merged historical source data](./all_meta_claims_2022_2026.csv)
+- [combined partial official-market-day price data](./combined_verified_selected_daily_2023_2026.csv)
+- [corrected, testable GitHub backtest script](./backtest_retro.py)
+- [pre-registered prospective rules](./forward_preregistered_protocol.json)
+- [first frozen prospective snapshot](./forward_first_snapshot.json)
+
+주의: 'confirmed market-day price data'는 **공식 ICESEMIT 완전한 지수 파일을 확보했다는 의미가 아니라, 공개 가격 출처의 해당 SOXL 거래일 숫자를 검산하여 정리한 선별 부분자료**다. 표본 사후 선정/이용권 제약이 해소되었다는 의미도 아니다.
