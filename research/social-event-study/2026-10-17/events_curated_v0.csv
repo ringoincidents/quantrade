@@ -1,0 +1,4 @@
+event_id,kind,first_session,last_session,source,selection_method
+JUL_DROP_2026,down,2026-07-24,2026-07-29,ChartExchange,retrospective_curated
+SEP_RALLY_2026,up,2026-09-17,2026-09-22,ChartExchange,retrospective_curated
+OCT_DROP_2026,down,2026-10-08,2026-10-16,ChartExchange,retrospective_curated
