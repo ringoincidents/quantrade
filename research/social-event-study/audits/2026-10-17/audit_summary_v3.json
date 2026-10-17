@@ -1,0 +1,127 @@
+{
+  "status": "RETROSPECTIVE_BIAS_AUDIT_NOT_A_TRADING_BACKTEST",
+  "asof_date": "2026-10-17",
+  "source_dataset": "research/social-event-study/backtests/2026-10-17/extended_thread_day_results.csv",
+  "notes": [
+    "Nonrandom ex-post selections",
+    "zero historical first-seen proofs",
+    "hypothetical first subsequent session close, not tradeable",
+    "one instrument's same-date posts share price outcome",
+    "simultaneous prices/news not controlled"
+  ],
+  "meta_investable_sample_count": 0,
+  "meta_strict_forecasts": 2,
+  "meta_ambiguous_evaluated": 2,
+  "meta_independent_5session_window_clusters": 2,
+  "overlap_cluster_anchors": [
+    [
+      "2026-07-28",
+      "2026-07-31"
+    ],
+    [
+      "2026-10-05",
+      "2026-10-12"
+    ]
+  ],
+  "paired_L1_L2_publication_dates": [
+    "2026-07-30",
+    "2026-10-02"
+  ],
+  "outcomes": [
+    {
+      "horizon": 1,
+      "direct_thread_day": {
+        "matched": 5,
+        "total": 15
+      },
+      "direct_unique_date": {
+        "matched": 4,
+        "total": 13
+      },
+      "direct_same_date_always_long": {
+        "matched": 7,
+        "total": 13
+      },
+      "meta_loose": {
+        "matched": 4,
+        "total": 4
+      },
+      "meta_loose_1pct": {
+        "matched": 2,
+        "total": 4
+      },
+      "meta_strict": {
+        "matched": 2,
+        "total": 2
+      },
+      "meta_strict_1pct": {
+        "matched": 1,
+        "total": 2
+      }
+    },
+    {
+      "horizon": 3,
+      "direct_thread_day": {
+        "matched": 6,
+        "total": 14
+      },
+      "direct_unique_date": {
+        "matched": 5,
+        "total": 12
+      },
+      "meta_loose": {
+        "matched": 3,
+        "total": 4
+      },
+      "meta_loose_1pct": {
+        "matched": 3,
+        "total": 4
+      },
+      "meta_strict": {
+        "matched": 2,
+        "total": 2
+      },
+      "meta_strict_1pct": {
+        "matched": 2,
+        "total": 2
+      }
+    },
+    {
+      "horizon": 5,
+      "direct_thread_day": {
+        "matched": 7,
+        "total": 14
+      },
+      "direct_unique_date": {
+        "matched": 6,
+        "total": 12
+      },
+      "meta_loose": {
+        "matched": 2,
+        "total": 3
+      },
+      "meta_loose_1pct": {
+        "matched": 2,
+        "total": 3
+      },
+      "meta_strict": {
+        "matched": 2,
+        "total": 2
+      },
+      "meta_strict_1pct": {
+        "matched": 2,
+        "total": 2
+      }
+    }
+  ],
+  "tests": {
+    "historical_audit": 10,
+    "future_maturity_synthetic": 10,
+    "total": 20,
+    "local_passed": true
+  },
+  "next_open_paper_test_only": true,
+  "real_forward_eligible_social_n": 0,
+  "next_mature_session": "2026-10-19",
+  "status_conclusion": "NO_CONFIRMED_INCREMENTAL_META_SENTIMENT_EDGE_OR_TRADE_AUTHORIZATION"
+}
