@@ -1,0 +1,79 @@
+{
+  "as_of": "2026-10-17",
+  "status": "RETROSPECTIVE_SELECTED_ONLY_NO_ALPHA",
+  "counts": {
+    "posts": 68,
+    "thread_day_layer_clusters": 35,
+    "daily_price_dates": 86,
+    "first_seen_verified": 0
+  },
+  "by_year": {
+    "2022": {
+      "claims": 1,
+      "clusters": 1,
+      "evaluable_5d": 0
+    },
+    "2023": {
+      "claims": 2,
+      "clusters": 1,
+      "evaluable_5d": 1
+    },
+    "2024": {
+      "claims": 13,
+      "clusters": 3,
+      "evaluable_5d": 0
+    },
+    "2025": {
+      "claims": 15,
+      "clusters": 6,
+      "evaluable_5d": 3
+    },
+    "2026": {
+      "claims": 37,
+      "clusters": 24,
+      "evaluable_5d": 20
+    }
+  },
+  "direct": {
+    "one_day": {
+      "n": 15,
+      "sign_match": 5,
+      "move_over_1pct": 5
+    },
+    "three_day": {
+      "n": 14,
+      "sign_match": 6,
+      "move_over_1pct": 6
+    },
+    "five_day": {
+      "n": 14,
+      "sign_match": 7,
+      "move_over_1pct": 6
+    }
+  },
+  "meta": {
+    "one_day": {
+      "n": 4,
+      "sign_match": 4,
+      "move_over_1pct": 2
+    },
+    "three_day": {
+      "n": 4,
+      "sign_match": 3,
+      "move_over_1pct": 3
+    },
+    "five_day": {
+      "n": 3,
+      "sign_match": 2,
+      "move_over_1pct": 2
+    }
+  },
+  "backtest_policy": "publication-date-only; first strictly later NYSE session close hypothetical anchor, not executable prices; strict no-fill for any missing exchange session",
+  "confidence": "INCONCLUSIVE_NO_CONFIRMED_EDGE",
+  "sources": [
+    "https://www.statmuse.com/money/ask/soxl-performance-february-2023",
+    "https://www.statmuse.com/money/ask/soxl-price-2022-to-2024",
+    "https://www.financecharts.com/compare/SOXL%2CAVGO/summary/price",
+    "https://chartexchange.com/symbol/nyse-soxl/historical/"
+  ]
+}
