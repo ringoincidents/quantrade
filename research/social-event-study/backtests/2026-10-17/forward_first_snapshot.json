@@ -1,0 +1,15 @@
+{
+  "asof_utc": "2026-10-17T07:52:49Z",
+  "state": "NO_SIGNAL",
+  "source_type": "PUBLIC_UNPAIRED_WEBPAGE_SNAPSHOT",
+  "stocktwits_score_24h": 83,
+  "stocktwits_source": "https://stocktwits.com/symbol/SOXL",
+  "soxl_close_2026_10_16_usd": 93.69,
+  "soxl_price_source": "https://chartexchange.com/symbol/nyse-soxl/historical/",
+  "posting_denominator_known": false,
+  "post_first_seen_verified_n": 0,
+  "eligible_prediction_count": 0,
+  "next_observation_session_et": "2026-10-19",
+  "next_session_return_status": "FUTURE_NOT_YET_OBSERVED",
+  "note": "Stocktwits rolling sentiment and prior-close price not aligned in timestamp; NOT a trading signal"
+}
