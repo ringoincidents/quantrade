@@ -1,0 +1,34 @@
+[
+  {
+    "source": "gdelt_doc_artlist",
+    "topic": "leveraged_semis",
+    "url": "https://www.aol.com/articles/investor-turned-amd-16-million-155948000.html",
+    "url_sha256": "44935b0db15b50093a6bd3945585f7e3ddd6489bbd98903d2fc521603ed7e804",
+    "first_seen_utc": "2026-10-19T20:37:04Z",
+    "retrieved_utc": "2026-10-19T20:37:04Z",
+    "gdelt_seendate_utc": "2026-10-19T16:45:00Z",
+    "domain": "aol.com",
+    "language": "English",
+    "published_utc": null,
+    "publish_time_verified": false,
+    "rights_status": "public_news_metadata_not_content_republication",
+    "predictive_eligible": false,
+    "note": "GDELT seen date is not verified original publication time."
+  },
+  {
+    "source": "gdelt_doc_artlist",
+    "topic": "leveraged_semis",
+    "url": "http://www.zerohedge.com/markets/great-ai-handoff-hedge-funds-dump-ai-record-pace-retail-pours-record-7-billion-3x-semis-etf",
+    "url_sha256": "1ceff2e69d15808d5fee9a602f5b0587c50c9078d2e2d395cbb7ca33eb7daee4",
+    "first_seen_utc": "2026-10-19T20:37:04Z",
+    "retrieved_utc": "2026-10-19T20:37:04Z",
+    "gdelt_seendate_utc": "2026-10-19T16:15:00Z",
+    "domain": "zerohedge.com",
+    "language": "English",
+    "published_utc": null,
+    "publish_time_verified": false,
+    "rights_status": "public_news_metadata_not_content_republication",
+    "predictive_eligible": false,
+    "note": "GDELT seen date is not verified original publication time."
+  }
+]
