@@ -1,0 +1,18 @@
+[
+  {
+    "source": "gdelt_doc_artlist",
+    "topic": "leveraged_semis",
+    "url": "https://www.zerohedge.com/markets/futures-slip-korean-data-center-ipo-faceplant-revives-tech-rout-french-spread-blows-out",
+    "url_sha256": "e7f09f0a225dc3f2bfaff2af71e7942e6ed8dcb3b5b8e98892883910e366d0bc",
+    "first_seen_utc": "2026-10-20T19:19:42Z",
+    "retrieved_utc": "2026-10-20T19:19:42Z",
+    "gdelt_seendate_utc": "2026-10-20T16:15:00Z",
+    "domain": "zerohedge.com",
+    "language": "English",
+    "published_utc": null,
+    "publish_time_verified": false,
+    "rights_status": "public_news_metadata_not_content_republication",
+    "predictive_eligible": false,
+    "note": "GDELT seen date is not verified original publication time."
+  }
+]
