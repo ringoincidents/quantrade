@@ -1,0 +1,30 @@
+name: Toss Offline Order Contract Tests
+
+on:
+  pull_request:
+    paths:
+      - 'quantrade/capabilities/toss_order_dryrun.py'
+      - 'tests/capabilities/test_toss_order_dryrun.py'
+      - '.github/workflows/toss_order_dryrun_tests.yml'
+      - 'research/2026-10-14_TOSS_OFFLINE_ORDER_TEST_REPORT.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile isolated dry-run capability
+        run: python -m py_compile quantrade/capabilities/toss_order_dryrun.py tests/capabilities/test_toss_order_dryrun.py
+      - name: Run offline tests (no broker secrets, no network access required)
+        env:
+          PROXY_URL: ''
+          TOSS_CLIENT_ID: ''
+          TOSS_CLIENT_SECRET: ''
+        run: python -m unittest discover -s tests/capabilities -p 'test_toss_order_dryrun.py' -v
