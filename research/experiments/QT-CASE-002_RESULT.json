@@ -1,0 +1,1538 @@
+{
+  "authority": {
+    "canonical_evidence_created": false,
+    "committee_decision_created": false,
+    "decision_plan_created": false,
+    "execution_authorized": false,
+    "founder_decision_created": false,
+    "live_order_possible": false,
+    "paper_authorized": false,
+    "real_client_portfolio_proposal_created": false,
+    "risk_policy_changed": false,
+    "target_weight_set": false
+  },
+  "case": {
+    "as_of": "2026-10-05T23:59:59+09:00",
+    "asset_id": "KRX:005930",
+    "case_id": "QT-CASE-002:KRX:005930",
+    "current_price": 276000.0,
+    "price_date": "2026-10-02",
+    "required_return_pct": 15.0
+  },
+  "cash_flow": {
+    "annual_history": {
+      "2022": {
+        "cash_conversion_ratio": 0.1654414584698291,
+        "fiscal_period_end": "2022-12-31",
+        "intangible_capex": 3696304000000.0,
+        "operating_cash_flow": 62181346000000.0,
+        "owner_cash_flow_proxy": 9054614000000.0,
+        "ppe_capex": 49430428000000.0,
+        "profit_attributable_to_owners": 54730018000000.0,
+        "profit_evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20230307000542#account=ifrs-full_ProfitLossAttributableToOwnersOfParent&field=thstrm_amount&scope=CFS",
+        "profit_observation_id": "DART:20230307000542:CFS:IS:DART_ACCOUNT:ifrs-full_ProfitLossAttributableToOwnersOfParent:CURRENT_PERIOD",
+        "source_observation_ids": [
+          "DART:20230307000542:CFS:CF:DART_ACCOUNT:ifrs-full_CashFlowsFromUsedInOperatingActivities:CURRENT_PERIOD",
+          "DART:20230307000542:CFS:CF:DART_ACCOUNT:ifrs-full_PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities:CURRENT_PERIOD",
+          "DART:20230307000542:CFS:CF:DART_ACCOUNT:ifrs-full_PurchaseOfIntangibleAssetsClassifiedAsInvestingActivities:CURRENT_PERIOD"
+        ]
+      },
+      "2023": {
+        "cash_conversion_ratio": -1.1328878402526124,
+        "fiscal_period_end": "2023-12-31",
+        "intangible_capex": 2922875000000.0,
+        "operating_cash_flow": 44137427000000.0,
+        "owner_cash_flow_proxy": -16396740000000.0,
+        "ppe_capex": 57611292000000.0,
+        "profit_attributable_to_owners": 14473401000000.0,
+        "profit_evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240312000736#account=ifrs-full_ProfitLossAttributableToOwnersOfParent&field=thstrm_amount&scope=CFS",
+        "profit_observation_id": "DART:20240312000736:CFS:IS:DART_ACCOUNT:ifrs-full_ProfitLossAttributableToOwnersOfParent:CURRENT_PERIOD",
+        "source_observation_ids": [
+          "DART:20240312000736:CFS:CF:DART_ACCOUNT:ifrs-full_CashFlowsFromUsedInOperatingActivities:CURRENT_PERIOD",
+          "DART:20240312000736:CFS:CF:DART_ACCOUNT:ifrs-full_PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities:CURRENT_PERIOD",
+          "DART:20240312000736:CFS:CF:DART_ACCOUNT:ifrs-full_PurchaseOfIntangibleAssetsClassifiedAsInvestingActivities:CURRENT_PERIOD"
+        ]
+      },
+      "2024": {
+        "cash_conversion_ratio": 0.572284413335652,
+        "fiscal_period_end": "2024-12-31",
+        "intangible_capex": 2335284000000.0,
+        "operating_cash_flow": 72982621000000.0,
+        "owner_cash_flow_proxy": 19240982000000.0,
+        "ppe_capex": 51406355000000.0,
+        "profit_attributable_to_owners": 33621363000000.0,
+        "profit_evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250311001085#account=ifrs-full_ProfitLossAttributableToOwnersOfParent&field=thstrm_amount&scope=CFS",
+        "profit_observation_id": "DART:20250311001085:CFS:IS:DART_ACCOUNT:ifrs-full_ProfitLossAttributableToOwnersOfParent:CURRENT_PERIOD",
+        "source_observation_ids": [
+          "DART:20250311001085:CFS:CF:DART_ACCOUNT:ifrs-full_CashFlowsFromUsedInOperatingActivities:CURRENT_PERIOD",
+          "DART:20250311001085:CFS:CF:DART_ACCOUNT:ifrs-full_PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities:CURRENT_PERIOD",
+          "DART:20250311001085:CFS:CF:DART_ACCOUNT:ifrs-full_PurchaseOfIntangibleAssetsClassifiedAsInvestingActivities:CURRENT_PERIOD"
+        ]
+      },
+      "2025": {
+        "cash_conversion_ratio": 0.7492381999159711,
+        "fiscal_period_end": "2025-12-31",
+        "intangible_capex": 4630970000000.0,
+        "operating_cash_flow": 85315148000000.0,
+        "owner_cash_flow_proxy": 33161999000000.0,
+        "ppe_capex": 47522179000000.0,
+        "profit_attributable_to_owners": 44260956000000.0,
+        "profit_evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260310002820#account=ifrs-full_ProfitLossAttributableToOwnersOfParent&field=thstrm_amount&scope=CFS",
+        "profit_observation_id": "DART:20260310002820:CFS:IS:DART_ACCOUNT:ifrs-full_ProfitLossAttributableToOwnersOfParent:CURRENT_PERIOD",
+        "source_observation_ids": [
+          "DART:20260310002820:CFS:CF:DART_ACCOUNT:ifrs-full_CashFlowsFromUsedInOperatingActivities:CURRENT_PERIOD",
+          "DART:20260310002820:CFS:CF:DART_ACCOUNT:ifrs-full_PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities:CURRENT_PERIOD",
+          "DART:20260310002820:CFS:CF:DART_ACCOUNT:ifrs-full_PurchaseOfIntangibleAssetsClassifiedAsInvestingActivities:CURRENT_PERIOD"
+        ]
+      }
+    },
+    "fy2025_owner_cash_flow_proxy": 33161999000000.0,
+    "h1_2025_owner_cash_flow_proxy": 6738441000000.0,
+    "h1_2026_owner_cash_flow_proxy": 112394910000000.0,
+    "implied_basic_shares": 6701128841.786526,
+    "implied_shares_is_accounting_approximation": true,
+    "ttm_cash_conversion": 0.92750207,
+    "ttm_owner_cash_flow_per_share": 20715.684070176885,
+    "ttm_owner_cash_flow_proxy": 138818468000000.0,
+    "ttm_profit_attributable_to_owners": 149669173000000.0
+  },
+  "cash_flow_dcf": {
+    "authority": {
+      "canonical_evidence_created": false,
+      "committee_decision_created": false,
+      "decision_plan_created": false,
+      "execution_authorized": false,
+      "live_order_possible": false,
+      "model_called": false,
+      "paper_authorized": false,
+      "portfolio_proposal_created": false,
+      "position_size_set": false,
+      "risk_opinion_created": false,
+      "thesis_validated": false
+    },
+    "case": {
+      "as_of": "2026-10-05T23:59:59+09:00",
+      "asset_id": "KRX:005930",
+      "case_id": "QT-CASE-002:KRX:005930",
+      "currency": "KRW",
+      "current_price": 276000.0,
+      "owner_cash_flow_per_share": 20715.684070176885,
+      "required_return_pct": 15.0,
+      "scenario_count": 3
+    },
+    "metrics": {
+      "expected_excess_over_hurdle_pct": -14.004991,
+      "expected_return_hurdle_met": false,
+      "expected_return_pct": 0.995009,
+      "fair_value_std": 82257.83644,
+      "highest_scenario_fair_value": 398207.41744,
+      "highest_scenario_return_pct": 44.27805,
+      "lowest_scenario_fair_value": 165725.472561,
+      "lowest_scenario_return_pct": -39.954539,
+      "probability_of_meeting_return_hurdle": 0.25,
+      "probability_of_price_loss": 0.75,
+      "required_return_pct": 15.0,
+      "weighted_fair_value": 278746.224658
+    },
+    "scenarios": [
+      {
+        "assumption_refs": [
+          "QT-CASE-002_PRE_REGISTRATION"
+        ],
+        "discount_rate_pct": 10.0,
+        "explicit_cash_flows_per_share": [
+          16572.54725614,
+          16572.54725614,
+          16572.54725614,
+          16572.54725614,
+          16572.54725614
+        ],
+        "explicit_growth_pct": 0.0,
+        "explicit_present_values_per_share": [
+          15065.95205104,
+          13696.3200464,
+          12451.20004218,
+          11319.27276562,
+          10290.24796874
+        ],
+        "explicit_years": 5,
+        "fair_value": 165725.47256142,
+        "input_kind": "ASSUMPTION",
+        "investment_authority": false,
+        "label": "Bear",
+        "probability": 0.25,
+        "scenario_id": "BEAR",
+        "scenario_return_pct": -39.954539,
+        "starting_cash_flow_factor": 0.8,
+        "starting_cash_flow_per_share": 16572.54725614,
+        "terminal_growth_pct": 0.0,
+        "terminal_present_value_per_share": 102902.47968744,
+        "terminal_value_per_share": 165725.47256142
+      },
+      {
+        "assumption_refs": [
+          "QT-CASE-002_PRE_REGISTRATION"
+        ],
+        "discount_rate_pct": 10.0,
+        "explicit_cash_flows_per_share": [
+          21337.15459228,
+          21977.26923005,
+          22636.58730695,
+          23315.68492616,
+          24015.15547395
+        ],
+        "explicit_growth_pct": 3.0,
+        "explicit_present_values_per_share": [
+          19397.41326571,
+          18163.03242153,
+          17007.20308561,
+          15924.92652562,
+          14911.52211035
+        ],
+        "explicit_years": 5,
+        "fair_value": 275526.00431584,
+        "input_kind": "ASSUMPTION",
+        "investment_authority": false,
+        "label": "Base",
+        "probability": 0.5,
+        "scenario_id": "BASE",
+        "scenario_return_pct": -0.171738,
+        "starting_cash_flow_factor": 1.0,
+        "starting_cash_flow_per_share": 20715.68407018,
+        "terminal_growth_pct": 2.0,
+        "terminal_present_value_per_share": 190121.90690701,
+        "terminal_value_per_share": 306193.23229281
+      },
+      {
+        "assumption_refs": [
+          "QT-CASE-002_PRE_REGISTRATION"
+        ],
+        "discount_rate_pct": 10.0,
+        "explicit_cash_flows_per_share": [
+          26101.76192842,
+          27406.85002484,
+          28777.19252609,
+          30216.05215239,
+          31726.85476001
+        ],
+        "explicit_growth_pct": 5.0,
+        "explicit_present_values_per_share": [
+          23728.87448038,
+          22650.28927673,
+          21620.73067324,
+          20637.9701881,
+          19699.88063409
+        ],
+        "explicit_years": 5,
+        "fair_value": 398207.41743988,
+        "input_kind": "ASSUMPTION",
+        "investment_authority": false,
+        "label": "Bull",
+        "probability": 0.25,
+        "scenario_id": "BULL",
+        "scenario_return_pct": 44.27805,
+        "starting_cash_flow_factor": 1.2,
+        "starting_cash_flow_per_share": 24858.82088421,
+        "terminal_growth_pct": 3.0,
+        "terminal_present_value_per_share": 289869.67218734,
+        "terminal_value_per_share": 466838.00575443
+      }
+    ],
+    "schema": "quantrade_cash_flow_dcf_v1",
+    "validation": {
+      "arithmetic_only": true,
+      "assumptions_validated_as_true": false,
+      "cash_flow_positive": true,
+      "discount_rate_exceeds_terminal_growth": true,
+      "probability_sum": 1.0,
+      "probability_tolerance": 1e-06,
+      "scenario_ids_unique": true
+    }
+  },
+  "counter_research": {
+    "annual_cash_conversion": [
+      {
+        "cash_conversion_ratio": 0.16544146,
+        "fiscal_year": 2022,
+        "owner_cash_flow_proxy": 9054614000000.0,
+        "profit_attributable_to_owners": 54730018000000.0
+      },
+      {
+        "cash_conversion_ratio": -1.13288784,
+        "fiscal_year": 2023,
+        "owner_cash_flow_proxy": -16396740000000.0,
+        "profit_attributable_to_owners": 14473401000000.0
+      },
+      {
+        "cash_conversion_ratio": 0.57228441,
+        "fiscal_year": 2024,
+        "owner_cash_flow_proxy": 19240982000000.0,
+        "profit_attributable_to_owners": 33621363000000.0
+      },
+      {
+        "cash_conversion_ratio": 0.7492382,
+        "fiscal_year": 2025,
+        "owner_cash_flow_proxy": 33161999000000.0,
+        "profit_attributable_to_owners": 44260956000000.0
+      }
+    ],
+    "authority": {
+      "canonical_evidence_created": false,
+      "committee_decision_created": false,
+      "execution_authorized": false,
+      "live_order_possible": false,
+      "model_called": false,
+      "portfolio_proposal_created": false,
+      "risk_opinion_created": false,
+      "thesis_truth_validated": false
+    },
+    "case_id": "QT-CASE-002:KRX:005930",
+    "flags": [
+      "HIGH_MULTIPLE_REGIME_DISPERSION",
+      "NEGATIVE_OWNER_CASH_FLOW_YEAR",
+      "WEAK_MEDIAN_CASH_CONVERSION",
+      "CURRENT_PB_ABOVE_HISTORICAL_P75"
+    ],
+    "metrics": {
+      "current_pb": 4.35883522,
+      "historical_pb_p75": 1.59029772,
+      "median_annual_cash_conversion": 0.36886294,
+      "multiple_dispersion_ratio": 5.36703515,
+      "negative_cash_flow_years": [
+        2023
+      ],
+      "ttm_cash_conversion": 0.92750207
+    },
+    "policy": {
+      "cash_conversion_threshold": 0.75,
+      "multiple_dispersion_ratio_threshold": 4.0
+    },
+    "schema": "quantrade_fundamental_counter_research_v1",
+    "status": "MATERIAL_COUNTER_EVIDENCE"
+  },
+  "cross_method": {
+    "classification": "CROSS_METHOD_MIXED",
+    "dcf_expected_return_pct": 0.995009,
+    "dcf_weighted_fair_value": 278746.224658,
+    "lower_of_two_rule": true,
+    "pe_expected_return_pct": 31.391408,
+    "pe_weighted_fair_value": 362640.286054,
+    "scenario_comparison": {
+      "BASE": {
+        "binding_method": "DCF",
+        "dcf_fair_value": 275526.00431584,
+        "pe_fair_value": 326950.1030899456,
+        "robust_lower_of_two_fair_value": 275526.00431584
+      },
+      "BEAR": {
+        "binding_method": "DCF",
+        "dcf_fair_value": 165725.47256142,
+        "pe_fair_value": 176962.56674828214,
+        "robust_lower_of_two_fair_value": 165725.47256142
+      },
+      "BULL": {
+        "binding_method": "DCF",
+        "dcf_fair_value": 398207.41743988,
+        "pe_fair_value": 619698.3712877671,
+        "robust_lower_of_two_fair_value": 398207.41743988
+      }
+    }
+  },
+  "experiment_id": "QT-CASE-002",
+  "historical_pb": {
+    "current_pb": 4.358835220297516,
+    "p25": 1.0326988747899835,
+    "p50": 1.2813759459038474,
+    "p75": 1.5902977221392698,
+    "rows": [
+      {
+        "bvps": 51511.64082199219,
+        "equity_evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20230307000542#account=ifrs-full_EquityAttributableToOwnersOfParent&field=thstrm_amount&scope=CFS",
+        "equity_observation_id": "DART:20230307000542:CFS:BS:DART_ACCOUNT:ifrs-full_EquityAttributableToOwnersOfParent:CURRENT_PERIOD",
+        "parent_equity": 345186142000000.0,
+        "pb": 1.0735437488993833,
+        "price_date": "2022-12-29",
+        "year": 2022,
+        "year_end_close": 55300.0
+      },
+      {
+        "bvps": 52712.57773724996,
+        "equity_evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240312000736#account=ifrs-full_EquityAttributableToOwnersOfParent&field=thstrm_amount&scope=CFS",
+        "equity_observation_id": "DART:20240312000736:CFS:BS:DART_ACCOUNT:ifrs-full_EquityAttributableToOwnersOfParent:CURRENT_PERIOD",
+        "parent_equity": 353233775000000.0,
+        "pb": 1.4892081429083113,
+        "price_date": "2023-12-28",
+        "year": 2023,
+        "year_end_close": 78500.0
+      },
+      {
+        "bvps": 58450.98822119884,
+        "equity_evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250311001085#account=ifrs-full_EquityAttributableToOwnersOfParent&field=thstrm_amount&scope=CFS",
+        "equity_observation_id": "DART:20250311001085:CFS:BS:DART_ACCOUNT:ifrs-full_EquityAttributableToOwnersOfParent:CURRENT_PERIOD",
+        "parent_equity": 391687603000000.0,
+        "pb": 0.9101642524617843,
+        "price_date": "2024-12-30",
+        "year": 2024,
+        "year_end_close": 53200.0
+      },
+      {
+        "bvps": 63319.66822576087,
+        "equity_evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260310002820#account=ifrs-full_EquityAttributableToOwnersOfParent&field=thstrm_amount&scope=CFS",
+        "equity_observation_id": "DART:20260310002820:CFS:BS:DART_ACCOUNT:ifrs-full_EquityAttributableToOwnersOfParent:CURRENT_PERIOD",
+        "parent_equity": 424313255000000.0,
+        "pb": 1.8935664598321456,
+        "price_date": "2025-12-30",
+        "year": 2025,
+        "year_end_close": 119900.0
+      }
+    ]
+  },
+  "mode": "RESEARCH_PAPER_ONLY",
+  "operational_result": {
+    "analyst_consensus_used": false,
+    "known_case_robustness_challenge": true,
+    "model_calls": 0,
+    "portfolio_context_is_synthetic": true,
+    "private_client_context_used": false,
+    "real_company_data": true,
+    "risk_context_is_synthetic": true,
+    "risk_invoked": false,
+    "success": true
+  },
+  "portfolio_sandbox": {
+    "alternatives": [
+      {
+        "alternative_id": "SANDBOX-CASH",
+        "alternative_type": "CASH",
+        "basis_refs": [
+          "QT-CASE-002_PRE_REGISTRATION:SANDBOX"
+        ],
+        "downside_pct": 0.0,
+        "expected_return_pct": 3.0,
+        "input_kind": "ALTERNATIVE_EXPECTATION",
+        "investment_authority": false
+      },
+      {
+        "alternative_id": "SANDBOX-CORE",
+        "alternative_type": "CORE_BENCHMARK",
+        "basis_refs": [
+          "QT-CASE-002_PRE_REGISTRATION:SANDBOX"
+        ],
+        "downside_pct": null,
+        "expected_return_pct": 8.0,
+        "input_kind": "ALTERNATIVE_EXPECTATION",
+        "investment_authority": false
+      }
+    ],
+    "authority": {
+      "canonical_evidence_created": false,
+      "committee_decision_created": false,
+      "decision_plan_created": false,
+      "execution_authorized": false,
+      "live_order_possible": false,
+      "model_called": false,
+      "paper_authorized": false,
+      "portfolio_proposal_created": false,
+      "portfolio_review_eligibility_created": true,
+      "risk_limit_changed": false,
+      "risk_opinion_created": false,
+      "target_weight_set": false,
+      "thesis_validated": false
+    },
+    "capital_headroom": {
+      "candidate_downside_pct": -39.954539,
+      "concentration_headroom_pct": 10.0,
+      "deterministic_upper_bound_pct": 5.005689,
+      "liquidity_headroom_pct": 10.0,
+      "risk_limited_headroom_pct": 5.005689,
+      "target_weight_proposed": false,
+      "upper_bound_is_not_target_weight": true
+    },
+    "case_id": "QT-CASE-002:KRX:005930",
+    "constraints": {
+      "as_of": "2026-10-05T23:00:00+09:00",
+      "available_downside_budget_pct": 2.0,
+      "constraint_refs": [
+        "QT-CASE-002_PRE_REGISTRATION:SANDBOX"
+      ],
+      "current_asset_weight_pct": 0.0,
+      "current_liquidity_pct": 20.0,
+      "mandate_allows_new_exposure": true,
+      "mandate_ref": "QT-CASE-002_PRE_REGISTRATION:SANDBOX",
+      "max_asset_weight_pct": 10.0,
+      "minimum_liquidity_reserve_pct": 10.0,
+      "snapshot_id": "QT-CASE-002-SANDBOX-PORTFOLIO"
+    },
+    "opportunity_cost": {
+      "alternative_count": 2,
+      "best_alternative_expected_return_pct": 8.0,
+      "best_alternative_id": "SANDBOX-CORE",
+      "best_alternative_type": "CORE_BENCHMARK",
+      "candidate_excess_vs_best_alternative_pct": -7.004991,
+      "candidate_expected_return_pct": 0.995009,
+      "investment_score_created": false,
+      "return_competition_evaluated": true
+    },
+    "reasons": [
+      "CASE_RETURN_HURDLE_NOT_MET",
+      "DOES_NOT_BEAT_BEST_CAPITAL_ALTERNATIVE"
+    ],
+    "schema": "quantrade_portfolio_opportunity_v1",
+    "status": "NOT_COMPETITIVE"
+  },
+  "preregistration_commit": "63325f10b4e4da6d5daa1b9510dbe45cab157bcb",
+  "risk_sandbox": null,
+  "robust_investment_case_economics": {
+    "authority": {
+      "canonical_evidence_created": false,
+      "committee_decision_created": false,
+      "decision_plan_created": false,
+      "execution_authorized": false,
+      "live_order_possible": false,
+      "model_called": false,
+      "paper_authorized": false,
+      "portfolio_proposal_created": false,
+      "position_size_set": false,
+      "risk_limit_changed": false,
+      "risk_opinion_created": false,
+      "thesis_validated": false
+    },
+    "case": {
+      "as_of": "2026-10-05T23:59:59+09:00",
+      "asset_id": "KRX:005930",
+      "case_id": "QT-CASE-002:KRX:005930",
+      "currency": "KRW",
+      "current_price": 276000.0,
+      "required_return_pct": 15.0,
+      "scenario_count": 3,
+      "valuation_horizon_days": 365
+    },
+    "consensus_comparison": null,
+    "metrics": {
+      "expected_excess_over_hurdle_pct": -14.004991,
+      "expected_return_hurdle_met": false,
+      "expected_return_pct": 0.995009,
+      "fair_value_std": 82257.83644,
+      "highest_scenario_fair_value": 398207.41744,
+      "highest_scenario_return_pct": 44.27805,
+      "lowest_scenario_fair_value": 165725.472561,
+      "lowest_scenario_return_pct": -39.954539,
+      "probability_of_meeting_return_hurdle": 0.25,
+      "probability_of_price_loss": 0.75,
+      "required_return_pct": 15.0,
+      "scenario_dispersion_pct_of_current": 29.803564,
+      "weighted_fair_value": 278746.224658
+    },
+    "scenarios": [
+      {
+        "assumption_refs": [
+          "QT-CASE-001_RESULT",
+          "QT-CASE-002_PRE_REGISTRATION"
+        ],
+        "evidence_refs": [],
+        "fair_value": 165725.47256142,
+        "input_kind": "ASSUMPTION",
+        "investment_authority": false,
+        "label": "Bear",
+        "probability": 0.25,
+        "scenario_id": "BEAR",
+        "scenario_return_pct": -39.954539,
+        "thesis_note": "QT-CASE-002 preregistered lower-of-two cross-method scenario value."
+      },
+      {
+        "assumption_refs": [
+          "QT-CASE-001_RESULT",
+          "QT-CASE-002_PRE_REGISTRATION"
+        ],
+        "evidence_refs": [],
+        "fair_value": 275526.00431584,
+        "input_kind": "ASSUMPTION",
+        "investment_authority": false,
+        "label": "Base",
+        "probability": 0.5,
+        "scenario_id": "BASE",
+        "scenario_return_pct": -0.171738,
+        "thesis_note": "QT-CASE-002 preregistered lower-of-two cross-method scenario value."
+      },
+      {
+        "assumption_refs": [
+          "QT-CASE-001_RESULT",
+          "QT-CASE-002_PRE_REGISTRATION"
+        ],
+        "evidence_refs": [],
+        "fair_value": 398207.41743988,
+        "input_kind": "ASSUMPTION",
+        "investment_authority": false,
+        "label": "Bull",
+        "probability": 0.25,
+        "scenario_id": "BULL",
+        "scenario_return_pct": 44.27805,
+        "thesis_note": "QT-CASE-002 preregistered lower-of-two cross-method scenario value."
+      }
+    ],
+    "schema": "quantrade_investment_case_economics_v1",
+    "validation": {
+      "arithmetic_only": true,
+      "assumptions_validated_as_true": false,
+      "currency_explicit": true,
+      "current_price_positive": true,
+      "fair_values_positive": true,
+      "probability_sum": 1.0,
+      "probability_tolerance": 1e-06,
+      "scenario_ids_unique": true,
+      "valuation_horizon_explicit": true
+    }
+  },
+  "schema": "quantrade_qt_case_002_result_v1",
+  "source_integrity": {
+    "fundamental_observation_count": 59,
+    "fundamental_payload_sha256": "9f40e55a9904feaf058859b0818a7e5ab1d08e78ceece483553d72a6d8f4fc99",
+    "open_dart_provider": {
+      "api_key_persisted": false,
+      "capital_authority": false,
+      "corp_code": "00126380",
+      "corp_code_resolution": "SEEDED_VERIFIED_MAPPING",
+      "historical_correction_policy": "FAIL_CLOSED_UNTIL_XBRL_BY_RECEIPT",
+      "model_required": false,
+      "network_required": true,
+      "point_in_time_capable": true,
+      "provider_id": "OPEN_DART",
+      "provider_version": "fnlttSinglAcntAll+list+corpCode:v1",
+      "publication_time_precision": "DATE_CONSERVATIVE_EOD_KST",
+      "source_license": "Open DART public API; verify source filing",
+      "stock_code": "005930"
+    },
+    "price_after_case_cutoff_used": false,
+    "price_source": {
+      "endpoint": "https://api.finance.naver.com/siseJson.naver",
+      "first_trading_date": "2022-01-03",
+      "http_status": 200,
+      "last_trading_date": "2026-10-02",
+      "params": {
+        "endTime": "20261005",
+        "requestType": 1,
+        "startTime": "20220101",
+        "symbol": "005930",
+        "timeframe": "day"
+      },
+      "provider": "naver-finance-historical",
+      "row_count": 1161,
+      "sha256": "8645ff61be8fabe204727aa8e8632a1702454533b878684696ab620db1e2b747"
+    },
+    "qt_case_001_result_sha256": "6c198387524b18ef79f6bee7108774ac54a8a8cc3aff7dea4d54e9bbdee4bb36",
+    "selected_evidence": [
+      {
+        "evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20230307000542#account=ifrs-full_CashFlowsFromUsedInOperatingActivities&field=thstrm_amount&scope=CFS",
+        "fiscal_period_end": "2022-12-31",
+        "metric_key": "DART_ACCOUNT:ifrs-full_CashFlowsFromUsedInOperatingActivities:CF:CURRENT_PERIOD",
+        "observation_id": "DART:20230307000542:CFS:CF:DART_ACCOUNT:ifrs-full_CashFlowsFromUsedInOperatingActivities:CURRENT_PERIOD",
+        "published_at": "2023-03-07T23:59:59+09:00",
+        "restated": false,
+        "source_document_id": "20230307000542",
+        "unit": "KRW",
+        "value": 62181346000000.0
+      },
+      {
+        "evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20230307000542#account=ifrs-full_EquityAttributableToOwnersOfParent&field=thstrm_amount&scope=CFS",
+        "fiscal_period_end": "2022-12-31",
+        "metric_key": "DART_ACCOUNT:ifrs-full_EquityAttributableToOwnersOfParent:BS:CURRENT_PERIOD",
+        "observation_id": "DART:20230307000542:CFS:BS:DART_ACCOUNT:ifrs-full_EquityAttributableToOwnersOfParent:CURRENT_PERIOD",
+        "published_at": "2023-03-07T23:59:59+09:00",
+        "restated": false,
+        "source_document_id": "20230307000542",
+        "unit": "KRW",
+        "value": 345186142000000.0
+      },
+      {
+        "evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20230307000542#account=ifrs-full_ProfitLossAttributableToOwnersOfParent&field=thstrm_amount&scope=CFS",
+        "fiscal_period_end": "2022-12-31",
+        "metric_key": "DART_ACCOUNT:ifrs-full_ProfitLossAttributableToOwnersOfParent:IS:CURRENT_PERIOD",
+        "observation_id": "DART:20230307000542:CFS:IS:DART_ACCOUNT:ifrs-full_ProfitLossAttributableToOwnersOfParent:CURRENT_PERIOD",
+        "published_at": "2023-03-07T23:59:59+09:00",
+        "restated": false,
+        "source_document_id": "20230307000542",
+        "unit": "KRW",
+        "value": 54730018000000.0
+      },
+      {
+        "evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20230307000542#account=ifrs-full_PurchaseOfIntangibleAssetsClassifiedAsInvestingActivities&field=thstrm_amount&scope=CFS",
+        "fiscal_period_end": "2022-12-31",
+        "metric_key": "DART_ACCOUNT:ifrs-full_PurchaseOfIntangibleAssetsClassifiedAsInvestingActivities:CF:CURRENT_PERIOD",
+        "observation_id": "DART:20230307000542:CFS:CF:DART_ACCOUNT:ifrs-full_PurchaseOfIntangibleAssetsClassifiedAsInvestingActivities:CURRENT_PERIOD",
+        "published_at": "2023-03-07T23:59:59+09:00",
+        "restated": false,
+        "source_document_id": "20230307000542",
+        "unit": "KRW",
+        "value": 3696304000000.0
+      },
+      {
+        "evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20230307000542#account=ifrs-full_PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities&field=thstrm_amount&scope=CFS",
+        "fiscal_period_end": "2022-12-31",
+        "metric_key": "DART_ACCOUNT:ifrs-full_PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities:CF:CURRENT_PERIOD",
+        "observation_id": "DART:20230307000542:CFS:CF:DART_ACCOUNT:ifrs-full_PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities:CURRENT_PERIOD",
+        "published_at": "2023-03-07T23:59:59+09:00",
+        "restated": false,
+        "source_document_id": "20230307000542",
+        "unit": "KRW",
+        "value": 49430428000000.0
+      },
+      {
+        "evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240312000736#account=ifrs-full_CashFlowsFromUsedInOperatingActivities&field=thstrm_amount&scope=CFS",
+        "fiscal_period_end": "2023-12-31",
+        "metric_key": "DART_ACCOUNT:ifrs-full_CashFlowsFromUsedInOperatingActivities:CF:CURRENT_PERIOD",
+        "observation_id": "DART:20240312000736:CFS:CF:DART_ACCOUNT:ifrs-full_CashFlowsFromUsedInOperatingActivities:CURRENT_PERIOD",
+        "published_at": "2024-03-12T23:59:59+09:00",
+        "restated": false,
+        "source_document_id": "20240312000736",
+        "unit": "KRW",
+        "value": 44137427000000.0
+      },
+      {
+        "evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240312000736#account=ifrs-full_EquityAttributableToOwnersOfParent&field=thstrm_amount&scope=CFS",
+        "fiscal_period_end": "2023-12-31",
+        "metric_key": "DART_ACCOUNT:ifrs-full_EquityAttributableToOwnersOfParent:BS:CURRENT_PERIOD",
+        "observation_id": "DART:20240312000736:CFS:BS:DART_ACCOUNT:ifrs-full_EquityAttributableToOwnersOfParent:CURRENT_PERIOD",
+        "published_at": "2024-03-12T23:59:59+09:00",
+        "restated": false,
+        "source_document_id": "20240312000736",
+        "unit": "KRW",
+        "value": 353233775000000.0
+      },
+      {
+        "evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240312000736#account=ifrs-full_ProfitLossAttributableToOwnersOfParent&field=thstrm_amount&scope=CFS",
+        "fiscal_period_end": "2023-12-31",
+        "metric_key": "DART_ACCOUNT:ifrs-full_ProfitLossAttributableToOwnersOfParent:IS:CURRENT_PERIOD",
+        "observation_id": "DART:20240312000736:CFS:IS:DART_ACCOUNT:ifrs-full_ProfitLossAttributableToOwnersOfParent:CURRENT_PERIOD",
+        "published_at": "2024-03-12T23:59:59+09:00",
+        "restated": false,
+        "source_document_id": "20240312000736",
+        "unit": "KRW",
+        "value": 14473401000000.0
+      },
+      {
+        "evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240312000736#account=ifrs-full_PurchaseOfIntangibleAssetsClassifiedAsInvestingActivities&field=thstrm_amount&scope=CFS",
+        "fiscal_period_end": "2023-12-31",
+        "metric_key": "DART_ACCOUNT:ifrs-full_PurchaseOfIntangibleAssetsClassifiedAsInvestingActivities:CF:CURRENT_PERIOD",
+        "observation_id": "DART:20240312000736:CFS:CF:DART_ACCOUNT:ifrs-full_PurchaseOfIntangibleAssetsClassifiedAsInvestingActivities:CURRENT_PERIOD",
+        "published_at": "2024-03-12T23:59:59+09:00",
+        "restated": false,
+        "source_document_id": "20240312000736",
+        "unit": "KRW",
+        "value": 2922875000000.0
+      },
+      {
+        "evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240312000736#account=ifrs-full_PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities&field=thstrm_amount&scope=CFS",
+        "fiscal_period_end": "2023-12-31",
+        "metric_key": "DART_ACCOUNT:ifrs-full_PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities:CF:CURRENT_PERIOD",
+        "observation_id": "DART:20240312000736:CFS:CF:DART_ACCOUNT:ifrs-full_PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities:CURRENT_PERIOD",
+        "published_at": "2024-03-12T23:59:59+09:00",
+        "restated": false,
+        "source_document_id": "20240312000736",
+        "unit": "KRW",
+        "value": 57611292000000.0
+      },
+      {
+        "evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250311001085#account=ifrs-full_CashFlowsFromUsedInOperatingActivities&field=thstrm_amount&scope=CFS",
+        "fiscal_period_end": "2024-12-31",
+        "metric_key": "DART_ACCOUNT:ifrs-full_CashFlowsFromUsedInOperatingActivities:CF:CURRENT_PERIOD",
+        "observation_id": "DART:20250311001085:CFS:CF:DART_ACCOUNT:ifrs-full_CashFlowsFromUsedInOperatingActivities:CURRENT_PERIOD",
+        "published_at": "2025-03-11T23:59:59+09:00",
+        "restated": false,
+        "source_document_id": "20250311001085",
+        "unit": "KRW",
+        "value": 72982621000000.0
+      },
+      {
+        "evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250311001085#account=ifrs-full_EquityAttributableToOwnersOfParent&field=thstrm_amount&scope=CFS",
+        "fiscal_period_end": "2024-12-31",
+        "metric_key": "DART_ACCOUNT:ifrs-full_EquityAttributableToOwnersOfParent:BS:CURRENT_PERIOD",
+        "observation_id": "DART:20250311001085:CFS:BS:DART_ACCOUNT:ifrs-full_EquityAttributableToOwnersOfParent:CURRENT_PERIOD",
+        "published_at": "2025-03-11T23:59:59+09:00",
+        "restated": false,
+        "source_document_id": "20250311001085",
+        "unit": "KRW",
+        "value": 391687603000000.0
+      },
+      {
+        "evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250311001085#account=ifrs-full_ProfitLossAttributableToOwnersOfParent&field=thstrm_amount&scope=CFS",
+        "fiscal_period_end": "2024-12-31",
+        "metric_key": "DART_ACCOUNT:ifrs-full_ProfitLossAttributableToOwnersOfParent:IS:CURRENT_PERIOD",
+        "observation_id": "DART:20250311001085:CFS:IS:DART_ACCOUNT:ifrs-full_ProfitLossAttributableToOwnersOfParent:CURRENT_PERIOD",
+        "published_at": "2025-03-11T23:59:59+09:00",
+        "restated": false,
+        "source_document_id": "20250311001085",
+        "unit": "KRW",
+        "value": 33621363000000.0
+      },
+      {
+        "evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250311001085#account=ifrs-full_PurchaseOfIntangibleAssetsClassifiedAsInvestingActivities&field=thstrm_amount&scope=CFS",
+        "fiscal_period_end": "2024-12-31",
+        "metric_key": "DART_ACCOUNT:ifrs-full_PurchaseOfIntangibleAssetsClassifiedAsInvestingActivities:CF:CURRENT_PERIOD",
+        "observation_id": "DART:20250311001085:CFS:CF:DART_ACCOUNT:ifrs-full_PurchaseOfIntangibleAssetsClassifiedAsInvestingActivities:CURRENT_PERIOD",
+        "published_at": "2025-03-11T23:59:59+09:00",
+        "restated": false,
+        "source_document_id": "20250311001085",
+        "unit": "KRW",
+        "value": 2335284000000.0
+      },
+      {
+        "evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250311001085#account=ifrs-full_PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities&field=thstrm_amount&scope=CFS",
+        "fiscal_period_end": "2024-12-31",
+        "metric_key": "DART_ACCOUNT:ifrs-full_PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities:CF:CURRENT_PERIOD",
+        "observation_id": "DART:20250311001085:CFS:CF:DART_ACCOUNT:ifrs-full_PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities:CURRENT_PERIOD",
+        "published_at": "2025-03-11T23:59:59+09:00",
+        "restated": false,
+        "source_document_id": "20250311001085",
+        "unit": "KRW",
+        "value": 51406355000000.0
+      },
+      {
+        "evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250814003156#account=ifrs-full_CashFlowsFromUsedInOperatingActivities&field=thstrm_amount&scope=CFS",
+        "fiscal_period_end": "2025-06-30",
+        "metric_key": "DART_ACCOUNT:ifrs-full_CashFlowsFromUsedInOperatingActivities:CF:CURRENT_PERIOD",
+        "observation_id": "DART:20250814003156:CFS:CF:DART_ACCOUNT:ifrs-full_CashFlowsFromUsedInOperatingActivities:CURRENT_PERIOD",
+        "published_at": "2025-08-14T23:59:59+09:00",
+        "restated": false,
+        "source_document_id": "20250814003156",
+        "unit": "KRW",
+        "value": 33941002000000.0
+      },
+      {
+        "evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250814003156#account=ifrs-full_ProfitLossAttributableToOwnersOfParent&field=thstrm_add_amount&scope=CFS",
+        "fiscal_period_end": "2025-06-30",
+        "metric_key": "DART_ACCOUNT:ifrs-full_ProfitLossAttributableToOwnersOfParent:IS:CURRENT_YTD",
+        "observation_id": "DART:20250814003156:CFS:IS:DART_ACCOUNT:ifrs-full_ProfitLossAttributableToOwnersOfParent:CURRENT_YTD",
+        "published_at": "2025-08-14T23:59:59+09:00",
+        "restated": false,
+        "source_document_id": "20250814003156",
+        "unit": "KRW",
+        "value": 12962441000000.0
+      },
+      {
+        "evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250814003156#account=ifrs-full_PurchaseOfIntangibleAssetsClassifiedAsInvestingActivities&field=thstrm_amount&scope=CFS",
+        "fiscal_period_end": "2025-06-30",
+        "metric_key": "DART_ACCOUNT:ifrs-full_PurchaseOfIntangibleAssetsClassifiedAsInvestingActivities:CF:CURRENT_PERIOD",
+        "observation_id": "DART:20250814003156:CFS:CF:DART_ACCOUNT:ifrs-full_PurchaseOfIntangibleAssetsClassifiedAsInvestingActivities:CURRENT_PERIOD",
+        "published_at": "2025-08-14T23:59:59+09:00",
+        "restated": false,
+        "source_document_id": "20250814003156",
+        "unit": "KRW",
+        "value": 2039179000000.0
+      },
+      {
+        "evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250814003156#account=ifrs-full_PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities&field=thstrm_amount&scope=CFS",
+        "fiscal_period_end": "2025-06-30",
+        "metric_key": "DART_ACCOUNT:ifrs-full_PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities:CF:CURRENT_PERIOD",
+        "observation_id": "DART:20250814003156:CFS:CF:DART_ACCOUNT:ifrs-full_PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities:CURRENT_PERIOD",
+        "published_at": "2025-08-14T23:59:59+09:00",
+        "restated": false,
+        "source_document_id": "20250814003156",
+        "unit": "KRW",
+        "value": 25163382000000.0
+      },
+      {
+        "evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260310002820#account=ifrs-full_BasicEarningsLossPerShare&field=thstrm_amount&scope=CFS",
+        "fiscal_period_end": "2025-12-31",
+        "metric_key": "DART_ACCOUNT:ifrs-full_BasicEarningsLossPerShare:IS:CURRENT_PERIOD",
+        "observation_id": "DART:20260310002820:CFS:IS:DART_ACCOUNT:ifrs-full_BasicEarningsLossPerShare:CURRENT_PERIOD",
+        "published_at": "2026-03-10T23:59:59+09:00",
+        "restated": false,
+        "source_document_id": "20260310002820",
+        "unit": "KRW",
+        "value": 6605.0
+      },
+      {
+        "evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260310002820#account=ifrs-full_CashFlowsFromUsedInOperatingActivities&field=thstrm_amount&scope=CFS",
+        "fiscal_period_end": "2025-12-31",
+        "metric_key": "DART_ACCOUNT:ifrs-full_CashFlowsFromUsedInOperatingActivities:CF:CURRENT_PERIOD",
+        "observation_id": "DART:20260310002820:CFS:CF:DART_ACCOUNT:ifrs-full_CashFlowsFromUsedInOperatingActivities:CURRENT_PERIOD",
+        "published_at": "2026-03-10T23:59:59+09:00",
+        "restated": false,
+        "source_document_id": "20260310002820",
+        "unit": "KRW",
+        "value": 85315148000000.0
+      },
+      {
+        "evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260310002820#account=ifrs-full_EquityAttributableToOwnersOfParent&field=thstrm_amount&scope=CFS",
+        "fiscal_period_end": "2025-12-31",
+        "metric_key": "DART_ACCOUNT:ifrs-full_EquityAttributableToOwnersOfParent:BS:CURRENT_PERIOD",
+        "observation_id": "DART:20260310002820:CFS:BS:DART_ACCOUNT:ifrs-full_EquityAttributableToOwnersOfParent:CURRENT_PERIOD",
+        "published_at": "2026-03-10T23:59:59+09:00",
+        "restated": false,
+        "source_document_id": "20260310002820",
+        "unit": "KRW",
+        "value": 424313255000000.0
+      },
+      {
+        "evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260310002820#account=ifrs-full_ProfitLossAttributableToOwnersOfParent&field=thstrm_amount&scope=CFS",
+        "fiscal_period_end": "2025-12-31",
+        "metric_key": "DART_ACCOUNT:ifrs-full_ProfitLossAttributableToOwnersOfParent:IS:CURRENT_PERIOD",
+        "observation_id": "DART:20260310002820:CFS:IS:DART_ACCOUNT:ifrs-full_ProfitLossAttributableToOwnersOfParent:CURRENT_PERIOD",
+        "published_at": "2026-03-10T23:59:59+09:00",
+        "restated": false,
+        "source_document_id": "20260310002820",
+        "unit": "KRW",
+        "value": 44260956000000.0
+      },
+      {
+        "evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260310002820#account=ifrs-full_PurchaseOfIntangibleAssetsClassifiedAsInvestingActivities&field=thstrm_amount&scope=CFS",
+        "fiscal_period_end": "2025-12-31",
+        "metric_key": "DART_ACCOUNT:ifrs-full_PurchaseOfIntangibleAssetsClassifiedAsInvestingActivities:CF:CURRENT_PERIOD",
+        "observation_id": "DART:20260310002820:CFS:CF:DART_ACCOUNT:ifrs-full_PurchaseOfIntangibleAssetsClassifiedAsInvestingActivities:CURRENT_PERIOD",
+        "published_at": "2026-03-10T23:59:59+09:00",
+        "restated": false,
+        "source_document_id": "20260310002820",
+        "unit": "KRW",
+        "value": 4630970000000.0
+      },
+      {
+        "evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260310002820#account=ifrs-full_PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities&field=thstrm_amount&scope=CFS",
+        "fiscal_period_end": "2025-12-31",
+        "metric_key": "DART_ACCOUNT:ifrs-full_PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities:CF:CURRENT_PERIOD",
+        "observation_id": "DART:20260310002820:CFS:CF:DART_ACCOUNT:ifrs-full_PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities:CURRENT_PERIOD",
+        "published_at": "2026-03-10T23:59:59+09:00",
+        "restated": false,
+        "source_document_id": "20260310002820",
+        "unit": "KRW",
+        "value": 47522179000000.0
+      },
+      {
+        "evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260814003699#account=ifrs-full_CashFlowsFromUsedInOperatingActivities&field=thstrm_amount&scope=CFS",
+        "fiscal_period_end": "2026-06-30",
+        "metric_key": "DART_ACCOUNT:ifrs-full_CashFlowsFromUsedInOperatingActivities:CF:CURRENT_PERIOD",
+        "observation_id": "DART:20260814003699:CFS:CF:DART_ACCOUNT:ifrs-full_CashFlowsFromUsedInOperatingActivities:CURRENT_PERIOD",
+        "published_at": "2026-08-14T23:59:59+09:00",
+        "restated": false,
+        "source_document_id": "20260814003699",
+        "unit": "KRW",
+        "value": 145355192000000.0
+      },
+      {
+        "evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260814003699#account=ifrs-full_ProfitLossAttributableToOwnersOfParent&field=thstrm_add_amount&scope=CFS",
+        "fiscal_period_end": "2026-06-30",
+        "metric_key": "DART_ACCOUNT:ifrs-full_ProfitLossAttributableToOwnersOfParent:IS:CURRENT_YTD",
+        "observation_id": "DART:20260814003699:CFS:IS:DART_ACCOUNT:ifrs-full_ProfitLossAttributableToOwnersOfParent:CURRENT_YTD",
+        "published_at": "2026-08-14T23:59:59+09:00",
+        "restated": false,
+        "source_document_id": "20260814003699",
+        "unit": "KRW",
+        "value": 118370658000000.0
+      },
+      {
+        "evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260814003699#account=ifrs-full_PurchaseOfIntangibleAssetsClassifiedAsInvestingActivities&field=thstrm_amount&scope=CFS",
+        "fiscal_period_end": "2026-06-30",
+        "metric_key": "DART_ACCOUNT:ifrs-full_PurchaseOfIntangibleAssetsClassifiedAsInvestingActivities:CF:CURRENT_PERIOD",
+        "observation_id": "DART:20260814003699:CFS:CF:DART_ACCOUNT:ifrs-full_PurchaseOfIntangibleAssetsClassifiedAsInvestingActivities:CURRENT_PERIOD",
+        "published_at": "2026-08-14T23:59:59+09:00",
+        "restated": false,
+        "source_document_id": "20260814003699",
+        "unit": "KRW",
+        "value": 1725464000000.0
+      },
+      {
+        "evidence_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260814003699#account=ifrs-full_PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities&field=thstrm_amount&scope=CFS",
+        "fiscal_period_end": "2026-06-30",
+        "metric_key": "DART_ACCOUNT:ifrs-full_PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities:CF:CURRENT_PERIOD",
+        "observation_id": "DART:20260814003699:CFS:CF:DART_ACCOUNT:ifrs-full_PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities:CURRENT_PERIOD",
+        "published_at": "2026-08-14T23:59:59+09:00",
+        "restated": false,
+        "source_document_id": "20260814003699",
+        "unit": "KRW",
+        "value": 31234818000000.0
+      }
+    ]
+  },
+  "thesis_contract": {
+    "as_of": "2026-10-05T23:59:59+09:00",
+    "authority": {
+      "canonical_evidence_created": false,
+      "committee_decision_created": false,
+      "decision_plan_created": false,
+      "execution_authorized": false,
+      "live_order_possible": false,
+      "model_called": false,
+      "paper_authorized": false,
+      "portfolio_proposal_created": false,
+      "position_size_set": false,
+      "risk_opinion_created": false,
+      "thesis_truth_validated": false
+    },
+    "case_id": "QT-CASE-002:KRX:005930",
+    "completeness": {
+      "all_theses_evidence_backed": true,
+      "all_theses_falsifiable": true,
+      "all_theses_have_counter_research": true,
+      "assumption_count": 2,
+      "counter_claim_count": 1,
+      "falsification_condition_count": 2,
+      "inference_count": 11,
+      "observation_count": 34,
+      "theses_with_counter_research": 1,
+      "theses_with_evidence_backing": 1,
+      "theses_without_eligible_evidence": 0,
+      "thesis_count": 1
+    },
+    "nodes": {
+      "assumptions": [
+        {
+          "assumption_id": "ASM-DCF-FROZEN",
+          "provenance_refs": [
+            "QT-CASE-002_PRE_REGISTRATION"
+          ],
+          "rationale": "QT-CASE-002 preregistered DCF assumptions.",
+          "statement": "The preregistered five-year Bear/Base/Bull cash-flow growth, discount-rate, and terminal-growth assumptions are used unchanged."
+        },
+        {
+          "assumption_id": "ASM-CASE001-PE-REUSE",
+          "provenance_refs": [
+            "research/experiments/QT-CASE-001_RESULT.json"
+          ],
+          "rationale": "Cross-method robustness requires an immutable first method.",
+          "statement": "QT-CASE-001 P/E scenario fair values are reused unchanged as the second valuation method."
+        }
+      ],
+      "counter_claims": [
+        {
+          "basis_refs": [
+            "INF-PE-REGIME",
+            "INF-TTM-CASH-CONVERSION",
+            "INF-PB-SANITY",
+            "INF-CASH-CONVERSION-2022",
+            "INF-CASH-CONVERSION-2023",
+            "INF-CASH-CONVERSION-2024",
+            "INF-CASH-CONVERSION-2025"
+          ],
+          "counter_id": "COUNTER-CASH-FLOW-CYCLE",
+          "statement": "The P/E upside may not survive cash-flow valuation because semiconductor earnings, capital intensity, cash conversion, and valuation regimes are cyclical.",
+          "thesis_id": "THESIS-QT-CASE-002"
+        }
+      ],
+      "falsification_conditions": [
+        {
+          "condition_id": "FALSIFY-TTM-OWNER-CF-80",
+          "evaluation_horizon": "next_two_reported_quarters_or_365_days_whichever_first",
+          "observable": "ttm_owner_cash_flow_proxy",
+          "statement": "Reconstructed TTM owner-cash-flow proxy falls below 80% of the frozen QT-CASE-002 level (138818468000000 KRW).",
+          "thesis_id": "THESIS-QT-CASE-002"
+        },
+        {
+          "condition_id": "FALSIFY-ROBUST-FAIR-VALUE-BELOW-PRICE",
+          "evaluation_horizon": "365_days",
+          "observable": "robust_cross_method_fair_value",
+          "statement": "The same lower-of-two cross-method methodology later produces robust fair value below the frozen Case price.",
+          "thesis_id": "THESIS-QT-CASE-002"
+        }
+      ],
+      "inferences": [
+        {
+          "inference_id": "INF-CASH-CONVERSION-2022",
+          "input_refs": [
+            "OBS-CFO-2022",
+            "OBS-PPE-CAPEX-2022",
+            "OBS-INT-CAPEX-2022",
+            "OBS-OWNER-PROFIT-2022"
+          ],
+          "statement": "FY2022 owner-cash-flow proxy=9054614000000 KRW; cash conversion=0.165441."
+        },
+        {
+          "inference_id": "INF-CASH-CONVERSION-2023",
+          "input_refs": [
+            "OBS-CFO-2023",
+            "OBS-PPE-CAPEX-2023",
+            "OBS-INT-CAPEX-2023",
+            "OBS-OWNER-PROFIT-2023"
+          ],
+          "statement": "FY2023 owner-cash-flow proxy=-16396740000000 KRW; cash conversion=-1.132888."
+        },
+        {
+          "inference_id": "INF-CASH-CONVERSION-2024",
+          "input_refs": [
+            "OBS-CFO-2024",
+            "OBS-PPE-CAPEX-2024",
+            "OBS-INT-CAPEX-2024",
+            "OBS-OWNER-PROFIT-2024"
+          ],
+          "statement": "FY2024 owner-cash-flow proxy=19240982000000 KRW; cash conversion=0.572284."
+        },
+        {
+          "inference_id": "INF-CASH-CONVERSION-2025",
+          "input_refs": [
+            "OBS-CFO-2025",
+            "OBS-PPE-CAPEX-2025",
+            "OBS-INT-CAPEX-2025",
+            "OBS-OWNER-PROFIT-2025"
+          ],
+          "statement": "FY2025 owner-cash-flow proxy=33161999000000 KRW; cash conversion=0.749238."
+        },
+        {
+          "inference_id": "INF-TTM-CASH-FLOW",
+          "input_refs": [
+            "OBS-CFO-2025",
+            "OBS-PPE-CAPEX-2025",
+            "OBS-INT-CAPEX-2025",
+            "OBS-CFO-2025-H1",
+            "OBS-PPE-CAPEX-2025-H1",
+            "OBS-INT-CAPEX-2025-H1",
+            "OBS-CFO-2026-H1",
+            "OBS-PPE-CAPEX-2026-H1",
+            "OBS-INT-CAPEX-2026-H1"
+          ],
+          "statement": "TTM owner-cash-flow proxy=138818468000000 KRW."
+        },
+        {
+          "inference_id": "INF-TTM-CASH-CONVERSION",
+          "input_refs": [
+            "INF-TTM-CASH-FLOW",
+            "OBS-OWNER-PROFIT-2025",
+            "OBS-OWNER-PROFIT-2025-H1",
+            "OBS-OWNER-PROFIT-2026-H1"
+          ],
+          "statement": "TTM cash conversion=0.927502."
+        },
+        {
+          "inference_id": "INF-IMPLIED-SHARES",
+          "input_refs": [
+            "OBS-OWNER-PROFIT-2025",
+            "OBS-EPS-FY2025"
+          ],
+          "statement": "FY2025 accounting-derived implied basic shares=6701128841.786526."
+        },
+        {
+          "inference_id": "INF-DCF",
+          "input_refs": [
+            "INF-TTM-CASH-FLOW",
+            "INF-IMPLIED-SHARES",
+            "ASM-DCF-FROZEN",
+            "OBS-PRICE-CASE"
+          ],
+          "statement": "Pre-registered cash-flow DCF weighted fair value=278746.224658 KRW; expected return=0.995009%."
+        },
+        {
+          "inference_id": "INF-PE-REGIME",
+          "input_refs": [
+            "OBS-PRICE-YE-2022",
+            "OBS-OWNER-PROFIT-2022",
+            "OBS-PRICE-YE-2023",
+            "OBS-OWNER-PROFIT-2023",
+            "OBS-PRICE-YE-2024",
+            "OBS-OWNER-PROFIT-2024",
+            "OBS-PRICE-YE-2025",
+            "OBS-OWNER-PROFIT-2025",
+            "ASM-CASE001-PE-REUSE"
+          ],
+          "statement": "QT-CASE-001 historical P/E max/min dispersion ratio=5.367035."
+        },
+        {
+          "inference_id": "INF-PB-SANITY",
+          "input_refs": [
+            "OBS-PARENT-EQUITY-2022",
+            "OBS-PARENT-EQUITY-2023",
+            "OBS-PARENT-EQUITY-2024",
+            "OBS-PARENT-EQUITY-2025",
+            "OBS-PRICE-YE-2022",
+            "OBS-PRICE-YE-2023",
+            "OBS-PRICE-YE-2024",
+            "OBS-PRICE-YE-2025",
+            "OBS-PRICE-CASE",
+            "INF-IMPLIED-SHARES"
+          ],
+          "statement": "Current P/B=4.358835; historical P75=1.590298."
+        },
+        {
+          "inference_id": "INF-ROBUST-VALUATION",
+          "input_refs": [
+            "INF-DCF",
+            "INF-PE-REGIME",
+            "ASM-CASE001-PE-REUSE",
+            "OBS-PRICE-CASE"
+          ],
+          "statement": "Lower-of-two cross-method weighted fair value=278746.224658 KRW; expected return=0.995009%; hurdle=NOT_CLEARED."
+        }
+      ],
+      "observations": [
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-CFO-2022",
+          "observed_at": "2023-03-07T23:59:59+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20230307000542#account=ifrs-full_CashFlowsFromUsedInOperatingActivities&field=thstrm_amount&scope=CFS",
+          "statement": "FY2022 operating cash flow: 62181346000000.0 KRW"
+        },
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-PPE-CAPEX-2022",
+          "observed_at": "2023-03-07T23:59:59+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20230307000542#account=ifrs-full_PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities&field=thstrm_amount&scope=CFS",
+          "statement": "FY2022 PP&E purchases: 49430428000000.0 KRW"
+        },
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-INT-CAPEX-2022",
+          "observed_at": "2023-03-07T23:59:59+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20230307000542#account=ifrs-full_PurchaseOfIntangibleAssetsClassifiedAsInvestingActivities&field=thstrm_amount&scope=CFS",
+          "statement": "FY2022 intangible purchases: 3696304000000.0 KRW"
+        },
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-OWNER-PROFIT-2022",
+          "observed_at": "2023-03-07T23:59:59+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20230307000542#account=ifrs-full_ProfitLossAttributableToOwnersOfParent&field=thstrm_amount&scope=CFS",
+          "statement": "FY2022 profit attributable to owners: 54730018000000.0 KRW"
+        },
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-PARENT-EQUITY-2022",
+          "observed_at": "2023-03-07T23:59:59+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20230307000542#account=ifrs-full_EquityAttributableToOwnersOfParent&field=thstrm_amount&scope=CFS",
+          "statement": "FY2022 parent equity: 345186142000000.0 KRW"
+        },
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-PRICE-YE-2022",
+          "observed_at": "2022-12-29T15:30:00+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://api.finance.naver.com/siseJson.naver#sha256=8645ff61be8fabe204727aa8e8632a1702454533b878684696ab620db1e2b747&date=2022-12-29",
+          "statement": "2022 year-end close: 55300.0 KRW"
+        },
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-CFO-2023",
+          "observed_at": "2024-03-12T23:59:59+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240312000736#account=ifrs-full_CashFlowsFromUsedInOperatingActivities&field=thstrm_amount&scope=CFS",
+          "statement": "FY2023 operating cash flow: 44137427000000.0 KRW"
+        },
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-PPE-CAPEX-2023",
+          "observed_at": "2024-03-12T23:59:59+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240312000736#account=ifrs-full_PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities&field=thstrm_amount&scope=CFS",
+          "statement": "FY2023 PP&E purchases: 57611292000000.0 KRW"
+        },
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-INT-CAPEX-2023",
+          "observed_at": "2024-03-12T23:59:59+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240312000736#account=ifrs-full_PurchaseOfIntangibleAssetsClassifiedAsInvestingActivities&field=thstrm_amount&scope=CFS",
+          "statement": "FY2023 intangible purchases: 2922875000000.0 KRW"
+        },
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-OWNER-PROFIT-2023",
+          "observed_at": "2024-03-12T23:59:59+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240312000736#account=ifrs-full_ProfitLossAttributableToOwnersOfParent&field=thstrm_amount&scope=CFS",
+          "statement": "FY2023 profit attributable to owners: 14473401000000.0 KRW"
+        },
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-PARENT-EQUITY-2023",
+          "observed_at": "2024-03-12T23:59:59+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20240312000736#account=ifrs-full_EquityAttributableToOwnersOfParent&field=thstrm_amount&scope=CFS",
+          "statement": "FY2023 parent equity: 353233775000000.0 KRW"
+        },
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-PRICE-YE-2023",
+          "observed_at": "2023-12-28T15:30:00+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://api.finance.naver.com/siseJson.naver#sha256=8645ff61be8fabe204727aa8e8632a1702454533b878684696ab620db1e2b747&date=2023-12-28",
+          "statement": "2023 year-end close: 78500.0 KRW"
+        },
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-CFO-2024",
+          "observed_at": "2025-03-11T23:59:59+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250311001085#account=ifrs-full_CashFlowsFromUsedInOperatingActivities&field=thstrm_amount&scope=CFS",
+          "statement": "FY2024 operating cash flow: 72982621000000.0 KRW"
+        },
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-PPE-CAPEX-2024",
+          "observed_at": "2025-03-11T23:59:59+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250311001085#account=ifrs-full_PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities&field=thstrm_amount&scope=CFS",
+          "statement": "FY2024 PP&E purchases: 51406355000000.0 KRW"
+        },
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-INT-CAPEX-2024",
+          "observed_at": "2025-03-11T23:59:59+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250311001085#account=ifrs-full_PurchaseOfIntangibleAssetsClassifiedAsInvestingActivities&field=thstrm_amount&scope=CFS",
+          "statement": "FY2024 intangible purchases: 2335284000000.0 KRW"
+        },
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-OWNER-PROFIT-2024",
+          "observed_at": "2025-03-11T23:59:59+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250311001085#account=ifrs-full_ProfitLossAttributableToOwnersOfParent&field=thstrm_amount&scope=CFS",
+          "statement": "FY2024 profit attributable to owners: 33621363000000.0 KRW"
+        },
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-PARENT-EQUITY-2024",
+          "observed_at": "2025-03-11T23:59:59+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250311001085#account=ifrs-full_EquityAttributableToOwnersOfParent&field=thstrm_amount&scope=CFS",
+          "statement": "FY2024 parent equity: 391687603000000.0 KRW"
+        },
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-PRICE-YE-2024",
+          "observed_at": "2024-12-30T15:30:00+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://api.finance.naver.com/siseJson.naver#sha256=8645ff61be8fabe204727aa8e8632a1702454533b878684696ab620db1e2b747&date=2024-12-30",
+          "statement": "2024 year-end close: 53200.0 KRW"
+        },
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-CFO-2025",
+          "observed_at": "2026-03-10T23:59:59+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260310002820#account=ifrs-full_CashFlowsFromUsedInOperatingActivities&field=thstrm_amount&scope=CFS",
+          "statement": "FY2025 operating cash flow: 85315148000000.0 KRW"
+        },
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-PPE-CAPEX-2025",
+          "observed_at": "2026-03-10T23:59:59+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260310002820#account=ifrs-full_PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities&field=thstrm_amount&scope=CFS",
+          "statement": "FY2025 PP&E purchases: 47522179000000.0 KRW"
+        },
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-INT-CAPEX-2025",
+          "observed_at": "2026-03-10T23:59:59+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260310002820#account=ifrs-full_PurchaseOfIntangibleAssetsClassifiedAsInvestingActivities&field=thstrm_amount&scope=CFS",
+          "statement": "FY2025 intangible purchases: 4630970000000.0 KRW"
+        },
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-OWNER-PROFIT-2025",
+          "observed_at": "2026-03-10T23:59:59+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260310002820#account=ifrs-full_ProfitLossAttributableToOwnersOfParent&field=thstrm_amount&scope=CFS",
+          "statement": "FY2025 profit attributable to owners: 44260956000000.0 KRW"
+        },
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-PARENT-EQUITY-2025",
+          "observed_at": "2026-03-10T23:59:59+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260310002820#account=ifrs-full_EquityAttributableToOwnersOfParent&field=thstrm_amount&scope=CFS",
+          "statement": "FY2025 parent equity: 424313255000000.0 KRW"
+        },
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-PRICE-YE-2025",
+          "observed_at": "2025-12-30T15:30:00+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://api.finance.naver.com/siseJson.naver#sha256=8645ff61be8fabe204727aa8e8632a1702454533b878684696ab620db1e2b747&date=2025-12-30",
+          "statement": "2025 year-end close: 119900.0 KRW"
+        },
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-CFO-2025-H1",
+          "observed_at": "2025-08-14T23:59:59+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250814003156#account=ifrs-full_CashFlowsFromUsedInOperatingActivities&field=thstrm_amount&scope=CFS",
+          "statement": "2025-H1 operating cash flow: 33941002000000.0 KRW"
+        },
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-PPE-CAPEX-2025-H1",
+          "observed_at": "2025-08-14T23:59:59+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250814003156#account=ifrs-full_PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities&field=thstrm_amount&scope=CFS",
+          "statement": "2025-H1 PP&E purchases: 25163382000000.0 KRW"
+        },
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-INT-CAPEX-2025-H1",
+          "observed_at": "2025-08-14T23:59:59+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250814003156#account=ifrs-full_PurchaseOfIntangibleAssetsClassifiedAsInvestingActivities&field=thstrm_amount&scope=CFS",
+          "statement": "2025-H1 intangible purchases: 2039179000000.0 KRW"
+        },
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-OWNER-PROFIT-2025-H1",
+          "observed_at": "2025-08-14T23:59:59+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250814003156#account=ifrs-full_ProfitLossAttributableToOwnersOfParent&field=thstrm_add_amount&scope=CFS",
+          "statement": "2025-H1 YTD profit attributable to owners: 12962441000000.0 KRW"
+        },
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-CFO-2026-H1",
+          "observed_at": "2026-08-14T23:59:59+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260814003699#account=ifrs-full_CashFlowsFromUsedInOperatingActivities&field=thstrm_amount&scope=CFS",
+          "statement": "2026-H1 operating cash flow: 145355192000000.0 KRW"
+        },
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-PPE-CAPEX-2026-H1",
+          "observed_at": "2026-08-14T23:59:59+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260814003699#account=ifrs-full_PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities&field=thstrm_amount&scope=CFS",
+          "statement": "2026-H1 PP&E purchases: 31234818000000.0 KRW"
+        },
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-INT-CAPEX-2026-H1",
+          "observed_at": "2026-08-14T23:59:59+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260814003699#account=ifrs-full_PurchaseOfIntangibleAssetsClassifiedAsInvestingActivities&field=thstrm_amount&scope=CFS",
+          "statement": "2026-H1 intangible purchases: 1725464000000.0 KRW"
+        },
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-OWNER-PROFIT-2026-H1",
+          "observed_at": "2026-08-14T23:59:59+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260814003699#account=ifrs-full_ProfitLossAttributableToOwnersOfParent&field=thstrm_add_amount&scope=CFS",
+          "statement": "2026-H1 YTD profit attributable to owners: 118370658000000.0 KRW"
+        },
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-EPS-FY2025",
+          "observed_at": "2026-03-10T23:59:59+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260310002820#account=ifrs-full_BasicEarningsLossPerShare&field=thstrm_amount&scope=CFS",
+          "statement": "FY2025 basic EPS: 6605.0 KRW"
+        },
+        {
+          "canonical_evidence_created": false,
+          "evidence_eligible_reference": true,
+          "observation_id": "OBS-PRICE-CASE",
+          "observed_at": "2026-10-02T15:30:00+09:00",
+          "source_kind": "EXTERNAL_EVIDENCE",
+          "source_ref": "https://api.finance.naver.com/siseJson.naver#sha256=8645ff61be8fabe204727aa8e8632a1702454533b878684696ab620db1e2b747&date=2026-10-02",
+          "statement": "Case-date close: 276000.0 KRW"
+        }
+      ],
+      "thesis_claims": [
+        {
+          "statement": "The conservative lower-of-two P/E and cash-flow DCF valuation does not clear the frozen 15% required-return hurdle.",
+          "support_refs": [
+            "INF-ROBUST-VALUATION"
+          ],
+          "thesis_id": "THESIS-QT-CASE-002"
+        }
+      ]
+    },
+    "schema": "quantrade_thesis_contract_v1",
+    "thesis_assessments": [
+      {
+        "assumption_refs": [
+          "ASM-DCF-FROZEN",
+          "ASM-CASE001-PE-REUSE"
+        ],
+        "counter_claim_ids": [
+          "COUNTER-CASH-FLOW-CYCLE"
+        ],
+        "counter_research_present": true,
+        "eligible_evidence_observation_refs": [
+          "OBS-CFO-2025",
+          "OBS-PPE-CAPEX-2025",
+          "OBS-INT-CAPEX-2025",
+          "OBS-CFO-2025-H1",
+          "OBS-PPE-CAPEX-2025-H1",
+          "OBS-INT-CAPEX-2025-H1",
+          "OBS-CFO-2026-H1",
+          "OBS-PPE-CAPEX-2026-H1",
+          "OBS-INT-CAPEX-2026-H1",
+          "OBS-OWNER-PROFIT-2025",
+          "OBS-EPS-FY2025",
+          "OBS-PRICE-CASE",
+          "OBS-PRICE-YE-2022",
+          "OBS-OWNER-PROFIT-2022",
+          "OBS-PRICE-YE-2023",
+          "OBS-OWNER-PROFIT-2023",
+          "OBS-PRICE-YE-2024",
+          "OBS-OWNER-PROFIT-2024",
+          "OBS-PRICE-YE-2025"
+        ],
+        "evidence_backed": true,
+        "falsification_condition_ids": [
+          "FALSIFY-TTM-OWNER-CF-80",
+          "FALSIFY-ROBUST-FAIR-VALUE-BELOW-PRICE"
+        ],
+        "falsification_defined": true,
+        "investment_authority": false,
+        "non_evidence_observation_refs": [],
+        "support_leaf_refs": [
+          "OBS-CFO-2025",
+          "OBS-PPE-CAPEX-2025",
+          "OBS-INT-CAPEX-2025",
+          "OBS-CFO-2025-H1",
+          "OBS-PPE-CAPEX-2025-H1",
+          "OBS-INT-CAPEX-2025-H1",
+          "OBS-CFO-2026-H1",
+          "OBS-PPE-CAPEX-2026-H1",
+          "OBS-INT-CAPEX-2026-H1",
+          "OBS-OWNER-PROFIT-2025",
+          "OBS-EPS-FY2025",
+          "ASM-DCF-FROZEN",
+          "OBS-PRICE-CASE",
+          "OBS-PRICE-YE-2022",
+          "OBS-OWNER-PROFIT-2022",
+          "OBS-PRICE-YE-2023",
+          "OBS-OWNER-PROFIT-2023",
+          "OBS-PRICE-YE-2024",
+          "OBS-OWNER-PROFIT-2024",
+          "OBS-PRICE-YE-2025",
+          "ASM-CASE001-PE-REUSE"
+        ],
+        "thesis_id": "THESIS-QT-CASE-002",
+        "thesis_truth_validated": false
+      }
+    ]
+  }
+}

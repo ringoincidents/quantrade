@@ -1,0 +1,61 @@
+{
+  "schema": "quantrade_qt_case_004_failure_v1",
+  "experiment_id": "QT-CASE-004",
+  "target": {
+    "asset_id": "KRX:005380",
+    "company": "Hyundai Motor Company",
+    "case_as_of": "2026-10-05T23:59:59+09:00"
+  },
+  "preregistration_commit": "5c7f5696479c3787843abca8799e937950f2daff",
+  "terminal_run": {
+    "run_id": 37880626483,
+    "source_sha": "39b2de24df7373b3adac19c54eef3e6989b08900",
+    "conclusion": "failure"
+  },
+  "preceding_attempt": {
+    "run_id": 37880525720,
+    "source_sha": "4105bb0e51161c131910aa2629f7dd24a23476d4",
+    "failure": "Open DART corpCode transport timeout before economic data retrieval"
+  },
+  "operational_result": {
+    "success": false,
+    "classification": "EXTERNAL_IDENTIFIER_SERVICE_UNAVAILABLE",
+    "stage": "DART_CORP_CODE_RESOLUTION",
+    "bounded_retry_attempts": 5,
+    "economic_fundamentals_retrieved": false,
+    "price_valuation_computed": false,
+    "semantic_gate_invoked_on_live_case": false,
+    "method_applicability_invoked_on_live_case": false,
+    "cross_method_gate_invoked": false,
+    "portfolio_invoked": false,
+    "risk_invoked": false,
+    "target_replaced": false,
+    "methodology_relaxed": false
+  },
+  "external_service_context": {
+    "provider": "OPEN_DART",
+    "official_notice_observed": true,
+    "maintenance_window_kst": "2026-10-08 20:00 ~ 2026-10-11 18:00",
+    "affected_service": "Open API corporation code",
+    "source_url": "https://engopendart.fss.or.kr/"
+  },
+  "interpretation": {
+    "economic_conclusion_available": false,
+    "holdout_result": "OPERATIONAL_INFRASTRUCTURE_FAILURE",
+    "does_not_mean_security_is_attractive_or_unattractive": true,
+    "holdout_integrity_preserved": true,
+    "next_product_question": "How should verified issuer identifiers be cached with provenance so PIT research does not depend on a transient corporation-code endpoint while still failing closed on mismatches?"
+  },
+  "authority": {
+    "canonical_evidence_created": false,
+    "target_weight_set": false,
+    "real_client_portfolio_proposal_created": false,
+    "risk_policy_changed": false,
+    "committee_decision_created": false,
+    "founder_decision_created": false,
+    "decision_plan_created": false,
+    "paper_authorized": false,
+    "execution_authorized": false,
+    "live_order_possible": false
+  }
+}
