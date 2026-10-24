@@ -1,0 +1,31 @@
+{
+  "disclaimer": "News metadata and search volume are NOT forum sentiments.",
+  "gdelt_articles_sampled": 0,
+  "live_forum_posts_ingested": 0,
+  "naver": {
+    "status": "NO_CREDENTIALS_NOT_FETCHED"
+  },
+  "naver_trend_points_sampled": 0,
+  "observed_at_utc": "2026-10-24T04:43:02Z",
+  "queries": {
+    "ai_chip_supply": {
+      "message": "HTTP Error 429: Too Many Requests",
+      "reason": "HTTPError",
+      "status": "FAILED"
+    },
+    "leveraged_semis": {
+      "message": "HTTP Error 429: Too Many Requests",
+      "reason": "HTTPError",
+      "status": "FAILED"
+    },
+    "semiconductor_macro": {
+      "message": "HTTP Error 429: Too Many Requests",
+      "reason": "HTTPError",
+      "status": "FAILED"
+    }
+  },
+  "run_id": "20261024T044302Z",
+  "social_forum_api_access": "NOT_AUTHORIZED",
+  "status": "DIAGNOSTIC_ONLY_NO_TRADE",
+  "usable_price_predictions": 0
+}
