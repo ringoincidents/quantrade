@@ -1,0 +1,18 @@
+[
+  {
+    "source": "gdelt_doc_artlist",
+    "topic": "leveraged_semis",
+    "url": "https://www.cnbc.com/2026/11/05/retail-traders-dump-the-most-stocks-in-single-day-since-covid-sell-off.html",
+    "url_sha256": "a2eccaa14f6910aab8810fa1c9d33d01c6725f75c973abc2fd8b76d7d4f30ad0",
+    "first_seen_utc": "2026-11-05T23:40:21Z",
+    "retrieved_utc": "2026-11-05T23:40:21Z",
+    "gdelt_seendate_utc": "2026-11-05T22:00:00Z",
+    "domain": "cnbc.com",
+    "language": "English",
+    "published_utc": null,
+    "publish_time_verified": false,
+    "rights_status": "public_news_metadata_not_content_republication",
+    "predictive_eligible": false,
+    "note": "GDELT seen date is not verified original publication time."
+  }
+]
