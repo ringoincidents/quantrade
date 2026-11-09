@@ -1,0 +1,26 @@
+# 2026-11-09 QuanTrade weekly incremental review — US 2026-11-06 regular close
+Status: RESEARCH_ONLY / PAPER_ONLY / NO_TRADE. Observed Monday 2026-11-09 KST before Monday US regular session. No personal position, quantity, cost basis, account data, or order authority.
+
+## New verified developments
+- IONQ 11/06 regular close **$32.62**, 11/05 $26.43, **+23.42%** Friday; 10/30 $30.04, **+8.59%** week. Historical Yahoo https://de.finance.yahoo.com/quote/IONQ/history/ . Prior #129 11/07 comment reported $32.60; vendor revision $0.02, don't treat as separate event. 11/05 earnings SEC original: https://www.sec.gov/Archives/edgar/data/1824920/000119312526449779/ionq-ex99_1.htm : revenue $173.8m (+336% YoY), SkyWater foundry $83.5m and platform $90.3m; FY revenue guidance $505-515m; $3.7bn pro forma liquidity incl Oct $2bn equity raise, adjusted EBITDA -$133.6m, GAAP net income +$564m **driven by noncash warrant mark-to-market**; operations loss -$433.1m. No claim $173.8m purely organic quantum revenue. Elisity completed; acquisition/dilution and integration risks remain. 11/06 recovery of 10/16 reference $31.28 is **not** recovery of private cost basis.
+- TE 11/06 **$2.36** from Yahoo regular 16:00:03 EST (not $2.42 intraday on Stock Analysis), 10/30 $2.70, week **-12.59%**. Prior #129 11/07 comment confirms $2.36; no independent new TE corporate financing resolution found this run. G2_Austin Phase1 construction and full financing remains key, 11/12 scheduled results are a future event; 10/30 share resale registration is *not* proven immediate share issuance/sale. Source https://finance.yahoo.com/quote/TE/ and https://www.fool.com/earnings/call-transcripts/2026/08/19/t1-energy-te-q2-2026-earnings-call-transcript/ .
+- SOXL 11/06 close **$45.97**, 11/05 $40.87, 10/30 $77.05; Friday **+12.48%**, week **-40.34%**. Stock Analysis now shows $45.97 (its earlier archived $45.90 conflicted with ADVFN $45.97); note provider revision and do not overwrite original observations. https://stockanalysis.com/etf/soxl/history/ . 11/05 -38.71%, 11/06 +12.48% not a trend reversal. 11/06 SOXX $136.53 (+3.51%), 11/05 SOXX $131.90 (-12.15%), split **3:1 effective 11/05**; this is NOT SOXL underlying. https://stockanalysis.com/etf/soxx/history/
+- Exact ICE NYSE Semiconductor Index / ICESEMIT official daily close, methodology/version/total-vs-price return, corporate actions, provider rights, and issuer NAV reconciliation NOT independently retrieved. Thus no exact index trend/RSI/MACD and no SOXL entry gate. SOXL targets 3x daily, not 3x cumulative.
+- AI funding stress: Reuters 2026-11-06 SoftBank 5y CDS **466bp**, 4-year high, with financing and AI profitability concerns; these are **SoftBank-specific**, not a generic high-yield OAS and not directly an ICESEMIT signal. https://www.reuters.com/business/media-telecom/softbank-cds-softbank-cds-2026-11-06/
+- US 10y 11/06 close **4.859%**, 11/05 **4.837%**, 10/30 **4.929%** per secondary Cboe TNX-linked series https://portfolio-terminal.com/markets/10-year-treasury-yield/november-2026 . A fall in Treasury yield amid credit risk does NOT mean AI financing has stabilized.
+- Community #130/#131: no newly verified prospective first-seen, permissioned, representative sample with independently measured OOS alpha; NO_SIGNAL. Existing hindsight cases not trading evidence.
+
+## Cross-asset opportunity mismatch
+Reference 10/30 close → 11/06 close: IONQ +8.59%, TE -12.59%, SOXL -40.34%. Thus the two existing holdings do not rebound together; selling on one bounce and waiting for the other is not equivalent to a single synchronized trade. From 11/05 close → 11/06 close IONQ +23.42%, SOXL +12.48%, TE +3.51% (single-vendor confirmed TE 2.28→2.36). SOXL one-day rebound does not remove the previous 38.71% loss. A cash-first strategy would have avoided much of the weekly SOXL drawdown in this retrospective period, but the return is NOT a prospective trading edge or pre-registered success.
+
+## Decision matrix
+HOLD IONQ: research candidate, fundamentals improved vs prior week but adjusted losses and dilution/integration remain. IONQ TRIM/SELL: independent research candidate, not mandated by cost basis.
+HOLD TE: funding/execution risks and underperformance require thesis check. TE TRIM/SELL: independent research candidate, not forced by SOXL.
+CASH: acceptable benchmark.
+SOXL PAPER ENTRY: **BLOCKED** exact underlying+issuer NAV+OOS strategy+portfolio stress budget+independent Risk missing.
+LIVE: NOT AUTHORIZED.
+
+## Paper ledger and tests
+Existing #126 Oct26 and Nov02 fixtures verify synthetic bookkeeping for chosen paths, **not** prospective OOS profitability. This run did not execute a new validated broker-calendar/corporate-action-adjusted simulation, so no invented new PASS or numeric portfolio P&L. Next acceptance test: at as-of 11/06, freeze decisions, apply US T+1 broker-specific cash availability, per-trade commission+spread+slippage, FX/tax, next executable price and simultaneous exit/time-stop, then compare hold/one-or-both cash/independent SOXL candidate against cash and matched risk; persist audit and walk-forward untouched test. No actual order.
+
+**Overall**: NEW IONQ 3Q earnings and 11/05–06 semiconductor crash/rebound merit an incremental weekly record; exact SOXL entry still fails closed.
