@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['.github/workflows/private_toss_report.yml']
+    paths: ['.github/workflows/private_toss_report.yml', 'send_private_toss_report.py']
 
 permissions:
   contents: read
