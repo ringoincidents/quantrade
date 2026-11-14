@@ -1,0 +1,77 @@
+name: QT-STRAT-005 Transfer Golden Run
+
+on:
+  push:
+    branches:
+      - "research/llm-trading-frameworks-2026-10-05"
+    paths:
+      - "scripts/run_qt_strat_005.py"
+      - "tests/capabilities/test_qt_strat_005_rules.py"
+      - ".github/workflows/qt_strat_005_transfer_run.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  transfer-run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: "research/llm-trading-frameworks-2026-10-05"
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Verify preregistration anchor exists
+        run: |
+          git cat-file -e 7ea6d1b101cda4e635a2678d96a3b127ad6bb9fc^{commit}
+          git show 7ea6d1b101cda4e635a2678d96a3b127ad6bb9fc:research/experiments/QT-STRAT-005_PRE_REGISTRATION.md >/tmp/prereg.md
+      - name: Install experiment dependency
+        run: python -m pip install requests
+      - name: Compile experiment
+        run: |
+          python -m compileall -q quantrade/capabilities scripts/run_qt_strat_005.py tests/capabilities/test_qt_strat_005_rules.py
+      - name: Verify frozen transfer rules
+        run: python -m unittest tests.capabilities.test_qt_strat_005_rules -v
+      - name: Run frozen transfer Golden Run
+        run: python -m scripts.run_qt_strat_005
+      - name: Verify generated artifacts
+        run: |
+          test -s research/experiments/QT-STRAT-005_RESULT.json
+          test -s research/experiments/QT-STRAT-005_DATASET.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          result = json.loads(Path("research/experiments/QT-STRAT-005_RESULT.json").read_text())
+          assert result["preregistration_commit"] == "7ea6d1b101cda4e635a2678d96a3b127ad6bb9fc"
+          assert result["market_scope"]["symbols"] == ["000660", "207940", "005380", "005490", "006400"]
+          assert result["authority"]["model_called"] is False
+          assert result["authority"]["execution_authorized"] is False
+          assert result["selection"]["test_opened_only_for_selected"] is True
+          assert result["pipeline_result"]["operational_success"] is True
+          assert result["pipeline_result"]["instrument_count"] == 5
+          print("artifact verification: OK")
+          PY
+      - name: Upload immutable run artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: qt-strat-005-transfer-run
+          path: |
+            research/experiments/QT-STRAT-005_RESULT.json
+            research/experiments/QT-STRAT-005_DATASET.json
+          if-no-files-found: error
+      - name: Commit transfer-run evidence
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add research/experiments/QT-STRAT-005_RESULT.json
+          git add research/experiments/QT-STRAT-005_DATASET.json
+          if git diff --cached --quiet; then
+            echo "No experiment artifact changes to commit."
+          else
+            git commit -m "experiment: record QT-STRAT-005 transfer evidence"
+            git push origin HEAD:research/llm-trading-frameworks-2026-10-05
+          fi
