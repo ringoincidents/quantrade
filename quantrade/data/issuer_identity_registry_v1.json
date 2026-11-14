@@ -1,0 +1,28 @@
+{
+  "schema": "quantrade_issuer_identity_registry_v1",
+  "version": "2026-10-09-r1",
+  "records": [
+    {
+      "asset_id": "KRX:005930",
+      "stock_code": "005930",
+      "provider_id": "OPEN_DART",
+      "external_id": "00126380",
+      "source_kind": "PRIOR_VERIFIED_GOLDEN_RUN",
+      "source_ref": "research/experiments/QT-CASE-001_RESULT.json#source_integrity.corp_code_seed_provenance",
+      "verified_at": "2026-10-08T11:19:21Z",
+      "verification_kind": "LIVE_OPEN_DART_VERIFIED_MAPPING",
+      "verification_ref": "github-actions-run:37769222168"
+    },
+    {
+      "asset_id": "KRX:006400",
+      "stock_code": "006400",
+      "provider_id": "OPEN_DART",
+      "external_id": "00126362",
+      "source_kind": "PRIOR_VERIFIED_CORRECTIVE_RUN",
+      "source_ref": "research/experiments/QT-CASE-003-CORR-001_RESULT.json#source.open_dart_provider",
+      "verified_at": "2026-10-09T00:50:38Z",
+      "verification_kind": "LIVE_FILING_STOCK_CODE_MATCH",
+      "verification_ref": "github-actions-run:37866735828"
+    }
+  ]
+}

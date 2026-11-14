@@ -1,0 +1,71 @@
+name: Verify Hyundai Motor DART Identity
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: quantrade-open-dart-live
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      OPEN_DART_API_KEY: ${{ secrets.OPEN_DART_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: "direction/investment-office-decision-economics-2026-10-05"
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Compile identity probe
+        run: python -m compileall -q scripts/run_issuer_identity_probe_005380.py
+
+      - name: Verify identity against official filing metadata
+        run: python -m scripts.run_issuer_identity_probe_005380
+
+      - name: Verify non-economic boundary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r = json.loads(
+              Path("research/diagnostics/ISSUER_ID_005380_VERIFICATION.json").read_text()
+          )
+          assert r["asset_id"] == "KRX:005380"
+          assert r["stock_code"] == "005380"
+          assert r["candidate_external_id"] == "00164742"
+          assert r["status"] == "VERIFIED"
+          assert r["economic_values_requested"] is False
+          assert r["authority"]["valuation_created"] is False
+          assert r["authority"]["execution_authorized"] is False
+          print(json.dumps({
+              "status": r["status"],
+              "filing_count": r["filing_count"],
+              "stock_code": r["stock_code"],
+              "corp_code": r["candidate_external_id"],
+              "economic_values_requested": r["economic_values_requested"],
+          }, sort_keys=True))
+          PY
+
+      - name: Commit verification record
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git pull --rebase origin direction/investment-office-decision-economics-2026-10-05
+          git add research/diagnostics/ISSUER_ID_005380_VERIFICATION.json
+          if git diff --cached --quiet; then
+            echo "No verification changes."
+          else
+            git commit -m "diagnostic: record verified Hyundai Motor DART identity"
+            git push origin HEAD:direction/investment-office-decision-economics-2026-10-05
+          fi
