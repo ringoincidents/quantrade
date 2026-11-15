@@ -1,14 +1,9 @@
 name: CEO Operating Review
 
+# 2026-11-15: Private HQ Runtime is offline. CEO review is on-demand only
+# until private proposal outcomes are reachable and verified.
 on:
-  schedule:
-    - cron: '15 11 * * *'
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - '.github/workflows/ceo_operating_review.yml'
 
 permissions:
   contents: write
