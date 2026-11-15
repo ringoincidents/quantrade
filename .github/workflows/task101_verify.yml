@@ -44,10 +44,9 @@ jobs:
           assert "git push" not in sync
           assert "runtime_portfolio_sync.py" in sync
 
-          retired_report = Path(".github/workflows/portfolio_report.yml").read_text()
-          retired_review = Path(".github/workflows/post_trade_review.yml").read_text()
-          assert "schedule:" not in retired_report
-          assert "schedule:" not in retired_review
+          # Retired public-reporting workflow stubs must stay deleted.
+          assert not Path(".github/workflows/portfolio_report.yml").exists()
+          assert not Path(".github/workflows/post_trade_review.yml").exists()
 
           tracked = {
               "real_portfolio.json",
