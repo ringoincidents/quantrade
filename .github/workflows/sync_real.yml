@@ -5,10 +5,10 @@ name: Real Portfolio Sync
 # 커밋하지 않는다. 짧은 GitHub Actions OIDC 토큰으로 private LLM Holdings
 # Runtime에 직접 전달한다. 주문/정정/취소 엔드포인트는 호출하지 않는다.
 #
-# KST 기준: 09:25 / 12:25 / 16:25 / 20:25
+# 2026-11-15: Railway production is offline. Pause unattended sync to prevent
+# repeated 404 failures; keep the read-only OIDC path for explicit recovery checks.
+# Do not re-add a schedule until the private Runtime endpoint is healthy.
 on:
-  schedule:
-    - cron: '25 0,3,7,11 * * *'
   workflow_dispatch:
 
 permissions:
