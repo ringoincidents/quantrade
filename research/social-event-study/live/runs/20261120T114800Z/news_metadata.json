@@ -1,0 +1,18 @@
+[
+  {
+    "source": "gdelt_doc_artlist",
+    "topic": "leveraged_semis",
+    "url": "http://www.zerohedge.com/markets/different-retail-one-showed-spacex-anthropic-sets-day-one-retail-trading-record-and-nearly",
+    "url_sha256": "8970a50287d706b3e4ea7dce9c7205b6fe16443274b387e63966545e50cbe6d5",
+    "first_seen_utc": "2026-11-20T11:48:00Z",
+    "retrieved_utc": "2026-11-20T11:48:00Z",
+    "gdelt_seendate_utc": "2026-11-20T06:45:00Z",
+    "domain": "zerohedge.com",
+    "language": "English",
+    "published_utc": null,
+    "publish_time_verified": false,
+    "rights_status": "public_news_metadata_not_content_republication",
+    "predictive_eligible": false,
+    "note": "GDELT seen date is not verified original publication time."
+  }
+]
