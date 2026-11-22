@@ -1,0 +1,25 @@
+name: QuanTrade Binance Spot Manual Read-Only Connection Check
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-connection:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    env:
+      QUANTRADE_BINANCE_API_KEY: ${{ secrets.QUANTRADE_BINANCE_API_KEY }}
+      QUANTRADE_BINANCE_API_SECRET: ${{ secrets.QUANTRADE_BINANCE_API_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check Binance Spot READ-ONLY connection (never places orders)
+        run: python -m quantrade.connectors.binance_spot_preflight
+
+# Manual-only: no automated schedules, no live trading. No account balance amounts in logs.
+# The user's Binance account/jurisdiction may reject GitHub hosted runner egress IP.

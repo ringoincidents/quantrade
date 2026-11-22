@@ -1,0 +1,26 @@
+name: Binance Spot Read-Only Adapter Tests
+
+on:
+  pull_request:
+    paths:
+      - 'quantrade/connectors/**'
+      - 'tests/connectors/**'
+      - 'research/alpha_lab/BINANCE_SPOT_READONLY.md'
+      - '.github/workflows/binance_spot_readonly.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile read-only connector
+        run: python -m compileall -q quantrade/connectors tests/connectors
+      - name: Run simulated read-only Binance API tests
+        run: python -m unittest discover -s tests/connectors -p 'test_*.py' -v
