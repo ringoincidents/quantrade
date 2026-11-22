@@ -94,14 +94,26 @@ def asof_panel(prices: list[Close], releases: list[Release], series_id: str):
 
 
 def vix_crosses(aligned: list[Release | None]) -> list[int]:
-    """Only first cross from <30 to >=30, no duplicate from unchanged release."""
+    """First upward >=30 VIX cross; re-arm only after 10 new VIX observations below 25."""
     out = []
-    for i in range(1, len(aligned)):
-        prev, now = aligned[i - 1], aligned[i]
-        if prev is None or now is None or now.first_public_at_utc == prev.first_public_at_utc:
+    previous = None
+    last_release_time = None
+    armed = True
+    low_count = 0
+    for i, now in enumerate(aligned):
+        if now is None or now.first_public_at_utc == last_release_time:
             continue
-        if prev.value < 30 <= now.value:
+        last_release_time = now.first_public_at_utc
+        if now.value < 25:
+            low_count += 1
+            if low_count >= 10:
+                armed = True
+        else:
+            low_count = 0
+        if armed and previous is not None and previous.value < 30 <= now.value:
             out.append(i)
+            armed = False
+        previous = now
     return out
 
 
