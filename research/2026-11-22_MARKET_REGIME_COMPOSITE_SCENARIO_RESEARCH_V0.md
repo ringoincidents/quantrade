@@ -13,7 +13,7 @@
 - Canonical precedence: `QUANTRADE_CANONICAL_VISION.md` > this candidate. Read `CLAUDE.md` (v3.2 forecast disablement), `research/TRADING_OSS_RESEARCH_PROGRAM.md` and relevant Holdings Strategy Memory protocol before any adoption.
 - Access/privacy: this file is in a **public repository**. No private holdings, quantities, cost bases, credentials, private account data, individual identity, or personal message transcripts.
 - Evidence legend: **F** = Founder-supplied requirement; **S** = independently inspectable public source; **H** = plausible/contested hypothesis; **P** = prior assistant/conversation lead, not independently replicated in this research record; **D** = proposed design, not evidence; **B** = blocker.
-- Linked issue: to be attached after issue creation; find issues by `QT-MRI-2026-11-22`.
+- Linked issue: [QuanTrade Issue #135](https://github.com/ringoincidents/quantrade/issues/135) — persistent restart trigger and research gates.
 
 ## 0. Why this must survive the chat
 
@@ -238,7 +238,7 @@ When asked about **QuanTrade**, market timing, market bottom, VIX/credit indicat
 
 **NOT DONE**: no source dataset downloaded or compiled; no numeric historical regression/reproduction performed here; no independently validated future-return threshold; no Monte Carlo engine built/run; no outcome backtest, no calibration, no composite index, no mobile dashboard, no real-money trading. Do not claim otherwise.
 
-**NEXT ACTION**: create a bounded, approved research task for G0: select source-vintage-safe VIX/HY-OAS/DGS10/QQQ/SPY panel with exact date-time conventions, pre-register one VIX+credit narrowing experiment and baseline for 2000–2025. Then G1. Link the issue from progress records.
+**NEXT ACTION**: use Issue #135 to scope and approve a bounded research task for G0: select source-vintage-safe VIX/HY-OAS/DGS10/QQQ/SPY panel with exact date-time conventions, pre-register one VIX+credit narrowing experiment and baseline for 2000–2025. Then G1. Link the issue from progress records.
 
 **BLOCKERS**: data availability/licenses, OAS release/vintage delays, exact underlying SOXL index if testing that asset, leakage-safe Korean export release history, unseen Claude Skill version, unapproved strategy prediction path.
 
