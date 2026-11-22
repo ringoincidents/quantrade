@@ -43,7 +43,9 @@ class TestPITGuard(unittest.TestCase):
         vals = [20, 20, 32, 32, 29, 31]
         times = [stamp(0),stamp(0),stamp(2),stamp(2),stamp(4),stamp(5)]
         r = [Release("VIXCLS", "X", v, t) for v, t in zip(vals, times)]
-        self.assertEqual(vix_crosses(r), [2, 5])
+        self.assertEqual(vix_crosses(r), [2])
+        recover = r[:3] + [Release("VIXCLS", "X", 19, stamp(i)) for i in range(3, 13)] + [Release("VIXCLS", "X", 31, stamp(13))]
+        self.assertEqual(vix_crosses(recover), [2, 13])
 
     def test_credit_turn_uses_past_and_bp_units(self):
         aligned = [Release("BAA10Y", str(i), 1.0 + 0.001*i, stamp(i)) for i in range(260)]
