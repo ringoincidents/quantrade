@@ -1,0 +1,25 @@
+name: Research market-data vault synthetic unit tests
+
+on:
+  pull_request:
+    paths:
+      - "research/market_data_vault/**"
+      - ".github/workflows/research-market-data-vault.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  synthetic-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout read-only repository
+        uses: actions/checkout@v4
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Run no-network research tests
+        run: python -m unittest discover -s research/market_data_vault -p 'test_*.py' -v
