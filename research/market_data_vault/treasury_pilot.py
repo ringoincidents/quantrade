@@ -144,6 +144,25 @@ def archive_and_index(private_dir: str | Path, raw: bytes, year: int,
         except FileExistsError:
             if hashlib.sha256(target.read_bytes()).hexdigest() != digest:
                 raise ValueError("Archive collision or corruption")
+    # The raw blob alone is not a reconstructible source snapshot: preserve
+    # original request identity and collection timestamp in a private sidecar.
+    meta = {
+        "sha256": digest, "source_url": final_url,
+        "collector_seen_utc": seen_utc, "source_year": year,
+        "byte_size": len(raw), "original_publication_time_verified": False,
+    }
+    sidecar = raw_dir / f"{digest}.json"
+    if sidecar.exists():
+        if json.loads(sidecar.read_text(encoding="utf-8")) != meta:
+            raise ValueError("Immutable source manifest differs from existing archive")
+    else:
+        try:
+            with sidecar.open("x", encoding="utf-8") as m:
+                json.dump(meta, m, indent=2, sort_keys=True)
+                m.write("\n")
+        except FileExistsError:
+            if json.loads(sidecar.read_text(encoding="utf-8")) != meta:
+                raise ValueError("Source manifest collision")
     db = connect(folder / "treasury_yields.sqlite")
     try:
         with db:
@@ -164,6 +183,45 @@ def archive_and_index(private_dir: str | Path, raw: bytes, year: int,
                 "rows_by_series": {k: len(v) for k, v in rows.items()}}
     finally:
         db.close()
+
+
+def restore_private_index(private_dir: str | Path) -> dict:
+    """Rebuild a LOST SQLite index using private immutable XML + manifests.
+
+    This is a destructive-operation-free restore: refuses to run if an index
+    already exists. Validate *all* manifest hashes before creating a database.
+    Neither original release timestamps nor historical vintages are invented.
+    """
+    folder = Path(private_dir).resolve()
+    db_path = folder / "treasury_yields.sqlite"
+    if db_path.exists():
+        raise FileExistsError("Existing index present: never overwrite")
+    raw_dir = folder / "sha256"
+    items = []
+    for sidecar in sorted(raw_dir.glob("*.json")):
+        manifest = json.loads(sidecar.read_text(encoding="utf-8"))
+        digest = manifest["sha256"]
+        if sidecar.name != f"{digest}.json":
+            raise ValueError("Manifest file name does not match digest")
+        raw_path = raw_dir / f"{digest}.xml"
+        payload = raw_path.read_bytes()
+        if hashlib.sha256(payload).hexdigest() != digest:
+            raise ValueError("Archive failed SHA-256 verification")
+        if len(payload) != manifest["byte_size"]:
+            raise ValueError("Archive byte count differs from manifest")
+        parse_annual_xml(payload, int(manifest["source_year"]))
+        parsed = urllib.parse.urlparse(manifest["source_url"])
+        if parsed.scheme != "https" or parsed.hostname != OFFICIAL_HOST:
+            raise ValueError("Untrusted source in manifest")
+        if manifest.get("original_publication_time_verified") is not False:
+            raise ValueError("Historical original availability must remain unverified")
+        items.append((payload, manifest))
+    if not items:
+        raise ValueError("No private source manifests available for restore")
+    for payload, meta in items:
+        archive_and_index(folder, payload, int(meta["source_year"]),
+                          meta["source_url"], meta["collector_seen_utc"])
+    return {"restored_batches": len(items), "index_path": str(db_path)}
 
 
 def latest_captured(db: sqlite3.Connection, series_id: str,
