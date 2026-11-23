@@ -1,4 +1,4 @@
-name: Research market-data vault synthetic unit tests
+name: Research market-data vault tests and official Treasury pilot
 
 on:
   pull_request:
@@ -23,3 +23,19 @@ jobs:
           python-version: "3.11"
       - name: Run no-network research tests
         run: python -m unittest discover -s research/market_data_vault -p 'test_*.py' -v
+
+  official-treasury-pilot:
+    # Only one official, public US Treasury annual XML request. No secrets,
+    # no file/artifact uploads, no scheduled collection, no market orders.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout research branch
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Fetch official 2025 Treasury 2Y and 10Y yield history
+        run: python research/market_data_vault/treasury_pilot.py --year 2025
