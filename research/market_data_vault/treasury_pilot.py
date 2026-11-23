@@ -153,8 +153,14 @@ def archive_and_index(private_dir: str | Path, raw: bytes, year: int,
     }
     sidecar = raw_dir / f"{digest}.json"
     if sidecar.exists():
-        if json.loads(sidecar.read_text(encoding="utf-8")) != meta:
+        previous_meta = json.loads(sidecar.read_text(encoding="utf-8"))
+        stable_fields = ("sha256", "source_url", "source_year",
+                         "byte_size", "original_publication_time_verified")
+        if any(previous_meta.get(k) != meta[k] for k in stable_fields):
             raise ValueError("Immutable source manifest differs from existing archive")
+        # Identical bytes fetched later are NOT a revision. Retain first seen.
+        seen_utc = previous_meta["collector_seen_utc"]
+        meta = previous_meta
     else:
         try:
             with sidecar.open("x", encoding="utf-8") as m:
