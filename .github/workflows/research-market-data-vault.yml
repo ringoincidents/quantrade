@@ -1,0 +1,50 @@
+name: Research market-data vault tests and official Treasury pilot
+
+on:
+  pull_request:
+    paths:
+      - "research/market_data_vault/**"
+      - ".github/workflows/research-market-data-vault.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  synthetic-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout read-only repository
+        uses: actions/checkout@v4
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Run no-network research tests
+        run: python -m unittest discover -s research/market_data_vault -p 'test_*.py' -v
+
+  official-treasury-pilot:
+    # Only one official, public US Treasury annual XML request. No secrets,
+    # no file/artifact uploads, no scheduled collection, no market orders.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout research branch
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Verify 2008, 2020 and 2025 official US Treasury histories in a private ephemeral archive
+        run: |
+          python research/market_data_vault/treasury_pilot.py --year 2008 --private-dir "$RUNNER_TEMP/treasury-pilot"
+          sleep 1
+          python research/market_data_vault/treasury_pilot.py --year 2020 --private-dir "$RUNNER_TEMP/treasury-pilot"
+          sleep 1
+          python research/market_data_vault/treasury_pilot.py --year 2025 --private-dir "$RUNNER_TEMP/treasury-pilot"
+      - name: Simulate local SQLite index loss and restore all three years from SHA-verified private raw files
+        run: |
+          rm "$RUNNER_TEMP/treasury-pilot/treasury_yields.sqlite"
+          python research/market_data_vault/treasury_pilot.py --restore-private-dir "$RUNNER_TEMP/treasury-pilot"

@@ -2,6 +2,11 @@
 
 This is a **research index**, not implementation authority. The canonical company direction remains in [QUANTRADE_CANONICAL_VISION.md](../QUANTRADE_CANONICAL_VISION.md), and the earlier alpha failure/prediction-disablement gates remain in [CLAUDE.md](../CLAUDE.md).
 
+## Foundational data research — retrieve before new API/history work
+
+- **[Market Data Vault — reusable licensed historical price storage + versioned indicator library](market_data_vault/README.md)** / [Issue #137](https://github.com/ringoincidents/quantrade/issues/137) / [Draft PR #138](https://github.com/ringoincidents/quantrade/pull/138): collect once, retain source rights/provenance, keep private raw data, deterministically recompute indicators. First check this catalog when a study stalls over data or indicator formulas. **P0 is synthetic-test-only, no licensed market feed/populated research data, no execution or authority.**
+- This infrastructure is a prerequisite for serious [Market Regime Composite/10,000-path scenario research](2026-11-22_MARKET_REGIME_COMPOSITE_SCENARIO_RESEARCH_V0.md). Avoid repeating the same data-acquisition blocker in each strategy.
+
 ## First retrieve before restarting similar work
 
 | Topic / trigger | Durable record | Next action |

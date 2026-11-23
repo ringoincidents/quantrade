@@ -1,0 +1,14 @@
+# Licensed, sensitive or locally sourced data NEVER belongs in public Git
+*.db
+*.sqlite
+*.sqlite3
+*.parquet
+*.arrow
+*.feather
+*.csv
+*.jsonl
+data/
+raw/
+snapshots/
+cache/
+__pycache__/
