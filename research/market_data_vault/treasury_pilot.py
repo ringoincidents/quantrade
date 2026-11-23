@@ -284,10 +284,19 @@ def pilot(year: int, private_dir: str | Path | None = None) -> dict:
 
 def main():
     ap = argparse.ArgumentParser(description="Official Treasury annual XML pilot, no trading")
-    ap.add_argument("--year", type=int, required=True)
+    ap.add_argument("--year", type=int, help="An explicit official Treasury calendar year")
     ap.add_argument("--private-dir", help="Optional private persistent storage, outside Git")
+    ap.add_argument("--restore-private-dir", help="Rebuild absent SQLite DB from immutable private source files; refuses overwrite")
     args = ap.parse_args()
-    print(json.dumps(pilot(args.year, args.private_dir), indent=2))
+    if args.restore_private_dir:
+        if args.year is not None or args.private_dir:
+            ap.error("Restore and fetch are separate actions")
+        result = restore_private_index(args.restore_private_dir)
+    else:
+        if args.year is None:
+            ap.error("--year is required for fetching")
+        result = pilot(args.year, args.private_dir)
+    print(json.dumps(result, indent=2))
 
 
 if __name__ == "__main__":
