@@ -7,6 +7,7 @@ from pathlib import Path
 from treasury_pilot import (
     archive_and_index, connect, latest_captured, official_url,
     parse_annual_xml, verified_historic_pit, fetch_official, MAX_XML_BYTES,
+    restore_private_index,
 )
 
 
@@ -113,6 +114,48 @@ class TreasuryTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             archive_and_index(self.p, self.xml, 2025, self.uri,
                               "2026-11-23T10:00:00")
+
+    def test_12_archive_sidecar_remembers_source_and_date(self):
+        a = archive_and_index(self.p, self.xml, 2025, self.uri, self.first_seen)
+        import json
+        sidecar = json.loads((self.p / "sha256" / (a["sha256"]+".json")).read_text())
+        self.assertEqual(sidecar["collector_seen_utc"], "2026-11-23T10:00:00+00:00")
+        self.assertEqual(sidecar["source_url"], self.uri)
+        self.assertFalse(sidecar["original_publication_time_verified"])
+
+    def test_13_same_payload_fetched_again_remains_idempotent(self):
+        archive_and_index(self.p, self.xml, 2025, self.uri, self.first_seen)
+        out = archive_and_index(self.p, self.xml, 2025, self.uri,
+                                "2026-11-24T12:00:00Z")
+        self.assertEqual(out["status"], "unchanged")
+        db = connect(self.p / "treasury_yields.sqlite")
+        self.addCleanup(db.close)
+        self.assertEqual(db.execute("SELECT count(*) FROM archive_batches").fetchone()[0], 1)
+
+    def test_14_rebuild_lost_index_from_private_archive(self):
+        archive_and_index(self.p, self.xml, 2025, self.uri, self.first_seen)
+        (self.p / "treasury_yields.sqlite").unlink()
+        result = restore_private_index(self.p)
+        self.assertEqual(result["restored_batches"], 1)
+        db = connect(self.p / "treasury_yields.sqlite")
+        self.addCleanup(db.close)
+        self.assertEqual(latest_captured(db, "UST_PAR_2Y", "2025-01-02",
+                                         "2026-11-23T10:01:00Z"), 4.1)
+        self.assertIsNone(verified_historic_pit(db, "UST_PAR_2Y",
+                                                "2025-01-02", "2026-11-24T00:00:00Z"))
+
+    def test_15_restore_refuses_to_overwrite_existing_db(self):
+        archive_and_index(self.p, self.xml, 2025, self.uri, self.first_seen)
+        with self.assertRaises(FileExistsError):
+            restore_private_index(self.p)
+
+    def test_16_restore_rejects_corrupt_source_before_new_db(self):
+        a = archive_and_index(self.p, self.xml, 2025, self.uri, self.first_seen)
+        (self.p / "treasury_yields.sqlite").unlink()
+        (self.p / "sha256" / (a["sha256"]+".xml")).write_bytes(b"tampered")
+        with self.assertRaises(ValueError):
+            restore_private_index(self.p)
+        self.assertFalse((self.p/"treasury_yields.sqlite").exists())
 
 
 if __name__ == "__main__":
