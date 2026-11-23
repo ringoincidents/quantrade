@@ -20,6 +20,7 @@ Market research was repeatedly blocked by needing to fetch prices/indicators aga
 - `ARCHITECTURE_RFC_2026-11-23.md`: P0–P3 plan and differences from existing feature calculations.
 - `treasury_pilot.py`: official annual US Treasury XML 2Y/10Y parser; optional private immutable source XML+SHA and sidecar manifest; collector-time index (NOT original historical release time); no-overwrite restore.
 - `test_treasury_pilot.py`: additional source parsing, anti-revision, exact-date, SHA-corruption, no-fabricated-PIT and restore tests.
+- [2026-11-23 vendor and license matrix](P1_SOURCE_PROVIDER_MATRIX_2026-11-23.md): prioritized official US Treasury, Cboe VIX, KRX 2010+, FRED/ALFRED and vetted ETF adjusted-price candidates. None purchased.
 - [2026-11-23 official source result](P1_TREASURY_PILOT_RESULT_2026-11-23.md): GitHub Actions downloaded 2008/2020/2025, **751 observations per maturity** in total and restored 3 temporary archive batches after deleting an ephemeral SQLite database. **29/29 synthetic unit tests PASS**. The raw files were not kept after the CI job.
 
 **No market-history CSV files or bulk third-party copyrighted data belong in this public Git repository.** Keep dataset and SQLite database in a private directory and back it up. Source license rights and first-available timestamps must be established from official evidence; the CLI flags record operator attestations, not independent verification.
