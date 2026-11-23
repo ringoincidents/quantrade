@@ -37,5 +37,14 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Fetch official 2025 Treasury 2Y and 10Y yield history
-        run: python research/market_data_vault/treasury_pilot.py --year 2025
+      - name: Verify 2008, 2020 and 2025 official US Treasury histories in a private ephemeral archive
+        run: |
+          python research/market_data_vault/treasury_pilot.py --year 2008 --private-dir "$RUNNER_TEMP/treasury-pilot"
+          sleep 1
+          python research/market_data_vault/treasury_pilot.py --year 2020 --private-dir "$RUNNER_TEMP/treasury-pilot"
+          sleep 1
+          python research/market_data_vault/treasury_pilot.py --year 2025 --private-dir "$RUNNER_TEMP/treasury-pilot"
+      - name: Simulate local SQLite index loss and restore all three years from SHA-verified private raw files
+        run: |
+          rm "$RUNNER_TEMP/treasury-pilot/treasury_yields.sqlite"
+          python research/market_data_vault/treasury_pilot.py --restore-private-dir "$RUNNER_TEMP/treasury-pilot"
