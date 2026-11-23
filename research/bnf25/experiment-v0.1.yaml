@@ -1,0 +1,66 @@
+experiment_id: QT-R001
+version: "0.1.0"
+status: "DESIGN_ONLY_NO_RESULTS"
+research_timezone: America/New_York
+signal_start: "2016-11-11"
+signal_end: "2026-11-11"
+warmup_sessions: 252
+universe:
+  preferred: sp500_point_in_time
+  pilot_fallback: spy_historical_etf_constituents_proxy
+  require_delisted_securities: true
+  require_permanent_security_id: true
+  same_day_membership_asof_signal: true
+signal:
+  moving_average: simple
+  lookback_sessions: 25
+  deviation_unit: percent
+  thresholds_percent: [-5, -10, -15, -20]
+  crossing_only: true
+  reentry_cooldown_sessions_per_symbol_threshold: 10
+execution:
+  signal_available_after: session_close
+  entry: next_session_regular_open
+  exit: close_of_hth_session_after_signal
+  holding_sessions: [1, 3, 5, 10]
+  skip_unfilled_entries_and_report: true
+  corporate_actions_asof_required: true
+costs:
+  unit: basis_points_one_way
+  optimistic: 2
+  base: 5
+  stress: 20
+  commission_usd_per_trade: 0
+  note: assumptions_not_actual_broker_quotes
+benchmark:
+  ticker: SPY
+  entry_exit_timing: matched_to_event
+  include_costs: true
+regimes:
+  trend:
+    index: SPY
+    sma_sessions: 200
+    positive_if_close_gte_sma: true
+  volatility:
+    index: VIX
+    bands: [20, 25]
+inference:
+  primary_threshold_percent: -15
+  primary_holding_sessions: 3
+  primary_metric: mean_signal_day_equal_weighted_net_excess_return_vs_SPY
+  ci: block_bootstrap
+  block_sessions: 20
+  iterations: 2000
+  seed: 20261112
+  secondary_multiplicity: holm
+splits:
+  discovery: ["2016-11-11", "2022-12-30"]
+  validation: ["2023-01-03", "2024-12-31"]
+  locked_test: ["2025-01-02", "2026-11-11"]
+artifacts:
+  manifest_required: true
+  event_ledger_required: true
+  censoring_counts_required: true
+  data_sha256_required: true
+  code_commit_sha_required: true
+  public_data_redistribution: false
