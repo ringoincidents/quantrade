@@ -1,6 +1,6 @@
 # QuanTrade Market Data Vault — P0 Offline Research Prototype
 
-**Status:** PROPOSED / SANDBOX / NO SOURCE HISTORY / NO VALIDATED SIGNAL / NO LIVE TRADING
+**Status:** SANDBOX / OFFICIAL TREASURY LIVE PILOT SUCCESS (3 years, 751 sessions each maturity) / NO PERSISTENT LICENSED DATA STORE / NO VALIDATED SIGNAL / NO LIVE TRADING
 
 - Tracking: [Issue #137](https://github.com/ringoincidents/quantrade/issues/137)
 - Canonical project vision: [QUANTRADE_CANONICAL_VISION.md](../../QUANTRADE_CANONICAL_VISION.md)
@@ -18,6 +18,9 @@ Market research was repeatedly blocked by needing to fetch prices/indicators aga
 - `cli.py`: offline register/ingest/snapshot commands; no API access, no broker connectivity.
 - `test_vault.py`: synthetic tests for licensing fail-closed, no lookahead, revision history, duplicate handling, invalid OHLCV, cross-series isolation and deterministic indicator semantics.
 - `ARCHITECTURE_RFC_2026-11-23.md`: P0–P3 plan and differences from existing feature calculations.
+- `treasury_pilot.py`: official annual US Treasury XML 2Y/10Y parser; optional private immutable source XML+SHA and sidecar manifest; collector-time index (NOT original historical release time); no-overwrite restore.
+- `test_treasury_pilot.py`: additional source parsing, anti-revision, exact-date, SHA-corruption, no-fabricated-PIT and restore tests.
+- [2026-11-23 official source result](P1_TREASURY_PILOT_RESULT_2026-11-23.md): GitHub Actions downloaded 2008/2020/2025, **751 observations per maturity** in total and restored 3 temporary archive batches after deleting an ephemeral SQLite database. **29/29 synthetic unit tests PASS**. The raw files were not kept after the CI job.
 
 **No market-history CSV files or bulk third-party copyrighted data belong in this public Git repository.** Keep dataset and SQLite database in a private directory and back it up. Source license rights and first-available timestamps must be established from official evidence; the CLI flags record operator attestations, not independent verification.
 
@@ -62,6 +65,17 @@ python research/market_data_vault/cli.py --db /private/path/qt-research.db snaps
 4. **No scheduling live collectors**, production deployments or changing trading policy in P0.
 5. SHA of imported file is recorded, **but the raw CSV itself must be stored separately**; P0 is not yet a fully recoverable private data lake.
 6. Revisions are traceable by first-known timestamp; unknown times are quarantined from verified-only snapshots.
+
+## Official Treasury annual pilot (public UST data; private storage only)
+
+```bash
+# First, decide where YOUR persistent private files live and back them up.
+python research/market_data_vault/treasury_pilot.py --year 2025 --private-dir /PRIVATE/qt-vault
+# To reconstruct a MISSING SQLite index from immutable raw files/sidecars:
+python research/market_data_vault/treasury_pilot.py --restore-private-dir /PRIVATE/qt-vault
+```
+
+The GitHub Actions pilot uses a temporary runner directory. Its successful download and recovery DOES NOT populate a long-term vault. Historic publication timestamps remain UNKNOWN, so the archived rates cannot be treated as point-in-time verified strategy features until release/vintage validation.
 
 ## Next concrete validation
 
