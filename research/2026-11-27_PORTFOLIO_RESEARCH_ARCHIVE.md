@@ -50,7 +50,7 @@ All prices/values are reported November 2026 research snapshots, NOT current ver
 | TDC | 37.42 | 29.44 / normalized CF | settlement inflates FCF, recurring growth low, SBC normalization |
 | GAP | 23.21 | 23.15 / adjusted EPS multiple | tariff refund, normalized EPS, apparel cyclicality |
 | HRMY | 35.26 | BLOCKED | WAKIX concentration, generic entry around 2030; finite patent-life rNPV |
-| 034320 Aniplus | 2020 | 1500 / normalized EPS | falling margins, content rights amortization/cash capex, Laftel integration |
+| 310200 Aniplus | 2020 | 1500 / normalized EPS | falling margins, content rights amortization/cash capex, Laftel integration |
 | 037440 Heerim | 3330 | 2970 / normalized EPS | receivables, negative operating CF, low margins, backlog conversion |
 | CMCSA | 25.73 | 28 / EPS multiple | broadband competition, spin-off perimeter and debt |
 | PG | 173.23 | 154 / EPS multiple | slow growth, input costs |
@@ -71,3 +71,5 @@ Legacy 24 watch universe: Samsung Fire, COR, MWA, CB, EOG, FN, POWL, CME, VLTO, 
 5. Biotech rNPV (Alteogen, HRMY), F&F deal, Coway lease cohort, NICE/Korea Ratings; no unsupported contractual or probability assumptions promoted.
 6. Decision journal and future outcomes, including rejected/held/unfilled orders; no fabricated entry. Private account data and actual trades outside public repo.
 7. See AUTOMATION_SPEC_2026-11-27.md and research config draft. Research only; governance and independent risk approval required before any operational adoption.
+
+Security identity correction: Aniplus 310200 verified in KRX filing https://kind.krx.co.kr/external/2026/05/08/000185/20260508000437/00634.htm ; remaining case identifiers require master-data verification before ingestion.
