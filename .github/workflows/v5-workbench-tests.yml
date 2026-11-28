@@ -1,0 +1,30 @@
+name: V5 Workbench isolated tests
+on:
+  pull_request:
+    paths:
+      - "quantrade/workbench/**"
+      - "tests/workbench/**"
+      - ".github/workflows/v5-workbench-tests.yml"
+permissions:
+  contents: read
+jobs:
+  synthetic-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m unittest discover -s tests/workbench -p "test_*.py" -v
+      - run: python -m quantrade.workbench.entry_monitor
+      - name: Generate offline synthetic report
+        run: python -m quantrade.workbench.local_report --store "$RUNNER_TEMP/f08-demo" demo
+      - uses: actions/upload-artifact@v4
+        with:
+          name: f08-synthetic-report
+          path: |
+            ${{ runner.temp }}/f08-demo/report-*/report.html
+            ${{ runner.temp }}/f08-demo/report-*/report.json
+            ${{ runner.temp }}/f08-demo/report-*/manifest.json
+          if-no-files-found: error
+          retention-days: 7
