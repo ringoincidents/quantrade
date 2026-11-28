@@ -4,12 +4,14 @@ from datetime import datetime,timezone
 from http.server import BaseHTTPRequestHandler,ThreadingHTTPServer
 from case_pilot import Transport,analyze,KEYS,DartFundamentalObservationProvider,DartProviderConfig,FundamentalQuery
 from research_link import Verifier,PATH,PORT,mac,response_message,validate
+from work_lifecycle import Lifecycle
 
 class Work:
     def __init__(self):
-        self.result={"state":"PENDING"}
-        self.lock=threading.Lock()
+        self.lifecycle=Lifecycle()
     def run(self):
+        return self.lifecycle.dispatch(self.collect)
+    def collect(self):
         key=os.getenv("DART_API_KEY")
         t=Transport()
         try:
@@ -21,8 +23,8 @@ class Work:
             validate(r)
         except Exception:
             r={"state":"BLOCKED"}
-        with self.lock:self.result=r
         print("RESEARCH_WORK",r["state"],"requests",t.calls,flush=True)
+        return r
 
 class Handler(BaseHTTPRequestHandler):
     def setup(self):
@@ -41,13 +43,18 @@ class Handler(BaseHTTPRequestHandler):
         if self.path!=PATH:return self.reply(404)
         stamp,nonce,sig=[self.single(k) for k in ("X-QT-Time","X-QT-Nonce","X-QT-Signature")]
         if not self.server.verifier.verify(stamp,nonce,sig):return self.reply(403)
-        with self.server.work.lock:r=self.server.work.result
-        if r["state"]!="REPORT_READY":return self.reply(503)
-        try:validate(r)
-        except (ValueError,TypeError,KeyError):return self.reply(503)
-        body=json.dumps(r,sort_keys=True,separators=(",",":")).encode()
+        self.server.work.run()
+        w=self.server.work.lifecycle.snapshot()
+        r=w["report"]
+        if r is not None:
+            try:validate(r)
+            except (ValueError,TypeError,KeyError):
+                w["report"]=None
+                w["report_sha256"]=None
+                w["state"]="STALE"
+        body=json.dumps(w,sort_keys=True,separators=(",",":")).encode()
         self.reply(200,body,mac(self.server.verifier.key,response_message(stamp,nonce,body)))
-        print("RESEARCH_HANDOFF signed report served",flush=True)
+        print("RESEARCH_HANDOFF signed lifecycle",w["state"],flush=True)
     def do_POST(self):self.reply(405)
 
 class Server(ThreadingHTTPServer):
@@ -63,6 +70,6 @@ if __name__=="__main__":
     work=Work()
     server=PrivateServer(("::",PORT),key,work)
     if server.verifier.key:
-        threading.Thread(target=work.run,daemon=True).start()
+        work.run()
     print("RESEARCH_SERVER","READY" if server.verifier.key else "LOCKED",flush=True)
     server.serve_forever()
