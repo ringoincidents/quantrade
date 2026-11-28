@@ -1,0 +1,20 @@
+# F08 close parity preflight — 2026-11-28
+
+Scope: offline parser and comparison contract. All tests use fabricated values; no new provider call or real-price comparison. No F08 or production promotion.
+
+## Sources and rights review
+- KRX Open API terms effective 2025-12-26: https://openapi.krx.co.kr/contents/OPP/INFO/OPPINFO002.jsp — noncommercial only, no third-party provision, attribution "한국거래소 통계정보" for derived screens, no use after agreement ends. API key and service approvals are reported, not evidence of rights for shared cloud storage/third-party processors. Confirm specific rights and deletion/retention rules before persistent store or private hosted display.
+- Massive Market Data Terms updated 2026-11-03: https://massive.com/legal/market-data-terms-of-service — own personal/nonbusiness/noncommercial use and storage within plan; deletion within 30 days after license ends, backups no later than 90 days under specified conditions, tools holding it on subscriber's behalf must comply, source-specific terms apply. FAQ https://massive.com/knowledge-base/article/which-plan-do-i-need-to-show-massive-data-in-my-app — private one-user screen only within individual eligibility, no other end users or business use. Account classification, source-specific permissions and processor/retention configuration not certified. Public preview is explicitly excluded.
+- Toss official market-data guide https://developers.tossinvest.com/docs/market-data — token-only GET /api/v1/candles, interval=1d, adjusted=false available, count up to 200, newest-first, before cursor. KR daily sample timestamp midnight KST; closePrice and currency provided. It does not by itself attest actual regular close, source feed independence, publication time, finality, or US session-date conventions. Toss terms https://home.tossinvest.com/ko/terms/v2?id=752 not fully readable in this review; use as reference candidate only until applicable market-data rights and definitions confirmed. Do not issue OAuth tokens or join broker credentials with public preview/market-data worker in this step.
+
+## Reuse / boundaries
+Read #138 pinned vault.py (960351885f2a1ae68f10e8b9f6456d3785a381f5): reuse identity, raw basis, source, explicit rights and PIT principles, not float-backed research price storage for exact F08 threshold calculations. Existing #141 bounded Decimal helper reused. No new database or canonical provider. #119/#120 approval/valuation authority is separate. #140 thresholds remain research only. Compare provider-specific candidate values only in memory; status does not reveal price or delta. Never use a price hash as anonymization.
+
+## Pilot protocol once authorized
+1. Pin exact instrument mapping, venue, currency, raw per-share basis and official latest completed session; US early-close window already has bounded reference. KRX dated calendar and exceptional closures still required.
+2. Request KRX KOSPI/KOSDAQ daily and Massive raw open-close for public fixture symbols, explicitly fixed session. Capture actual receipt timestamp; do not backdate or confuse candle label with availability.
+3. Obtain second-source raw regular close; Toss KR 1d candidate can be compared numerically but is NOT proof of regular-session definition; US daily timestamp semantics blocked. Confirm data-use scope and upstream relationship. Exact Decimal match is necessary, not sufficient. Mismatches stop decision eligibility; no rounding tolerance or automatic source substitution.
+4. Private status/evidence only, no raw price or reconstructible hash in public repository/logs/preview. Need independently checked actual publication/finality/corporate actions and repeated observations before decision integration. No actual orders or account-data reads for this task.
+
+## Remaining blockers
+Actual two-source price parity NOT RUN; no current production permission. KRX calendar and source-specific rights, Toss data license/session definitions, actual finality, source-independent provenance, private credential isolation and authenticated storage remain open. Offline reference comparison cannot produce REVIEW/WAIT or pass S1.2. Existing alerts unchanged.
