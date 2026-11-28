@@ -1,0 +1,17 @@
+name: Decision review routing research tests
+on:
+  push:
+    branches: [research/market-data-vault-p0-20261123]
+    paths: ['research/decision_review/**', '.github/workflows/decision-review-research.yml']
+permissions:
+  contents: read
+jobs:
+  synthetic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m unittest discover -s research/decision_review -p 'test_*.py' -v
