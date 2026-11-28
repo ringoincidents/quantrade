@@ -1,0 +1,21 @@
+import assert from "node:assert/strict";
+import {IDS,cutoff,urlFor,parseSnapshot,makeInput,fetchSnapshot,preview} from "./alfred_semiconductor.mjs";
+import {evaluate} from "./industry_activity.mjs";
+const vintage="2026-11-24",ds=["2025-07-01","2025-10-01","2026-07-01","2026-10-01"],vals=[[100,100,110,120],[75,75,80,85]],csv=(id,i,v=vintage)=>Buffer.from("observation_date,"+id+"_"+v.replaceAll("-","")+"\n"+ds.map((d,j)=>d+","+vals[i][j]).join("\n")+"\n");
+const pair=IDS.map((id,i)=>parseSnapshot(csv(id,i),id,vintage));
+const review={rights:"RESEARCH_ALLOWED",status:"VERIFIED",reviewer:"synthetic fixture only",evidenceSha256:"a".repeat(64),snapshotHashes:pair.map(s=>s.sha256)},capturedAt="2026-11-28T12:00:00Z";
+let n=0;async function test(name,f){await f();n++;console.log("PASS "+name)}
+await test("conservative date cutoff",()=>assert.equal(cutoff(vintage),"2026-11-26T00:00:00.000Z"));
+await test("exact request scope and archive floor",()=>{let u=new URL(urlFor(IDS[0],vintage));assert.equal(u.hostname,"alfred.stlouisfed.org");assert.equal(u.searchParams.get("coed"),"2026-10-01");assert.equal(u.searchParams.get("vintage_date"),vintage);assert.throws(()=>urlFor(IDS[1],"2020-01-01"));assert.throws(()=>urlFor("OTHER",vintage))});
+await test("strict dated header",()=>assert.throws(()=>parseSnapshot(Buffer.from(csv(IDS[0],0).toString().replace("_20261124","")),IDS[0],vintage),/VINTAGE_HEADER_MISMATCH/));
+await test("missing value not interpolated",()=>{let p=parseSnapshot(Buffer.from(csv(IDS[0],0).toString().replace("2026-07-01,110","2026-07-01,.")),IDS[0],vintage);assert.deepEqual(p.missing,["2026-07"]);assert.equal(preview([p,pair[1]]).reason,"EXACT_PERIOD_MISSING")});
+await test("duplicate and future reference month rejected",()=>{assert.throws(()=>parseSnapshot(Buffer.concat([csv(IDS[0],0),Buffer.from("2026-10-01,3\n")]),IDS[0],vintage));assert.throws(()=>parseSnapshot(Buffer.concat([csv(IDS[0],0),Buffer.from("2026-11-01,3\n")]),IDS[0],vintage))});
+await test("invalid numeric rejected",()=>assert.throws(()=>parseSnapshot(Buffer.from(csv(IDS[0],0).toString().replace("2026-07-01,110","2026-07-01,NaN")),IDS[0],vintage)));
+await test("separate snapshots cannot be mixed",()=>assert.throws(()=>preview([pair[0],{...pair[1],vintage:"2026-10-31"}])));
+await test("no self-attestation",()=>assert.throws(()=>makeInput(pair,{capturedAt,review:null}),/EXTERNAL_REVIEW_REQUIRED/));
+await test("review must bind exact raw hashes",()=>assert.throws(()=>makeInput(pair,{capturedAt,review:{...review,snapshotHashes:["0".repeat(64),pair[1].sha256]}})));
+await test("no early capture",()=>assert.throws(()=>makeInput(pair,{capturedAt:"2026-11-25T00:00:00Z",review})));
+await test("preview and reviewed calculator parity",()=>{const a=preview(pair),b=evaluate(makeInput(pair,{capturedAt,review})).industries[0];assert.equal(a.status,"SOURCE_PREVIEW_NOT_VERIFIED");assert.equal(a.phase,b.phase);assert.equal(a.period,b.period);for(let i=0;i<2;i++)assert.equal(a.metrics[i].acceleration,b.metrics[i].acceleration)});
+await test("strict HTTP and MIME",async()=>{await assert.rejects(()=>fetchSnapshot(IDS[0],vintage,async()=>new Response("x",{status:403})),/HTTP_403/);await assert.rejects(()=>fetchSnapshot(IDS[0],vintage,async()=>new Response("<html>",{headers:{"content-type":"text/html"}})),/UNEXPECTED_CONTENT_TYPE/)});
+await test("mock transport requires redirect error and returns exact bytes",async()=>{let p=await fetchSnapshot(IDS[0],vintage,async(u,opt)=>{assert.equal(opt.redirect,"error");assert.equal(new URL(u).searchParams.get("id"),IDS[0]);return new Response(csv(IDS[0],0),{headers:{"content-type":"text/csv"}})});assert.equal(p.sha256,pair[0].sha256)});
+console.log(JSON.stringify({assertions:n,status:"SYNTHETIC_ONLY"}));

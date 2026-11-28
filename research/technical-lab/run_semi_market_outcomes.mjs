@@ -1,0 +1,10 @@
+import {readFileSync,writeFileSync} from "node:fs";
+import {createHash} from "node:crypto";
+import {compare} from "./semi_market_outcomes.mjs";
+const args=process.argv.slice(2);if(args.length!==5)throw Error("Usage: node run_semi_market_outcomes.mjs replay.json expected-replay-sha256 market.json expected-market-sha256 output.json");
+const hash=b=>createHash("sha256").update(b).digest("hex"),r=readFileSync(args[0]),m=readFileSync(args[2]);
+if(hash(r)!==args[1]||hash(m)!==args[3])throw Error("input hash mismatch");
+const market=JSON.parse(m);if(market.replaySha256!==hash(r))throw Error("market bundle not bound to replay");
+const out={...compare(JSON.parse(r),market),replaySha256:hash(r),marketSha256:hash(m),codeSha256:hash(readFileSync(new URL("./semi_market_outcomes.mjs",import.meta.url)))};
+writeFileSync(args[4],JSON.stringify(out,null,2)+"\n",{flag:"wx"});
+console.log(JSON.stringify({status:out.status,summary:out.summary,nonoverlap:out.nonoverlap},null,2));

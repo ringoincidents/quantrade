@@ -1,0 +1,38 @@
+name: Technical Lab offline verification
+on:
+  pull_request:
+    paths:
+      - 'research/technical-lab/**'
+      - '.github/workflows/technical-lab-offline.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax and offline synthetic integration
+        run: |
+          node --version
+          for f in research/technical-lab/*.mjs; do node --check "$f" || exit 1; done
+          node research/technical-lab/run.mjs --self-test
+          node research/technical-lab/batch.mjs --self-test
+          node research/technical-lab/test_batch.mjs
+          node research/technical-lab/run_events.mjs --self-test
+          node research/technical-lab/audit_universe.mjs --self-test
+          node research/technical-lab/calendar_event_audit.mjs --self-test
+          node research/technical-lab/test_sector_attribution.mjs
+          node research/technical-lab/test_industry_activity.mjs
+          node research/technical-lab/test_alfred_semiconductor.mjs
+          node research/technical-lab/test_semi_monthly_replay.mjs
+          node research/technical-lab/test_semi_market_outcomes.mjs
+          node research/technical-lab/audit_semi_monthly.mjs research/technical-lab/semi_monthly_run_46142381437.json "$RUNNER_TEMP/semi-audit.json"
+      - name: Recompute stored exploratory transfer diagnostics
+        run: |
+          node research/technical-lab/transfer_diagnostics.mjs research/technical-lab/transfer_batch1.json research/technical-lab/transfer_batch2.json research/technical-lab/transfer_batch3.json "$RUNNER_TEMP/transfer.json"
+          node --input-type=module -e 'import fs from "node:fs"; import assert from "node:assert/strict"; const a=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+"/transfer.json")); const b=JSON.parse(fs.readFileSync("research/technical-lab/transfer_diagnostics_report.json")); assert.deepEqual(a.results,b.results);'

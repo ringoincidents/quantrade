@@ -1,0 +1,19 @@
+name: Technical Lab ALFRED source feasibility
+on:
+  pull_request:
+    types: [labeled]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  probe:
+    if: github.event_name == 'workflow_dispatch' || github.event.label.name == 'technical-lab-alfred-probe'
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Bounded public source feasibility
+        run: node research/technical-lab/probe_alfred_semiconductor.mjs

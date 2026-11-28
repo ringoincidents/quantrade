@@ -1,0 +1,48 @@
+name: Technical Lab calendar alignment audit
+on:
+  pull_request:
+    types: [labeled]
+  workflow_dispatch:
+    inputs:
+      source_run_id:
+        description: Completed universe workflow run ID
+        required: true
+        default: '46139748823'
+        type: string
+permissions:
+  contents: read
+  actions: read
+jobs:
+  audit:
+    if: github.event_name == 'workflow_dispatch' || github.event.label.name == 'technical-lab-calendar-audit'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify calendar audit fixtures
+        run: node research/technical-lab/calendar_event_audit.mjs --self-test
+      - uses: actions/download-artifact@v4
+        with:
+          name: technical-lab-universe-evidence
+          run-id: ${{ inputs.source_run_id || '46139748823' }}
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/prior
+      - name: Fetch pinned source calendar only
+        run: |
+          git init "$RUNNER_TEMP/plain"
+          git -C "$RUNNER_TEMP/plain" remote add origin https://github.com/Sixian-Li/plain-backtest.git
+          git -C "$RUNNER_TEMP/plain" sparse-checkout set data/processed/calendars
+          git -C "$RUNNER_TEMP/plain" fetch --depth 1 --filter=blob:none origin 36adf234a7b98e1bb30356350a9274d33e63f835
+          git -C "$RUNNER_TEMP/plain" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/plain" rev-parse HEAD)" = 36adf234a7b98e1bb30356350a9274d33e63f835
+      - name: Audit completed run without replaying price data
+        run: |
+          node research/technical-lab/calendar_event_audit.mjs "$RUNNER_TEMP/prior/audit.json" "$RUNNER_TEMP/prior/universe.json" "$RUNNER_TEMP/plain/data/processed/calendars/XNYS.csv" "$RUNNER_TEMP/calendar-audit.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: technical-lab-calendar-audit
+          path: ${{ runner.temp }}/calendar-audit.json
+          retention-days: 30

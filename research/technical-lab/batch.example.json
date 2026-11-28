@@ -1,0 +1,48 @@
+{
+  "experimentId": "replace-with-unique-id",
+  "from": "2022-01-03",
+  "to": "2026-08-04",
+  "fee": 0.0025,
+  "assets": [
+    {
+      "asset": "SPY",
+      "prices": {
+        "path": "/local/data/SPY.csv",
+        "format": "plainbacktest",
+        "source": "https://github.com/Sixian-Li/plain-backtest",
+        "rights": "Source declares CC BY 4.0; audit pending",
+        "basis": "Source-declared adjusted OHLC; independent audit pending",
+        "sha256": "REPLACE_WITH_SHA256_OF_EXACT_BYTES"
+      }
+    },
+    {
+      "asset": "QQQ",
+      "prices": {
+        "path": "/local/data/QQQ.csv",
+        "format": "plainbacktest",
+        "source": "https://github.com/Sixian-Li/plain-backtest",
+        "rights": "Source declares CC BY 4.0; audit pending",
+        "basis": "Source-declared adjusted OHLC; independent audit pending",
+        "sha256": "REPLACE_WITH_SHA256_OF_EXACT_BYTES"
+      }
+    }
+  ],
+  "variants": [
+    {
+      "rule": "hold",
+      "mode": "now"
+    },
+    {
+      "rule": "70",
+      "mode": "now"
+    },
+    {
+      "rule": "P",
+      "mode": "now"
+    },
+    {
+      "rule": "P",
+      "mode": "5"
+    }
+  ]
+}

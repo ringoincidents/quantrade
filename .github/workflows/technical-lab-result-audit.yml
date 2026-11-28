@@ -1,0 +1,39 @@
+name: Technical Lab completed-run audit
+on:
+  pull_request:
+    types: [labeled]
+  workflow_dispatch:
+    inputs:
+      source_run_id:
+        description: Completed universe workflow run ID
+        required: true
+        default: '46139748823'
+        type: string
+permissions:
+  contents: read
+  actions: read
+jobs:
+  audit:
+    if: github.event_name == 'workflow_dispatch' || github.event.label.name == 'technical-lab-audit'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          name: technical-lab-universe-evidence
+          run-id: ${{ inputs.source_run_id || '46139748823' }}
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/prior
+      - name: Reconcile immutable results and secondary diagnostics
+        run: |
+          node --check research/technical-lab/universe_diagnostics.mjs
+          node research/technical-lab/universe_diagnostics.mjs "$RUNNER_TEMP/prior/audit.json" "$RUNNER_TEMP/prior/universe.json" "$RUNNER_TEMP/diagnostics.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: technical-lab-universe-diagnostics
+          path: ${{ runner.temp }}/diagnostics.json
+          retention-days: 30

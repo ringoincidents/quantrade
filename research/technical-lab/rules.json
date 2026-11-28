@@ -1,0 +1,59 @@
+{
+  "version": "QT-MAR-REPLAY-1.0.0",
+  "status": "EXPLORATORY_NOT_VALIDATED",
+  "authority": "Lab only; no production, prediction, or order authority",
+  "sources": {
+    "MAR_G": "https://github.com/ringoincidents/quantrade/issues/143#issuecomment-7237703427",
+    "MAR_H": "https://github.com/ringoincidents/quantrade/issues/143#issuecomment-7237732298",
+    "MAR_I": "https://github.com/ringoincidents/quantrade/issues/143#issuecomment-7237755247",
+    "MAR_M": "https://github.com/ringoincidents/quantrade/issues/143#issuecomment-7238142188",
+    "MAR_N": "https://github.com/ringoincidents/quantrade/issues/143#issuecomment-7238206291"
+  },
+  "rules": {
+    "50": "50% initial equity, drift",
+    "70": "70% initial equity, drift",
+    "hold": "100% initial equity, hold",
+    "70R": "70% initial equity, monthly rebalance",
+    "B": "100% normal, 0% during latched crisis",
+    "P": "latched crisis; 25% below SMA20, 50% above SMA20 below SMA60, 75% above both, 100% outside crisis",
+    "M": "P with lagged VIX/HY caps and HY60 exit criterion",
+    "D": "SMA60 gap buffer 0%, MAR-G drawdown age rules",
+    "H1": "D with 1% buffer",
+    "H3": "D with 3% buffer",
+    "H5": "D with 5% buffer",
+    "GH5": "H5 enabled only under prior VIX>=30 or asset below SMA200"
+  },
+  "parameters": {
+    "warmupSessions": 200,
+    "crisisOnsetDrawdown": -0.15,
+    "normalExitDrawdownStrictlyAbove": -0.1,
+    "drawdownWindow": 120,
+    "trendWindows": [
+      20,
+      60,
+      200
+    ],
+    "macroLagSessions": 2,
+    "GH5VixLagSessions": 1,
+    "confirmationCloses": 5,
+    "feePerTradedNotional": 0.0025,
+    "cashYield": 0,
+    "execution": "next open, no final forced liquidation"
+  },
+  "modes": {
+    "5": "five consecutive identical target closes",
+    "now": "execute each target change",
+    "week": "last observed session of week",
+    "asym": "immediate decreases; five consecutive closes for increases"
+  },
+  "deferred": [
+    "MAR-A through F event-study replication",
+    "100-month support transfer",
+    "multi-asset and delisted universe",
+    "market/sector matched controls",
+    "authorized PIT macro data",
+    "cash yield and corporate-action reconciliation",
+    "independent OOS validation"
+  ],
+  "dataGate": "G0 BLOCKED (#135); declared provenance is not an audit."
+}

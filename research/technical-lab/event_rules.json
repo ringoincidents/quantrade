@@ -1,0 +1,38 @@
+{
+  "version": "QT-MAR-EVENT-1.0.0",
+  "status": "EXPLORATORY_NOT_VALIDATED",
+  "design": "https://github.com/ringoincidents/quantrade/issues/143#issuecomment-7238341496",
+  "rules": {
+    "D_COMP_BREAK": "Cross above all 5/10/20/60/120 daily SMAs; prior 20 sessions any CV<=.05",
+    "M_COMP_BREAK": "Completed month crosses above all 5/10/20/30/40/60 month SMAs; preceding three completed CV<=.05",
+    "M_SUPPORT100": "Declining completed month, trailing 12 completed month high DD<=-.20, prior SMA100 rising, previous close > prior SMA100*1.05, current close within ±5% prior SMA100",
+    "D_HIGH252": "Close strictly greater than prior 252 closing highs",
+    "D_MATURE": "First consecutive day 21 below SMA60, trailing60 return<=0, trailing120 DD<=-.20",
+    "D_RECLAIM20": "Cross above/equal daily SMA20 with trailing120 DD<=-.15",
+    "W_RECLAIM20": "Completed week cross above/equal SMA20, previous completed week below, prior 52-week DD<=-.15",
+    "Y_RECLAIM3": "Completed year cross above/equal SMA3"
+  },
+  "outcomes": {
+    "horizons": [
+      5,
+      20,
+      60,
+      120
+    ],
+    "entry": "next observed open",
+    "exit": "signal index + horizon close",
+    "costFactor": 0.995,
+    "mae": "min future low / entry -1",
+    "mfe": "max future high / entry -1",
+    "hit10": "future low <=90% entry",
+    "censored": "null",
+    "comparison": "eligible non-event same rule; not matched",
+    "nonoverlap": "greedy by asset/rule/horizon/group, next signal strictly after previous exit"
+  },
+  "limitations": [
+    "new proxy definitions not exact original cafe rules",
+    "no corporate-action or PIT calendar certification",
+    "no delisted universe",
+    "no trading authority"
+  ]
+}
