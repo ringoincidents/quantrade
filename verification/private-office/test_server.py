@@ -136,6 +136,15 @@ class HTTPTests(unittest.TestCase):
         self.assertEqual(self.request("GET","/assets/demo/unknown",headers=c)[0],404)
         self.assertEqual(self.request("POST","/api/demo/portfolio/initial",headers={**c,"Origin":ORIGIN})[0],405)
 
+    def test_same_origin_form_policy_and_cross_origin_rejection(self):
+        status,h,_=self.request("GET","/login")
+        self.assertEqual(status,200)
+        self.assertEqual(h["Referrer-Policy"],"same-origin")
+        self.assertEqual(self.login(origin="null")[0],403)
+        self.assertEqual(self.request("POST","/login",urlencode({"token":TOKEN}),{"Content-Type":"application/x-www-form-urlencoded"})[0],403)
+        self.assertEqual(self.login(origin="https://evil.example")[0],403)
+        self.assertEqual(self.login()[0],303)
+
     def test_no_mutations_or_oversized_login(self):
         status,h,_=self.login()
         c=h["Set-Cookie"].split(";")[0]

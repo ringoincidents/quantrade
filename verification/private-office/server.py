@@ -136,7 +136,9 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Vary","Cookie")
         self.send_header("X-Content-Type-Options","nosniff")
         self.send_header("X-Frame-Options","DENY")
-        self.send_header("Referrer-Policy","no-referrer")
+        # no-referrer can force a same-origin HTML form POST Origin to null.
+        # same-origin retains the origin for our POST and suppresses cross-origin referrers.
+        self.send_header("Referrer-Policy","same-origin")
         self.send_header("Strict-Transport-Security","max-age=31536000")
         self.send_header("Content-Security-Policy","default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'")
         if location:
@@ -211,7 +213,9 @@ class Handler(BaseHTTPRequestHandler):
         if not self.preflight():
             return
         if self.headers.get_all("Origin")!=[self.auth.origin]:
-            self.send(403,b"Forbidden","text/plain")
+            # Fixed diagnostic only; never emit actual headers, URLs or credentials.
+            print(json.dumps({"auth_post":"ORIGIN_REJECTED"}),flush=True)
+            self.send(403,login_page("브라우저 출처 검증 실패. Safari에서 직접 열고 로그인 화면을 새로고침하세요."))
             return
         if self.path=="/logout":
             if not self.auth.active(self.session()):
