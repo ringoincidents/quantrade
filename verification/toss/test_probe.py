@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import Mock
-from probe import request, proxy_config, holdings_ok, page_complete, Blocked
+from probe import request, proxy_config, holdings_ok, page_complete, Blocked, subscription_status
 
 class TestProbe(unittest.TestCase):
     def test_mutations_blocked_before_transport(self):
@@ -23,6 +23,18 @@ class TestProbe(unittest.TestCase):
         self.assertFalse(holdings_ok({"items":[{}]}))
         self.assertFalse(page_complete({"hasNext":True}))
         self.assertFalse(page_complete({"nextCursor":"x"}))
+
+    def test_documented_subscription_ack(self):
+        self.assertEqual(subscription_status(
+            {"type":"subscriptions","subscribed":["personal:order:1","trade:us:AAPL"],"rejected":[]},
+            ["1"]), ("PASS","PASS"))
+        self.assertEqual(subscription_status(
+            {"type":"subscriptions","subscribed":["personal:order:1","trade:us:AAPL"],
+             "rejected":[{"code":"account-not-found"}]}, ["1","2"]), ("PARTIAL","PASS"))
+        with self.assertRaises(Blocked):
+            subscription_status({"type":"ack","subscribed":[],"rejected":[]}, ["1"])
+        with self.assertRaises(Blocked):
+            subscription_status({"type":"subscriptions","subscribed":["trade:us:AAPL"]}, ["1"])
 
 if __name__ == "__main__":
     unittest.main()

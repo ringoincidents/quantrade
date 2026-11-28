@@ -71,6 +71,21 @@ def holdings_ok(value):
 def page_complete(value):
     return value.get("hasNext") in (False, None) and not value.get("nextCursor")
 
+def subscription_status(ack, accounts):
+    # Official connection guide: type=subscriptions, top-level subscribed/rejected.
+    if not isinstance(ack, dict) or ack.get("type") != "subscriptions":
+        raise Blocked("ACK_NOT_RECEIVED")
+    subscribed = ack.get("subscribed")
+    rejected = ack.get("rejected")
+    if (not isinstance(subscribed, list) or not all(isinstance(x, str) for x in subscribed)
+            or not isinstance(rejected, list) or not all(isinstance(x, dict) for x in rejected)):
+        raise Blocked("ACK_SCHEMA_UNVERIFIED")
+    wanted = {"personal:order:" + account for account in accounts}
+    actual = set(subscribed)
+    order = "PASS" if wanted <= actual else "PARTIAL" if wanted & actual else "NOT_CONFIRMED"
+    market = "PASS" if "trade:us:AAPL" in actual else "NOT_CONFIRMED"
+    return order, market
+
 def ws_check(proxy, token, accounts):
     # Explicit authenticated HTTP CONNECT tunnel, TLS validation, no trace.
     conn = websocket.create_connection(
@@ -86,19 +101,11 @@ def ws_check(proxy, token, accounts):
         raw = conn.recv()
         if not isinstance(raw, str) or len(raw) > MAX_BYTES:
             raise Blocked("ACK_INVALID")
-        ack = json.loads(raw)
-        if ack.get("type") != "ack":
-            raise Blocked("ACK_NOT_RECEIVED")
-        body = ack.get("data", ack)
-        subscribed = body.get("subscribed")
-        if not isinstance(subscribed, list) or not all(isinstance(x, str) for x in subscribed):
-            raise Blocked("ACK_SCHEMA_UNVERIFIED")
-        wanted = {"personal:order:" + account for account in accounts}
-        actual = set(subscribed)
-        emit("WEBSOCKET_ORDER_SUBSCRIPTION", "PASS" if wanted <= actual else
-             "PARTIAL" if wanted & actual else "NOT_CONFIRMED")
-        emit("WEBSOCKET_MARKET_SUBSCRIPTION", "PASS" if "trade:us:AAPL" in actual else "NOT_CONFIRMED")
-        return bool(wanted & actual) and "trade:us:AAPL" in actual
+        order_status, market_status = subscription_status(json.loads(raw), accounts)
+        emit("WEBSOCKET_ORDER_SUBSCRIPTION", order_status)
+        emit("WEBSOCKET_MARKET_SUBSCRIPTION", market_status)
+        # This confirms subscription acceptance, never a real fill or market tick.
+        return order_status == "PASS" and market_status == "PASS"
     finally:
         conn.close(timeout=1)
 
