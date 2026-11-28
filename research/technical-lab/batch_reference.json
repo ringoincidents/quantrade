@@ -1,0 +1,34 @@
+{
+  "status": "EXPLORATORY_NOT_VALIDATED",
+  "validationAssertions": 12,
+  "assets": [
+    {
+      "asset": "QQQ",
+      "sha": "3c7f40995a6e2b7d6a2cdf5c84f38bd0deb4ed82"
+    },
+    {
+      "asset": "SPY",
+      "sha": "ed4e54af2c021b7c3923f9cdf877c52821b7b1aa"
+    }
+  ],
+  "benchmarks": [
+    {
+      "from": "2001-01-02",
+      "to": "2021-03-19",
+      "sessions": 5085,
+      "sameDates": true,
+      "holdReturnPct": 423.38,
+      "mddPct": -56.64,
+      "note": "Independent manual hold benchmark for later Node batch CLI assertion, not executed by CLI."
+    },
+    {
+      "from": "2022-01-03",
+      "to": "2026-08-04",
+      "sessions": 1150,
+      "sameDates": true,
+      "holdReturnPct": 78.84,
+      "mddPct": -29.53,
+      "note": "Independent manual hold benchmark for later Node batch CLI assertion, not executed by CLI."
+    }
+  ]
+}
