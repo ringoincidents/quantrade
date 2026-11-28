@@ -31,4 +31,26 @@ test("price known before session close rejected",()=>{let s=fixture.series[0];as
 test("descriptive context exact horizons",()=>{let x=sectorContext(makeContext(fixture),{sectorId:"SECTOR",marketId:"MARKET",date:dates[129],asOf});assert.equal(x.status,"DESCRIPTIVE_ONLY");assert.deepEqual(x.windows.map(w=>w.h),[20,60,120]);near(x.windows[0].relativeReturn,358/318-229/209)});
 test("insufficient context is partial",()=>{let x=sectorContext(makeContext(fixture),{sectorId:"SECTOR",marketId:"MARKET",date:dates[20],asOf:t(dates[20])});assert.deepEqual(x.windows.map(w=>w.status),["DESCRIPTIVE","BLOCKED","BLOCKED"])});
 test("context does not use future price bars",()=>{let a=sectorContext(makeContext(fixture),{sectorId:"SECTOR",marketId:"MARKET",date:dates[60],asOf:t(dates[60])}),s=fixture.series[1],b=sectorContext(makeContext({...fixture,series:[fixture.series[0],{...s,bars:s.bars.slice(0,61)}]}),{sectorId:"SECTOR",marketId:"MARKET",date:dates[60],asOf:t(dates[60])});assert.deepEqual(a,b)});
+
+import {mkdtempSync,writeFileSync,readFileSync,rmSync} from "node:fs";
+import {tmpdir} from "node:os";
+import {join} from "node:path";
+import {fileURLToPath} from "node:url";
+import {spawnSync} from "node:child_process";
+import {createHash} from "node:crypto";
+test("CLI lineage, immutable result, blocked rows",()=>{
+ const d=mkdtempSync(join(tmpdir(),"qt-sector-"));
+ try{
+ const sha=x=>createHash("sha256").update(x).digest("hex"),write=(name,v)=>{let p=join(d,name),b=JSON.stringify(v);writeFileSync(p,b);return [p,sha(b)]};
+ const [ap,ah]=write("audit.json",{inventorySha256:"fixture",files:[{}]});
+ const [up,uh]=write("universe.json",{inventorySha256:"fixture",auditSha256:ah,assets:[{asset:"A",status:"USED_EXPLORATORY"}],observations:[{...e,group:"TEST"},{...e,group:"TEST",result:null}]});
+ const [ip,ih]=write("sector.json",{...fixture,universeSha256:uh,marketId:"MARKET",asOf,contextRequests:[]});
+ const out=join(d,"result.json"),cli=fileURLToPath(new URL("./run_sector_attribution.mjs",import.meta.url));
+ const run=hash=>spawnSync(process.execPath,[cli,ap,up,ip,hash,out],{encoding:"utf8"});
+ assert.notEqual(run("0".repeat(64)).status,0);
+ const good=run(ih);assert.equal(good.status,0,good.stderr);
+ const p=JSON.parse(readFileSync(out,"utf8"));assert.equal(p.summary[0].matched,1);assert.equal(p.summary[0].coverage,.5);assert.equal(p.summary[0].blocked.CENSORED_UNRESOLVED,1);
+ assert.notEqual(run(ih).status,0);
+ }finally{rmSync(d,{recursive:true,force:true})}
+});
 console.log(JSON.stringify({assertions:n,status:"SYNTHETIC_ONLY"}));
