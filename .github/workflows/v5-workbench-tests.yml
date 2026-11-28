@@ -17,3 +17,13 @@ jobs:
           python-version: "3.12"
       - run: python -m unittest discover -s tests/workbench -p "test_*.py" -v
       - run: python -m quantrade.workbench.entry_monitor
+      - name: Generate offline synthetic report
+        run: python -m quantrade.workbench.local_report --store "$RUNNER_TEMP/f08-demo" demo
+      - uses: actions/upload-artifact@v4
+        with:
+          name: f08-synthetic-report
+          path: |
+            ${{ runner.temp }}/f08-demo/report-*.html
+            ${{ runner.temp }}/f08-demo/report-*.json
+          if-no-files-found: error
+          retention-days: 7
