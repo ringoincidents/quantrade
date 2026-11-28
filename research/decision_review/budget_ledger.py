@@ -68,8 +68,10 @@ def reserve(db,case,*,case_id,request_id,provider,model,prompt_sha,author_provid
             raise ValueError("BUDGET_NOT_CONFIGURED")
         used,spent=db.execute("SELECT COUNT(*),COALESCE(SUM(reserved_micro_usd),0) FROM gateway_attempt WHERE day=?",(day,)).fetchone()
         required=route(case)["required_independent_reviews"]
-        case_rows=db.execute("SELECT provider,grade FROM gateway_attempt WHERE case_id=?",(case_id,)).fetchall()
-        if any(g!=grade for _,g in case_rows) or provider in {p for p,_ in case_rows} or len(case_rows)>=required:
+        if db.execute("SELECT 1 FROM gateway_attempt WHERE day=? AND state=\'UNKNOWN\' LIMIT 1",(day,)).fetchone():
+            raise ValueError("UNRECONCILED_USAGE")
+        case_rows=db.execute("SELECT provider,grade,prompt_sha,author_provider FROM gateway_attempt WHERE case_id=?",(case_id,)).fetchall()
+        if any((g,h,a)!=(grade,prompt_sha,author_provider) for _,g,h,a in case_rows) or provider in {p for p,_,_,_ in case_rows} or len(case_rows)>=required:
             raise ValueError("REVIEW_DUPLICATE_OR_SCOPE_CHANGED")
         remaining=required-len(case_rows)
         plan=call_plan(case,scope=scope,provider_approved=provider_approved,
