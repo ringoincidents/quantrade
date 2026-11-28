@@ -11,6 +11,7 @@ from collections import deque
 from http.cookies import SimpleCookie
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlsplit
+from link_transport import check_link
 from portfolio_demo import SCENARIOS, render as demo_render, scenario as demo_scenario
 
 COOKIE = "__Host-qt_session"
@@ -105,7 +106,7 @@ def page(path):
     if demo:
         content=demo_render(path.rsplit("/",1)[1])
     elif path=="/assets":
-        content+='<p><a href="/assets/demo/initial">합성 원장 검증 화면 열기</a></p>'
+        content+='<p><a href="/assets/demo/initial">합성 원장 검증 화면 열기</a></p><p><a href="/api/link-check">내부 연결 검증 (상태)</a></p>'
     return document('<div class="shell"><nav class="rail" aria-label="책갈피">'+nav+'</nav><main class="paper">'
                     '<div class="mast"><span>QUANTRADE</span><span>'+number+'</span></div>'
                     '<h1 class="title">'+title+'</h1><div class="sub">PRIVATE AUTH PILOT / 실제 데이터 미연결</div>'
@@ -202,6 +203,8 @@ class Handler(BaseHTTPRequestHandler):
             self.send(200,page(self.path))
         elif self.path.startswith("/api/demo/portfolio/") and self.path.rsplit("/",1)[1] in SCENARIOS and self.path.count("/")==4:
             self.send(200,json.dumps(demo_scenario(self.path.rsplit("/",1)[1]),ensure_ascii=False).encode(),"application/json")
+        elif self.path=="/api/link-check":
+            self.send(200,json.dumps(check_link(os.environ.get("OFFICE_BROKER_LINK_KEY",""))).encode(),"application/json")
         elif self.path=="/api/portfolio":
             self.send(503,b'{"state":"NOT_CONNECTED","actual_account_connected":false}',"application/json")
         elif self.path=="/api/status":

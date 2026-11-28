@@ -136,6 +136,19 @@ class HTTPTests(unittest.TestCase):
         self.assertEqual(self.request("GET","/assets/demo/unknown",headers=c)[0],404)
         self.assertEqual(self.request("POST","/api/demo/portfolio/initial",headers={**c,"Origin":ORIGIN})[0],405)
 
+    def test_link_check_requires_login(self):
+        from unittest.mock import patch
+        with patch("server.check_link",return_value={"state":"SYNTHETIC_LINK_VERIFIED","real_data":False}) as check:
+            self.assertEqual(self.request("GET","/api/link-check")[0],401)
+            check.assert_not_called()
+            status,h,_=self.login()
+            c={"Cookie":h["Set-Cookie"].split(";")[0]}
+            status,h,body=self.request("GET","/api/link-check",headers=c)
+            self.assertEqual(status,200)
+            self.assertEqual(json.loads(body)["state"],"SYNTHETIC_LINK_VERIFIED")
+            self.assertEqual(h["Cache-Control"],"no-store, private")
+            check.assert_called_once()
+
     def test_same_origin_form_policy_and_cross_origin_rejection(self):
         status,h,_=self.request("GET","/login")
         self.assertEqual(status,200)

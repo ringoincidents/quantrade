@@ -1,0 +1,7 @@
+FROM python:3.12-slim
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+WORKDIR /app
+COPY verification/private-office/link_transport.py verification/private-office/link_gateway.py verification/private-office/test_link.py ./
+RUN python -m unittest -v test_link
+USER 65534:65534
+CMD ["python","-B","/app/link_gateway.py"]
