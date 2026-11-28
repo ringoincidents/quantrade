@@ -180,6 +180,22 @@ class HTTPTests(unittest.TestCase):
             self.assertEqual(self.request("GET","/market/rates",headers=c)[0],200)
         self.assertEqual(self.request("POST","/api/treasury",headers={**c,"Origin":ORIGIN})[0],405)
 
+    def test_inbox_live_and_source_status(self):
+        for path in ("/inbox/live","/market/sources"):self.assertEqual(self.request("GET",path)[0],303)
+        for path in ("/api/inbox/live","/api/sources"):self.assertEqual(self.request("GET",path)[0],401)
+        _,h,_=self.login();c={"Cookie":h["Set-Cookie"].split(";")[0]}
+        from unittest.mock import patch
+        from founder_inbox import Cache
+        with patch("founder_inbox.CACHE",Cache(lambda: (_ for _ in ()).throw(TimeoutError()))):
+            st,h,b=self.request("GET","/api/inbox/live",headers=c);self.assertEqual(st,200)
+            v=json.loads(b);self.assertFalse(v["live_github"]);self.assertFalse(v["approval_authorized"])
+            self.assertEqual(v["public_index"]["state"],"REFRESH_FAILED")
+            self.assertEqual(self.request("GET","/inbox/live",headers=c)[0],200)
+        st,h,b=self.request("GET","/api/sources",headers=c);self.assertEqual(st,200)
+        self.assertFalse(json.loads(b)["runtime_verified"])
+        self.assertEqual(self.request("GET","/market/sources",headers=c)[0],200)
+        self.assertEqual(self.request("POST","/api/inbox/live",headers={**c,"Origin":ORIGIN})[0],405)
+
     def test_new_surfaces_auth_and_boundaries(self):
         for p in ("/lab","/strategies","/inbox"):
             self.assertEqual(self.request("GET",p)[0],303)

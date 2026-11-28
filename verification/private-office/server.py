@@ -17,6 +17,7 @@ from bls_direct import CACHE as BLS_DATA_CACHE, render as bls_data_render
 from macro_view import CACHE as MACRO_CACHE, render as macro_render
 from treasury_view import CACHE as TREASURY_CACHE, render as treasury_render
 from lab_view import FRAMES,lab as lab_snapshot,render_lab,compare as strategy_snapshot,render_compare
+from source_status import snapshot as source_snapshot,render as source_render
 from founder_inbox import snapshot as inbox_snapshot,render as inbox_render
 from market_room import snapshot as market_room_snapshot, render as market_room_render
 from market_demo import SCENARIOS as MARKET_SCENARIOS, render as market_render, scenario as market_scenario
@@ -117,6 +118,8 @@ PAGES["/market/macro/M"]=("07 / MACRO","거시경제 / 월별",[])
 PAGES["/market/rates"]=("07 / RATES","미 국채 금리",[])
 PAGES["/lab"]=("08 / LAB","기술적 분석 Lab",[])
 PAGES["/strategies"]=("09 / STRATEGIES","전략 비교",[])
+PAGES["/market/sources"]=("07 / SOURCES","데이터 연결 검증",[])
+PAGES["/inbox/live"]=("10 / INBOX","Founder Inbox / 공개 원장",[])
 PAGES["/inbox"]=("10 / INBOX","Founder Inbox",[])
 TABS = {"/":"업무","/assets":"자산","/cases":"종목","/risk":"위험","/market":"시장","/lab":"랩","/strategies":"전략","/inbox":"안건","/reports":"보고","/records":"기록"}
 
@@ -128,14 +131,14 @@ def page(path):
     market_demo=path.startswith("/market/demo/")
     lab_demo=path.startswith("/lab/")
     number,title,rows=PAGES["/assets" if demo else "/reports" if report_demo else "/cases" if case_demo else "/risk" if risk_demo else "/market" if market_demo else "/lab" if lab_demo else path]
-    nav="".join('<a href="'+link+'"'+(' aria-current="page"' if (path==link or demo and link=="/assets" or report_demo and link=="/reports" or case_demo and link=="/cases" or risk_demo and link=="/risk" or (market_demo or path=="/market/rates" or path.startswith("/market/macro/") or path=="/market/bls") and link=="/market" or lab_demo and link=="/lab") else '')+'>'+name+'</a>' for link,name in TABS.items())
+    nav="".join('<a href="'+link+'"'+(' aria-current="page"' if (path==link or demo and link=="/assets" or report_demo and link=="/reports" or case_demo and link=="/cases" or risk_demo and link=="/risk" or (market_demo or path=="/market/rates" or path.startswith("/market/macro/") or path in ("/market/bls","/market/sources")) and link=="/market" or lab_demo and link=="/lab" or path=="/inbox/live" and link=="/inbox") else '')+'>'+name+'</a>' for link,name in TABS.items())
     content="".join('<div class="row"><span>'+a+'</span><strong>'+b+'</strong></div>' for a,b in rows)
     if demo:
         content=demo_render(path.rsplit("/",1)[1])
     elif market_demo:
         content=market_render(path.rsplit("/",1)[1])
     elif path=="/market":
-        content=market_room_render(BLS_CACHE.get(),treasury_render(TREASURY_CACHE.get()),"".join(macro_render(MACRO_CACHE.get(g)) for g in ("D","M")))
+        content='<p><a href="/market/sources">데이터 공급자 검증 현황</a></p>'+market_room_render(BLS_CACHE.get(),treasury_render(TREASURY_CACHE.get()),"".join(macro_render(MACRO_CACHE.get(g)) for g in ("D","M")))
     elif path=="/market/bls":
         content=bls_data_render(BLS_DATA_CACHE.get())
     elif path in ("/market/macro/D","/market/macro/M"):
@@ -146,8 +149,10 @@ def page(path):
         content=render_lab(path.rsplit("/",1)[1] if lab_demo else "D")
     elif path=="/strategies":
         content=render_compare()
-    elif path=="/inbox":
-        content=inbox_render()
+    elif path in ("/inbox","/inbox/live"):
+        content=inbox_render(path=="/inbox/live")
+    elif path=="/market/sources":
+        content=source_render()
     elif risk_demo:
         content=risk_render(path.rsplit("/",1)[1])
     elif path=="/risk":
@@ -287,6 +292,10 @@ class Handler(BaseHTTPRequestHandler):
             self.send(200,json.dumps(lab_snapshot(self.path.rsplit("/",1)[1]),allow_nan=False).encode(),"application/json")
         elif self.path=="/api/demo/strategies":
             self.send(200,json.dumps(strategy_snapshot(),ensure_ascii=False,allow_nan=False).encode(),"application/json")
+        elif self.path=="/api/inbox/live":
+            self.send(200,json.dumps(inbox_snapshot(True),ensure_ascii=False,allow_nan=False).encode(),"application/json")
+        elif self.path=="/api/sources":
+            self.send(200,json.dumps(source_snapshot(),ensure_ascii=False).encode(),"application/json")
         elif self.path=="/api/inbox":
             self.send(200,json.dumps(inbox_snapshot(),ensure_ascii=False).encode(),"application/json")
         elif self.path=="/api/calendar-refresh":
