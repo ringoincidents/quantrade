@@ -4,6 +4,7 @@ import json
 from observation_validator import validate, instant
 from experiment import evaluate, score
 import forecast_ledger as ledger
+from scorecard import compare
 
 def replay(db, rows, asof):
     cutoff=instant(asof)
@@ -20,4 +21,5 @@ def replay(db, rows, asof):
             for model,value in p["predictions"].items():
                 fid=ledger.forecast(db,r["period"],r["issued_at"],"REPLAY:"+model,"research-v1",value,manifest)
                 ids.append(ledger.evaluate(db,fid,rid,asof))
-    return {"status":"RETROSPECTIVE_UNVERIFIED","manifest":manifest,"n":len(predictions),"scores":score(predictions),"evaluation_ids":ids}
+        matched=compare(db,ids,("REPLAY:Persistence","research-v1"))
+    return {"scorecard":matched,"status":"RETROSPECTIVE_UNVERIFIED","manifest":manifest,"n":len(predictions),"scores":score(predictions),"evaluation_ids":ids}
