@@ -1,0 +1,29 @@
+{
+  "experimentId": "replace-with-unique-id",
+  "from": "2001-01-01",
+  "to": "2026-08-04",
+  "assets": [
+    {
+      "asset": "SPY",
+      "prices": {
+        "path": "/local/data/SPY.csv",
+        "format": "plainbacktest",
+        "source": "https://github.com/Sixian-Li/plain-backtest",
+        "rights": "source declares CC BY 4.0; audit pending",
+        "basis": "adjusted OHLC as declared by source",
+        "sha256": "REPLACE_WITH_EXACT_FILE_SHA256"
+      }
+    },
+    {
+      "asset": "QQQ",
+      "prices": {
+        "path": "/local/data/QQQ.csv",
+        "format": "plainbacktest",
+        "source": "https://github.com/Sixian-Li/plain-backtest",
+        "rights": "source declares CC BY 4.0; audit pending",
+        "basis": "adjusted OHLC as declared by source",
+        "sha256": "REPLACE_WITH_EXACT_FILE_SHA256"
+      }
+    }
+  ]
+}
