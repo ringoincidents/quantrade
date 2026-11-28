@@ -61,6 +61,32 @@ def validate(obj,clock=time.time):
     clean["raw_retained"]=False
     return clean
 
+def validate_work(w,clock=time.time):
+    from work_lifecycle import STATES, FAILED, MAX_RUNS, COOLDOWN, digest
+    if not isinstance(w,dict) or w.get("schema")!="qt-verification-work-v1":raise ValueError("WORK_SCHEMA")
+    if w.get("department")!="FUNDAMENTAL_RESEARCH" or w.get("review_department")!="COUNTER_RESEARCH":raise ValueError("WORK_OWNER")
+    if any(w.get(k) is not False for k in ("durable","approved","external_model_called","trade_authorized")):raise ValueError("WORK_AUTHORITY")
+    if type(w.get("runs")) is not int or not 1<=w["runs"]<=MAX_RUNS or w.get("max_runs")!=MAX_RUNS or w.get("cooldown_seconds")!=COOLDOWN:raise ValueError("WORK_LIMIT")
+    if not re.fullmatch(r"FUNDAMENTAL-005930-[0-9a-f]{16}",w.get("work_id") or ""):raise ValueError("WORK_ID")
+    events=w["events"]
+    if not isinstance(events,list) or not 3<=len(events)<=len(STATES):raise ValueError("WORK_EVENTS")
+    actual=tuple(e["state"] for e in events)
+    if actual not in (STATES[:3],STATES,FAILED):raise ValueError("WORK_SEQUENCE")
+    stamps=[datetime.fromisoformat(e["at"]) for e in events]
+    if any(d.tzinfo is None or d.timestamp()>clock()+SKEW for d in stamps) or stamps!=sorted(stamps):raise ValueError("WORK_CLOCK")
+    state=w["state"]
+    if state!=actual[-1] and not (state=="STALE" and actual==STATES):raise ValueError("WORK_STATE")
+    expected_review="BLOCKED_NO_INDEPENDENT_REVIEW" if actual==STATES else "NOT_SUBMITTED"
+    if w.get("review_status")!=expected_review:raise ValueError("WORK_REVIEW")
+    clean={k:w[k] for k in ("schema","work_id","department","review_department","state","events","runs","max_runs","cooldown_seconds","review_status","report_sha256","durable","approved","external_model_called","trade_authorized")}
+    if state=="REVIEW_BLOCKED":
+        if not HEX.fullmatch(w.get("report_sha256") or "") or digest(w["report"])!=w["report_sha256"]:raise ValueError("WORK_HASH")
+        r=validate(w["report"],clock)
+        r["workflow"]=clean
+        return r
+    if w.get("report") is not None or w.get("report_sha256") is not None:raise ValueError("WORK_UNEXPECTED_REPORT")
+    return {"state":state,"workflow":clean}
+
 def fetch(key,*,connection_factory=http.client.HTTPConnection,clock=time.time):
     key=key_bytes(key)
     if not key:return {"state":"LINK_KEY_NOT_CONFIGURED"}
@@ -74,8 +100,8 @@ def fetch(key,*,connection_factory=http.client.HTTPConnection,clock=time.time):
         if len(body)>LIMIT:return {"state":"RESPONSE_TOO_LARGE"}
         sig=res.getheader("X-QT-Response-Signature","")
         if not HEX.fullmatch(sig) or not hmac.compare_digest(sig,mac(key,response_message(stamp,nonce,body))):return {"state":"INVALID_RESPONSE_AUTH"}
-        return validate(json.loads(body),clock)
-    except (ValueError,TypeError,KeyError,InvalidOperation,OverflowError):
+        return validate_work(json.loads(body),clock)
+    except (ValueError,TypeError,KeyError,InvalidOperation,OverflowError,AttributeError):
         return {"state":"REPORT_INVALID_OR_STALE"}
     except (OSError,http.client.HTTPException):
         return {"state":"WORKER_UNAVAILABLE"}
