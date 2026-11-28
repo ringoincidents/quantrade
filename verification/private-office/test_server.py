@@ -136,6 +136,34 @@ class HTTPTests(unittest.TestCase):
         self.assertEqual(self.request("GET","/assets/demo/unknown",headers=c)[0],404)
         self.assertEqual(self.request("POST","/api/demo/portfolio/initial",headers={**c,"Origin":ORIGIN})[0],405)
 
+    def test_portfolio_risk_review_and_authority(self):
+        for path in ("/api/risk","/api/demo/risk/baseline"):
+            self.assertEqual(self.request("GET",path)[0],401)
+        self.assertEqual(self.request("GET","/risk/demo/baseline")[0],303)
+        status,h,_=self.login()
+        c={"Cookie":h["Set-Cookie"].split(";")[0]}
+        self.assertEqual(self.request("GET","/api/risk",headers=c)[0],503)
+        self.assertEqual(self.request("GET","/risk",headers=c)[0],200)
+        for name,expected,ceiling in [("baseline","PASS_WITH_LIMITS",2.5),("strong-alternative",None,None),
+            ("no-cash",None,None),("correlation-veto","VETO",None),("missing-risk","REQUIRE_MORE_INFORMATION",None),
+            ("sector-limit","PASS_WITH_LIMITS",0.0),("drawdown-veto","VETO",None)]:
+            status,h,body=self.request("GET","/api/demo/risk/"+name,headers=c)
+            self.assertEqual(status,200)
+            v=json.loads(body)
+            self.assertEqual(v["mode"],"SYNTHETIC_ONLY")
+            self.assertEqual(v["risk"]["status"] if v["risk"] else None,expected)
+            self.assertEqual(v["illustrative_incremental_ceiling_pct"],ceiling)
+            self.assertIsNone(v["target_weight_pct"])
+            self.assertFalse(v["policy_approved"])
+            self.assertFalse(v["decision_authorized"])
+            self.assertFalse(v["order_authorized"])
+            self.assertEqual(v["portfolio"]["capital_headroom"]["deterministic_upper_bound_pct"],0.0 if name=="no-cash" else 5.0)
+            status,h,body=self.request("GET","/risk/demo/"+name,headers=c)
+            self.assertEqual(status,200)
+            self.assertIn("합성 포트폴리오 / 실제 운용 기준 아님".encode(),body)
+            self.assertEqual(h["Cache-Control"],"no-store, private")
+        self.assertEqual(self.request("POST","/api/risk",headers={**c,"Origin":ORIGIN})[0],405)
+
     def test_case_register_auth_and_gates(self):
         self.assertEqual(self.request("GET","/api/demo/case/baseline")[0],401)
         self.assertEqual(self.request("GET","/cases/demo/baseline")[0],303)
