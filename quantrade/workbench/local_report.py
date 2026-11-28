@@ -5,6 +5,7 @@ import json
 import os
 import re
 import sqlite3
+import shutil
 import tempfile
 from datetime import date, datetime, timedelta, timezone
 from decimal import Context, Decimal, InvalidOperation, localcontext
@@ -107,20 +108,26 @@ def validated_quotes(doc):
             pass
     return result
 
-STORE_VERSION = 2
+STORE_VERSION = 3
 
 def check_store_version(con, *, initialize=False):
     version = con.execute("PRAGMA user_version").fetchone()[0]
     tables = {r[0] for r in con.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+    required = {"inputs", "runs", "rejected_runs"}
     if version == STORE_VERSION:
-        require({"inputs", "runs", "rejected_runs"} <= tables, "STORE_SCHEMA_INVALID")
-    elif initialize and version == 0 and not tables:
+        require(required | {"exports"} <= tables, "STORE_SCHEMA_INVALID")
+        return
+    if version == 2 and initialize:
+        require(required <= tables and "exports" not in tables, "STORE_SCHEMA_INVALID")
+    elif version == 0 and initialize and not tables:
         con.execute("CREATE TABLE inputs (kind TEXT, identity TEXT, hash TEXT, body TEXT, PRIMARY KEY(kind,identity))")
         con.execute("CREATE TABLE runs (id TEXT PRIMARY KEY, input TEXT, report TEXT, started TEXT, finished TEXT)")
         con.execute("CREATE TABLE rejected_runs (id INTEGER PRIMARY KEY, run_id TEXT, input TEXT, reason TEXT, recorded_at TEXT)")
-        con.execute("PRAGMA user_version=2")
     else:
         raise ValueError("LEGACY_STORE_QUARANTINED")
+    con.execute("CREATE TABLE exports (run_id TEXT PRIMARY KEY, state TEXT NOT NULL CHECK(state IN ('PENDING','PUBLISHED')), manifest TEXT, updated TEXT NOT NULL)")
+    con.execute("INSERT INTO exports SELECT id,'PENDING',NULL,? FROM runs", (utcnow(),))
+    con.execute("PRAGMA user_version=3")
 
 def evaluate(doc, *, manual_confirmed=False):
     require(isinstance(doc,dict), "INVALID_DOCUMENT")
@@ -266,6 +273,31 @@ def save_run(directory, doc, report, started):
             raise
     return p
 
+def attach_historical_quotes(con, doc, report):
+    """Prior committed validated input, display only. Not provider-verified."""
+    as_of = instant(doc["as_of"])
+    for row in report["rows"]:
+        row["last_validated_quote"] = None
+        if row["status"] != "BLOCKED":
+            continue
+        options = []
+        for identity, body in con.execute("SELECT identity,body FROM inputs WHERE kind='quote'"):
+            mode, instrument, _, _ = json.loads(identity)
+            if mode != doc["mode"] or instrument != row["instrument"]:
+                continue
+            q = json.loads(body)
+            if instant(q["observed_at"]) <= instant(q["retrieved_at"]) <= as_of:
+                options.append(q)
+        if options:
+            q = max(options, key=lambda q: (instant(q["observed_at"]), q["revision"], instant(q["retrieved_at"])))
+            row["last_validated_quote"] = dict(
+                price=q["price"], currency=q["currency"], session_date=q["session_date"],
+                observed_at=q["observed_at"], retrieved_at=q["retrieved_at"],
+                source=q["source"], source_ref=q["source_ref"], revision=q["revision"],
+                age_seconds=int((as_of-instant(q["observed_at"])).total_seconds()),
+                qualification="HISTORICAL_INPUT_ONLY_NOT_VERIFIED_MARKET_DATA")
+    return report
+
 def persist_validated(con, doc, report, started):
         require(report["run_id"] == digest(doc), "REPORT_INPUT_MISMATCH")
         selected = validated_quotes(doc)
@@ -313,6 +345,9 @@ def persist_validated(con, doc, report, started):
             identity = canonical([doc["mode"],q["instrument"],q["session_date"],q["revision"]])
             old = con.execute("SELECT hash FROM inputs WHERE kind='quote' AND identity=?", (identity,)).fetchone()
             require(old is None or old[0] == digest(q), "IMMUTABLE_INPUT_CONFLICT")
+        # Freeze historical context before inserting any quotes from this run.
+        if con.execute("SELECT 1 FROM runs WHERE id=?", (report["run_id"],)).fetchone() is None:
+            report = attach_historical_quotes(con, doc, json.loads(canonical(report)))
         # Store distinct versions, reject attempts to mutate a previously recorded input.
         for kind, records, keys in (("target",doc["targets"],("instrument","version")),
                                     ("quote",selected,("instrument","session_date","revision")),
@@ -328,6 +363,7 @@ def persist_validated(con, doc, report, started):
                 con.execute("INSERT OR IGNORE INTO inputs VALUES (?,?,?,?)",(kind,identity,h,canonical(item)))
         con.execute("INSERT OR IGNORE INTO runs VALUES (?,?,?,?,?)",
                     (report["run_id"],canonical(doc),canonical(report),started,utcnow()))
+        con.execute("INSERT OR IGNORE INTO exports VALUES (?,'PENDING',NULL,?)", (report["run_id"],utcnow()))
 
 def atomic_write(path, contents):
     fd, name = tempfile.mkstemp(dir=path.parent, prefix=".tmp-")
@@ -341,6 +377,69 @@ def atomic_write(path, contents):
         if os.path.exists(name):
             os.unlink(name)
 
+def sync_directory(path):
+    if os.name == "posix":
+        fd = os.open(path, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0))
+        try:
+            os.fsync(fd)
+        finally:
+            os.close(fd)
+
+def read_bundle(path, expected):
+    require(path.is_dir() and not path.is_symlink(), "EXPORT_BUNDLE_INVALID")
+    require({x.name for x in path.iterdir()} == set(expected), "EXPORT_BUNDLE_INVALID")
+    for name, data in expected.items():
+        file = path/name
+        require(file.is_file() and not file.is_symlink() and file.read_bytes() == data.encode("utf-8"),
+                "EXPORT_BUNDLE_INVALID")
+
+def publish_run(directory, run_id):
+    """Publish a complete directory; reconcile a crash after rename via show."""
+    require(re.fullmatch(r"[0-9a-f]{64}", run_id) is not None, "INVALID_RUN_ID")
+    p = private_dir(directory)
+    db = p/"runs.sqlite3"
+    require(db.is_file() and not db.is_symlink(), "UNKNOWN_RUN")
+    if os.name == "posix":
+        require(db.stat().st_mode & 0o077 == 0, "STORE_NOT_PRIVATE")
+    with sqlite3.connect(db) as con:
+        con.execute("BEGIN IMMEDIATE")
+        check_store_version(con, initialize=True)
+        con.commit()
+        con.execute("BEGIN IMMEDIATE")
+        row = con.execute("SELECT report FROM runs WHERE id=?", (run_id,)).fetchone()
+        require(row is not None, "UNKNOWN_RUN")
+        record = con.execute("SELECT state,manifest FROM exports WHERE run_id=?", (run_id,)).fetchone()
+        require(record is not None, "EXPORT_STATE_MISSING")
+        report = json.loads(row[0])
+        require(report["run_id"] == run_id, "REPORT_INPUT_MISMATCH")
+        contents = {"report.json": json.dumps(report,ensure_ascii=False,indent=2),
+                    "report.html": render(report)}
+        manifest = canonical({"run_id":run_id,"format":"f08-bundle-v1",
+                              "sha256":{name:hashlib.sha256(data.encode("utf-8")).hexdigest()
+                                        for name,data in contents.items()}})
+        contents["manifest.json"] = manifest
+        bundle = p/("report-"+run_id)
+        if record[0] == "PUBLISHED":
+            require(record[1] == manifest, "EXPORT_MANIFEST_MISMATCH")
+            read_bundle(bundle, contents)
+        else:
+            if bundle.exists() or bundle.is_symlink():
+                read_bundle(bundle, contents)
+            else:
+                stage = Path(tempfile.mkdtemp(dir=p,prefix=".bundle-"))
+                try:
+                    for name,data in contents.items():
+                        atomic_write(stage/name, data)
+                    sync_directory(stage)
+                    os.rename(stage,bundle)
+                    sync_directory(p)
+                finally:
+                    if stage.exists():
+                        shutil.rmtree(stage)
+            con.execute("UPDATE exports SET state='PUBLISHED',manifest=?,updated=? WHERE run_id=?",
+                        (manifest,utcnow(),run_id))
+    return bundle/"report.html"
+
 def render(report):
     def e(v): return escape(str(v)) if v is not None else "—"
     def pct(v): return e(format(Decimal(v)*100,"+.2f")+"%") if v is not None else "—"
@@ -349,7 +448,11 @@ def render(report):
     for r in report["rows"]:
         status = r["status"]
         out.append('<tr><th scope="row">'+e(r["instrument"])+'</th><td>'+e(r["price"])+' '+e(r["currency"])+'</td><td>'+e(r["entry_price"])+'</td><td>'+pct(r["gap"])+'</td><td class="'+status+'">'+labels[status]+'</td></tr>')
-        out.append('<tr class="details"><td colspan="5"><details><summary>근거 · '+e(r["session_date"])+'</summary><p>사유: '+e(r["reason"])+'<br>출처: '+e(r["source"])+'<br>평가 버전: '+e(r["target_version"])+'<br>유효기간: '+e(r["expires_at"])+'</p></details></td></tr>')
+        historical = r.get("last_validated_quote")
+        history_html = ""
+        if historical:
+            history_html = "<br>이전 검증 입력 (참고 전용·시장 검증 아님): "+e(historical["price"])+" "+e(historical["currency"])+" · "+e(historical["session_date"])+" · "+e(historical["source"])+" · 경과 "+e(historical["age_seconds"])+"초"
+        out.append('<tr class="details"><td colspan="5"><details><summary>근거 · '+e(r["session_date"])+'</summary><p>사유: '+e(r["reason"])+'<br>출처: '+e(r["source"])+'<br>평가 버전: '+e(r["target_version"])+'<br>유효기간: '+e(r["expires_at"])+history_html+'</p></details></td></tr>')
     mode = "합성 데이터" if report["mode"]=="SYNTHETIC" else "수동 입력 · 최신 세션 미검증 · 신호 차단"
     health = "일부 보류" if report["data_health"]=="INCOMPLETE" else "입력 검사 완료"
     return """<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'"><title>QuanTrade — Field</title><style>
@@ -395,25 +498,14 @@ def main(argv=None):
             print(directory/name)
             return 0
         if args.command == "show":
-            require(re.fullmatch(r"[0-9a-f]{64}",args.run_id) is not None,"INVALID_RUN_ID")
-            db = directory/"runs.sqlite3"
-            require(db.is_file() and not db.is_symlink(), "UNKNOWN_RUN")
-            if os.name == "posix":
-                require(db.stat().st_mode & 0o077 == 0, "STORE_NOT_PRIVATE")
-            with sqlite3.connect(db) as con:
-                check_store_version(con)
-                row = con.execute("SELECT report FROM runs WHERE id=?",(args.run_id,)).fetchone()
-            require(row is not None,"UNKNOWN_RUN")
-            report = json.loads(row[0])
+            run_id = args.run_id
         else:
             started = utcnow()
             doc = demo() if args.command=="demo" else json.loads(Path(args.input).read_text(encoding="utf-8"))
             report = evaluate(doc,manual_confirmed=getattr(args,"confirm_manual",False))
             save_run(directory,doc,report,started)
-        name = "report-"+report["run_id"]
-        atomic_write(directory/(name+".json"),json.dumps(report,ensure_ascii=False,indent=2))
-        atomic_write(directory/(name+".html"),render(report))
-        print(directory/(name+".html"))
+            run_id = report["run_id"]
+        print(publish_run(directory,run_id))
         return 0
     except (OSError, ValueError, KeyError, TypeError, InvalidOperation, OverflowError, sqlite3.Error) as e:
         # Do not print private input content.

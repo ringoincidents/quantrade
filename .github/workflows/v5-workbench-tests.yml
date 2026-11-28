@@ -23,7 +23,8 @@ jobs:
         with:
           name: f08-synthetic-report
           path: |
-            ${{ runner.temp }}/f08-demo/report-*.html
-            ${{ runner.temp }}/f08-demo/report-*.json
+            ${{ runner.temp }}/f08-demo/report-*/report.html
+            ${{ runner.temp }}/f08-demo/report-*/report.json
+            ${{ runner.temp }}/f08-demo/report-*/manifest.json
           if-no-files-found: error
           retention-days: 7

@@ -3,10 +3,11 @@ import json
 import sqlite3
 import tempfile
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 from quantrade.workbench.local_report import (
-    demo, digest, evaluate, main, render, save_run, utcnow,
+    demo, digest, evaluate, main, render, save_run, utcnow, publish_run,
 )
 
 class LocalReportTests(unittest.TestCase):
@@ -212,6 +213,73 @@ class LocalReportTests(unittest.TestCase):
             save_run(tmp,self.d,evaluate(self.d),utcnow())
             self.assertEqual(self.row()["target_version"],"v2")
 
+    def test_export_failure_and_retry(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            r=evaluate(self.d); rid=r["run_id"]
+            save_run(tmp,self.d,r,utcnow())
+            from quantrade.workbench import local_report as lr
+            real_write=lr.atomic_write
+            def fail_html(path, data):
+                if path.name=="report.html":
+                    raise OSError("test interruption")
+                real_write(path,data)
+            with patch.object(lr,"atomic_write",side_effect=fail_html):
+                self.assertEqual(main(["--store",tmp,"show",rid]),1)
+            self.assertFalse((Path(tmp)/("report-"+rid)).exists())
+            with sqlite3.connect(Path(tmp)/"runs.sqlite3") as con:
+                self.assertEqual(con.execute("SELECT state FROM exports WHERE run_id=?",(rid,)).fetchone()[0],"PENDING")
+                self.assertEqual(con.execute("SELECT count(*) FROM runs").fetchone()[0],1)
+            path=publish_run(tmp,rid)
+            self.assertTrue(path.exists())
+            self.assertEqual({x.name for x in path.parent.iterdir()},{"report.html","report.json","manifest.json"})
+            with sqlite3.connect(Path(tmp)/"runs.sqlite3") as con:
+                self.assertEqual(con.execute("SELECT state FROM exports WHERE run_id=?",(rid,)).fetchone()[0],"PUBLISHED")
+
+    def test_reconcile_renamed_bundle_and_reject_tamper(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            r=evaluate(self.d); rid=r["run_id"]
+            save_run(tmp,self.d,r,utcnow())
+            path=publish_run(tmp,rid)
+            with sqlite3.connect(Path(tmp)/"runs.sqlite3") as con:
+                con.execute("UPDATE exports SET state='PENDING',manifest=NULL")
+            self.assertEqual(publish_run(tmp,rid),path)
+            path.write_text("tampered")
+            with self.assertRaisesRegex(ValueError,"EXPORT_BUNDLE_INVALID"):
+                publish_run(tmp,rid)
+
+    def test_v2_additive_migration_keeps_report(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            r=evaluate(self.d);rid=r["run_id"]
+            save_run(tmp,self.d,r,utcnow())
+            with sqlite3.connect(Path(tmp)/"runs.sqlite3") as con:
+                original=con.execute("SELECT report FROM runs WHERE id=?",(rid,)).fetchone()[0]
+                con.execute("DROP TABLE exports")
+                con.execute("PRAGMA user_version=2")
+            self.assertTrue(publish_run(tmp,rid).exists())
+            with sqlite3.connect(Path(tmp)/"runs.sqlite3") as con:
+                self.assertEqual(con.execute("PRAGMA user_version").fetchone()[0],3)
+                self.assertEqual(con.execute("SELECT report FROM runs WHERE id=?",(rid,)).fetchone()[0],original)
+
+    def test_historical_price_never_used_for_decision(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            save_run(tmp,self.d,evaluate(self.d),utcnow())
+            self.d["quotes"].pop(0)
+            self.d["as_of"]="2026-11-29T08:00:00+09:00"
+            r=evaluate(self.d);rid=r["run_id"]
+            save_run(tmp,self.d,r,utcnow())
+            path=publish_run(tmp,rid)
+            data=json.loads((path.parent/"report.json").read_text())
+            row=next(x for x in data["rows"] if x["instrument"]=="XNYS:DEMO_A")
+            self.assertEqual(row["status"],"BLOCKED")
+            self.assertEqual(row["reason"],"MISSING_QUOTE")
+            self.assertIsNone(row["price"])
+            self.assertIsNone(row["gap"])
+            self.assertEqual(row["last_validated_quote"]["price"],"80")
+            self.assertEqual(row["last_validated_quote"]["qualification"],"HISTORICAL_INPUT_ONLY_NOT_VERIFIED_MARKET_DATA")
+            self.assertGreater(row["last_validated_quote"]["age_seconds"],86400)
+            self.assertIn("참고 전용",path.read_text())
+            self.assertEqual(publish_run(tmp,rid),path)
+
     def test_html_escape_and_cli(self):
         self.d["quotes"][0]["source"]="<script>alert(1)</script>"
         h=render(evaluate(self.d))
@@ -219,9 +287,9 @@ class LocalReportTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             self.assertEqual(main(["--store",tmp,"demo"]),0)
             rid=evaluate(demo())["run_id"]
-            self.assertTrue((Path(tmp)/("report-"+rid+".html")).is_file())
+            self.assertTrue((Path(tmp)/("report-"+rid)/"report.html").is_file())
             self.assertEqual(main(["--store",tmp,"show",rid]),0)
-            j=json.loads((Path(tmp)/("report-"+rid+".json")).read_text())
+            j=json.loads((Path(tmp)/("report-"+rid)/"report.json").read_text())
             self.assertEqual(j["mode"],"SYNTHETIC")
 
 if __name__=="__main__":
