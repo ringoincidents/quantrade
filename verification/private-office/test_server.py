@@ -136,6 +136,37 @@ class HTTPTests(unittest.TestCase):
         self.assertEqual(self.request("GET","/assets/demo/unknown",headers=c)[0],404)
         self.assertEqual(self.request("POST","/api/demo/portfolio/initial",headers={**c,"Origin":ORIGIN})[0],405)
 
+    def test_market_research_auth_and_point_in_time(self):
+        self.assertEqual(self.request("GET","/api/market")[0],401)
+        self.assertEqual(self.request("GET","/api/demo/market/baseline")[0],401)
+        self.assertEqual(self.request("GET","/market/demo/baseline")[0],303)
+        status,h,_=self.login()
+        c={"Cookie":h["Set-Cookie"].split(";")[0]}
+        self.assertEqual(self.request("GET","/api/market",headers=c)[0],503)
+        self.assertEqual(self.request("GET","/market",headers=c)[0],200)
+        for name in ("baseline","late-release","credit-missing","baa-proxy"):
+            status,h,body=self.request("GET","/api/demo/market/"+name,headers=c)
+            self.assertEqual(status,200)
+            v=json.loads(body)
+            self.assertEqual(v["g0"],"BLOCKED")
+            for key in ("market_regime","composite_index","forecast"):
+                self.assertIsNone(v[key])
+            self.assertFalse(v["decision_authorized"])
+            self.assertFalse(v["order_authorized"])
+            self.assertEqual(v["fixture_day_260"]["vix_known"]["value"],20.0 if name=="late-release" else 35.0)
+            if name=="credit-missing":
+                self.assertIsNone(v["synthetic_events"]["combined"])
+                self.assertEqual(v["coverage"]["credit"],0)
+            elif name=="baa-proxy":
+                self.assertEqual(v["credit_kind"],"INVESTMENT_GRADE_PROXY_NOT_HY")
+            else:
+                self.assertEqual(v["credit_series"],"BAMLH0A0HYM2")
+            status,h,body=self.request("GET","/market/demo/"+name,headers=c)
+            self.assertEqual(status,200)
+            self.assertIn("합성 연구 / 실제 장세 판정 아님".encode(),body)
+            self.assertEqual(h["Cache-Control"],"no-store, private")
+        self.assertEqual(self.request("POST","/api/market",headers={**c,"Origin":ORIGIN})[0],405)
+
     def test_portfolio_risk_review_and_authority(self):
         for path in ("/api/risk","/api/demo/risk/baseline"):
             self.assertEqual(self.request("GET",path)[0],401)

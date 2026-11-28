@@ -12,6 +12,7 @@ from http.cookies import SimpleCookie
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlsplit
 from link_transport import check_link
+from market_demo import SCENARIOS as MARKET_SCENARIOS, render as market_render, scenario as market_scenario
 from risk_demo import SCENARIOS as RISK_SCENARIOS, render as risk_render, scenario as risk_scenario
 from case_demo import SCENARIOS as CASE_SCENARIOS, render as case_render, scenario as case_scenario
 from report_demo import SCENARIOS as REPORT_SCENARIOS, render as report_render, scenario as report_scenario
@@ -101,18 +102,24 @@ PAGES = {"/":("01 / REGISTER","투자 업무 대장",[("인증 세션","활성")
          "/records":("04 / RECORDS","운영 기록",[("인증 범위","단일 소유자 검증"),("실제 주문","비활성"),("운영 승인","보류")])}
 PAGES["/cases"]=("05 / CASES","기업가치·운용 기준 원장",[("실제 종목","미연결"),("운용 기준","미승인")])
 PAGES["/risk"]=("06 / RISK","포트폴리오·리스크 원장",[("실제 포트폴리오","미연결"),("실제 위험 한도","미승인")])
-TABS = {"/":"업무","/assets":"자산","/cases":"종목","/risk":"위험","/reports":"보고","/records":"기록"}
+PAGES["/market"]=("07 / MARKET","시장 국면 연구 원장",[("실제 장세","판정 불가"),("예측 모델","미검증"),("데이터 준비","G0 차단")])
+TABS = {"/":"업무","/assets":"자산","/cases":"종목","/risk":"위험","/market":"시장","/reports":"보고","/records":"기록"}
 
 def page(path):
     demo = path.startswith("/assets/demo/")
     report_demo = path.startswith("/reports/demo/")
     case_demo = path.startswith("/cases/demo/")
     risk_demo=path.startswith("/risk/demo/")
-    number,title,rows=PAGES["/assets" if demo else "/reports" if report_demo else "/cases" if case_demo else "/risk" if risk_demo else path]
-    nav="".join('<a href="'+link+'"'+(' aria-current="page"' if (path==link or demo and link=="/assets" or report_demo and link=="/reports" or case_demo and link=="/cases" or risk_demo and link=="/risk") else '')+'>'+name+'</a>' for link,name in TABS.items())
+    market_demo=path.startswith("/market/demo/")
+    number,title,rows=PAGES["/assets" if demo else "/reports" if report_demo else "/cases" if case_demo else "/risk" if risk_demo else "/market" if market_demo else path]
+    nav="".join('<a href="'+link+'"'+(' aria-current="page"' if (path==link or demo and link=="/assets" or report_demo and link=="/reports" or case_demo and link=="/cases" or risk_demo and link=="/risk" or market_demo and link=="/market") else '')+'>'+name+'</a>' for link,name in TABS.items())
     content="".join('<div class="row"><span>'+a+'</span><strong>'+b+'</strong></div>' for a,b in rows)
     if demo:
         content=demo_render(path.rsplit("/",1)[1])
+    elif market_demo:
+        content=market_render(path.rsplit("/",1)[1])
+    elif path=="/market":
+        content+='<p><a href="/market/demo/baseline">시장 국면 연구 / 합성 사례</a></p>'
     elif risk_demo:
         content=risk_render(path.rsplit("/",1)[1])
     elif path=="/risk":
@@ -242,6 +249,12 @@ class Handler(BaseHTTPRequestHandler):
             self.send(200,json.dumps(risk_scenario(self.path.rsplit("/",1)[1]),ensure_ascii=False,allow_nan=False).encode(),"application/json")
         elif self.path=="/api/risk":
             self.send(503,b'{"state":"NOT_CONNECTED","actual_data_connected":false}',"application/json")
+        elif self.path.startswith("/market/demo/") and self.path.rsplit("/",1)[1] in MARKET_SCENARIOS and self.path.count("/")==3:
+            self.send(200,page(self.path))
+        elif self.path.startswith("/api/demo/market/") and self.path.rsplit("/",1)[1] in MARKET_SCENARIOS and self.path.count("/")==4:
+            self.send(200,json.dumps(market_scenario(self.path.rsplit("/",1)[1]),ensure_ascii=False,allow_nan=False).encode(),"application/json")
+        elif self.path=="/api/market":
+            self.send(503,b'{"state":"RESEARCH_G0_BLOCKED","actual_data_connected":false}',"application/json")
         elif self.path=="/api/link-check":
             self.send(200,json.dumps(check_link(os.environ.get("OFFICE_BROKER_LINK_KEY",""))).encode(),"application/json")
         elif self.path=="/api/portfolio":
