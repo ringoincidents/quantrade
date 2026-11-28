@@ -208,7 +208,9 @@ def save_run(directory, doc, report, started):
         # A previously observed revocation must never be silently omitted.
         current_revocations = {digest(r) for r in doc.get("revocations", [])}
         target_hashes = {digest(t) for t in doc["targets"]}
-        for body, h in con.execute("SELECT body,hash FROM inputs WHERE kind=?",("revocation",)):
+        for identity, body, h in con.execute("SELECT identity,body,hash FROM inputs WHERE kind=?",("revocation",)):
+            if json.loads(identity)[0] != doc["mode"]:
+                continue
             r = json.loads(body)
             if r["target_hash"] in target_hashes:
                 require(h in current_revocations,"MISSING_PRIOR_REVOCATION")
@@ -223,7 +225,10 @@ def save_run(directory, doc, report, started):
             expected = doc["expected_sessions"].get(market(q["instrument"]),{})
             if q.get("session_date") != expected.get("session_date"):
                 continue
-            if q.get("retrieved_at") is None or instant(q["retrieved_at"]) > now:
+            try:
+                if type(q.get("revision")) is not int or q["revision"] < 1 or instant(q["retrieved_at"]) > now:
+                    continue
+            except (KeyError, ValueError, TypeError):
                 continue
             if any(x.get("instrument")==q["instrument"] and x.get("session_date")==q["session_date"] for x in doc["quotes"]):
                 require(any(x.get("instrument")==q["instrument"] and x.get("session_date")==q["session_date"] and type(x.get("revision")) is int and x["revision"]>=q["revision"] for x in doc["quotes"]),"MISSING_PRIOR_QUOTE_REVISION")
