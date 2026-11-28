@@ -1,0 +1,20 @@
+name: DCF diagnostic verification
+on:
+  pull_request:
+    branches: [direction/investment-office-decision-economics-2026-10-05]
+permissions:
+  contents: read
+jobs:
+  synthetic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Legacy and diagnostic DCF tests
+        run: |
+          export PYTHONPATH="$PWD"
+          python -m unittest discover -s tests/capabilities -p 'test_cash_flow_valuation.py' -v
+          python verification/valuation/test_dcf_diagnostics.py -v
