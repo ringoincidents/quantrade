@@ -12,6 +12,8 @@ from http.cookies import SimpleCookie
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlsplit
 from link_transport import check_link
+from research_link import fetch as research_fetch
+from html import escape
 from calendar_refresh import CACHE as BLS_CACHE
 from bls_direct import CACHE as BLS_DATA_CACHE, render as bls_data_render
 from macro_view import CACHE as MACRO_CACHE, render as macro_render
@@ -125,6 +127,23 @@ def fundamental_report_html():
             '<p><a href="'+r["source"]+'">DART 공시 원문</a> · <a href="'+r["code"]+'">검증 코드</a></p>'
             '<p class="notice">일회성 실행 결과를 수동 게시한 보고서입니다. 최신 분기·가격·가치평가·실계좌·자동 수집·독립 검토는 포함되지 않습니다. 매매 판단 권한 없음.</p>')
 
+def research_report():
+    return research_fetch(os.getenv("OFFICE_RESEARCH_LINK_KEY",""))
+
+def research_report_html():
+    r=research_report()
+    if r["state"]!="REPORT_READY":
+        return '<p class="notice">자동 연구 보고서 수신 불가: '+escape(r["state"])+'</p><p><a href="/reports/fundamental/005930">이전 날짜의 수동 검증 보고서</a></p>'
+    return ('<p class="notice">서명 검증된 내부 연구 결과 / 2025년 연간 연결재무제표 / 독립 검토 대기</p>'
+            '<p>삼성전자 · 005930 · 수집 시각 '+escape(r["observed_at"])+'</p><table>'
+            '<tr><th>재무 항목</th><th>조 원</th></tr>'
+            +''.join('<tr><td>'+label+'</td><td>'+escape(r["metrics"][key])+'</td></tr>' for key,label in (("revenue","매출"),("operating_income","영업이익"),("net_income","당기순이익"),("assets","자산"),("liabilities","부채"),("equity","자본")))
+            +'</table><table><tr><th>비율</th><th>%</th></tr>'
+            +''.join('<tr><td>'+label+'</td><td>'+escape(r["ratios"][key])+'</td></tr>' for key,label in (("operating_margin_pct","영업이익률"),("net_margin_pct","순이익률"),("liabilities_to_equity_pct","부채비율")))
+            +'</table><p><a href="https://dart.fss.or.kr/dsaf001/main.do?rcpNo='+escape(r["filing_ref"])+'">DART 공시 원문</a></p>'
+            '<p class="notice">메모리 기반 검증, 영속 저장·독립 검토·가치평가·매매 권한 없음. 수집 시각은 실적 기준일이 아닙니다.</p>')
+
+PAGES["/reports/fundamental/live/005930"]=("03 / RESEARCH HANDOFF","자동 연구 보고서",[])
 PAGES["/reports/fundamental/005930"]=("03 / FUNDAMENTAL","기업 재무 검증 보고서",[])
 PAGES["/performance"]=("11 / PERFORMANCE","투자 성과·매매 복기",[])
 PAGES["/cases"]=("05 / CASES","기업가치·운용 기준 원장",[("실제 종목","미연결"),("운용 기준","미승인")])
@@ -182,9 +201,12 @@ def page(path):
         content=report_render(path.rsplit("/",1)[1])
     elif path=="/cases":
         content+='<p><a href="/cases/demo/baseline">기업가치·운용 기준 / 합성 사례</a></p>'
+    elif path=="/reports/fundamental/live/005930":
+        content=research_report_html()
     elif path=="/reports/fundamental/005930":
         content=fundamental_report_html()
     elif path=="/reports":
+        content+='<p><a href="/reports/fundamental/live/005930">삼성전자 / 내부 연구 결과 자동 수신 검증</a></p>'
         content+='<p><a href="/reports/fundamental/005930">삼성전자 2025 연간 재무 / 실제 공시 검증</a></p>'
         content+='<p><a href="/reports/demo/baseline">안전마진 감시 / 합성 보고서 열기</a></p><p><a href="/cases/demo/baseline">기업가치·운용 기준 원장 / 합성 사례</a></p>'
     elif path=="/performance":
@@ -317,6 +339,9 @@ class Handler(BaseHTTPRequestHandler):
             self.send(200,json.dumps(lab_snapshot(self.path.rsplit("/",1)[1]),allow_nan=False).encode(),"application/json")
         elif self.path=="/api/demo/strategies":
             self.send(200,json.dumps(strategy_snapshot(),ensure_ascii=False,allow_nan=False).encode(),"application/json")
+        elif self.path=="/api/reports/fundamental/live/005930":
+            r=research_report()
+            self.send(200 if r["state"]=="REPORT_READY" else 503,json.dumps(r,ensure_ascii=False,allow_nan=False).encode(),"application/json")
         elif self.path=="/api/reports/fundamental/005930":
             self.send(200,json.dumps(FUNDAMENTAL_REPORT,ensure_ascii=False,allow_nan=False).encode(),"application/json")
         elif self.path=="/api/demo/performance":
@@ -403,4 +428,6 @@ if __name__=="__main__":
     if auth.ready:
         result=check_link(os.environ.get("OFFICE_BROKER_LINK_KEY",""))
         print(json.dumps({"internal_link":result["state"],"real_data":False}),flush=True)
+    if auth.ready:
+        print(json.dumps({"research_link":research_report()["state"]}),flush=True)
     Server(("0.0.0.0",int(os.environ.get("PORT","8080"))),auth).serve_forever()
