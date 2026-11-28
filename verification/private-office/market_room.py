@@ -51,7 +51,7 @@ def snapshot():
         "macro":[{"id":i,"label":label,"value":v,"period":p,"release_date":d,"source":u} for i,label,v,p,d,u in OBS],
         "unconnected_series":list(MISSING),"market_regime":None,"forecast":None,"decision_authorized":False,"order_authorized":False}
 
-def render():
+def render(refresh=None):
     v=snapshot()
     def e(x):return escape(str(x),quote=True)
     def row(k,x):return '<div class="row"><span>'+e(k)+'</span><strong>'+e(x)+'</strong></div>'
@@ -85,4 +85,11 @@ def render():
     out.append(row("한국 거래소 캘린더","미연결"))
     out.append(row("장세 종합 판정 / 예측","보류"))
     out.append('<p><a href="/market/demo/baseline">시장 국면 연구 · 합성 사례</a></p><p class="notice">연구 G0 차단 유지. 공식 발표값은 투자 신호가 아니며 합성 연구와 혼용하지 않습니다.</p>')
+    if refresh is not None:
+        out.append('<div class="section">05 / BLS CALENDAR · ON ACCESS</div>')
+        out.append(row("공식 BLS 피드",refresh.get("state","UNKNOWN")))
+        out.append(row("최종 성공 확인",refresh.get("checked_at") or "없음"))
+        out.append('<p class="notice">화면 접속 시 최대 1시간 간격으로 공식 피드 갱신 시도. 실패 시 기존 일정은 참고용이며 자동 백그라운드 실행 아님. <a href="https://www.bls.gov/schedule/news_release/bls.ics">공식 구독 피드</a></p>')
+        for x in refresh.get("events",[]):
+            out.append(row(x["at_kst"][:16].replace("T"," "),x["summary"]))
     return "".join(out)

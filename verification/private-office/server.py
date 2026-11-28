@@ -12,6 +12,9 @@ from http.cookies import SimpleCookie
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlsplit
 from link_transport import check_link
+from calendar_refresh import CACHE as BLS_CACHE
+from lab_view import FRAMES,lab as lab_snapshot,render_lab,compare as strategy_snapshot,render_compare
+from founder_inbox import snapshot as inbox_snapshot,render as inbox_render
 from market_room import snapshot as market_room_snapshot, render as market_room_render
 from market_demo import SCENARIOS as MARKET_SCENARIOS, render as market_render, scenario as market_scenario
 from risk_demo import SCENARIOS as RISK_SCENARIOS, render as risk_render, scenario as risk_scenario
@@ -105,7 +108,10 @@ PAGES = {"/":("01 / REGISTER","투자 업무 대장",[("인증 세션","활성")
 PAGES["/cases"]=("05 / CASES","기업가치·운용 기준 원장",[("실제 종목","미연결"),("운용 기준","미승인")])
 PAGES["/risk"]=("06 / RISK","포트폴리오·리스크 원장",[("실제 포트폴리오","미연결"),("실제 위험 한도","미승인")])
 PAGES["/market"]=("07 / MARKET","시장 상황실",[("실제 장세","판정 불가"),("예측 모델","미검증"),("데이터 준비","G0 차단")])
-TABS = {"/":"업무","/assets":"자산","/cases":"종목","/risk":"위험","/market":"시장","/reports":"보고","/records":"기록"}
+PAGES["/lab"]=("08 / LAB","기술적 분석 Lab",[])
+PAGES["/strategies"]=("09 / STRATEGIES","전략 비교",[])
+PAGES["/inbox"]=("10 / INBOX","Founder Inbox",[])
+TABS = {"/":"업무","/assets":"자산","/cases":"종목","/risk":"위험","/market":"시장","/lab":"랩","/strategies":"전략","/inbox":"안건","/reports":"보고","/records":"기록"}
 
 def page(path):
     demo = path.startswith("/assets/demo/")
@@ -113,15 +119,22 @@ def page(path):
     case_demo = path.startswith("/cases/demo/")
     risk_demo=path.startswith("/risk/demo/")
     market_demo=path.startswith("/market/demo/")
-    number,title,rows=PAGES["/assets" if demo else "/reports" if report_demo else "/cases" if case_demo else "/risk" if risk_demo else "/market" if market_demo else path]
-    nav="".join('<a href="'+link+'"'+(' aria-current="page"' if (path==link or demo and link=="/assets" or report_demo and link=="/reports" or case_demo and link=="/cases" or risk_demo and link=="/risk" or market_demo and link=="/market") else '')+'>'+name+'</a>' for link,name in TABS.items())
+    lab_demo=path.startswith("/lab/")
+    number,title,rows=PAGES["/assets" if demo else "/reports" if report_demo else "/cases" if case_demo else "/risk" if risk_demo else "/market" if market_demo else "/lab" if lab_demo else path]
+    nav="".join('<a href="'+link+'"'+(' aria-current="page"' if (path==link or demo and link=="/assets" or report_demo and link=="/reports" or case_demo and link=="/cases" or risk_demo and link=="/risk" or market_demo and link=="/market" or lab_demo and link=="/lab") else '')+'>'+name+'</a>' for link,name in TABS.items())
     content="".join('<div class="row"><span>'+a+'</span><strong>'+b+'</strong></div>' for a,b in rows)
     if demo:
         content=demo_render(path.rsplit("/",1)[1])
     elif market_demo:
         content=market_render(path.rsplit("/",1)[1])
     elif path=="/market":
-        content=market_room_render()
+        content=market_room_render(BLS_CACHE.get())
+    elif path=="/lab" or lab_demo:
+        content=render_lab(path.rsplit("/",1)[1] if lab_demo else "D")
+    elif path=="/strategies":
+        content=render_compare()
+    elif path=="/inbox":
+        content=inbox_render()
     elif risk_demo:
         content=risk_render(path.rsplit("/",1)[1])
     elif path=="/risk":
@@ -255,6 +268,16 @@ class Handler(BaseHTTPRequestHandler):
             self.send(200,page(self.path))
         elif self.path.startswith("/api/demo/market/") and self.path.rsplit("/",1)[1] in MARKET_SCENARIOS and self.path.count("/")==4:
             self.send(200,json.dumps(market_scenario(self.path.rsplit("/",1)[1]),ensure_ascii=False,allow_nan=False).encode(),"application/json")
+        elif self.path.startswith("/lab/") and self.path.rsplit("/",1)[1] in FRAMES and self.path.count("/")==2:
+            self.send(200,page(self.path))
+        elif self.path.startswith("/api/demo/lab/") and self.path.rsplit("/",1)[1] in FRAMES and self.path.count("/")==4:
+            self.send(200,json.dumps(lab_snapshot(self.path.rsplit("/",1)[1]),allow_nan=False).encode(),"application/json")
+        elif self.path=="/api/demo/strategies":
+            self.send(200,json.dumps(strategy_snapshot(),ensure_ascii=False,allow_nan=False).encode(),"application/json")
+        elif self.path=="/api/inbox":
+            self.send(200,json.dumps(inbox_snapshot(),ensure_ascii=False).encode(),"application/json")
+        elif self.path=="/api/calendar-refresh":
+            self.send(200,json.dumps(BLS_CACHE.get(),ensure_ascii=False).encode(),"application/json")
         elif self.path=="/api/market-room":
             self.send(200,json.dumps(market_room_snapshot(),ensure_ascii=False,allow_nan=False).encode(),"application/json")
         elif self.path=="/api/market":

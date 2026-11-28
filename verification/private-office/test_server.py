@@ -136,6 +136,29 @@ class HTTPTests(unittest.TestCase):
         self.assertEqual(self.request("GET","/assets/demo/unknown",headers=c)[0],404)
         self.assertEqual(self.request("POST","/api/demo/portfolio/initial",headers={**c,"Origin":ORIGIN})[0],405)
 
+    def test_new_surfaces_auth_and_boundaries(self):
+        for p in ("/lab","/strategies","/inbox"):
+            self.assertEqual(self.request("GET",p)[0],303)
+        for p in ("/api/demo/lab/D","/api/demo/strategies","/api/inbox","/api/calendar-refresh"):
+            self.assertEqual(self.request("GET",p)[0],401)
+        _,h,_=self.login();c={"Cookie":h["Set-Cookie"].split(";")[0]}
+        for f in ("D","W","M","Y"):
+            st,h,b=self.request("GET","/api/demo/lab/"+f,headers=c)
+            self.assertEqual(st,200);v=json.loads(b);self.assertEqual(v["mode"],"SYNTHETIC_ONLY")
+            self.assertFalse(v["decision_authorized"]);self.assertFalse(v["actual_data_connected"])
+            self.assertEqual(self.request("GET","/lab/"+f,headers=c)[0],200)
+        self.assertEqual(self.request("GET","/lab/Z",headers=c)[0],404)
+        st,h,b=self.request("GET","/api/demo/strategies",headers=c);self.assertEqual(st,200)
+        self.assertFalse(json.loads(b)["actual_backtest"])
+        self.assertEqual(self.request("GET","/strategies",headers=c)[0],200)
+        st,h,b=self.request("GET","/api/inbox",headers=c);self.assertEqual(st,200)
+        self.assertFalse(json.loads(b)["approval_authorized"])
+        self.assertEqual(self.request("GET","/inbox",headers=c)[0],200)
+        self.assertEqual(self.request("POST","/api/inbox",headers={**c,"Origin":ORIGIN})[0],405)
+        from unittest.mock import patch
+        with patch("server.BLS_CACHE.get",return_value={"state":"REFRESH_FAILED","events":[],"checked_at":None}):
+            self.assertEqual(self.request("GET","/api/calendar-refresh",headers=c)[0],200)
+
     def test_market_room_dated_reference_and_auth(self):
         self.assertEqual(self.request("GET","/market")[0],303)
         self.assertEqual(self.request("GET","/api/market-room")[0],401)
@@ -160,7 +183,9 @@ class HTTPTests(unittest.TestCase):
         self.assertFalse(v["exchange"]["actual_close_verified"])
         self.assertEqual(len(v["macro"]),5)
         self.assertEqual(self.request("GET","/api/market",headers=c)[0],503)
-        status,h,body=self.request("GET","/market",headers=c)
+        from unittest.mock import patch
+        with patch("server.BLS_CACHE.get",return_value={"state":"REFRESH_FAILED","events":[],"checked_at":None}):
+            status,h,body=self.request("GET","/market",headers=c)
         self.assertEqual(status,200)
         for text in ("시장 상황실","자동 갱신 미연결","12월 주요 경제 발표 한국시간","미연결","합성 사례"):
             self.assertIn(text.encode(),body)
@@ -173,7 +198,9 @@ class HTTPTests(unittest.TestCase):
         status,h,_=self.login()
         c={"Cookie":h["Set-Cookie"].split(";")[0]}
         self.assertEqual(self.request("GET","/api/market",headers=c)[0],503)
-        self.assertEqual(self.request("GET","/market",headers=c)[0],200)
+        from unittest.mock import patch
+        with patch("server.BLS_CACHE.get",return_value={"state":"REFRESH_FAILED","events":[],"checked_at":None}):
+            self.assertEqual(self.request("GET","/market",headers=c)[0],200)
         for name in ("baseline","late-release","credit-missing","baa-proxy"):
             status,h,body=self.request("GET","/api/demo/market/"+name,headers=c)
             self.assertEqual(status,200)
