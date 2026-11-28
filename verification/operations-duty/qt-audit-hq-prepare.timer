@@ -1,0 +1,9 @@
+[Unit]
+Description=Prepare audit exceptions after audit windows
+[Timer]
+OnCalendar=*-*-* *:06/15:00
+AccuracySec=5s
+Persistent=true
+Unit=qt-audit-hq-prepare.service
+[Install]
+WantedBy=timers.target

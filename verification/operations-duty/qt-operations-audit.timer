@@ -1,0 +1,9 @@
+[Unit]
+Description=Audit QuanTrade operations every fifteen minutes
+[Timer]
+OnCalendar=*-*-* *:04/15:00
+AccuracySec=5s
+Persistent=true
+Unit=qt-operations-audit.service
+[Install]
+WantedBy=timers.target
