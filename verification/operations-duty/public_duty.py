@@ -126,6 +126,8 @@ def report(db,now):
        "trade_authorized":False}
     handoff.init(db)
     p["handoff"]=handoff.summary(db)
+    from ai_control import operational_projection
+    p["ai_control"]=operational_projection(db)
     p["decision_requested"]=p["decision_requested"] or p["handoff"]["pending_review_count"]>0
     with db:db.execute("INSERT INTO public_reports VALUES(?,?,?)",(hour,core.canonical(p),core.digest(p)))
     return p
