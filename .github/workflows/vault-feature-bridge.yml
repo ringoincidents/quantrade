@@ -1,0 +1,18 @@
+name: Vault feature bridge offline tests
+on:
+  push:
+    branches: [research/market-data-vault-p0-20261123]
+    paths: ['research/market_data_vault/**', '.github/workflows/vault-feature-bridge.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  synthetic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m unittest discover -s research/market_data_vault -p 'test_*.py' -v
