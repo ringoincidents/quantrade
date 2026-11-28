@@ -10,6 +10,7 @@ import os
 import sqlite3
 import time
 from pathlib import Path
+import command_contract as commands
 
 PERIOD=300
 REPORT_PERIOD=3600
@@ -45,7 +46,7 @@ def open_db(path):
     db.row_factory=sqlite3.Row
     db.execute("PRAGMA journal_mode=WAL")
     db.execute("PRAGMA synchronous=FULL")
-    db.executescript(SCHEMA)
+    db.executescript(SCHEMA + commands.SCHEMA)
     with db:
         db.execute("INSERT OR IGNORE INTO metadata VALUES('schema','1')")
         if db.execute("SELECT v FROM metadata WHERE k='schema'").fetchone()[0]!="1":
@@ -145,12 +146,13 @@ def report(db, now):
     for row in db.execute("SELECT * FROM jobs WHERE state='COMPLETED' AND slot>=? AND slot<?",(start,slot)):
         try: read_result(row)
         except Exception: bad.append([row["slot"],row["sop"]])
-    body={"mode":"SYNTHETIC_PILOT","window_start":start,"window_end":slot,"created_at":now,
+    requests=[dict(r) for r in db.execute("SELECT id,sop,received_at,state FROM command_receipts WHERE received_at>=? AND received_at<? AND action='REQUEST_REVIEW' ORDER BY received_at,id LIMIT 20",(start,slot))]
+    body={"review_requests":requests,"mode":"SYNTHETIC_PILOT","window_start":start,"window_end":slot,"created_at":now,
           "expected_jobs":36,"states":states,"coverage_complete":sum(states.values())==36,
           "all_completed":states.get("COMPLETED",0)==36,
           "blocked_sample":issues,"anomalies":anomalies,"digest_failures":bad,
           "llm_calls":0,"llm_enabled":False,"trade_authority":False,
-          "decision_requested":bool(issues or anomalies or bad or states.get("COMPLETED",0)!=36)}
+          "decision_requested":bool(requests or issues or anomalies or bad or states.get("COMPLETED",0)!=36)}
     with db:
         db.execute("INSERT OR IGNORE INTO reports VALUES(?,?,?)",(slot,canonical(body),digest(body)))
     return body
@@ -175,7 +177,9 @@ def locked(path):
 def main():
     p=argparse.ArgumentParser()
     p.add_argument("--db",required=True)
-    p.add_argument("action",choices=("tick","serve","report"))
+    p.add_argument("action",choices=("tick","serve","report","ingest-command"))
+    p.add_argument('--envelope')
+    p.add_argument('--key-file')
     args=p.parse_args()
     os.umask(0o077)
     path=Path(args.db)
@@ -184,6 +188,9 @@ def main():
         db=open_db(path)
         try:
             if args.action=="report": print(canonical(latest_report(db))); return
+            if args.action=="ingest-command":
+                if not args.envelope or not args.key_file: p.error("local envelope and key-file required")
+                print(commands.accept(db,commands.read_envelope(args.envelope),commands.read_key(args.key_file),int(time.time()),PLAN)); return
             recover(db,int(time.time()))
             while True:
                 tick(db,int(time.time()))
