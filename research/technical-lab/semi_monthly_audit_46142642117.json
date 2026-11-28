@@ -1,0 +1,136 @@
+{
+  "runId": 46142642117,
+  "status": "EXPLORATORY_NOT_VALIDATED",
+  "sourceSha256": "0fba3bccd65c4f007e6841473ae3a631d163428cb691dd67a3b057409900f6f0",
+  "sourceRun": 46142381437,
+  "decisionCount": 51,
+  "classified": 16,
+  "summary": {
+    "counts": {
+      "ABSTAIN": 35,
+      "PAIRED": 13,
+      "MISSING": 2,
+      "CENSORED": 1
+    },
+    "paired": 13,
+    "correct": 6,
+    "baselineCorrect": 6,
+    "byPhase": {
+      "CONTRACTION_PROXY": {
+        "n": 5,
+        "correct": 2,
+        "baselineCorrect": 2,
+        "observedUp": 3,
+        "observedDown": 2,
+        "observedFlat": 0
+      },
+      "EXPANSION_PROXY": {
+        "n": 8,
+        "correct": 4,
+        "baselineCorrect": 4,
+        "observedUp": 4,
+        "observedDown": 4,
+        "observedFlat": 0
+      }
+    }
+  },
+  "firstReferencePeriodOnly": {
+    "counts": {
+      "ABSTAIN": 35,
+      "PAIRED": 12,
+      "MISSING": 2,
+      "CENSORED": 1
+    },
+    "paired": 12,
+    "correct": 5,
+    "baselineCorrect": 5,
+    "byPhase": {
+      "CONTRACTION_PROXY": {
+        "n": 5,
+        "correct": 2,
+        "baselineCorrect": 2,
+        "observedUp": 3,
+        "observedDown": 2,
+        "observedFlat": 0
+      },
+      "EXPANSION_PROXY": {
+        "n": 7,
+        "correct": 3,
+        "baselineCorrect": 3,
+        "observedUp": 3,
+        "observedDown": 4,
+        "observedFlat": 0
+      }
+    }
+  },
+  "repeated": [
+    {
+      "vintage": "2025-10-31",
+      "period": "2025-08",
+      "phase": "EXPANSION_PROXY"
+    }
+  ],
+  "quarterSpaced": {
+    "counts": {
+      "ABSTAIN": 12,
+      "PAIRED": 4,
+      "MISSING": 1
+    },
+    "paired": 4,
+    "correct": 2,
+    "baselineCorrect": 2,
+    "byPhase": {
+      "CONTRACTION_PROXY": {
+        "n": 2,
+        "correct": 1,
+        "baselineCorrect": 1,
+        "observedUp": 1,
+        "observedDown": 1,
+        "observedFlat": 0
+      },
+      "EXPANSION_PROXY": {
+        "n": 2,
+        "correct": 1,
+        "baselineCorrect": 1,
+        "observedUp": 1,
+        "observedDown": 1,
+        "observedFlat": 0
+      }
+    }
+  },
+  "signCounts": {
+    "1,1|-1,1": 19,
+    "1,-1|-1,-1": 13,
+    "-1,-1|-1,-1": 5,
+    "-1,1|-1,-1": 1,
+    "1,1|1,1": 11,
+    "1,1|-1,-1": 1
+  },
+  "baselineIdentical": true,
+  "exceptions": [
+    {
+      "vintage": "2025-07-31",
+      "period": "2025-06",
+      "reason": "FUTURE_EXACT_PERIOD_MISSING"
+    },
+    {
+      "vintage": "2025-08-31",
+      "period": "2025-07",
+      "reason": "FUTURE_EXACT_PERIOD_MISSING"
+    },
+    {
+      "vintage": "2025-11-30",
+      "period": null,
+      "reason": "STALE_OR_MISALIGNED_SERIES"
+    },
+    {
+      "vintage": "2026-10-31",
+      "period": "2026-09",
+      "reason": "FUTURE_VINTAGE_OUTSIDE_SCHEDULE"
+    }
+  ],
+  "limitations": [
+    "Secondary descriptive audit after viewing results; earliest reference observation retained without optimizing outcomes.",
+    "No independent economic ground truth, no investment performance, no predictive edge."
+  ]
+}
