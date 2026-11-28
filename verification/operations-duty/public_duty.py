@@ -39,6 +39,8 @@ def plan(db,now):
     lower=row[0] if row else now-GRACE
     cutoff=now-30*86400
     with db:
+        # Migration: old spools cannot prove their original activation time.
+        db.execute("INSERT OR IGNORE INTO public_meta VALUES('coverage_start',?)",(lower if not row else now,))
         if lower<cutoff:
             db.execute("INSERT OR IGNORE INTO public_meta VALUES('history_gap',?)",(lower,))
             lower=cutoff
