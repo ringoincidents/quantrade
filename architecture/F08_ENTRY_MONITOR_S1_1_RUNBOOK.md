@@ -1,0 +1,18 @@
+# F-08 S1.1 — offline manual workbench
+Status: draft implementation, no production access. #142/#141. Python 3.12, standard library only. No network calls, order authority, scheduled job or AI. Run from checkout of the PR branch:
+
+```sh
+python -m unittest discover -s tests/workbench -p 'test_*.py' -v
+python -m quantrade.workbench.local_report demo
+python -m quantrade.workbench.local_report template
+```
+The first CLI command saves a synthetic snapshot and writes an HTML report and JSON export under ~/.quantrade-f08 (outside Git; POSIX directory 0700). Open the printed HTML path in a browser. The report is read-only and mobile-sized; details expand to show reason, source and valuation version. Demo contains 3 fictitious instruments: at threshold, above threshold, missing quote. Session dates are operator declarations, not a validated exchange calendar.
+The template is synthetic. For manual local use, edit a copy outside the repo. Change mode to MANUAL, set as_of, enabled security IDs, expected session dates/close instants, quote data and target versions with evidence, approval reference, expiry and basis. Remove synthetic approvals and replace synthetic source declarations. Never reuse fictitious inputs as actual prices. All decimals must be strings. Explicit approval command (repeat for each new target, using output file as next input):
+```sh
+python -m quantrade.workbench.local_report approve /private/input.json XNYS:DEMO_A v1 --operator local-reviewer --confirm-manual
+python -m quantrade.workbench.local_report run /private/approved-input.json --confirm-manual
+python -m quantrade.workbench.local_report show RUN_ID
+```
+Use the actual printed approved file path, not the example. Approve binds the target hash, reference, local operator and approved_at. It is a local declaration, not external authentication; files must remain under trusted operator control. Manual input is via editable JSON, not a mobile form. Use `--store /private/path` before the subcommand for a separate private directory.
+To revoke, append revocations entry {ref, operator, target_hash, revoked_at}; keep prior records unchanged, use a new version/approval for a replacement, carry prior revocations forward. Price correction uses a new integer revision; do not edit old version. Store rejects known revision rollback and omitted revocations for previously seen target hashes. Identical full input has the same run ID, no duplicate run. SQLite persists snapshots and input revisions transactionally; report export uses atomic replacement. No alerts generated. If a run fails, CLI returns nonzero and writes no new report; prior report remains historical, never live.
+Limitations: no independent review, provider/market calendar verification, source licensing, live freshness, split/event ingestion, authentication, server, smartphone device test, private backup/restore, or trading-day parity. Local OS account is the security boundary (POSIX permission check; Windows ACL not verified). No deployment or uploading private output to public Git. A separately reviewed authenticated private runtime and verified data are required before real monitoring. S1.1 acceptance remains subject to review and actual browser/user test; S1.2 blocked until data rights/access proven.
