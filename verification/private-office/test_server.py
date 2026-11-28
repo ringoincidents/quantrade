@@ -116,6 +116,19 @@ class HTTPTests(unittest.TestCase):
             self.assertEqual(status,200)
             self.assertIn(b"WORKER_UNAVAILABLE",body)
 
+    def test_work_lifecycle_review_block_visible(self):
+        from unittest.mock import patch
+        workflow={"work_id":"FUNDAMENTAL-005930-"+"a"*16,"state":"REVIEW_BLOCKED","department":"FUNDAMENTAL_RESEARCH","review_department":"COUNTER_RESEARCH","runs":1,"max_runs":2,"events":[{"state":"REVIEW_REQUESTED","at":"2026-11-28T11:00:00+00:00"},{"state":"REVIEW_BLOCKED","at":"2026-11-28T11:00:00+00:00"}]}
+        with patch("server.research_report",return_value={"state":"FAILED","workflow":workflow}):
+            status,h,_=self.login()
+            self.assertEqual(status,303)
+            cookie={"Cookie":h["Set-Cookie"].split(";")[0]}
+            status,_,body=self.request("GET","/reports/fundamental/live/005930",headers=cookie)
+            self.assertEqual(status,200)
+            self.assertIn(b"REVIEW_BLOCKED",body)
+            self.assertIn(b"REVIEW_REQUESTED",body)
+            self.assertIn(b"COUNTER_RESEARCH",body)
+
     def test_actual_filing_report_auth_and_scope(self):
         path="/reports/fundamental/005930"
         api="/api/reports/fundamental/005930"
