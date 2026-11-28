@@ -1,0 +1,41 @@
+name: Technical Lab full universe research
+on:
+  pull_request:
+    paths:
+      - 'research/technical-lab/run_universe.mjs'
+      - 'research/technical-lab/audit_universe.mjs'
+      - 'research/technical-lab/source_inventory.json'
+      - '.github/workflows/technical-lab-universe.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  universe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Fetch public source snapshot only
+        run: |
+          git clone --depth 1 --filter=blob:none --sparse https://github.com/Sixian-Li/plain-backtest.git "$RUNNER_TEMP/plain"
+          git -C "$RUNNER_TEMP/plain" sparse-checkout set data/processed/daily backtest/docs/release
+          git -C "$RUNNER_TEMP/plain" rev-parse HEAD
+          test "$(git -C "$RUNNER_TEMP/plain" hash-object backtest/docs/release/source_snapshot.json)" = cb0677768e9a64853c5d7aea2ee29a3ca7418946
+      - name: Verify all source bytes and quality
+        run: |
+          mkdir -p "$RUNNER_TEMP/lab-output"
+          node research/technical-lab/audit_universe.mjs research/technical-lab/source_inventory.json "$RUNNER_TEMP/plain" "$RUNNER_TEMP/lab-output/audit.json"
+      - name: Replay frozen three events and market benchmark
+        run: |
+          node --max-old-space-size=6144 research/technical-lab/run_universe.mjs research/technical-lab/source_inventory.json "$RUNNER_TEMP/lab-output/audit.json" "$RUNNER_TEMP/plain" "$RUNNER_TEMP/lab-output/universe.json"
+      - name: Preserve research-only evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: technical-lab-universe-evidence
+          path: ${{ runner.temp }}/lab-output/*.json
+          retention-days: 14
+          if-no-files-found: warn
