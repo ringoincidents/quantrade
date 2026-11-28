@@ -1,0 +1,75 @@
+name: QT-CASE-001 Archived Golden Run Replay
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quantrade-open-dart-live
+  cancel-in-progress: false
+
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      OPEN_DART_API_KEY: ${{ secrets.OPEN_DART_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: "1419314da38f40c08c5c8dadbbdfa7af41694b33"
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Verify frozen replay anchor
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "1419314da38f40c08c5c8dadbbdfa7af41694b33"
+          git cat-file -e 96af7467cb052b4cc90828135276ba9f6b68f7df^{commit}
+
+      - name: Verify Open DART secret
+        shell: bash
+        run: |
+          if [ -z "$OPEN_DART_API_KEY" ]; then
+            echo "OPEN_DART_API_KEY is required for archived replay" >&2
+            exit 1
+          fi
+
+      - name: Compile frozen experiment
+        run: |
+          python -m compileall -q quantrade/capabilities scripts/run_qt_case_001.py
+
+      - name: Run frozen-rule tests
+        run: python -m unittest tests.capabilities.test_qt_case_001_rules -v
+
+      - name: Execute frozen Golden Run
+        run: python -m scripts.run_qt_case_001
+
+      - name: Verify immutable experiment identity
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          result = json.loads(Path("research/experiments/QT-CASE-001_RESULT.json").read_text())
+          assert result["preregistration_commit"] == "96af7467cb052b4cc90828135276ba9f6b68f7df"
+          assert result["authority"]["execution_authorized"] is False
+          assert result["authority"]["live_order_possible"] is False
+          print(json.dumps({
+              "experiment_id": result["experiment_id"],
+              "execution_authorized": result["authority"]["execution_authorized"],
+          }, sort_keys=True))
+          PY
+
+      - name: Upload replay artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: qt-case-001-archived-replay
+          path: |
+            /tmp/QT-CASE-001_FULL_ARTIFACT.json
+            research/experiments/QT-CASE-001_RESULT.json
+          if-no-files-found: error

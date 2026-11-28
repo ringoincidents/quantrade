@@ -1,0 +1,53 @@
+name: QT-CASE-004 Archived Infrastructure Failure
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-record:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: "8436e3cdd79ede4cb219a1efeec89aa222e8a566"
+          fetch-depth: 0
+
+      - name: Verify frozen experiment lineage
+        run: |
+          git cat-file -e 5c7f5696479c3787843abca8799e937950f2daff^{commit}
+          git cat-file -e 39b2de24df7373b3adac19c54eef3e6989b08900^{commit}
+          test -f research/experiments/QT-CASE-004_RESULT.json
+          test -f research/experiments/QT-CASE-004_RESULT_REPORT.md
+
+      - name: Verify recorded failure
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r = json.loads(
+              Path("research/experiments/QT-CASE-004_RESULT.json").read_text()
+          )
+          assert r["experiment_id"] == "QT-CASE-004"
+          assert r["operational_result"]["classification"] == "EXTERNAL_IDENTIFIER_SERVICE_UNAVAILABLE"
+          assert r["operational_result"]["economic_fundamentals_retrieved"] is False
+          assert r["operational_result"]["target_replaced"] is False
+          assert r["authority"]["execution_authorized"] is False
+          print(json.dumps({
+              "experiment_id": r["experiment_id"],
+              "classification": r["operational_result"]["classification"],
+              "economic_fundamentals_retrieved": r["operational_result"]["economic_fundamentals_retrieved"],
+          }, sort_keys=True))
+          PY
+
+      - name: Upload immutable record
+        uses: actions/upload-artifact@v4
+        with:
+          name: qt-case-004-archived-failure-record
+          path: |
+            research/experiments/QT-CASE-004_RESULT.json
+            research/experiments/QT-CASE-004_RESULT_REPORT.md
+          if-no-files-found: error

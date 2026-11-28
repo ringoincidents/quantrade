@@ -1,0 +1,172 @@
+name: Investment Office Core Tests
+
+on:
+  pull_request:
+    paths:
+      - "quantrade/capabilities/investment_case.py"
+      - "quantrade/capabilities/investment_case_evaluation.py"
+      - "quantrade/capabilities/thesis_contract.py"
+      - "quantrade/capabilities/thesis_contract_evaluation.py"
+      - "quantrade/capabilities/fundamental_evidence.py"
+      - "quantrade/capabilities/dart_fundamental_provider.py"
+      - "quantrade/capabilities/portfolio_opportunity.py"
+      - "quantrade/capabilities/portfolio_opportunity_evaluation.py"
+      - "quantrade/capabilities/risk_opinion.py"
+      - "quantrade/capabilities/risk_opinion_evaluation.py"
+      - "quantrade/capabilities/case_learning.py"
+      - "quantrade/capabilities/case_learning_evaluation.py"
+      - "quantrade/capabilities/cash_flow_valuation.py"
+      - "quantrade/capabilities/fundamental_counter_research.py"
+      - "quantrade/capabilities/fundamental_semantics.py"
+      - "quantrade/capabilities/issuer_identity.py"
+      - "quantrade/capabilities/research_preflight.py"
+      - "quantrade/data/issuer_identity_registry_v1.json"
+      - "quantrade/capabilities/valuation_crosscheck.py"
+      - "quantrade/capabilities/valuation_method_applicability.py"
+      - "tests/capabilities/test_investment_case.py"
+      - "tests/capabilities/test_thesis_contract.py"
+      - "tests/capabilities/test_fundamental_evidence.py"
+      - "tests/capabilities/test_dart_fundamental_provider.py"
+      - "tests/capabilities/test_portfolio_opportunity.py"
+      - "tests/capabilities/test_risk_opinion.py"
+      - "tests/capabilities/test_case_learning.py"
+      - "tests/capabilities/test_cash_flow_valuation.py"
+      - "tests/capabilities/test_fundamental_counter_research.py"
+      - "tests/capabilities/test_fundamental_semantics.py"
+      - "tests/capabilities/test_issuer_identity.py"
+      - "tests/capabilities/test_research_preflight.py"
+      - "tests/capabilities/test_qt_case_004_rules.py"
+      - "tests/capabilities/test_valuation_crosscheck.py"
+      - "tests/capabilities/test_valuation_method_applicability.py"
+      - "tests/capabilities/test_qt_case_001_rules.py"
+      - "tests/capabilities/test_qt_case_002_rules.py"
+      - "scripts/run_qt_case_001.py"
+      - "scripts/run_qt_case_002.py"
+      - "scripts/run_dart_fundamental_probe.py"
+      - ".github/workflows/dart_fundamental_probe.yml"
+      - "research/precedents/2026-10-05_INVESTMENT_OFFICE_DECISION_ECONOMICS_DIRECTION.md"
+  push:
+    branches:
+      - "direction/investment-office-decision-economics-2026-10-05"
+    paths:
+      - "quantrade/capabilities/investment_case.py"
+      - "quantrade/capabilities/investment_case_evaluation.py"
+      - "quantrade/capabilities/thesis_contract.py"
+      - "quantrade/capabilities/thesis_contract_evaluation.py"
+      - "quantrade/capabilities/fundamental_evidence.py"
+      - "quantrade/capabilities/dart_fundamental_provider.py"
+      - "quantrade/capabilities/portfolio_opportunity.py"
+      - "quantrade/capabilities/portfolio_opportunity_evaluation.py"
+      - "quantrade/capabilities/risk_opinion.py"
+      - "quantrade/capabilities/risk_opinion_evaluation.py"
+      - "quantrade/capabilities/case_learning.py"
+      - "quantrade/capabilities/case_learning_evaluation.py"
+      - "quantrade/capabilities/cash_flow_valuation.py"
+      - "quantrade/capabilities/fundamental_counter_research.py"
+      - "quantrade/capabilities/fundamental_semantics.py"
+      - "quantrade/capabilities/issuer_identity.py"
+      - "quantrade/capabilities/research_preflight.py"
+      - "quantrade/data/issuer_identity_registry_v1.json"
+      - "quantrade/capabilities/valuation_crosscheck.py"
+      - "quantrade/capabilities/valuation_method_applicability.py"
+      - "tests/capabilities/test_investment_case.py"
+      - "tests/capabilities/test_thesis_contract.py"
+      - "tests/capabilities/test_fundamental_evidence.py"
+      - "tests/capabilities/test_dart_fundamental_provider.py"
+      - "tests/capabilities/test_portfolio_opportunity.py"
+      - "tests/capabilities/test_risk_opinion.py"
+      - "tests/capabilities/test_case_learning.py"
+      - "tests/capabilities/test_cash_flow_valuation.py"
+      - "tests/capabilities/test_fundamental_counter_research.py"
+      - "tests/capabilities/test_fundamental_semantics.py"
+      - "tests/capabilities/test_issuer_identity.py"
+      - "tests/capabilities/test_research_preflight.py"
+      - "tests/capabilities/test_qt_case_004_rules.py"
+      - "tests/capabilities/test_valuation_crosscheck.py"
+      - "tests/capabilities/test_valuation_method_applicability.py"
+      - "tests/capabilities/test_qt_case_001_rules.py"
+      - "tests/capabilities/test_qt_case_002_rules.py"
+      - "scripts/run_qt_case_001.py"
+      - "scripts/run_qt_case_002.py"
+      - "scripts/run_dart_fundamental_probe.py"
+      - ".github/workflows/dart_fundamental_probe.yml"
+      - ".github/workflows/investment_case_tests.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unittest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compile Investment Office capability
+        run: python -m compileall -q quantrade/capabilities tests/capabilities scripts/run_dart_fundamental_probe.py
+      - name: Run Investment Case tests
+        run: python -m unittest tests.capabilities.test_investment_case -v
+      - name: Run Thesis Contract tests
+        run: python -m unittest tests.capabilities.test_thesis_contract -v
+      - name: Run Point-in-Time Fundamental Evidence tests
+        run: python -m unittest tests.capabilities.test_fundamental_evidence -v
+      - name: Run Open DART provider tests
+        run: python -m unittest tests.capabilities.test_dart_fundamental_provider -v
+      - name: Run Portfolio opportunity-cost tests
+        run: python -m unittest tests.capabilities.test_portfolio_opportunity -v
+      - name: Run independent Risk Opinion tests
+        run: python -m unittest tests.capabilities.test_risk_opinion -v
+      - name: Run Case learning/calibration tests
+        run: python -m unittest tests.capabilities.test_case_learning -v
+      - name: Run cash-flow DCF tests
+        run: python -m unittest tests.capabilities.test_cash_flow_valuation -v
+      - name: Run deterministic counter-research tests
+        run: python -m unittest tests.capabilities.test_fundamental_counter_research -v
+      - name: Run semantic fundamental applicability tests
+        run: python -m unittest tests.capabilities.test_fundamental_semantics -v
+      - name: Run issuer identity registry tests
+        run: python -m unittest tests.capabilities.test_issuer_identity -v
+      - name: Run research dependency preflight tests
+        run: python -m unittest tests.capabilities.test_research_preflight -v
+      - name: Run QT-CASE-004 frozen-rule tests
+        run: python -m unittest tests.capabilities.test_qt_case_004_rules -v
+      - name: Run cross-method valuation tests
+        run: python -m unittest tests.capabilities.test_valuation_crosscheck -v
+      - name: Run valuation-method applicability tests
+        run: python -m unittest tests.capabilities.test_valuation_method_applicability -v
+      - name: Run QT-CASE frozen-rule tests
+        run: |
+          python -m unittest tests.capabilities.test_qt_case_001_rules -v
+          python -m unittest tests.capabilities.test_qt_case_002_rules -v
+      - name: Run existing capability regression suite
+        run: python -m unittest discover -s tests/capabilities -p "test_*.py" -v
+      - name: Run reference harness
+        run: |
+          python - <<'PY'
+          import json
+          from quantrade.capabilities.investment_case_evaluation import reference_cases
+          from quantrade.capabilities.thesis_contract_evaluation import reference_thesis_contracts
+          from quantrade.capabilities.portfolio_opportunity_evaluation import reference_portfolio_opportunities
+          from quantrade.capabilities.risk_opinion_evaluation import reference_risk_opinions
+          from quantrade.capabilities.case_learning_evaluation import reference_case_learning
+
+          economics = reference_cases()
+          thesis = reference_thesis_contracts()
+          portfolio = reference_portfolio_opportunities()
+          risk = reference_risk_opinions()
+          learning = reference_case_learning()
+          assert economics["authority"]["execution_authorized"] is False
+          assert economics["authority"]["portfolio_proposal_created"] is False
+          assert thesis["authority"]["canonical_evidence_created"] is False
+          assert thesis["authority"]["thesis_truth_validated"] is False
+          assert thesis["authority"]["execution_authorized"] is False
+          assert portfolio["authority"]["portfolio_proposal_created"] is False
+          assert portfolio["authority"]["execution_authorized"] is False
+          assert risk["authority"]["committee_decision_created"] is False
+          assert risk["authority"]["execution_authorized"] is False
+          assert learning["authority"]["performance_record_created"] is False
+          assert learning["authority"]["execution_authorized"] is False
+          print(json.dumps({"economics": economics, "thesis": thesis, "portfolio": portfolio, "risk": risk, "learning": learning}, ensure_ascii=False, sort_keys=True))
+          PY

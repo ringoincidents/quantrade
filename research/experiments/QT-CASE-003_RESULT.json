@@ -1,0 +1,48 @@
+{
+  "schema": "quantrade_qt_case_003_failure_v1",
+  "experiment_id": "QT-CASE-003",
+  "target": {
+    "asset_id": "KRX:006400",
+    "company": "Samsung SDI",
+    "case_as_of": "2026-10-05T23:59:59+09:00"
+  },
+  "preregistration_commit": "bf59d2b3b147d2a2864c151ba7751a3b136563ed",
+  "first_methodology_reaching_live_fundamentals_run": {
+    "run_id": 37866181333,
+    "source_sha": "a02b6700dfa6461ea0d476d46ee7bb0fdcbea526",
+    "conclusion": "failure"
+  },
+  "operational_result": {
+    "success": false,
+    "classification": "MISSING_REQUIRED_FROZEN_METRIC",
+    "stage": "TTM_EPS_INPUT_RESOLUTION",
+    "failed_requirement": {
+      "fiscal_period_end": "2025-12-31",
+      "metric_key": "DART_ACCOUNT:ifrs-full_BasicEarningsLossPerShare:IS:CURRENT_PERIOD",
+      "observation_count": 0
+    },
+    "target_replaced": false,
+    "methodology_relaxed": false,
+    "valuation_computed": false,
+    "portfolio_invoked": false,
+    "risk_invoked": false
+  },
+  "interpretation": {
+    "economic_conclusion_available": false,
+    "holdout_result": "PROCESS_PORTABILITY_FAILURE",
+    "does_not_mean_security_is_attractive_or_unattractive": true,
+    "next_question": "Determine whether the failure is true metric absence or issuer-specific XBRL/statement-schema variation without rewriting QT-CASE-003."
+  },
+  "authority": {
+    "canonical_evidence_created": false,
+    "target_weight_set": false,
+    "real_client_portfolio_proposal_created": false,
+    "risk_policy_changed": false,
+    "committee_decision_created": false,
+    "founder_decision_created": false,
+    "decision_plan_created": false,
+    "paper_authorized": false,
+    "execution_authorized": false,
+    "live_order_possible": false
+  }
+}

@@ -1,0 +1,44 @@
+name: QT-CASE-003 Archived Holdout Failure Replay
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quantrade-open-dart-live
+  cancel-in-progress: false
+
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      OPEN_DART_API_KEY: ${{ secrets.OPEN_DART_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: "a02b6700dfa6461ea0d476d46ee7bb0fdcbea526"
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Verify frozen failure source
+        run: |
+          test "$(git rev-parse HEAD)" = "a02b6700dfa6461ea0d476d46ee7bb0fdcbea526"
+          git cat-file -e bf59d2b3b147d2a2864c151ba7751a3b136563ed^{commit}
+      - name: Replay frozen holdout
+        run: |
+          set +e
+          python -m scripts.run_qt_case_003 > /tmp/qt-case-003-replay.log 2>&1
+          code=$?
+          cat /tmp/qt-case-003-replay.log
+          test "$code" -ne 0
+          grep -F "BasicEarningsLossPerShare:IS:CURRENT_PERIOD count=0" /tmp/qt-case-003-replay.log
+      - name: Upload failure replay log
+        uses: actions/upload-artifact@v4
+        with:
+          name: qt-case-003-archived-failure-replay
+          path: /tmp/qt-case-003-replay.log
+          if-no-files-found: error

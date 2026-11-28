@@ -1,0 +1,30 @@
+{
+  "schema": "quantrade_issuer_identity_candidate_v1",
+  "asset_id": "KRX:005380",
+  "stock_code": "005380",
+  "provider_id": "OPEN_DART",
+  "candidate_external_id": "00164742",
+  "status": "PENDING_OFFICIAL_VERIFICATION",
+  "discovery": {
+    "source_kind": "PUBLIC_REFERENCE_ONLY",
+    "source_ref": "github:Team-Delgo/korea-stock-mcp/README.md",
+    "claim": "real OpenDART local verification reports stock_code 005380 -> corp_code 00164742",
+    "trusted_as_registry_authority": false
+  },
+  "official_verification_attempt": {
+    "run_id": 37880946691,
+    "workflow": "Verify Hyundai Motor DART Identity",
+    "result": "OPEN_DART_LIST_TRANSPORT_UNAVAILABLE",
+    "economic_values_requested": false
+  },
+  "promotion_rule": {
+    "required": "official Open DART filing metadata must return stock_code 005380 and corp_code 00164742",
+    "automatic_promotion_allowed_without_official_verification": false
+  },
+  "authority": {
+    "economic_observation_created": false,
+    "valuation_created": false,
+    "portfolio_proposal_created": false,
+    "execution_authorized": false
+  }
+}
