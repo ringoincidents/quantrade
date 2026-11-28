@@ -93,6 +93,11 @@ function eventSelfTest(){
  let mrows=a.slice(0,5),mf=mrows.map((x,i)=>({date:x.d,frames:{D:{bar:x,ma:{},cv:null},W:null,Y:null,M:{bar:{p:i===4?110:90,knownOn:x.d},ma:Object.fromEntries([5,10,20,30,40,60].map(k=>[k,100])),cv:.01,slope:{}}}}));
  check(eventScan(mrows,mf).filter(x=>x.rule==="M_COMP_BREAK"&&x.hit).length===1,"monthly breakout");
  let later=[...mf,{date:a[5].d,frames:{...mf[4].frames,D:{bar:a[5],ma:{},cv:null}}}];check(eventScan(a.slice(0,6),later).filter(x=>x.rule==="M_COMP_BREAK"&&x.hit).length===1,"monthly dedup");
+ // Frozen M_SUPPORT100: previous close is above the band, current close may enter it.
+ const supportFixture=(current,previous)=>{let rr=a.slice(0,12);let ss=rr.map((x,i)=>({date:x.d,frames:{D:{bar:x,ma:{},cv:null},W:null,Y:null,M:{bar:{p:i===11?current:i===10?previous:140,knownOn:x.d},ma:{100:100},slope:{100:1},cv:null}}}));return eventScan(rr,ss).filter(x=>x.rule==="M_SUPPORT100"&&x.index===11)};
+ let positive=supportFixture(100,120);check(positive.length===1&&positive[0].hit,"support current enters band from previous close");
+ let control=supportFixture(90,120);check(control.length===1&&!control[0].hit,"support eligible non-event below band");
+ check(supportFixture(100,104).length===0,"support previous close must exceed band");
  return n;
 }
 export {ruleIds,eventScan,outcome,eventOutcomes,selectNonoverlap,eventStats,summarizeEvents,eventSelfTest};
