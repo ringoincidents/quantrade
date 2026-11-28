@@ -1,0 +1,396 @@
+{
+  "status": "EXPLORATORY_NOT_VALIDATED",
+  "observations": 996,
+  "results": [
+    {
+      "rule": "Y_RECLAIM3",
+      "return": {
+        "nEvent": 87,
+        "nControl": 67,
+        "pooled": 0.005144014444096963,
+        "yearBalanced": -0.03254669030039994,
+        "matchedYears": 17,
+        "yearClusterBootstrap95": [
+          -0.07971391558198831,
+          0.013528052417066967
+        ],
+        "leaveOneAssetOutRange": [
+          -0.009124796847225811,
+          0.026775953180734138
+        ]
+      },
+      "adverse10": {
+        "nEvent": 87,
+        "nControl": 67,
+        "pooled": -0.19128495453765654,
+        "yearBalanced": -0.09170374031965726,
+        "matchedYears": 17,
+        "yearClusterBootstrap95": [
+          -0.3225490196078431,
+          0.14936562860438293
+        ],
+        "leaveOneAssetOutRange": [
+          -0.2273610571317528,
+          -0.14947768281101614
+        ]
+      },
+      "costSensitivity": [
+        {
+          "roundTripHaircut": 0,
+          "pooledReturnDifference": 0.0051698637629115154,
+          "eventMean": 0.011439515906649824
+        },
+        {
+          "roundTripHaircut": 0.005,
+          "pooledReturnDifference": 0.005144014444096963,
+          "eventMean": 0.0063823183271165705
+        },
+        {
+          "roundTripHaircut": 0.01,
+          "pooledReturnDifference": 0.005118165125282384,
+          "eventMean": 0.001325120747583313
+        },
+        {
+          "roundTripHaircut": 0.02,
+          "pooledReturnDifference": 0.005066466487653283,
+          "eventMean": -0.008789274411483184
+        }
+      ],
+      "timeDiagnostics": [
+        {
+          "label": "2001-2012",
+          "return": {
+            "nEvent": 51,
+            "nControl": 35,
+            "pooled": 0.03294389385445327,
+            "yearBalanced": -0.06479339696707695,
+            "matchedYears": 7,
+            "yearClusterBootstrap95": [
+              -0.1067517087738302,
+              -0.02447909072405157
+            ],
+            "leaveOneAssetOutRange": [
+              0.018161524348529058,
+              0.05326824108165965
+            ]
+          },
+          "adverse10": {
+            "nEvent": 51,
+            "nControl": 35,
+            "pooled": -0.1775910364145658,
+            "yearBalanced": 0.21946778711484596,
+            "matchedYears": 7,
+            "yearClusterBootstrap95": [
+              -0.11386554621848737,
+              0.5742296918767507
+            ],
+            "leaveOneAssetOutRange": [
+              -0.2303921568627451,
+              -0.1447704081632653
+            ]
+          }
+        },
+        {
+          "label": "2013+",
+          "return": {
+            "nEvent": 36,
+            "nControl": 32,
+            "pooled": -0.02195540709916733,
+            "yearBalanced": -0.009973995633726024,
+            "matchedYears": 10,
+            "yearClusterBootstrap95": [
+              -0.08349925600639277,
+              0.05897973214582022
+            ],
+            "leaveOneAssetOutRange": [
+              -0.03909199884377972,
+              -0.004905221947035847
+            ]
+          },
+          "adverse10": {
+            "nEvent": 36,
+            "nControl": 32,
+            "pooled": -0.22569444444444442,
+            "yearBalanced": -0.3095238095238095,
+            "matchedYears": 10,
+            "yearClusterBootstrap95": [
+              -0.5595238095238095,
+              -0.09285714285714283
+            ],
+            "leaveOneAssetOutRange": [
+              -0.28095238095238095,
+              -0.16847290640394091
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "rule": "M_COMP_BREAK",
+      "return": {
+        "nEvent": 109,
+        "nControl": 408,
+        "pooled": 0.0002814812444650351,
+        "yearBalanced": -0.018912648653717116,
+        "matchedYears": 22,
+        "yearClusterBootstrap95": [
+          -0.050714133383108866,
+          0.012906333951039945
+        ],
+        "leaveOneAssetOutRange": [
+          -0.004888610111288284,
+          0.0051007665975682384
+        ]
+      },
+      "adverse10": {
+        "nEvent": 109,
+        "nControl": 408,
+        "pooled": -0.037439287641662156,
+        "yearBalanced": 0.042461900805202235,
+        "matchedYears": 22,
+        "yearClusterBootstrap95": [
+          -0.08435831844922757,
+          0.18312068048910157
+        ],
+        "leaveOneAssetOutRange": [
+          -0.060867155417831886,
+          -0.023547880690737877
+        ]
+      },
+      "costSensitivity": [
+        {
+          "roundTripHaircut": 0,
+          "pooledReturnDifference": 0.00028289572308043886,
+          "eventMean": 0.001927251222042234
+        },
+        {
+          "roundTripHaircut": 0.005,
+          "pooledReturnDifference": 0.0002814812444650351,
+          "eventMean": -0.0030823850340679854
+        },
+        {
+          "roundTripHaircut": 0.01,
+          "pooledReturnDifference": 0.00028006676584963093,
+          "eventMean": -0.008092021290178195
+        },
+        {
+          "roundTripHaircut": 0.02,
+          "pooledReturnDifference": 0.00027723780861883124,
+          "eventMean": -0.018111293802398624
+        }
+      ],
+      "timeDiagnostics": [
+        {
+          "label": "2001-2012",
+          "return": {
+            "nEvent": 69,
+            "nControl": 275,
+            "pooled": -0.012298329509600355,
+            "yearBalanced": -0.06709447526948732,
+            "matchedYears": 11,
+            "yearClusterBootstrap95": [
+              -0.10364044358246077,
+              -0.039565569888872616
+            ],
+            "leaveOneAssetOutRange": [
+              -0.01868139950388362,
+              -0.00552498132639925
+            ]
+          },
+          "adverse10": {
+            "nEvent": 69,
+            "nControl": 275,
+            "pooled": -0.0341501976284585,
+            "yearBalanced": 0.11170357420357419,
+            "matchedYears": 11,
+            "yearClusterBootstrap95": [
+              -0.02762792762792763,
+              0.24428765678765682
+            ],
+            "leaveOneAssetOutRange": [
+              -0.07380720545277503,
+              -0.01038474633980252
+            ]
+          }
+        },
+        {
+          "label": "2013+",
+          "return": {
+            "nEvent": 40,
+            "nControl": 133,
+            "pooled": 0.019177114731750558,
+            "yearBalanced": 0.029269177962053104,
+            "matchedYears": 11,
+            "yearClusterBootstrap95": [
+              -0.006835916673182074,
+              0.06590141048893773
+            ],
+            "leaveOneAssetOutRange": [
+              0.008529410038765485,
+              0.03376370182971915
+            ]
+          },
+          "adverse10": {
+            "nEvent": 40,
+            "nControl": 133,
+            "pooled": -0.03590225563909771,
+            "yearBalanced": -0.02677977259316973,
+            "matchedYears": 11,
+            "yearClusterBootstrap95": [
+              -0.2232936122888276,
+              0.22170785089445377
+            ],
+            "leaveOneAssetOutRange": [
+              -0.09326974032856383,
+              0.018817204301075252
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "rule": "M_SUPPORT100",
+      "return": {
+        "nEvent": 43,
+        "nControl": 264,
+        "pooled": -0.004845597156337519,
+        "yearBalanced": -0.0022610191113016744,
+        "matchedYears": 18,
+        "yearClusterBootstrap95": [
+          -0.06554002316225532,
+          0.06296755274427696
+        ],
+        "leaveOneAssetOutRange": [
+          -0.021866744919245517,
+          0.0036295476345358166
+        ]
+      },
+      "adverse10": {
+        "nEvent": 43,
+        "nControl": 264,
+        "pooled": 0.057082452431289676,
+        "yearBalanced": 0.10590039590039595,
+        "matchedYears": 18,
+        "yearClusterBootstrap95": [
+          -0.103003108003108,
+          0.325933695933696
+        ],
+        "leaveOneAssetOutRange": [
+          0.028660909177185168,
+          0.09285714285714292
+        ]
+      },
+      "costSensitivity": [
+        {
+          "roundTripHaircut": 0,
+          "pooledReturnDifference": -0.004869946890791427,
+          "eventMean": 0.039241726451611794
+        },
+        {
+          "roundTripHaircut": 0.005,
+          "pooledReturnDifference": -0.004845597156337519,
+          "eventMean": 0.03404551781935373
+        },
+        {
+          "roundTripHaircut": 0.01,
+          "pooledReturnDifference": -0.004821247421883567,
+          "eventMean": 0.02884930918709563
+        },
+        {
+          "roundTripHaircut": 0.02,
+          "pooledReturnDifference": -0.004772547952975607,
+          "eventMean": 0.018456891922579554
+        }
+      ],
+      "timeDiagnostics": [
+        {
+          "label": "2001-2012",
+          "return": {
+            "nEvent": 21,
+            "nControl": 140,
+            "pooled": -0.02079110031788058,
+            "yearBalanced": -0.0028850905976021586,
+            "matchedYears": 8,
+            "yearClusterBootstrap95": [
+              -0.05095614253198914,
+              0.03894053966062731
+            ],
+            "leaveOneAssetOutRange": [
+              -0.0541611528350902,
+              -0.004462193065724405
+            ]
+          },
+          "adverse10": {
+            "nEvent": 21,
+            "nControl": 140,
+            "pooled": 0.07619047619047625,
+            "yearBalanced": -0.013836580086580078,
+            "matchedYears": 8,
+            "yearClusterBootstrap95": [
+              -0.25341991341991343,
+              0.2575
+            ],
+            "leaveOneAssetOutRange": [
+              0.022556390977443663,
+              0.131203007518797
+            ]
+          }
+        },
+        {
+          "label": "2013+",
+          "return": {
+            "nEvent": 22,
+            "nControl": 124,
+            "pooled": 0.009241200268001765,
+            "yearBalanced": -0.00176176192226129,
+            "matchedYears": 10,
+            "yearClusterBootstrap95": [
+              -0.11256094989029339,
+              0.10859011371184571
+            ],
+            "leaveOneAssetOutRange": [
+              -0.0026682245652011743,
+              0.015392694307048975
+            ]
+          },
+          "adverse10": {
+            "nEvent": 22,
+            "nControl": 124,
+            "pooled": 0.05425219941348974,
+            "yearBalanced": 0.20168997668997674,
+            "matchedYears": 10,
+            "yearClusterBootstrap95": [
+              -0.09895104895104893,
+              0.5195804195804197
+            ],
+            "leaveOneAssetOutRange": [
+              0.0047846889952152805,
+              0.11403508771929821
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "Year-cluster resampling of paired year means only; ignores cross-year serial dependence and asset dependence across years, not confirmatory inference.",
+    "Leave-one-asset-out sensitivity is not a confidence interval.",
+    "Time split selected after prior results, not holdout.",
+    "Ledger from focused scanner, not verified imported Node CLI; fee sensitivity is uniform haircut only.",
+    "No market or sector benchmark, terminal outcomes or corporate-action certification."
+  ],
+  "inputs": [
+    {
+      "path": "research/technical-lab/transfer_batch1.json",
+      "blob": "01b255ecf6bf5f83f8d1587119fe40a5d17ce099"
+    },
+    {
+      "path": "research/technical-lab/transfer_batch2.json",
+      "blob": "00ab18efe6f1aaf3d59e907c74d17dca260f3004"
+    },
+    {
+      "path": "research/technical-lab/transfer_batch3.json",
+      "blob": "62b3ad86a28e5e869733693f829ef9692f58c45e"
+    }
+  ]
+}
