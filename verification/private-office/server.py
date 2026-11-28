@@ -24,6 +24,7 @@ from market_demo import SCENARIOS as MARKET_SCENARIOS, render as market_render, 
 from risk_demo import SCENARIOS as RISK_SCENARIOS, render as risk_render, scenario as risk_scenario
 from case_demo import SCENARIOS as CASE_SCENARIOS, render as case_render, scenario as case_scenario
 from report_demo import SCENARIOS as REPORT_SCENARIOS, render as report_render, scenario as report_scenario
+from performance_view import snapshot as performance_snapshot,render as performance_render
 from portfolio_demo import SCENARIOS, render as demo_render, scenario as demo_scenario
 
 COOKIE = "__Host-qt_session"
@@ -109,6 +110,7 @@ PAGES = {"/":("01 / REGISTER","투자 업무 대장",[("인증 세션","활성")
          "/assets":("02 / ASSETS","자산 원장",[("평가 자산","—"),("보유 종목","미연결"),("토스 계좌","아직 연결하지 않음")]),
          "/reports":("03 / REPORTS","투자 보고서",[("안전마진 감시","검증 중"),("시장 데이터","미연결"),("실제 보고서","없음")]),
          "/records":("04 / RECORDS","운영 기록",[("인증 범위","단일 소유자 검증"),("실제 주문","비활성"),("운영 승인","보류")])}
+PAGES["/performance"]=("11 / PERFORMANCE","투자 성과·매매 복기",[])
 PAGES["/cases"]=("05 / CASES","기업가치·운용 기준 원장",[("실제 종목","미연결"),("운용 기준","미승인")])
 PAGES["/risk"]=("06 / RISK","포트폴리오·리스크 원장",[("실제 포트폴리오","미연결"),("실제 위험 한도","미승인")])
 PAGES["/market"]=("07 / MARKET","시장 상황실",[("실제 장세","판정 불가"),("예측 모델","미검증"),("데이터 준비","G0 차단")])
@@ -131,7 +133,7 @@ def page(path):
     market_demo=path.startswith("/market/demo/")
     lab_demo=path.startswith("/lab/")
     number,title,rows=PAGES["/assets" if demo else "/reports" if report_demo else "/cases" if case_demo else "/risk" if risk_demo else "/market" if market_demo else "/lab" if lab_demo else path]
-    nav="".join('<a href="'+link+'"'+(' aria-current="page"' if (path==link or demo and link=="/assets" or report_demo and link=="/reports" or case_demo and link=="/cases" or risk_demo and link=="/risk" or (market_demo or path=="/market/rates" or path.startswith("/market/macro/") or path in ("/market/bls","/market/sources")) and link=="/market" or lab_demo and link=="/lab" or path=="/inbox/live" and link=="/inbox") else '')+'>'+name+'</a>' for link,name in TABS.items())
+    nav="".join('<a href="'+link+'"'+(' aria-current="page"' if (path==link or demo and link=="/assets" or report_demo and link=="/reports" or case_demo and link=="/cases" or risk_demo and link=="/risk" or (market_demo or path=="/market/rates" or path.startswith("/market/macro/") or path in ("/market/bls","/market/sources")) and link=="/market" or lab_demo and link=="/lab" or path=="/inbox/live" and link=="/inbox" or path=="/performance" and link=="/records") else '')+'>'+name+'</a>' for link,name in TABS.items())
     content="".join('<div class="row"><span>'+a+'</span><strong>'+b+'</strong></div>' for a,b in rows)
     if demo:
         content=demo_render(path.rsplit("/",1)[1])
@@ -166,6 +168,10 @@ def page(path):
         content+='<p><a href="/cases/demo/baseline">기업가치·운용 기준 / 합성 사례</a></p>'
     elif path=="/reports":
         content+='<p><a href="/reports/demo/baseline">안전마진 감시 / 합성 보고서 열기</a></p><p><a href="/cases/demo/baseline">기업가치·운용 기준 원장 / 합성 사례</a></p>'
+    elif path=="/performance":
+        content=performance_render()
+    elif path=="/records":
+        content+='<p><a href="/performance">투자 성과·매매 복기 / 합성 검증</a></p>'
     elif path=="/assets":
         content+='<p><a href="/assets/demo/initial">합성 원장 검증 화면 열기</a></p><p><a href="/api/link-check">내부 연결 검증 (상태)</a></p>'
     return document('<div class="shell"><nav class="rail" aria-label="책갈피">'+nav+'</nav><main class="paper">'
@@ -292,6 +298,10 @@ class Handler(BaseHTTPRequestHandler):
             self.send(200,json.dumps(lab_snapshot(self.path.rsplit("/",1)[1]),allow_nan=False).encode(),"application/json")
         elif self.path=="/api/demo/strategies":
             self.send(200,json.dumps(strategy_snapshot(),ensure_ascii=False,allow_nan=False).encode(),"application/json")
+        elif self.path=="/api/demo/performance":
+            self.send(200,json.dumps(performance_snapshot(),ensure_ascii=False,allow_nan=False).encode(),"application/json")
+        elif self.path=="/api/performance":
+            self.send(503,b'{"state":"NOT_CONNECTED","actual_account_connected":false}',"application/json")
         elif self.path=="/api/inbox/live":
             self.send(200,json.dumps(inbox_snapshot(True),ensure_ascii=False,allow_nan=False).encode(),"application/json")
         elif self.path=="/api/sources":

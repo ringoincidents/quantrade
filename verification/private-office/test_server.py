@@ -180,6 +180,18 @@ class HTTPTests(unittest.TestCase):
             self.assertEqual(self.request("GET","/market/rates",headers=c)[0],200)
         self.assertEqual(self.request("POST","/api/treasury",headers={**c,"Origin":ORIGIN})[0],405)
 
+    def test_performance_auth_and_separation(self):
+        for p in ("/api/performance","/api/demo/performance"):self.assertEqual(self.request("GET",p)[0],401)
+        self.assertEqual(self.request("GET","/performance")[0],303)
+        _,h,_=self.login();c={"Cookie":h["Set-Cookie"].split(";")[0]}
+        self.assertEqual(self.request("GET","/api/performance",headers=c)[0],503)
+        st,h,b=self.request("GET","/api/demo/performance",headers=c)
+        self.assertEqual(st,200);v=json.loads(b);self.assertFalse(v["actual_account_connected"])
+        self.assertFalse(v["order_authorized"]);self.assertEqual(h["Cache-Control"],"no-store, private")
+        st,h,b=self.request("GET","/performance",headers=c)
+        self.assertEqual(st,200);self.assertIn("합성 성과 / 실제 계좌 아님".encode(),b)
+        self.assertEqual(self.request("POST","/api/performance",headers={**c,"Origin":ORIGIN})[0],405)
+
     def test_inbox_live_and_source_status(self):
         for path in ("/inbox/live","/market/sources"):self.assertEqual(self.request("GET",path)[0],303)
         for path in ("/api/inbox/live","/api/sources"):self.assertEqual(self.request("GET",path)[0],401)
