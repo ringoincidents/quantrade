@@ -1,0 +1,136 @@
+{
+  "runId": 46141885349,
+  "head": "bc250e4a401e917e2e835e93ad16359f989a9196",
+  "status": "SOURCE_FEASIBILITY_ONLY",
+  "results": [
+    {
+      "vintage": "2023-12-29",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "first": "2021-12",
+          "last": "2023-11",
+          "sha256": "9495759350891e3cda7725093e5072afdc31577eeb22976598c789c828a62059"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "first": "2021-12",
+          "last": "2023-11",
+          "sha256": "dc3a0dd74cd82f95c9f08cbffbc983d3e6c581b0512360f67d2c84b9cbdde0c2"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "EXPANSION_PROXY",
+        "period": "2023-11",
+        "asOf": "2023-12-31T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 15.346699991246782,
+            "previousGrowth": 11.079590485093016,
+            "acceleration": 4.267109506153766
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": 2.524499999999989,
+            "previousGrowth": 0.06700000000000728,
+            "acceleration": 2.457499999999982
+          }
+        ]
+      }
+    },
+    {
+      "vintage": "2025-12-31",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "first": "2023-12",
+          "last": "2025-11",
+          "sha256": "bb0737756e2740ecea1b0f7677a3190394bff9f69822e3126a0d6a230f9b8598"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "first": "2023-12",
+          "last": "2025-11",
+          "sha256": "9305a9cdc70b32c0959b3688b5081914ce4e5391adb1f183bae63069e4bcc0b6"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "MIXED_OR_FLAT",
+        "period": "2025-11",
+        "asOf": "2026-01-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 16.4877408245119,
+            "previousGrowth": 13.657417675103801,
+            "acceleration": 2.8303231494080983
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": -2.055800000000005,
+            "previousGrowth": -2.6944000000000017,
+            "acceleration": 0.6385999999999967
+          }
+        ]
+      }
+    },
+    {
+      "vintage": "2026-11-24",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "first": "2024-11",
+          "last": "2026-10",
+          "sha256": "b5bd1d499ad203dc49e3800c5fe7d3cbfd73dc6eac7227a2daafcc1c6be1e537"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "first": "2024-11",
+          "last": "2026-10",
+          "sha256": "d4aa04e3d2ebd20aa0a1428c02e5a799046272db72dca4321315e944246026b1"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "EXPANSION_PROXY",
+        "period": "2026-10",
+        "asOf": "2026-11-26T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 13.495661992660501,
+            "previousGrowth": 8.44159335146879,
+            "acceleration": 5.054068641191712
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": 0.7922000000000082,
+            "previousGrowth": -1.7515000000000072,
+            "acceleration": 2.5437000000000154
+          }
+        ]
+      }
+    }
+  ]
+}
