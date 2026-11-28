@@ -8,7 +8,7 @@ from __future__ import annotations
 import math
 from collections.abc import Sequence
 
-LIBRARY_VERSION = "market_data_vault.indicators.v0.3"
+LIBRARY_VERSION = "market_data_vault.indicators.v0.4"
 
 
 def _prices(values: Sequence[float]) -> list[float]:
@@ -224,3 +224,29 @@ def ma_geometry(values: Sequence[float], periods=(5,20,60), lookback: int=5) -> 
 INDICATOR_CATALOG.update({
     "MA_GEOMETRY:MEAN_NORMALIZED:v1":{"formula":"(max SMA-min SMA)/mean SMA; width change; fractional slopes and signed adjacent gaps","input":"close","function":"ma_geometry"},
 })
+
+def price_geometry(opens,highs,lows,closes,period=20):
+    """Descriptive candle geometry and prior-window extremes (exclude current).
+    No named candlestick strategy, trade classification, or forecast.
+    """
+    o,h,l,c=map(_prices,(opens,highs,lows,closes));n=_window(period)
+    if len({len(o),len(h),len(l),len(c)})!=1 or any(not lo<=min(a,z)<=max(a,z)<=hi for a,hi,lo,z in zip(o,h,l,c)):
+        raise ValueError("invalid OHLC")
+    out={k:[] for k in ("body_signed_fraction","upper_wick_fraction","lower_wick_fraction","range_fraction","gap_from_previous_close","prior_high","prior_low","distance_to_prior_high","distance_to_prior_low")}
+    for j,(a,hi,lo,z) in enumerate(zip(o,h,l,c)):
+        span=hi-lo
+        out["body_signed_fraction"].append((z-a)/span if span else None)
+        out["upper_wick_fraction"].append((hi-max(a,z))/span if span else None)
+        out["lower_wick_fraction"].append((min(a,z)-lo)/span if span else None)
+        out["range_fraction"].append(span/a)
+        out["gap_from_previous_close"].append(a/c[j-1]-1 if j else None)
+        ph=max(h[j-n:j]) if j>=n else None
+        pl=min(l[j-n:j]) if j>=n else None
+        out["prior_high"].append(ph);out["prior_low"].append(pl)
+        out["distance_to_prior_high"].append(z/ph-1 if ph is not None else None)
+        out["distance_to_prior_low"].append(z/pl-1 if pl is not None else None)
+    if any(x is not None and not math.isfinite(x) for series in out.values() for x in series):
+        raise ValueError("nonfinite geometry")
+    return out
+
+INDICATOR_CATALOG.update({"PRICE_GEOMETRY:PRIOR_WINDOW:v1":{"formula":"candle range fractions and prior-window high/low distances","input":"open,high,low,close","function":"price_geometry"}})

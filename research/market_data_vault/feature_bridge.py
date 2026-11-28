@@ -7,10 +7,10 @@ import json
 import math
 from datetime import date, datetime
 from zoneinfo import ZoneInfo
-from indicators import LIBRARY_VERSION,sma,ema,rsi_wilder,atr_wilder,macd,bollinger,volume_ratio,cmf,ma_geometry
+from indicators import LIBRARY_VERSION,sma,ema,rsi_wilder,atr_wilder,macd,bollinger,volume_ratio,cmf,ma_geometry,price_geometry
 from vault import parse_utc
 
-VERSION="vault_feature_bridge.v3"
+VERSION="vault_feature_bridge.v4"
 MAX_SESSIONS=10000
 MAX_REVISIONS=100000
 
@@ -135,6 +135,14 @@ def measure_bars(bars,currency):
             add("MA_SLOPE_5:"+str(n),5,series,"FRACTION")
         for pair,series in g["pair_gaps"].items():
             add("MA_PAIR_GAP:"+pair, max(map(int,pair.split(":"))),series,"FRACTION")
+    # Existing internal callers may use close-only synthetic bars; do not invent opens.
+    if all("open" in bar for bar in bars):
+        pg=price_geometry([bar["open"] for bar in bars],highs,lows,prices)
+        for k,series in pg.items():
+            add("PRICE_GEOMETRY:"+k,20 if "prior_" in k else 1,series,currency if k in ("prior_high","prior_low") else "FRACTION")
+        if highs[-1]==lows[-1]:
+            for k in ("body_signed_fraction","upper_wick_fraction","lower_wick_fraction"):
+                measures["PRICE_GEOMETRY:"+k]["state"]="UNDEFINED_ZERO_RANGE"
     return measures
 
 def build_bundle(db,dataset_id,as_of,plan,*,mode="SYNTHETIC"):

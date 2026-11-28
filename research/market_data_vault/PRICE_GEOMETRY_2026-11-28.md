@@ -1,0 +1,2 @@
+# Descriptive price geometry v1
+Existing shared volume ratio and CMF remain unchanged. Adds signed candle body and upper/lower wick as fraction of candle range, range relative to open, gap vs previous close, prior 20-bar high/low (excludes current) and close distance to those levels. Zero range null for body/wicks; no invented opens. Available on strict complete daily and higher-frame bars. Not chart-pattern recognition or a validated trading rule. No actual data or prediction. Existing source rights, calendars, corporate action, float and as-of limitations remain.
