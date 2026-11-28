@@ -261,4 +261,8 @@ class Server(ThreadingHTTPServer):
 if __name__=="__main__":
     auth=Auth(os.environ.get("OFFICE_ACCESS_TOKEN",""),os.environ.get("OFFICE_ORIGIN",""))
     print(json.dumps({"mode":"AUTH_PILOT","configuration":"READY" if auth.ready else "LOCKED","configuration_reason":auth.configuration_reason,"private_data":"DISCONNECTED"}),flush=True)
+    # Bounded synthetic-only smoke; never contacts a broker or logs credentials.
+    if auth.ready:
+        result=check_link(os.environ.get("OFFICE_BROKER_LINK_KEY",""))
+        print(json.dumps({"internal_link":result["state"],"real_data":False}),flush=True)
     Server(("0.0.0.0",int(os.environ.get("PORT","8080"))),auth).serve_forever()
