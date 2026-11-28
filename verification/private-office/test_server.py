@@ -101,6 +101,27 @@ class HTTPTests(unittest.TestCase):
         self.assertEqual(self.request("POST","/logout",headers={"Cookie":c,"Origin":ORIGIN})[0],303)
         self.assertEqual(self.request("GET","/api/status",headers={"Cookie":c})[0],401)
 
+    def test_actual_filing_report_auth_and_scope(self):
+        path="/reports/fundamental/005930"
+        api="/api/reports/fundamental/005930"
+        self.assertEqual(self.request("GET",path)[0],303)
+        self.assertEqual(self.request("GET",api)[0],401)
+        status,h,_=self.login()
+        self.assertEqual(status,303)
+        cookie={"Cookie":h["Set-Cookie"].split(";")[0]}
+        status,h,body=self.request("GET",api,headers=cookie)
+        self.assertEqual(status,200)
+        r=json.loads(body)
+        self.assertEqual(r["filing_ref"],"20260310002820")
+        self.assertEqual(r["independent_review"],"PENDING")
+        for k in ("raw_retained","automatic_refresh","valuation_authority","portfolio_authority","trade_authority"):
+            self.assertFalse(r[k])
+        status,h,body=self.request("GET",path,headers=cookie)
+        self.assertEqual(status,200)
+        self.assertIn(b"566.942",body)
+        self.assertIn(b"20260310002820",body)
+        self.assertEqual(self.request("GET","/api/portfolio",headers=cookie)[0],503)
+
     def test_missing_configuration_is_fail_closed(self):
         self.server.auth=Auth("",ORIGIN)
         self.assertEqual(self.request("GET","/health")[0],200)
