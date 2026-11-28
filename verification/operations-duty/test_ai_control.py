@@ -1,4 +1,5 @@
 import sqlite3,tempfile,unittest
+from unittest.mock import patch
 from datetime import datetime,timezone,timedelta
 from pathlib import Path
 import ai_control as a
@@ -34,12 +35,30 @@ class AIControl(unittest.TestCase):
         with self.assertRaises(ValueError):self.reserve(2)
         self.assertEqual(self.db.execute("SELECT count(*) FROM gateway_attempt").fetchone()[0],1)
     def test_month_cap_across_days(self):
-        self.cfg(daily_calls=2,monthly_calls=2)
-        # Seed a prior synthetic settled day in same UTC month; if today is
-        # first day, seed current day via existing API and test direct cap.
-        self.reserve(1);a.settle_synthetic(self.db,"r1",actual_input=1000,actual_output=1000,reported_micro_usd=2000,receipt_sha="b"*64)
-        self.reserve(2)
-        with self.assertRaises(ValueError):self.reserve(3)
+        self.day="2026-11-10"
+        self.cfg(daily_calls=1,monthly_calls=1)
+        with patch.object(ledger,"datetime",wraps=datetime) as clock:
+            clock.now.return_value=datetime(2026,11,10,tzinfo=timezone.utc)
+            self.reserve(1)
+            a.settle_synthetic(self.db,"r1",actual_input=1000,actual_output=1000,reported_micro_usd=2000,receipt_sha="b"*64)
+            ledger.configure_day(self.db,"2026-11-11",max_calls=1,max_micro_usd=10000,policy_ref="synthetic.fixture")
+            clock.now.return_value=datetime(2026,11,11,tzinfo=timezone.utc)
+            with self.assertRaisesRegex(sqlite3.IntegrityError,"MONTH_CALL_LIMIT"):self.reserve(2)
+        self.assertEqual(self.db.execute("SELECT count(*) FROM gateway_attempt").fetchone()[0],1)
+    def test_cross_day_unknown(self):
+        self.day="2026-11-10"
+        self.cfg(daily_calls=1,monthly_calls=2)
+        with patch.object(ledger,"datetime",wraps=datetime) as clock:
+            clock.now.return_value=datetime(2026,11,10,tzinfo=timezone.utc)
+            self.reserve(1)
+            ledger.configure_day(self.db,"2026-11-11",max_calls=1,max_micro_usd=10000,policy_ref="synthetic.fixture")
+            clock.now.return_value=datetime(2026,11,11,tzinfo=timezone.utc)
+            with self.assertRaisesRegex(sqlite3.IntegrityError,"UNRECONCILED_PRIOR_USAGE"):self.reserve(2)
+    def test_month_cost_trigger(self):
+        self.cfg(daily_micro=10000,monthly_micro=10000)
+        self.reserve(1)
+        with self.db:self.db.execute("UPDATE ai_pilot_month SET max_micro_usd=3000")
+        with self.assertRaisesRegex(sqlite3.IntegrityError,"MONTH_COST_LIMIT"):self.reserve(2)
     def test_month_trigger_even_if_day_cap_passes(self):
         self.cfg(daily_calls=2,monthly_calls=2)
         self.reserve(1);a.settle_synthetic(self.db,"r1",actual_input=0,actual_output=0,reported_micro_usd=0,receipt_sha="b"*64)
