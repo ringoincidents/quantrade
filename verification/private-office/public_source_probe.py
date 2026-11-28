@@ -27,3 +27,9 @@ def macro(g):
     return {"series":[{"id":x["id"],"date":x["observation_date"],"available":x["value"] is not None} for x in rows]}
 check("BLS_MONTHLY",lambda:{"events":len(monthly_fetch(now)[0])})
 for g in ("D","M"):check("FRED_"+g,lambda:macro(g))
+
+from bls_direct import fetch as bls_data_fetch,parse as bls_data_parse
+def bls_data():
+    rows=bls_data_parse(bls_data_fetch(now),now)
+    return {"series":[{"id":x["source_series_id"],"date":x["observation_date"],"available":x["value"] is not None} for x in rows]}
+check("BLS_V1",bls_data)

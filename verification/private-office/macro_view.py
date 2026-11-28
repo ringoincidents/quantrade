@@ -132,6 +132,7 @@ def render(v,detail=False):
             vals=[float(p["value"]) for p in x["history"]];lo=min(vals);span=max(vals)-lo or 1
             points=" ".join(f"{10+i*300/(len(vals)-1):.1f},{70-60*(z-lo)/span:.1f}" for i,z in enumerate(vals))
             out.append('<svg viewBox="0 0 320 80" role="img" aria-label="최근 관측값 추이" style="width:100%;height:auto"><polyline fill="none" stroke="#333" stroke-width="1.4" points="'+points+'"/></svg><p class="notice">'+e(x["history"][0]["date"])+' – '+e(x["history"][-1]["date"])+' · 관측 간격 동일 표시, 실제 날짜 간격 아님</p>')
+    if v["group"]=="M":out.append('<p><a href="/market/bls">BLS 직접 수집 / 물가·고용</a></p>')
     if not detail:out.append('<p><a href="/market/macro/'+v["group"]+'">상세 / 공식 데이터 갱신 시도</a></p>')
     out.append('<p class="notice">출처: 각 원기관 via FRED, Federal Reserve Bank of St. Louis. 최신 수정치이며 최초 발표값·실시간·투자 신호 아님. <a href="'+TERMS+'">이용 조건</a></p>')
     if detail and v["group"]=="D":

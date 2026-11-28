@@ -136,6 +136,19 @@ class HTTPTests(unittest.TestCase):
         self.assertEqual(self.request("GET","/assets/demo/unknown",headers=c)[0],404)
         self.assertEqual(self.request("POST","/api/demo/portfolio/initial",headers={**c,"Origin":ORIGIN})[0],405)
 
+    def test_bls_direct_route(self):
+        self.assertEqual(self.request("GET","/api/bls")[0],401)
+        self.assertEqual(self.request("GET","/market/bls")[0],303)
+        _,h,_=self.login();c={"Cookie":h["Set-Cookie"].split(";")[0]}
+        from unittest.mock import patch
+        from bls_direct import Cache
+        with patch("server.BLS_DATA_CACHE",Cache(lambda n: (_ for _ in ()).throw(TimeoutError()))):
+            st,h,b=self.request("GET","/api/bls",headers=c);self.assertEqual(st,200)
+            v=json.loads(b);self.assertEqual(v["state"],"REFRESH_FAILED")
+            self.assertEqual(v["rows"],[]);self.assertFalse(v["decision_authorized"])
+            self.assertEqual(self.request("GET","/market/bls",headers=c)[0],200)
+        self.assertEqual(self.request("POST","/api/bls",headers={**c,"Origin":ORIGIN})[0],405)
+
     def test_macro_auth_and_no_mutation(self):
         for p in ("/api/macro/D","/api/macro/M"):self.assertEqual(self.request("GET",p)[0],401)
         self.assertEqual(self.request("GET","/market/macro/M")[0],303)
