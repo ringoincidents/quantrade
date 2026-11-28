@@ -1,4 +1,5 @@
 import http.client
+import json
 import threading
 import unittest
 from urllib.parse import urlencode
@@ -106,6 +107,34 @@ class HTTPTests(unittest.TestCase):
         for path in ("/","/login","/assets","/api/status"):
             self.assertEqual(self.request("GET",path)[0],503)
         self.assertEqual(self.login()[0],503)
+
+    def test_portfolio_demo_auth_and_explicit_separation(self):
+        self.assertEqual(self.request("GET","/api/portfolio")[0],401)
+        self.assertEqual(self.request("GET","/api/demo/portfolio/initial")[0],401)
+        self.assertEqual(self.request("GET","/assets/demo/initial")[0],303)
+        status,h,_=self.login()
+        c={"Cookie":h["Set-Cookie"].split(";")[0]}
+        status,h,body=self.request("GET","/api/portfolio",headers=c)
+        self.assertEqual(status,503)
+        self.assertFalse(json.loads(body)["actual_account_connected"])
+        self.assertNotIn(b"DEMO_KR",body)
+        for name,state,total in [("initial","OBSERVED","660000"),("event","RECONCILIATION_REQUIRED","660000"),
+                                 ("reconciled","OBSERVED","800000"),("failed","REFRESH_FAILED","660000"),("stale","STALE","660000")]:
+            status,h,body=self.request("GET","/api/demo/portfolio/"+name,headers=c)
+            self.assertEqual(status,200)
+            v=json.loads(body)
+            self.assertEqual(v["mode"],"SYNTHETIC_ONLY")
+            self.assertEqual(v["state"],state)
+            self.assertEqual(v["last_observation"]["securities_value_krw"],total)
+            self.assertFalse(v["actual_account_connected"])
+            self.assertFalse(v["order_authorized"])
+            self.assertEqual(v["current_observation"],state=="OBSERVED")
+            status,h,body=self.request("GET","/assets/demo/"+name,headers=c)
+            self.assertEqual(status,200)
+            self.assertIn("합성 데이터 / 실제 계좌 아님".encode(),body)
+            self.assertEqual(h["Cache-Control"],"no-store, private")
+        self.assertEqual(self.request("GET","/assets/demo/unknown",headers=c)[0],404)
+        self.assertEqual(self.request("POST","/api/demo/portfolio/initial",headers={**c,"Origin":ORIGIN})[0],405)
 
     def test_no_mutations_or_oversized_login(self):
         status,h,_=self.login()
