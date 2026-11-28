@@ -1,0 +1,20 @@
+[Unit]
+Description=QuanTrade isolated synthetic duty pilot
+[Service]
+Type=oneshot
+User=qt-duty
+Group=qt-duty
+StateDirectory=qt-duty
+StateDirectoryMode=0700
+WorkingDirectory=/opt/quantrade/verification/operations-duty
+ExecStart=/usr/bin/python3 -B /opt/quantrade/verification/operations-duty/duty.py --db /var/lib/qt-duty/pilot.sqlite tick
+UMask=0077
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+RestrictAddressFamilies=AF_UNIX
+MemoryMax=128M
+CPUQuota=20%
+TimeoutStartSec=45
