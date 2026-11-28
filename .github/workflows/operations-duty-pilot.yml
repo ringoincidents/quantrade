@@ -1,0 +1,22 @@
+name: Operations duty offline pilot
+on:
+  pull_request:
+    paths:
+      - 'verification/operations-duty/**'
+      - '.github/workflows/operations-duty-pilot.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m unittest discover -s verification/operations-duty -v
+      - run: |
+          python verification/operations-duty/duty.py --db "$RUNNER_TEMP/qt-duty.sqlite" tick
+          python verification/operations-duty/duty.py --db "$RUNNER_TEMP/qt-duty.sqlite" report
