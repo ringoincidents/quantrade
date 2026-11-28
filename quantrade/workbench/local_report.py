@@ -108,26 +108,31 @@ def validated_quotes(doc):
             pass
     return result
 
-STORE_VERSION = 3
+STORE_VERSION = 4
 
 def check_store_version(con, *, initialize=False):
     version = con.execute("PRAGMA user_version").fetchone()[0]
     tables = {r[0] for r in con.execute("SELECT name FROM sqlite_master WHERE type='table'")}
     required = {"inputs", "runs", "rejected_runs"}
     if version == STORE_VERSION:
-        require(required | {"exports"} <= tables, "STORE_SCHEMA_INVALID")
+        require(required | {"exports", "local_approval_events"} <= tables, "STORE_SCHEMA_INVALID")
         return
-    if version == 2 and initialize:
-        require(required <= tables and "exports" not in tables, "STORE_SCHEMA_INVALID")
+    if version == 3 and initialize:
+        require(required | {"exports"} <= tables and "local_approval_events" not in tables, "STORE_SCHEMA_INVALID")
+    elif version == 2 and initialize:
+        require(required <= tables and not ({"exports","local_approval_events"} & tables), "STORE_SCHEMA_INVALID")
     elif version == 0 and initialize and not tables:
         con.execute("CREATE TABLE inputs (kind TEXT, identity TEXT, hash TEXT, body TEXT, PRIMARY KEY(kind,identity))")
         con.execute("CREATE TABLE runs (id TEXT PRIMARY KEY, input TEXT, report TEXT, started TEXT, finished TEXT)")
         con.execute("CREATE TABLE rejected_runs (id INTEGER PRIMARY KEY, run_id TEXT, input TEXT, reason TEXT, recorded_at TEXT)")
     else:
         raise ValueError("LEGACY_STORE_QUARANTINED")
-    con.execute("CREATE TABLE exports (run_id TEXT PRIMARY KEY, state TEXT NOT NULL CHECK(state IN ('PENDING','PUBLISHED')), manifest TEXT, updated TEXT NOT NULL)")
-    con.execute("INSERT INTO exports SELECT id,'PENDING',NULL,? FROM runs", (utcnow(),))
-    con.execute("PRAGMA user_version=3")
+    if version != 3:
+        con.execute("CREATE TABLE exports (run_id TEXT PRIMARY KEY, state TEXT NOT NULL CHECK(state IN ('PENDING','PUBLISHED')), manifest TEXT, updated TEXT NOT NULL)")
+        con.execute("INSERT INTO exports SELECT id,'PENDING',NULL,? FROM runs", (utcnow(),))
+    # Do not backfill old approval declarations as authenticated evidence.
+    con.execute("CREATE TABLE local_approval_events (ref TEXT PRIMARY KEY, body TEXT NOT NULL, target TEXT NOT NULL, recorded_at TEXT NOT NULL, local_uid TEXT)")
+    con.execute("PRAGMA user_version=4")
 
 def evaluate(doc, *, manual_confirmed=False):
     require(isinstance(doc,dict), "INVALID_DOCUMENT")
@@ -247,6 +252,64 @@ def private_dir(path):
         require(p.stat().st_mode & 0o077 == 0, "STORE_NOT_PRIVATE")
     return p
 
+def record_local_approval(directory, target, operator):
+    """Persist a local declaration. This is not remote authentication."""
+    ref = text(target["approval_ref"])
+    require(operator != "SYNTHETIC", "INVALID_APPROVAL_OPERATOR")
+    operator = text(operator)
+    require(target["state"] == "APPROVED", "INVALID_APPROVAL")
+    m = market(target["instrument"])
+    require(target["currency"] == MARKETS[m][1] and target["price_basis"] == BASIS, "INVALID_TARGET")
+    require(decimal(target["value"]) > 0 and 0 <= decimal(target["margin"]) < 1, "INVALID_TARGET_VALUE")
+    text(target["version"]); text(target["evidence"])
+    effective = instant(target["approved_at"])
+    expiry = instant(target["expires_at"])
+    require(effective < expiry, "INVALID_TARGET_INTERVAL")
+    invalidated = target.get("invalidated_at")
+    require(invalidated is None, "INVALID_APPROVAL")
+    approval = dict(ref=ref,target_hash=digest(target),operator=operator,approved_at=target["approved_at"])
+    p = private_dir(directory)
+    db = p/"runs.sqlite3"
+    require(not db.is_symlink(), "UNSAFE_STORE")
+    if db.exists() and os.name == "posix":
+        require(db.stat().st_mode & 0o077 == 0, "STORE_NOT_PRIVATE")
+    fd = os.open(db, os.O_CREAT | os.O_RDWR, 0o600)
+    os.close(fd)
+    with sqlite3.connect(db) as con:
+        con.execute("BEGIN IMMEDIATE")
+        check_store_version(con, initialize=True)
+        recorded = utcnow()
+        require(effective <= instant(recorded) < expiry, "INVALID_APPROVAL_INTERVAL")
+        old = con.execute("SELECT body,target FROM local_approval_events WHERE ref=?", (ref,)).fetchone()
+        require(old is None or old == (canonical(approval),canonical(target)), "LOCAL_APPROVAL_CONFLICT")
+        con.execute("INSERT OR IGNORE INTO local_approval_events VALUES (?,?,?,?,?)",
+                    (ref,canonical(approval),canonical(target),recorded,
+                     str(os.getuid()) if hasattr(os,"getuid") else None))
+    return approval
+
+def approval_context(con, doc, report):
+    """Evidence only: effective time vs locally observed recording time."""
+    for row in report["rows"]:
+        if doc["mode"] != "MANUAL":
+            row["approval_evidence"] = {"qualification":"SYNTHETIC_ONLY"}
+            continue
+        evidence = {"qualification":"LOCAL_RECORD_NOT_FOUND","recorded_at":None,
+                    "effective_at":None,"authenticated":False}
+        t = next((x for x in doc["targets"] if digest(x)==row.get("target_ref")),None)
+        if t is not None:
+            evidence["effective_at"] = t.get("approved_at")
+            a = [x for x in doc["approvals"] if x.get("ref")==t.get("approval_ref")]
+            rec = con.execute("SELECT body,target,recorded_at FROM local_approval_events WHERE ref=?",(t.get("approval_ref"),)).fetchone()
+            if rec is not None:
+                if len(a)!=1 or rec[0]!=canonical(a[0]) or rec[1]!=canonical(t):
+                    evidence["qualification"]="LOCAL_RECORD_MISMATCH"
+                else:
+                    evidence["recorded_at"]=rec[2]
+                    evidence["qualification"]=("LOCAL_RECORD_AFTER_AS_OF" if instant(rec[2])>instant(doc["as_of"])
+                                               else "LOCAL_DECLARATION_RECORDED_UNAUTHENTICATED")
+        row["approval_evidence"]=evidence
+    return report
+
 def save_run(directory, doc, report, started):
     p = private_dir(directory)
     db = p/"runs.sqlite3"
@@ -347,7 +410,7 @@ def persist_validated(con, doc, report, started):
             require(old is None or old[0] == digest(q), "IMMUTABLE_INPUT_CONFLICT")
         # Freeze historical context before inserting any quotes from this run.
         if con.execute("SELECT 1 FROM runs WHERE id=?", (report["run_id"],)).fetchone() is None:
-            report = attach_historical_quotes(con, doc, json.loads(canonical(report)))
+            report = approval_context(con, doc, attach_historical_quotes(con, doc, json.loads(canonical(report))))
         # Store distinct versions, reject attempts to mutate a previously recorded input.
         for kind, records, keys in (("target",doc["targets"],("instrument","version")),
                                     ("quote",selected,("instrument","session_date","revision")),
@@ -452,6 +515,9 @@ def render(report):
         history_html = ""
         if historical:
             history_html = "<br>이전 검증 입력 (참고 전용·시장 검증 아님): "+e(historical["price"])+" "+e(historical["currency"])+" · "+e(historical["session_date"])+" · "+e(historical["source"])+" · 경과 "+e(historical["age_seconds"])+"초"
+        approval = r.get("approval_evidence", {})
+        if report["mode"] == "MANUAL" and approval:
+            history_html += "<br>승인 선언: "+e(approval.get("qualification"))+" · 효력 시각 "+e(approval.get("effective_at"))+" · 로컬 기록 "+e(approval.get("recorded_at"))+" (인증 아님)"
         out.append('<tr class="details"><td colspan="5"><details><summary>근거 · '+e(r["session_date"])+'</summary><p>사유: '+e(r["reason"])+'<br>출처: '+e(r["source"])+'<br>평가 버전: '+e(r["target_version"])+'<br>유효기간: '+e(r["expires_at"])+history_html+'</p></details></td></tr>')
     mode = "합성 데이터" if report["mode"]=="SYNTHETIC" else "수동 입력 · 최신 세션 미검증 · 신호 차단"
     health = "일부 보류" if report["data_health"]=="INCOMPLETE" else "입력 검사 완료"
@@ -492,7 +558,7 @@ def main(argv=None):
             require(t["state"]=="APPROVED" and instant(t["approved_at"]) <= datetime.now(timezone.utc),"INVALID_APPROVAL")
             ref = text(t["approval_ref"])
             require(not any(a.get("ref")==ref for a in doc["approvals"]),"APPROVAL_ALREADY_EXISTS")
-            doc["approvals"].append(dict(ref=ref,target_hash=digest(t),operator=text(args.operator),approved_at=t["approved_at"]))
+            doc["approvals"].append(record_local_approval(directory,t,args.operator))
             name = "approved-"+digest(doc)+".json"
             atomic_write(directory/name,json.dumps(doc,ensure_ascii=False,indent=2))
             print(directory/name)

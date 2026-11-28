@@ -23,6 +23,8 @@ def request_json(url, header, key):
     try:
         req = Request(url, headers={header: key, "Accept": "application/json"})
         with build_opener(NoRedirect()).open(req, timeout=15) as res:
+            if res.status != 200:
+                return "HTTP_"+str(res.status), None
             raw = res.read(8_000_001)
             if len(raw)>8_000_000:
                 return "RESPONSE_TOO_LARGE", None

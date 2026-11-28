@@ -7,7 +7,7 @@ from unittest.mock import patch
 from pathlib import Path
 
 from quantrade.workbench.local_report import (
-    demo, digest, evaluate, main, render, save_run, utcnow, publish_run,
+    demo, digest, evaluate, main, render, save_run, utcnow, publish_run, record_local_approval,
 )
 
 class LocalReportTests(unittest.TestCase):
@@ -254,10 +254,11 @@ class LocalReportTests(unittest.TestCase):
             with sqlite3.connect(Path(tmp)/"runs.sqlite3") as con:
                 original=con.execute("SELECT report FROM runs WHERE id=?",(rid,)).fetchone()[0]
                 con.execute("DROP TABLE exports")
+                con.execute("DROP TABLE local_approval_events")
                 con.execute("PRAGMA user_version=2")
             self.assertTrue(publish_run(tmp,rid).exists())
             with sqlite3.connect(Path(tmp)/"runs.sqlite3") as con:
-                self.assertEqual(con.execute("PRAGMA user_version").fetchone()[0],3)
+                self.assertEqual(con.execute("PRAGMA user_version").fetchone()[0],4)
                 self.assertEqual(con.execute("SELECT report FROM runs WHERE id=?",(rid,)).fetchone()[0],original)
 
     def test_historical_price_never_used_for_decision(self):
@@ -279,6 +280,52 @@ class LocalReportTests(unittest.TestCase):
             self.assertGreater(row["last_validated_quote"]["age_seconds"],86400)
             self.assertIn("참고 전용",path.read_text())
             self.assertEqual(publish_run(tmp,rid),path)
+
+    def manual_fixture(self):
+        d=json.loads(json.dumps(demo()).replace("2026-11-","2024-11-").replace("2026-12-","2024-12-"))
+        d["mode"]="MANUAL"
+        d["approvals"]=[]
+        for q in d["quotes"]:
+            q["source"]="MANUAL_FIXTURE"
+        return d
+
+    def test_local_approval_not_backdated_or_authenticated(self):
+        d=self.manual_fixture(); t=d["targets"][0]
+        with tempfile.TemporaryDirectory() as tmp:
+            from quantrade.workbench import local_report as lr
+            with patch.object(lr,"utcnow",return_value="2024-11-29T00:00:00+00:00"):
+                approval=record_local_approval(tmp,t,"declared-operator")
+                self.assertEqual(record_local_approval(tmp,t,"declared-operator"),approval)
+                with self.assertRaisesRegex(ValueError,"LOCAL_APPROVAL_CONFLICT"):
+                    record_local_approval(tmp,t,"different")
+            d["approvals"].append(approval)
+            report=evaluate(d,manual_confirmed=True);rid=report["run_id"]
+            save_run(tmp,d,report,utcnow())
+            path=publish_run(tmp,rid)
+            row=next(r for r in json.loads((path.parent/"report.json").read_text())["rows"] if r["instrument"]==t["instrument"])
+            self.assertEqual(row["status"],"BLOCKED")
+            self.assertEqual(row["approval_evidence"]["qualification"],"LOCAL_RECORD_AFTER_AS_OF")
+            self.assertFalse(row["approval_evidence"]["authenticated"])
+            self.assertNotEqual(row["approval_evidence"]["recorded_at"],row["approval_evidence"]["effective_at"])
+            d["as_of"]="2024-11-30T08:00:00+09:00"
+            report=evaluate(d,manual_confirmed=True)
+            save_run(tmp,d,report,utcnow())
+            path=publish_run(tmp,report["run_id"])
+            row=next(r for r in json.loads((path.parent/"report.json").read_text())["rows"] if r["instrument"]==t["instrument"])
+            self.assertEqual(row["status"],"BLOCKED")
+            self.assertEqual(row["approval_evidence"]["qualification"],"LOCAL_DECLARATION_RECORDED_UNAUTHENTICATED")
+
+    def test_imported_approval_is_not_local_record(self):
+        d=self.manual_fixture();t=d["targets"][0]
+        d["approvals"].append(dict(ref=t["approval_ref"],target_hash=digest(t),operator="claimed",approved_at=t["approved_at"]))
+        with tempfile.TemporaryDirectory() as tmp:
+            report=evaluate(d,manual_confirmed=True)
+            save_run(tmp,d,report,utcnow())
+            path=publish_run(tmp,report["run_id"])
+            row=next(r for r in json.loads((path.parent/"report.json").read_text())["rows"] if r["instrument"]==t["instrument"])
+            self.assertEqual(row["approval_evidence"]["qualification"],"LOCAL_RECORD_NOT_FOUND")
+            self.assertFalse(row["approval_evidence"]["authenticated"])
+            self.assertEqual(row["status"],"BLOCKED")
 
     def test_html_escape_and_cli(self):
         self.d["quotes"][0]["source"]="<script>alert(1)</script>"
