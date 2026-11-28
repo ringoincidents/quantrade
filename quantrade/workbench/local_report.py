@@ -71,6 +71,7 @@ def evaluate(doc, *, manual_confirmed=False):
             "INVALID_ENABLED_LIST")
     for i in enabled:
         market(i)
+    require(isinstance(doc["expected_sessions"],dict),"INVALID_SESSION_MAP")
     require(all(isinstance(doc[k], list) and all(isinstance(v, dict) for v in doc[k])
                 for k in ("targets", "quotes", "approvals")), "INVALID_COLLECTION")
     rows = []
@@ -125,6 +126,7 @@ def evaluate(doc, *, manual_confirmed=False):
             q = qs[0]
             row.update(quote_ref=digest(q), source=text(q["source"]))
             text(q["source_ref"])
+            require(mode != "MANUAL" or q["source"] != "SYNTHETIC", "SYNTHETIC_QUOTE_IN_MANUAL_RUN")
             require(q["currency"] == currency, "CURRENCY_MISMATCH")
             require(q["price_basis"] == BASIS, "PRICE_BASIS_MISMATCH")
             require(q["finality"] == "FINAL", "QUOTE_NOT_FINAL")
@@ -188,8 +190,9 @@ def private_dir(path):
 def save_run(directory, doc, report, started):
     p = private_dir(directory)
     db = p/"runs.sqlite3"
-    if db.exists():
-        require(not db.is_symlink(), "UNSAFE_STORE")
+    require(not db.is_symlink(), "UNSAFE_STORE")
+    if db.exists() and os.name == "posix":
+        require(db.stat().st_mode & 0o077 == 0, "STORE_NOT_PRIVATE")
     fd = os.open(db, os.O_CREAT | os.O_RDWR, 0o600)
     os.close(fd)
     with sqlite3.connect(db) as con:
@@ -246,6 +249,12 @@ def main(argv=None):
     run = sub.add_parser("run")
     run.add_argument("input")
     run.add_argument("--confirm-manual",action="store_true")
+    approve = sub.add_parser("approve")
+    approve.add_argument("input")
+    approve.add_argument("instrument")
+    approve.add_argument("version")
+    approve.add_argument("--operator",required=True)
+    approve.add_argument("--confirm-manual",action="store_true")
     view = sub.add_parser("show")
     view.add_argument("run_id")
     args = p.parse_args(argv)
@@ -254,6 +263,21 @@ def main(argv=None):
         if args.command == "template":
             atomic_write(directory/"template.json",json.dumps(demo(),ensure_ascii=False,indent=2))
             print(directory/"template.json")
+            return 0
+        if args.command == "approve":
+            require(args.confirm_manual,"MANUAL_CONFIRMATION_REQUIRED")
+            doc = json.loads(Path(args.input).read_text(encoding="utf-8"))
+            require(doc["schema"] == SCHEMA and doc["mode"] == "MANUAL","MANUAL_INPUT_REQUIRED")
+            targets = [t for t in doc["targets"] if t["instrument"]==args.instrument and t["version"]==args.version]
+            require(len(targets)==1,"AMBIGUOUS_TARGET")
+            t = targets[0]
+            require(t["state"]=="APPROVED" and instant(t["approved_at"]) <= datetime.now(timezone.utc),"INVALID_APPROVAL")
+            ref = text(t["approval_ref"])
+            require(not any(a.get("ref")==ref for a in doc["approvals"]),"APPROVAL_ALREADY_EXISTS")
+            doc["approvals"].append(dict(ref=ref,target_hash=digest(t),operator=text(args.operator),approved_at=t["approved_at"]))
+            name = "approved-"+digest(doc)+".json"
+            atomic_write(directory/name,json.dumps(doc,ensure_ascii=False,indent=2))
+            print(directory/name)
             return 0
         if args.command == "show":
             require(re.fullmatch(r"[0-9a-f]{64}",args.run_id) is not None,"INVALID_RUN_ID")
