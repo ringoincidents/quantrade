@@ -57,7 +57,7 @@ def plan_due(db, now):
         row=db.execute("SELECT v FROM metadata WHERE k='last_slot'").fetchone()
         if row and slot<int(row[0]):
             event(db,now,slot,None,"CLOCK_REGRESSION","No new scheduled work")
-            return
+            return False
         start=int(row[0])+PERIOD if row else slot
         earliest=slot-(MAX_CATCHUP-1)*PERIOD
         if start<earliest:
@@ -67,6 +67,7 @@ def plan_due(db, now):
             for sop in PLAN:
                 db.execute("INSERT OR IGNORE INTO jobs VALUES(?,?,'PLANNED',NULL,NULL,?)",(at,sop,now))
         db.execute("INSERT OR REPLACE INTO metadata VALUES('last_slot',?)",(str(slot),))
+    return True
 def recover(db, now):
     with db:
         rows=db.execute("SELECT slot,sop FROM jobs WHERE state='RUNNING'").fetchall()
@@ -146,14 +147,15 @@ def report(db, now):
         except Exception: bad.append([row["slot"],row["sop"]])
     body={"mode":"SYNTHETIC_PILOT","window_start":start,"window_end":slot,"created_at":now,
           "expected_jobs":36,"states":states,"coverage_complete":sum(states.values())==36,
+          "all_completed":states.get("COMPLETED",0)==36,
           "blocked_sample":issues,"anomalies":anomalies,"digest_failures":bad,
           "llm_calls":0,"llm_enabled":False,"trade_authority":False,
-          "decision_requested":bool(issues or anomalies or bad or sum(states.values())!=36)}
+          "decision_requested":bool(issues or anomalies or bad or states.get("COMPLETED",0)!=36)}
     with db:
         db.execute("INSERT OR IGNORE INTO reports VALUES(?,?,?)",(slot,canonical(body),digest(body)))
     return body
 def tick(db, now):
-    plan_due(db,now)
+    if not plan_due(db,now): return latest_report(db)
     run_ready(db,now)
     return report(db,now)
 def latest_report(db):
