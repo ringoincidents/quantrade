@@ -138,6 +138,53 @@ class LocalReportTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError,"MISSING_PRIOR_REVOCATION"):
                 save_run(tmp,self.d,evaluate(self.d),utcnow())
 
+    def test_rejected_revision_can_be_corrected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            save_run(tmp,self.d,evaluate(self.d),utcnow())
+            q=copy.deepcopy(self.d["quotes"][0]);q.update(revision=2,price="-1")
+            self.d["quotes"].append(q)
+            blocked=evaluate(self.d)
+            self.assertEqual(self.row()["reason"],"INVALID_PRICE")
+            save_run(tmp,self.d,blocked,utcnow())
+            with sqlite3.connect(Path(tmp)/"runs.sqlite3") as con:
+                self.assertEqual(con.execute("SELECT count(*) FROM inputs WHERE kind='quote'").fetchone()[0],2)
+                self.assertEqual(con.execute("SELECT count(*) FROM runs").fetchone()[0],2)
+            q["price"]="79"
+            save_run(tmp,self.d,evaluate(self.d),utcnow())
+            self.assertEqual(self.row()["status"],"REVIEW")
+            with sqlite3.connect(Path(tmp)/"runs.sqlite3") as con:
+                self.assertEqual(con.execute("SELECT count(*) FROM inputs WHERE kind='quote'").fetchone()[0],3)
+            q["price"]="78"
+            with self.assertRaisesRegex(ValueError,"IMMUTABLE_INPUT_CONFLICT"):
+                save_run(tmp,self.d,evaluate(self.d),utcnow())
+            with sqlite3.connect(Path(tmp)/"runs.sqlite3") as con:
+                self.assertEqual(con.execute("SELECT count(*) FROM rejected_runs").fetchone()[0],1)
+                self.assertEqual(con.execute("SELECT count(*) FROM runs").fetchone()[0],3)
+
+    def test_invalid_revision_does_not_advance_history(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            q=copy.deepcopy(self.d["quotes"][0]);q.update(revision=9,finality="UNKNOWN")
+            self.d["quotes"].append(q)
+            save_run(tmp,self.d,evaluate(self.d),utcnow())
+            self.assertEqual(self.row()["reason"],"QUOTE_NOT_FINAL")
+            self.d["quotes"].pop()
+            save_run(tmp,self.d,evaluate(self.d),utcnow())
+            self.assertEqual(self.row()["status"],"REVIEW")
+
+    def test_legacy_store_not_silently_migrated_or_shown(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            db=Path(tmp)/"runs.sqlite3"
+            with sqlite3.connect(db) as con:
+                con.execute("CREATE TABLE inputs (kind TEXT, identity TEXT, hash TEXT, body TEXT)")
+                con.execute("CREATE TABLE runs (id TEXT PRIMARY KEY, report TEXT)")
+                con.execute("INSERT INTO runs VALUES (?,?)",(evaluate(self.d)["run_id"],json.dumps(evaluate(self.d))))
+            db.chmod(0o600)
+            before=db.read_bytes()
+            with self.assertRaisesRegex(ValueError,"LEGACY_STORE_QUARANTINED"):
+                save_run(tmp,self.d,evaluate(self.d),utcnow())
+            self.assertEqual(main(["--store",tmp,"show",evaluate(self.d)["run_id"]]),1)
+            self.assertEqual(db.read_bytes(),before)
+
     def test_prior_quote_revision_cannot_disappear(self):
         with tempfile.TemporaryDirectory() as tmp:
             q=copy.deepcopy(self.d["quotes"][0]);q.update(revision=2,price="81")

@@ -57,6 +57,71 @@ def require(condition, reason):
     if not condition:
         raise ValueError(reason)
 
+def select_quote(doc, instrument, now):
+    """Validate the selected revision independently of target eligibility.
+
+    A declared session is not a trusted calendar; this is input validation only.
+    Never fall back to a lower revision if the latest submitted revision is bad.
+    """
+    mode = doc["mode"]
+    zone, currency = MARKETS[market(instrument)]
+    session = doc["expected_sessions"][market(instrument)]
+    close = instant(session["close_at"])
+    session_date = date.fromisoformat(session["session_date"])
+    require(close.astimezone(ZoneInfo(zone)).date() == session_date and close <= now,
+            "INVALID_EXPECTED_SESSION")
+    allq = [q for q in doc["quotes"] if q.get("instrument") == instrument]
+    require(allq, "MISSING_QUOTE")
+    current = [q for q in allq if q.get("session_date") == session_date.isoformat()]
+    require(current, "SESSION_MISMATCH")
+    require(all(type(q.get("revision")) is int and q["revision"] >= 1 for q in current),
+            "INVALID_REVISION")
+    require(all(instant(q["retrieved_at"]) <= now for q in current), "FUTURE_QUOTE_REVISION")
+    latest = max(q["revision"] for q in current)
+    qs = [q for q in current if q["revision"] == latest]
+    require(len(qs) == 1, "AMBIGUOUS_QUOTE")
+    q = qs[0]
+    text(q["source"])
+    text(q["source_ref"])
+    require(mode != "MANUAL" or q["source"] != "SYNTHETIC", "SYNTHETIC_QUOTE_IN_MANUAL_RUN")
+    require(q["currency"] == currency, "CURRENCY_MISMATCH")
+    require(q["price_basis"] == BASIS, "PRICE_BASIS_MISMATCH")
+    require(q["finality"] == "FINAL", "QUOTE_NOT_FINAL")
+    require(q["corporate_action_status"] == "CLEAR", "CORPORATE_ACTION_UNVERIFIED")
+    require(instant(q["observed_at"]) == close, "CLOSE_TIME_MISMATCH")
+    require(close <= instant(q["available_at"]) <= instant(q["retrieved_at"]) <= now,
+            "INVALID_AVAILABILITY")
+    price = decimal(q["price"])
+    require(price > 0, "INVALID_PRICE")
+    return q, price
+
+def validated_quotes(doc):
+    """Only the selected, structurally valid input enters revision history."""
+    result = []
+    now = instant(doc["as_of"])
+    for instrument in doc["enabled"]:
+        try:
+            quote, _ = select_quote(doc, instrument, now)
+            result.append(quote)
+        except (KeyError, TypeError, ValueError, InvalidOperation, OverflowError):
+            pass
+    return result
+
+STORE_VERSION = 2
+
+def check_store_version(con, *, initialize=False):
+    version = con.execute("PRAGMA user_version").fetchone()[0]
+    tables = {r[0] for r in con.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+    if version == STORE_VERSION:
+        require({"inputs", "runs", "rejected_runs"} <= tables, "STORE_SCHEMA_INVALID")
+    elif initialize and version == 0 and not tables:
+        con.execute("CREATE TABLE inputs (kind TEXT, identity TEXT, hash TEXT, body TEXT, PRIMARY KEY(kind,identity))")
+        con.execute("CREATE TABLE runs (id TEXT PRIMARY KEY, input TEXT, report TEXT, started TEXT, finished TEXT)")
+        con.execute("CREATE TABLE rejected_runs (id INTEGER PRIMARY KEY, run_id TEXT, input TEXT, reason TEXT, recorded_at TEXT)")
+        con.execute("PRAGMA user_version=2")
+    else:
+        raise ValueError("LEGACY_STORE_QUARANTINED")
+
 def evaluate(doc, *, manual_confirmed=False):
     require(isinstance(doc,dict), "INVALID_DOCUMENT")
     require(doc["schema"] == SCHEMA, "UNKNOWN_SCHEMA")
@@ -121,30 +186,8 @@ def evaluate(doc, *, manual_confirmed=False):
             require(v > 0 and 0 <= margin < 1, "INVALID_TARGET_VALUE")
             text(t["evidence"])
             row["entry_price"] = str(entry_price(v, margin))
-            allq = [q for q in doc["quotes"] if q.get("instrument") == instrument]
-            require(allq, "MISSING_QUOTE")
-            current = [q for q in allq if q.get("session_date") == session_date.isoformat()]
-            require(current, "SESSION_MISMATCH")
-            require(all(type(q.get("revision")) is int and q["revision"] >= 1 for q in current),
-                    "INVALID_REVISION")
-            require(all(instant(q["retrieved_at"]) <= now for q in current), "FUTURE_QUOTE_REVISION")
-            latest = max(q["revision"] for q in current)
-            qs = [q for q in current if q["revision"] == latest]
-            require(len(qs) == 1, "AMBIGUOUS_QUOTE")
-            q = qs[0]
-            row.update(quote_ref=digest(q), source=text(q["source"]))
-            text(q["source_ref"])
-            require(mode != "MANUAL" or q["source"] != "SYNTHETIC", "SYNTHETIC_QUOTE_IN_MANUAL_RUN")
-            require(q["currency"] == currency, "CURRENCY_MISMATCH")
-            require(q["price_basis"] == BASIS, "PRICE_BASIS_MISMATCH")
-            require(q["finality"] == "FINAL", "QUOTE_NOT_FINAL")
-            require(q["corporate_action_status"] == "CLEAR", "CORPORATE_ACTION_UNVERIFIED")
-            require(instant(q["observed_at"]) == close, "CLOSE_TIME_MISMATCH")
-            require(close <= instant(q["available_at"]) <= instant(q["retrieved_at"]) <= now,
-                    "INVALID_AVAILABILITY")
-            price = decimal(q["price"])
-            require(price > 0, "INVALID_PRICE")
-            row["price"] = str(price)
+            q, price = select_quote(doc, instrument, now)
+            row.update(quote_ref=digest(q), source=q["source"], price=str(price))
             # A caller-declared session is not independent evidence of latest close.
             require(mode == "SYNTHETIC", "SESSION_FRESHNESS_UNVERIFIED")
             # Synthetic-only comparison against the declared fixture session.
@@ -206,9 +249,26 @@ def save_run(directory, doc, report, started):
     fd = os.open(db, os.O_CREAT | os.O_RDWR, 0o600)
     os.close(fd)
     with sqlite3.connect(db) as con:
-        con.execute("CREATE TABLE IF NOT EXISTS inputs (kind TEXT, identity TEXT, hash TEXT, body TEXT, PRIMARY KEY(kind,identity))")
-        con.execute("CREATE TABLE IF NOT EXISTS runs (id TEXT PRIMARY KEY, input TEXT, report TEXT, started TEXT, finished TEXT)")
         con.execute("BEGIN IMMEDIATE")
+        check_store_version(con, initialize=True)
+        con.commit()
+        con.execute("BEGIN IMMEDIATE")
+        try:
+            persist_validated(con, doc, report, started)
+        except ValueError as error:
+            con.rollback()
+            # Record rejected raw input separately; never promote its revisions.
+            reason = str(error)
+            require(re.fullmatch(r"[A-Z][A-Z_]+", reason) is not None, "INVALID_INPUT")
+            con.execute("INSERT INTO rejected_runs(run_id,input,reason,recorded_at) VALUES (?,?,?,?)",
+                        (digest(doc),canonical(doc),reason,utcnow()))
+            con.commit()
+            raise
+    return p
+
+def persist_validated(con, doc, report, started):
+        require(report["run_id"] == digest(doc), "REPORT_INPUT_MISMATCH")
+        selected = validated_quotes(doc)
         # A previously observed revocation must never be silently omitted.
         current_revocations = {digest(r) for r in doc.get("revocations", [])}
         target_hashes = {digest(t) for t in doc["targets"]}
@@ -235,27 +295,27 @@ def save_run(directory, doc, report, started):
             revoked = any(r["target_hash"] == digest(t) and instant(r["revoked_at"]) <= now for r in doc.get("revocations",[]))
             if active and not revoked:
                 require(digest(t) in target_hashes,"MISSING_PRIOR_ACTIVE_TARGET")
-        # A known correction cannot silently be rolled back in a later run.
-        now = instant(doc["as_of"])
-        for identity, body in con.execute("SELECT identity,body FROM inputs WHERE kind=?",("quote",)):
-            if json.loads(identity)[0] != doc["mode"]:
-                continue
-            q = json.loads(body)
-            if q.get("instrument") not in doc["enabled"]:
-                continue
-            expected = doc["expected_sessions"].get(market(q["instrument"]),{})
-            if q.get("session_date") != expected.get("session_date"):
-                continue
-            try:
-                if type(q.get("revision")) is not int or q["revision"] < 1 or instant(q["retrieved_at"]) > now:
+        # Never roll back an accepted selected revision. Rejected input does not
+        # participate in this index. Missing/invalid quotes remain blocked in runs.
+        for q in selected:
+            for identity, body in con.execute("SELECT identity,body FROM inputs WHERE kind='quote'"):
+                mode, instrument, session, revision = json.loads(identity)
+                if (mode, instrument, session) != (doc["mode"], q["instrument"], q["session_date"]):
                     continue
-            except (KeyError, ValueError, TypeError):
+                prior = json.loads(body)
+                if instant(prior["retrieved_at"]) <= now:
+                    require(q["revision"] >= revision, "MISSING_PRIOR_QUOTE_REVISION")
+        # An accepted revision is immutable even if a later run also supplies
+        # a higher revision. Check supplied versions, not merely the selected one.
+        for q in doc["quotes"]:
+            if not all(k in q for k in ("instrument","session_date","revision")):
                 continue
-            if any(x.get("instrument")==q["instrument"] and x.get("session_date")==q["session_date"] for x in doc["quotes"]):
-                require(any(x.get("instrument")==q["instrument"] and x.get("session_date")==q["session_date"] and type(x.get("revision")) is int and x["revision"]>=q["revision"] for x in doc["quotes"]),"MISSING_PRIOR_QUOTE_REVISION")
+            identity = canonical([doc["mode"],q["instrument"],q["session_date"],q["revision"]])
+            old = con.execute("SELECT hash FROM inputs WHERE kind='quote' AND identity=?", (identity,)).fetchone()
+            require(old is None or old[0] == digest(q), "IMMUTABLE_INPUT_CONFLICT")
         # Store distinct versions, reject attempts to mutate a previously recorded input.
         for kind, records, keys in (("target",doc["targets"],("instrument","version")),
-                                    ("quote",doc["quotes"],("instrument","session_date","revision")),
+                                    ("quote",selected,("instrument","session_date","revision")),
                                     ("approval",doc["approvals"],("ref",)),
                                     ("revocation",doc.get("revocations",[]),("ref",))):
             for item in records:
@@ -268,7 +328,6 @@ def save_run(directory, doc, report, started):
                 con.execute("INSERT OR IGNORE INTO inputs VALUES (?,?,?,?)",(kind,identity,h,canonical(item)))
         con.execute("INSERT OR IGNORE INTO runs VALUES (?,?,?,?,?)",
                     (report["run_id"],canonical(doc),canonical(report),started,utcnow()))
-    return p
 
 def atomic_write(path, contents):
     fd, name = tempfile.mkstemp(dir=path.parent, prefix=".tmp-")
@@ -337,7 +396,12 @@ def main(argv=None):
             return 0
         if args.command == "show":
             require(re.fullmatch(r"[0-9a-f]{64}",args.run_id) is not None,"INVALID_RUN_ID")
-            with sqlite3.connect(directory/"runs.sqlite3") as con:
+            db = directory/"runs.sqlite3"
+            require(db.is_file() and not db.is_symlink(), "UNKNOWN_RUN")
+            if os.name == "posix":
+                require(db.stat().st_mode & 0o077 == 0, "STORE_NOT_PRIVATE")
+            with sqlite3.connect(db) as con:
+                check_store_version(con)
                 row = con.execute("SELECT report FROM runs WHERE id=?",(args.run_id,)).fetchone()
             require(row is not None,"UNKNOWN_RUN")
             report = json.loads(row[0])
