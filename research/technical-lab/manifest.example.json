@@ -1,0 +1,49 @@
+{
+  "experimentId": "replace-with-unique-experiment-id",
+  "asset": "SPY",
+  "from": "2022-01-01",
+  "to": "2026-08-04",
+  "fee": 0.0025,
+  "prices": {
+    "path": "/local/data/SPY.csv",
+    "format": "plainbacktest",
+    "source": "https://github.com/Sixian-Li/plain-backtest",
+    "rights": "Source declares CC BY 4.0; verify chain before redistribution",
+    "basis": "Source-declared adjusted OHLC; audit pending",
+    "sha256": "REPLACE_WITH_SHA256_OF_EXACT_INPUT_BYTES"
+  },
+  "variants": [
+    {
+      "rule": "hold",
+      "mode": "now"
+    },
+    {
+      "rule": "70",
+      "mode": "now"
+    },
+    {
+      "rule": "70R",
+      "mode": "now"
+    },
+    {
+      "rule": "B",
+      "mode": "now"
+    },
+    {
+      "rule": "P",
+      "mode": "now"
+    },
+    {
+      "rule": "P",
+      "mode": "5"
+    },
+    {
+      "rule": "P",
+      "mode": "week"
+    },
+    {
+      "rule": "P",
+      "mode": "asym"
+    }
+  ]
+}
