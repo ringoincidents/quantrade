@@ -1,0 +1,21 @@
+[Unit]
+Description=QuanTrade read-only operations audit
+[Service]
+Type=oneshot
+User=qt-duty
+Group=qt-duty
+StateDirectory=qt-operations-audit
+StateDirectoryMode=0700
+WorkingDirectory=/opt/quantrade/verification/operations-duty
+ExecStart=/usr/bin/python3 -B /opt/quantrade/verification/operations-duty/operations_audit.py --source-db /var/lib/qt-public-duty/public.sqlite --audit-db /var/lib/qt-operations-audit/audit.sqlite
+UMask=0077
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadOnlyPaths=/var/lib/qt-public-duty
+PrivateTmp=true
+PrivateDevices=true
+RestrictAddressFamilies=AF_UNIX
+MemoryMax=128M
+CPUQuota=20%
+TimeoutStartSec=45
