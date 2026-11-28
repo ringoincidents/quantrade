@@ -52,7 +52,7 @@ def reserve(db,case,*,case_id,request_id,provider,model,prompt_sha,author_provid
     day=datetime.now(timezone.utc).date().isoformat()
     for x in (case_id,request_id,model,tariff_ref):token(x)
     sha(prompt_sha)
-    if provider not in PROVIDERS or author_provider not in PROVIDERS or provider==author_provider:
+    if provider not in PROVIDERS or author_provider not in (PROVIDERS | {"DETERMINISTIC"}) or provider==author_provider:
         raise ValueError("INDEPENDENCE_NOT_ESTABLISHED")
     for x in (max_input,max_output,input_micro_per_million,output_micro_per_million):natural(x)
     if min(max_input,max_output,input_micro_per_million,output_micro_per_million)==0:
