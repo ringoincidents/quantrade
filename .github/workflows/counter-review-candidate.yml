@@ -1,0 +1,21 @@
+name: Counter Research candidate verification
+on:
+  pull_request:
+    branches: [verification/counter-review-fact-split-20261128]
+permissions:
+  contents: read
+jobs:
+  synthetic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Offline tests only
+        run: |
+          export PYTHONPATH="$PWD"
+          python verification/counter-review/review_pilot.py --test
+          python verification/counter-review/fact_split_pilot.py --test
+          python verification/counter-review/test_evidence_review.py -v
