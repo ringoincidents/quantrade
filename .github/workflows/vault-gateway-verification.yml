@@ -1,0 +1,20 @@
+name: Vault and Gateway verification
+on:
+  pull_request:
+    branches: [research/market-data-vault-p0-20261123]
+    paths:
+      - 'research/decision_review/**'
+      - 'research/market_data_vault/**'
+      - '.github/workflows/vault-gateway-verification.yml'
+permissions:
+  contents: read
+jobs:
+  offline-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m unittest -v research.decision_review.test_vault_gateway
