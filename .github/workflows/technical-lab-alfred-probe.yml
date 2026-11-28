@@ -1,13 +1,13 @@
 name: Technical Lab ALFRED source feasibility
 on:
   pull_request:
-    paths:
-      - '.github/workflows/technical-lab-alfred-probe.yml'
+    types: [labeled]
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
   probe:
+    if: github.event_name == 'workflow_dispatch' || github.event.label.name == 'technical-lab-alfred-probe'
     runs-on: ubuntu-latest
     timeout-minutes: 4
     steps:
