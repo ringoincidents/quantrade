@@ -136,6 +136,36 @@ class HTTPTests(unittest.TestCase):
         self.assertEqual(self.request("GET","/assets/demo/unknown",headers=c)[0],404)
         self.assertEqual(self.request("POST","/api/demo/portfolio/initial",headers={**c,"Origin":ORIGIN})[0],405)
 
+    def test_market_room_dated_reference_and_auth(self):
+        self.assertEqual(self.request("GET","/market")[0],303)
+        self.assertEqual(self.request("GET","/api/market-room")[0],401)
+        status,h,_=self.login()
+        c={"Cookie":h["Set-Cookie"].split(";")[0]}
+        status,h,body=self.request("GET","/api/market-room",headers=c)
+        self.assertEqual(status,200)
+        self.assertEqual(h["Cache-Control"],"no-store, private")
+        v=json.loads(body)
+        self.assertEqual(v["mode"],"DATED_OFFICIAL_REFERENCE")
+        self.assertFalse(v["auto_refresh"])
+        self.assertFalse(v["live_market_feed"])
+        self.assertFalse(v["calendar"]["complete"])
+        self.assertFalse(v["decision_authorized"])
+        self.assertIsNone(v["market_regime"])
+        self.assertEqual(v["calendar"]["events"][0]["at_kst"],"2026-12-02T00:00:00+09:00")
+        self.assertEqual(v["calendar"]["events"][1]["at_kst"],"2026-12-04T22:30:00+09:00")
+        self.assertEqual(v["calendar"]["events"][2]["at_kst"],"2026-12-10T04:00:00+09:00")
+        sessions={x["date_et"]:x for x in v["exchange"]["sessions"]}
+        self.assertEqual(sessions["2026-11-26"]["state"],"CLOSED_SCHEDULED")
+        self.assertEqual(sessions["2026-11-27"]["close_kst"],"2026-11-28T03:00:00+09:00")
+        self.assertFalse(v["exchange"]["actual_close_verified"])
+        self.assertEqual(len(v["macro"]),5)
+        self.assertEqual(self.request("GET","/api/market",headers=c)[0],503)
+        status,h,body=self.request("GET","/market",headers=c)
+        self.assertEqual(status,200)
+        for text in ("시장 상황실","자동 갱신 미연결","12월 주요 경제 발표 한국시간","미연결","합성 사례"):
+            self.assertIn(text.encode(),body)
+        self.assertEqual(self.request("POST","/api/market-room",headers={**c,"Origin":ORIGIN})[0],405)
+
     def test_market_research_auth_and_point_in_time(self):
         self.assertEqual(self.request("GET","/api/market")[0],401)
         self.assertEqual(self.request("GET","/api/demo/market/baseline")[0],401)

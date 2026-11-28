@@ -12,6 +12,7 @@ from http.cookies import SimpleCookie
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlsplit
 from link_transport import check_link
+from market_room import snapshot as market_room_snapshot, render as market_room_render
 from market_demo import SCENARIOS as MARKET_SCENARIOS, render as market_render, scenario as market_scenario
 from risk_demo import SCENARIOS as RISK_SCENARIOS, render as risk_render, scenario as risk_scenario
 from case_demo import SCENARIOS as CASE_SCENARIOS, render as case_render, scenario as case_scenario
@@ -83,6 +84,7 @@ class Auth:
 
 STYLE = """<style>
 :root{color-scheme:light}*{box-sizing:border-box}body{margin:0;background:#929291;color:#111;font:14px/1.6 system-ui,sans-serif}.shell{display:flex;max-width:1100px;margin:20px auto;padding-right:18px;align-items:flex-start}.rail{width:48px;flex:none;padding-top:10px;position:sticky;top:10px}.rail a{display:block;text-align:center;color:#111;text-decoration:none;border-top:1px solid #555;padding:15px 2px;min-height:48px;font-size:12px}.rail a[aria-current=page]{background:#fff}.paper{flex:1;min-width:0;min-height:620px;padding:23px 26px 36px;background:#fff}.mast{display:flex;justify-content:space-between;font:10px monospace;color:#333;gap:8px}.title{font-size:30px;font-weight:400;letter-spacing:-1px;margin:28px 0 15px}.sub{font-size:12px;color:#555}.rule{border-top:1px solid #111;margin-top:24px}.row{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid #c9c9c9;padding:14px 0}.row strong{font-weight:400}.section{font:11px monospace;color:#555;margin-top:25px}input{font:inherit;padding:12px;border:1px solid #555;width:100%;max-width:420px;margin:10px 0;display:block}button{font:inherit;padding:10px 16px;border:1px solid #111;background:white;cursor:pointer;color:#111}a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #111;outline-offset:3px}.login{max-width:520px;margin:25px auto;padding:30px;background:white;min-height:440px}.notice{color:#555;font-size:12px;line-height:1.7}.foot{margin-top:32px;color:#666;font:10px monospace}@media(max-width:799px){.shell{margin:0;padding:0}.paper{min-height:100dvh;padding:19px 17px}.rail{width:44px}.login{margin:0;min-height:100dvh;padding:24px 20px}}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-top:1px solid #bbb;border-left:1px solid #bbb;margin-top:12px}.calhead,.calday{border-right:1px solid #bbb;border-bottom:1px solid #bbb;padding:4px;min-width:0}.calhead{text-align:center;font-size:10px;background:#f5f5f3}.calday{min-height:54px;font:11px monospace}.calday small{display:block;font:10px/1.35 system-ui,sans-serif;overflow-wrap:anywhere;margin-top:4px}.calday.empty{background:#f5f5f3}.row small{font-size:11px;color:#555}.row a{color:#333;font-size:11px}.row strong{text-align:right;flex-shrink:0}
 </style>"""
 
 def document(body):
@@ -102,7 +104,7 @@ PAGES = {"/":("01 / REGISTER","투자 업무 대장",[("인증 세션","활성")
          "/records":("04 / RECORDS","운영 기록",[("인증 범위","단일 소유자 검증"),("실제 주문","비활성"),("운영 승인","보류")])}
 PAGES["/cases"]=("05 / CASES","기업가치·운용 기준 원장",[("실제 종목","미연결"),("운용 기준","미승인")])
 PAGES["/risk"]=("06 / RISK","포트폴리오·리스크 원장",[("실제 포트폴리오","미연결"),("실제 위험 한도","미승인")])
-PAGES["/market"]=("07 / MARKET","시장 국면 연구 원장",[("실제 장세","판정 불가"),("예측 모델","미검증"),("데이터 준비","G0 차단")])
+PAGES["/market"]=("07 / MARKET","시장 상황실",[("실제 장세","판정 불가"),("예측 모델","미검증"),("데이터 준비","G0 차단")])
 TABS = {"/":"업무","/assets":"자산","/cases":"종목","/risk":"위험","/market":"시장","/reports":"보고","/records":"기록"}
 
 def page(path):
@@ -119,7 +121,7 @@ def page(path):
     elif market_demo:
         content=market_render(path.rsplit("/",1)[1])
     elif path=="/market":
-        content+='<p><a href="/market/demo/baseline">시장 국면 연구 / 합성 사례</a></p>'
+        content=market_room_render()
     elif risk_demo:
         content=risk_render(path.rsplit("/",1)[1])
     elif path=="/risk":
@@ -137,9 +139,9 @@ def page(path):
         content+='<p><a href="/assets/demo/initial">합성 원장 검증 화면 열기</a></p><p><a href="/api/link-check">내부 연결 검증 (상태)</a></p>'
     return document('<div class="shell"><nav class="rail" aria-label="책갈피">'+nav+'</nav><main class="paper">'
                     '<div class="mast"><span>QUANTRADE</span><span>'+number+'</span></div>'
-                    '<h1 class="title">'+title+'</h1><div class="sub">PRIVATE AUTH PILOT / 실제 데이터 미연결</div>'
+                    '<h1 class="title">'+title+'</h1><div class="sub">PRIVATE AUTH PILOT / 실계좌·실시간 데이터 미연결</div>'
                     '<div class="rule"></div>'+content+
-                    '<p class="notice">로그인 검증용 화면. 실제 잔고, 시세 및 매수 신호를 표시하지 않습니다.</p>'
+                    '<p class="notice">개인 인증 검증용 화면. 실제 잔고, 실시간 시세 및 매수 신호를 표시하지 않습니다.</p>'
                     '<form method="post" action="/logout"><button>잠금 / 로그아웃</button></form>'
                     '<div class="foot">SESSION / 30 MINUTES</div></main></div>')
 
@@ -253,6 +255,8 @@ class Handler(BaseHTTPRequestHandler):
             self.send(200,page(self.path))
         elif self.path.startswith("/api/demo/market/") and self.path.rsplit("/",1)[1] in MARKET_SCENARIOS and self.path.count("/")==4:
             self.send(200,json.dumps(market_scenario(self.path.rsplit("/",1)[1]),ensure_ascii=False,allow_nan=False).encode(),"application/json")
+        elif self.path=="/api/market-room":
+            self.send(200,json.dumps(market_room_snapshot(),ensure_ascii=False,allow_nan=False).encode(),"application/json")
         elif self.path=="/api/market":
             self.send(503,b'{"state":"RESEARCH_G0_BLOCKED","actual_data_connected":false}',"application/json")
         elif self.path=="/api/link-check":
