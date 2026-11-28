@@ -121,10 +121,11 @@ def evaluate(r,*,scope):
     with localcontext() as ctx:
         ctx.prec=60
         t=normalized(r.target,cutoff)
+        require(r.quote_ref in r.target.source_refs and r.share_basis_ref in r.target.source_refs,"TARGET_CONTEXT_REFS")
         target_metric=t["income"] if r.method=="PE" else t["ebitda"]
         require(target_metric>0,"TARGET_DENOMINATOR_NONPOSITIVE")
         require(r.method!="EV_EBITDA" or t["ev"]>0,"TARGET_EV_NONPOSITIVE")
-        excluded=[];included=[];multiples=[]
+        excluded=[];included=[];multiples=[];eligible_firms=[]
         for f in r.peers:
             reason=[]
             if f.asset_id==r.target.asset_id:reason.append("SELF")
@@ -142,7 +143,7 @@ def evaluate(r,*,scope):
             except ValueError as e:reason.append("INVALID_INPUT:"+str(e))
             if reason:
                 excluded.append({"asset_id":f.asset_id,"reasons":reason});continue
-            mult=numerator/denominator;multiples.append(mult)
+            mult=numerator/denominator;multiples.append(mult);eligible_firms.append(f)
             included.append({"asset_id":f.asset_id,"normalized_income":out(p["income"]),"normalized_ebitda":out(p["ebitda"]),"multiple":out(mult)})
         base={"schema":"qt_relative_valuation_research_v1","input_sha256":digest(asdict(r)),"case_id":r.case_id,"method":r.method,"included":included,"excluded":excluded,"universe_complete_verified":False,"source_verified":False,"adjustments_verified":False,"thresholds_adopted":False,"portfolio_authorized":False,"trade_authorized":False}
         if len(multiples)<r.min_peers:return dict(base,state="BLOCKED_INSUFFICIENT_PEERS"),None
@@ -163,7 +164,7 @@ def evaluate(r,*,scope):
             per=equity/t["shares"];weighted+=d(s.probability)*per
             rows.append({"id":s.id,"probability":s.probability,"multiple":out(q[s.peer_quantile_pct]),"fair_value_per_share":out(per)})
             snap.append(ValuationScenarioSnapshot(s.id,s.probability,float(per)))
-        ir=tuple(sorted({ref for f in (r.target,*r.peers) for ref in (*f.source_refs,*(a.source_ref for a in f.adjustments)) if isinstance(ref,str) and ref.startswith("synthetic:")}))
+        ir=tuple(sorted({ref for f in (r.target,*eligible_firms) for ref in (*f.source_refs,*(a.source_ref for a in f.adjustments)) if isinstance(ref,str) and ref.startswith("synthetic:")}))
         # Input references must be compact; refuse instead of truncating evidence.
         require(len(ir)<=64,"INPUT_REF_BOUND")
         ar=tuple(sorted({r.universe_ref,*[ref for s in r.scenarios for ref in s.assumption_refs]}))
