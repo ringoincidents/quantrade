@@ -19,3 +19,11 @@ def rates():
     result=parse(raw,year,now)
     return {"observation_date":result["observation_date"],"two_y":result["ust_par_2y_pct"],"ten_y":result["ust_par_10y_pct"],"spread_bp":result["spread_10y_2y_bp"]}
 check("BLS_ICS",bls);check("UST_PAR",rates)
+
+from macro_view import fetch as macro_fetch,parse as macro_parse
+from bls_monthly import fetch as monthly_fetch
+def macro(g):
+    rows=macro_parse(macro_fetch(g,now),g,now)
+    return {"series":[{"id":x["id"],"date":x["observation_date"],"available":x["value"] is not None} for x in rows]}
+check("BLS_MONTHLY",lambda:{"events":len(monthly_fetch(now)[0])})
+for g in ("D","M"):check("FRED_"+g,lambda:macro(g))

@@ -30,7 +30,7 @@ OBS=(
  ("CORE_PCE_YOY","근원 PCE 전년비","+3.3%","2026-10","2026-11-25",BEA),
  ("CORE_PCE_MOM","근원 PCE 전월비","+0.3%","2026-10","2026-11-25",BEA),
 )
-MISSING=("VIX","HY OAS","달러 인덱스","유가","KOSPI / KOSDAQ","S&P 500 / NASDAQ")
+MISSING=("VIX (자동 수집 권리 검토)","HY OAS (ICE 권리 검토)","DXY (광의 달러지수와 다름)","KOSPI / KOSDAQ","S&P 500 / NASDAQ")
 
 def snapshot():
     events=[]
@@ -51,7 +51,7 @@ def snapshot():
         "macro":[{"id":i,"label":label,"value":v,"period":p,"release_date":d,"source":u} for i,label,v,p,d,u in OBS],
         "unconnected_series":list(MISSING),"market_regime":None,"forecast":None,"decision_authorized":False,"order_authorized":False}
 
-def render(refresh=None,treasury_html=""):
+def render(refresh=None,treasury_html="",macro_html=""):
     v=snapshot()
     def e(x):return escape(str(x),quote=True)
     def row(k,x):return '<div class="row"><span>'+e(k)+'</span><strong>'+e(x)+'</strong></div>'
@@ -75,6 +75,7 @@ def render(refresh=None,treasury_html=""):
     for x in v["macro"]:
         out.append('<div class="row"><span>'+e(x["label"])+'<br><small>'+e(x["period"])+' 기준 · '+e(x["release_date"])+' 발표 · '+src(x["source"])+'</small></span><strong>'+e(x["value"])+'</strong></div>')
     if treasury_html:out.append(treasury_html)
+    if macro_html:out.append(macro_html)
     out.append('<div class="section">03 / NYSE · SCHEDULED SESSIONS (ET)</div>')
     for x in v["exchange"]["sessions"]:
         state={"REGULAR_SCHEDULED":"정규 일정","EARLY_CLOSE_SCHEDULED":"조기 폐장 일정","CLOSED_SCHEDULED":"휴장 일정"}[x["state"]]
@@ -90,7 +91,7 @@ def render(refresh=None,treasury_html=""):
         out.append('<div class="section">05 / BLS CALENDAR · ON ACCESS</div>')
         out.append(row("공식 BLS 피드",refresh.get("state","UNKNOWN")))
         out.append(row("최종 성공 확인",refresh.get("checked_at") or "없음"))
-        out.append('<p class="notice">화면 접속 시 최대 1시간 간격으로 공식 피드 갱신 시도. 실패 시 기존 일정은 참고용이며 자동 백그라운드 실행 아님. <a href="https://www.bls.gov/schedule/news_release/bls.ics">공식 구독 피드</a></p>')
+        out.append('<p class="notice">화면 접속 시 최대 1시간 간격으로 공식 피드 갱신 시도. 실패 시 기존 일정은 참고용이며 자동 백그라운드 실행 아님. <a href="https://www.bls.gov/schedule/news_release/bls.ics">공식 구독 피드</a> · 실패 시 공식 월별 목록을 시도합니다.</p>')
         for x in refresh.get("events",[]):
             out.append(row(x["at_kst"][:16].replace("T"," "),x["summary"]))
     return "".join(out)

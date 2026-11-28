@@ -13,6 +13,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlsplit
 from link_transport import check_link
 from calendar_refresh import CACHE as BLS_CACHE
+from macro_view import CACHE as MACRO_CACHE, render as macro_render
 from treasury_view import CACHE as TREASURY_CACHE, render as treasury_render
 from lab_view import FRAMES,lab as lab_snapshot,render_lab,compare as strategy_snapshot,render_compare
 from founder_inbox import snapshot as inbox_snapshot,render as inbox_render
@@ -109,6 +110,8 @@ PAGES = {"/":("01 / REGISTER","투자 업무 대장",[("인증 세션","활성")
 PAGES["/cases"]=("05 / CASES","기업가치·운용 기준 원장",[("실제 종목","미연결"),("운용 기준","미승인")])
 PAGES["/risk"]=("06 / RISK","포트폴리오·리스크 원장",[("실제 포트폴리오","미연결"),("실제 위험 한도","미승인")])
 PAGES["/market"]=("07 / MARKET","시장 상황실",[("실제 장세","판정 불가"),("예측 모델","미검증"),("데이터 준비","G0 차단")])
+PAGES["/market/macro/D"]=("07 / MACRO","거시경제 / 일별",[])
+PAGES["/market/macro/M"]=("07 / MACRO","거시경제 / 월별",[])
 PAGES["/market/rates"]=("07 / RATES","미 국채 금리",[])
 PAGES["/lab"]=("08 / LAB","기술적 분석 Lab",[])
 PAGES["/strategies"]=("09 / STRATEGIES","전략 비교",[])
@@ -123,14 +126,16 @@ def page(path):
     market_demo=path.startswith("/market/demo/")
     lab_demo=path.startswith("/lab/")
     number,title,rows=PAGES["/assets" if demo else "/reports" if report_demo else "/cases" if case_demo else "/risk" if risk_demo else "/market" if market_demo else "/lab" if lab_demo else path]
-    nav="".join('<a href="'+link+'"'+(' aria-current="page"' if (path==link or demo and link=="/assets" or report_demo and link=="/reports" or case_demo and link=="/cases" or risk_demo and link=="/risk" or (market_demo or path=="/market/rates") and link=="/market" or lab_demo and link=="/lab") else '')+'>'+name+'</a>' for link,name in TABS.items())
+    nav="".join('<a href="'+link+'"'+(' aria-current="page"' if (path==link or demo and link=="/assets" or report_demo and link=="/reports" or case_demo and link=="/cases" or risk_demo and link=="/risk" or (market_demo or path=="/market/rates" or path.startswith("/market/macro/")) and link=="/market" or lab_demo and link=="/lab") else '')+'>'+name+'</a>' for link,name in TABS.items())
     content="".join('<div class="row"><span>'+a+'</span><strong>'+b+'</strong></div>' for a,b in rows)
     if demo:
         content=demo_render(path.rsplit("/",1)[1])
     elif market_demo:
         content=market_render(path.rsplit("/",1)[1])
     elif path=="/market":
-        content=market_room_render(BLS_CACHE.get(),treasury_render(TREASURY_CACHE.get()))
+        content=market_room_render(BLS_CACHE.get(),treasury_render(TREASURY_CACHE.get()),"".join(macro_render(MACRO_CACHE.get(g)) for g in ("D","M")))
+    elif path in ("/market/macro/D","/market/macro/M"):
+        content=macro_render(MACRO_CACHE.get(path[-1],True),detail=True)
     elif path=="/market/rates":
         content=treasury_render(TREASURY_CACHE.get(True),detail=True)
     elif path=="/lab" or lab_demo:
@@ -282,6 +287,8 @@ class Handler(BaseHTTPRequestHandler):
             self.send(200,json.dumps(inbox_snapshot(),ensure_ascii=False).encode(),"application/json")
         elif self.path=="/api/calendar-refresh":
             self.send(200,json.dumps(BLS_CACHE.get(),ensure_ascii=False).encode(),"application/json")
+        elif self.path in ("/api/macro/D","/api/macro/M"):
+            self.send(200,json.dumps(MACRO_CACHE.get(self.path[-1],True),ensure_ascii=False,allow_nan=False).encode(),"application/json")
         elif self.path=="/api/treasury":
             self.send(200,json.dumps(TREASURY_CACHE.get(True),ensure_ascii=False,allow_nan=False).encode(),"application/json")
         elif self.path=="/api/market-room":

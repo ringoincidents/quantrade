@@ -5,6 +5,7 @@ from datetime import datetime,timezone,timedelta
 from zoneinfo import ZoneInfo
 from urllib.request import Request,build_opener,HTTPRedirectHandler
 import threading,time
+from bls_monthly import fetch as monthly_fetch
 URL="https://www.bls.gov/schedule/news_release/bls.ics"
 KST=ZoneInfo("Asia/Seoul")
 MAX=1_000_000
@@ -56,8 +57,8 @@ def parse(raw,now):
     if len(out)>500:raise ValueError("TOO_MANY_EVENTS")
     return sorted(out,key=lambda x:x["at_kst"])
 class Cache:
-    def __init__(self,loader=fetch,clock=time.monotonic,now=lambda:datetime.now(timezone.utc)):
-        self.loader=loader;self.clock=clock;self.now=now;self.lock=threading.Lock();self.last_attempt=None;self.events=[];self.checked=None;self.state="NOT_FETCHED"
+    def __init__(self,loader=fetch,clock=time.monotonic,now=lambda:datetime.now(timezone.utc),fallback=None):
+        self.fallback=fallback;self.source=URL;self.loader=loader;self.clock=clock;self.now=now;self.lock=threading.Lock();self.last_attempt=None;self.events=[];self.checked=None;self.state="NOT_FETCHED"
     def get(self):
         if not self.lock.acquire(False):return {"state":"REFRESH_IN_PROGRESS","events":[],"checked_at":None,"source":URL}
         try:
@@ -65,9 +66,13 @@ class Cache:
             if self.last_attempt is None or at-self.last_attempt>=3600:
                 self.last_attempt=at
                 try:
-                    now=self.now();self.events=parse(self.loader(),now);self.checked=now.isoformat();self.state="FETCHED"
+                    now=self.now();self.events=parse(self.loader(),now);self.checked=now.isoformat();self.state="FETCHED";self.source=URL
                 except Exception:
                     self.state="REFRESH_FAILED"
-            return {"state":self.state,"events":list(self.events),"checked_at":self.checked,"source":URL,"refresh_mode":"ON_ACCESS_MAX_ONCE_PER_HOUR","historical_only":self.state!="FETCHED"}
+                    if self.fallback is not None:
+                        try:
+                            self.events,self.source=self.fallback(self.now());self.checked=self.now().isoformat();self.state="FETCHED_MONTHLY_FALLBACK"
+                        except Exception:pass
+            return {"state":self.state,"events":list(self.events),"checked_at":self.checked,"source":self.source,"refresh_mode":"ON_ACCESS_MAX_ONCE_PER_HOUR","historical_only":self.state not in ("FETCHED","FETCHED_MONTHLY_FALLBACK")}
         finally:self.lock.release()
-CACHE=Cache()
+CACHE=Cache(fallback=monthly_fetch)
