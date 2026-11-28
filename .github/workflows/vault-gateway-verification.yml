@@ -1,0 +1,16 @@
+name: Vault and Gateway verification
+on:
+  push:
+    branches: [verification/vault-gateway-contract-20261128]
+permissions:
+  contents: read
+jobs:
+  offline-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m unittest -v research.decision_review.test_vault_gateway
