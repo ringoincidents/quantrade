@@ -61,6 +61,7 @@ def main():
     # Fixed public fixture, not a live quote or portfolio. Only status codes leave this process.
     kr=os.environ.get("KRX_API_KEY","")
     us=os.environ.get("MASSIVE_API_KEY","")
+    statuses = {}
     for label,fn in [
         ("KRX_KOSPI",lambda:krx("stk_bydd_trd",kr,"005930")),
         ("KRX_KOSDAQ",lambda:krx("ksq_bydd_trd",kr)),
@@ -71,7 +72,11 @@ def main():
             status=fn()
         except Exception:
             status="UNEXPECTED_ERROR"
+        statuses[label] = status
         print("F08_PROBE "+label+" "+status,flush=True)
+    passed = sum(s == "PASS_SCHEMA" for s in statuses.values())
+    print("F08_PROBE SUMMARY "+json.dumps({"passed":passed,"total":len(statuses),"statuses":statuses},sort_keys=True),flush=True)
     print("F08_PROBE FINISHED; no persisted prices, no orders",flush=True)
+    return 0 if passed == len(statuses) else 1
 if __name__=="__main__":
-    main()
+    raise SystemExit(main())

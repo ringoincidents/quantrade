@@ -1,7 +1,7 @@
 import unittest
 from dataclasses import replace
 from datetime import datetime, timedelta, timezone
-from decimal import Decimal as D
+from decimal import Decimal as D, localcontext
 from quantrade.workbench.entry_monitor import Quote, Target, check_entry
 
 class EntryMonitorTests(unittest.TestCase):
@@ -17,6 +17,16 @@ class EntryMonitorTests(unittest.TestCase):
         self.assertEqual(r["status"], "REVIEW")
         self.assertEqual(r["entry_price"], D("80"))
         self.assertEqual(r["safety_margin"], D(".20"))
+    def test_context_independent_boundary(self):
+        target = replace(self.t, value=D("999999999999999999999999.123456789012"), margin=D("0"))
+        quote = replace(self.q, price=D("999999999999999999999999.123456789013"))
+        for precision in (6, 28, 80):
+            with localcontext() as ctx:
+                ctx.prec = precision
+                self.assertEqual(self.check(quote, target)["status"], "WAIT")
+                self.assertEqual(self.check(quote, target)["entry_price"], target.value)
+    def test_overprecision_blocked(self):
+        self.assertEqual(self.check(replace(self.q, price=D("80.0000000000001")), self.t)["reason"], "INVALID_NUMBER")
     def test_above(self):
         self.assertEqual(self.check(replace(self.q, price=D("80.01")), self.t)["status"], "WAIT")
     def test_stale(self):

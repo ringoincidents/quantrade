@@ -102,7 +102,22 @@ class LocalReportTests(unittest.TestCase):
         for i,a in enumerate(self.d["approvals"]):
             a["operator"]="test-operator"
             self.reapprove(i)
-        self.assertEqual(self.row(manual_confirmed=True)["status"],"REVIEW")
+        self.assertEqual(self.row(manual_confirmed=True)["status"],"BLOCKED")
+        self.assertEqual(self.row(manual_confirmed=True)["reason"],"SESSION_FRESHNESS_UNVERIFIED")
+        self.d["as_of"]="2024-12-15T18:00:00+09:00"
+        self.assertEqual(self.row(manual_confirmed=True)["reason"],"SESSION_FRESHNESS_UNVERIFIED")
+
+    def test_malformed_session_existing_store(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            save_run(tmp,self.d,evaluate(self.d),utcnow())
+            self.d["expected_sessions"]["XNYS"]=[]
+            with self.assertRaisesRegex(ValueError,"INVALID_SESSION_MAP"):
+                evaluate(self.d)
+            path=Path(tmp)/"bad.json"
+            path.write_text(json.dumps(self.d))
+            self.assertEqual(main(["--store",tmp,"run",str(path)]),1)
+            with sqlite3.connect(Path(tmp)/"runs.sqlite3") as con:
+                self.assertEqual(con.execute("SELECT count(*) FROM runs").fetchone()[0],1)
 
     def test_persist_repeat_and_conflict(self):
         with tempfile.TemporaryDirectory() as tmp:

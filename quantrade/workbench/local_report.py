@@ -7,12 +7,12 @@ import re
 import sqlite3
 import tempfile
 from datetime import date, datetime, timedelta, timezone
-from decimal import Decimal, InvalidOperation, localcontext
+from decimal import Context, Decimal, InvalidOperation, localcontext
 from html import escape
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-from .entry_monitor import Quote, Target, check_entry
+from .entry_monitor import Quote, Target, check_entry, entry_price
 
 SCHEMA = "entry-monitor-v1"
 MARKETS = {"KRX": ("Asia/Seoul", "KRW"), "XNYS": ("America/New_York", "USD"),
@@ -73,6 +73,8 @@ def evaluate(doc, *, manual_confirmed=False):
     for i in enabled:
         market(i)
     require(isinstance(doc["expected_sessions"],dict),"INVALID_SESSION_MAP")
+    require(all(isinstance(doc["expected_sessions"].get(market(i)), dict) for i in enabled),
+            "INVALID_SESSION_MAP")
     require(all(isinstance(doc[k], list) and all(isinstance(v, dict) for v in doc[k])
                 for k in ("targets", "quotes", "approvals")), "INVALID_COLLECTION")
     revocations = doc.get("revocations", [])
@@ -118,9 +120,7 @@ def evaluate(doc, *, manual_confirmed=False):
             v, margin = decimal(t["value"]), decimal(t["margin"])
             require(v > 0 and 0 <= margin < 1, "INVALID_TARGET_VALUE")
             text(t["evidence"])
-            with localcontext() as ctx:
-                ctx.prec = 80
-                row["entry_price"] = str(v * (1-margin))
+            row["entry_price"] = str(entry_price(v, margin))
             allq = [q for q in doc["quotes"] if q.get("instrument") == instrument]
             require(allq, "MISSING_QUOTE")
             current = [q for q in allq if q.get("session_date") == session_date.isoformat()]
@@ -145,9 +145,10 @@ def evaluate(doc, *, manual_confirmed=False):
             price = decimal(q["price"])
             require(price > 0, "INVALID_PRICE")
             row["price"] = str(price)
-            # Session and finality are checked above; elapsed cutoff cannot reject a holiday/weekend.
-            with localcontext() as ctx:
-                ctx.prec = 80
+            # A caller-declared session is not independent evidence of latest close.
+            require(mode == "SYNTHETIC", "SESSION_FRESHNESS_UNVERIFIED")
+            # Synthetic-only comparison against the declared fixture session.
+            with localcontext(Context(prec=80)):
                 r = check_entry(Quote(instrument, price, currency, close, q["source"]),
                                 Target(instrument, v, margin, currency, t["version"],
                                        t["evidence"], instant(t["approved_at"]), instant(t["expires_at"])),
@@ -163,6 +164,7 @@ def evaluate(doc, *, manual_confirmed=False):
     rows.sort(key=lambda r: (rank[r["status"]], Decimal(r["gap"] or "0"), r["instrument"]))
     return dict(schema=SCHEMA, run_id=digest(doc), mode=mode, as_of=doc["as_of"],
                 expected_sessions=doc["expected_sessions"], rows=rows,
+                session_verification="SYNTHETIC_DECLARATION" if mode=="SYNTHETIC" else "UNVERIFIED_MANUAL",
                 data_health="INCOMPLETE" if any(r["status"]=="BLOCKED" for r in rows) else "DECLARED_COMPLETE",
                 job_state="OFFLINE_COMPLETE")
 
@@ -289,7 +291,7 @@ def render(report):
         status = r["status"]
         out.append('<tr><th scope="row">'+e(r["instrument"])+'</th><td>'+e(r["price"])+' '+e(r["currency"])+'</td><td>'+e(r["entry_price"])+'</td><td>'+pct(r["gap"])+'</td><td class="'+status+'">'+labels[status]+'</td></tr>')
         out.append('<tr class="details"><td colspan="5"><details><summary>근거 · '+e(r["session_date"])+'</summary><p>사유: '+e(r["reason"])+'<br>출처: '+e(r["source"])+'<br>평가 버전: '+e(r["target_version"])+'<br>유효기간: '+e(r["expires_at"])+'</p></details></td></tr>')
-    mode = "합성 데이터" if report["mode"]=="SYNTHETIC" else "수동 입력 · 검증되지 않은 시세"
+    mode = "합성 데이터" if report["mode"]=="SYNTHETIC" else "수동 입력 · 최신 세션 미검증 · 신호 차단"
     health = "일부 보류" if report["data_health"]=="INCOMPLETE" else "입력 검사 완료"
     return """<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'"><title>QuanTrade — Field</title><style>
 body{font:14px system-ui,sans-serif;background:#fafafa;color:#222;margin:0 auto;max-width:760px;padding:18px}header{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid #bbb;padding-bottom:12px}h1{font-size:20px;margin:0}h2{font-size:16px;margin:20px 0 8px}p,summary{font-size:12px;color:#555}table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}th,td{text-align:right;padding:9px 3px;border-bottom:1px solid #ddd}th:first-child,td:first-child{text-align:left}thead th{font-size:11px;color:#555}tbody th{font-size:12px;overflow-wrap:anywhere}.REVIEW{font-weight:700;color:#176748}.BLOCKED{color:#a05c00}.WAIT{color:#555}.details td{padding:3px 3px 9px;text-align:left}summary{cursor:pointer}.scroll{overflow-x:auto}@media(max-width:400px){body{padding:12px}th,td{font-size:11px}}</style><header><h1>QuanTrade / Field</h1><span>오프라인</span></header><h2>투자 기회 감시</h2><p>"""+e(mode)+" · "+e(health)+" · 스냅샷 "+e(report["as_of"])+"""</p><div class="scroll"><table><thead><tr><th>종목</th><th>종가</th><th>검토가</th><th>괴리율</th><th>상태</th></tr></thead><tbody>"""+''.join(out)+"""</tbody></table></div><p>괴리율 = (종가 − 검토가) / 검토가. 검토는 매수 권고가 아님.</p></html>"""

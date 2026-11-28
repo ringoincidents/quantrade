@@ -1,7 +1,7 @@
 """Provisional read-only entry monitor; no broker or AI calls."""
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from decimal import Decimal
+from decimal import Context, Decimal, localcontext
 
 @dataclass(frozen=True)
 class Quote:
@@ -25,6 +25,18 @@ class Target:
 def _aware(dt):
     return isinstance(dt, datetime) and dt.utcoffset() is not None
 
+def bounded_decimal(x):
+    """Match offline contract: at most 24 integer and 12 fractional digits."""
+    return (isinstance(x, Decimal) and x.is_finite()
+            and x.as_tuple().exponent >= -12 and x.adjusted() < 24)
+
+def entry_price(value, margin):
+    if not (bounded_decimal(value) and bounded_decimal(margin)
+            and value > 0 and Decimal(0) <= margin < Decimal(1)):
+        raise ValueError("INVALID_TARGET_VALUE")
+    with localcontext(Context(prec=80)):
+        return value * (Decimal(1) - margin)
+
 def check_entry(quote, target, *, as_of, max_age):
     """Compare a supplied quote with a human-approved target; not trade advice.
     An upstream approval adapter and trading-calendar freshness policy are required
@@ -42,7 +54,7 @@ def check_entry(quote, target, *, as_of, max_age):
         return result("BLOCKED", "MISSING_PROVENANCE")
     if quote.instrument != target.instrument or quote.currency != target.currency:
         return result("BLOCKED", "IDENTITY_OR_CURRENCY_MISMATCH")
-    if not all(isinstance(x, Decimal) and x.is_finite() for x in (quote.price, target.value, target.margin)):
+    if not all(bounded_decimal(x) for x in (quote.price, target.value, target.margin)):
         return result("BLOCKED", "INVALID_NUMBER")
     if quote.price <= 0 or target.value <= 0 or not Decimal(0) <= target.margin < Decimal(1):
         return result("BLOCKED", "INVALID_NUMBER")
@@ -50,8 +62,9 @@ def check_entry(quote, target, *, as_of, max_age):
         return result("BLOCKED", "TARGET_NOT_CURRENT")
     if quote.observed_at > as_of or as_of - quote.observed_at > max_age:
         return result("BLOCKED", "QUOTE_NOT_CURRENT")
-    entry = target.value * (Decimal(1) - target.margin)
-    margin = Decimal(1) - quote.price / target.value
+    entry = entry_price(target.value, target.margin)
+    with localcontext(Context(prec=80)):
+        margin = Decimal(1) - quote.price / target.value
     return result("REVIEW" if quote.price <= entry else "WAIT",
                   "ENTRY_CONDITION_MET" if quote.price <= entry else "ABOVE_ENTRY",
                   entry, margin)

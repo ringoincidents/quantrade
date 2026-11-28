@@ -16,6 +16,12 @@ class ProbeTests(unittest.TestCase):
         with patch.object(p,"request_json",return_value=("HTTP_403",None)):
             self.assertEqual(p.krx("stk_bydd_trd","fixture"),"HTTP_403")
             self.assertEqual(p.massive("AAPL","fixture"),"HTTP_403")
+    def test_aggregate_exit(self):
+        with patch.object(p,"krx",return_value="HTTP_401"), patch.object(p,"massive",return_value="PASS_SCHEMA"), patch("builtins.print") as out:
+            self.assertEqual(p.main(),1)
+            self.assertTrue(any('"passed": 2' in str(c) for c in out.call_args_list))
+        with patch.object(p,"krx",return_value="PASS_SCHEMA"), patch.object(p,"massive",return_value="PASS_SCHEMA"), patch("builtins.print"):
+            self.assertEqual(p.main(),0)
     def test_missing(self):
         self.assertEqual(p.request_json("https://example.invalid","AUTH_KEY",""),("KEY_MISSING",None))
     def test_invalid_prices(self):
