@@ -1,0 +1,167 @@
+{
+  "status": "EXPLORATORY_NOT_VALIDATED",
+  "syntheticAssertions": 15,
+  "regressions": [
+    {
+      "name": "SPY old",
+      "rule": "P",
+      "mode": "now",
+      "from": "2001-01-01",
+      "to": "2021-03-19",
+      "expected": 289.81,
+      "actual": 289.81,
+      "mdd": -44.11,
+      "orders": 143,
+      "sha": "fd424789a7547730397e755c417de34caf9cedac"
+    },
+    {
+      "name": "SPY old",
+      "rule": "P",
+      "mode": "5",
+      "from": "2001-01-01",
+      "to": "2021-03-19",
+      "expected": 376.26,
+      "actual": 376.26,
+      "mdd": -35.02,
+      "orders": 53,
+      "sha": "fd424789a7547730397e755c417de34caf9cedac"
+    },
+    {
+      "name": "SPY old",
+      "rule": "M",
+      "mode": "now",
+      "from": "2001-01-01",
+      "to": "2021-03-19",
+      "expected": 282.14,
+      "actual": 282.14,
+      "mdd": -40.82,
+      "orders": 126,
+      "sha": "fd424789a7547730397e755c417de34caf9cedac"
+    },
+    {
+      "name": "SPY old",
+      "rule": "M",
+      "mode": "5",
+      "from": "2001-01-01",
+      "to": "2021-03-19",
+      "expected": 325.46,
+      "actual": 325.46,
+      "mdd": -34.66,
+      "orders": 44,
+      "sha": "fd424789a7547730397e755c417de34caf9cedac"
+    },
+    {
+      "name": "SPY old",
+      "rule": "B",
+      "mode": "now",
+      "from": "2001-01-01",
+      "to": "2021-03-19",
+      "expected": 272.64,
+      "actual": 272.64,
+      "mdd": -36.57,
+      "orders": 17,
+      "sha": "fd424789a7547730397e755c417de34caf9cedac"
+    },
+    {
+      "name": "SPY old",
+      "rule": "H5",
+      "mode": "now",
+      "from": "2001-01-01",
+      "to": "2021-03-19",
+      "expected": 425.29,
+      "actual": 425.29,
+      "mdd": -49.2,
+      "orders": 33,
+      "sha": "fd424789a7547730397e755c417de34caf9cedac"
+    },
+    {
+      "name": "SPY old",
+      "rule": "GH5",
+      "mode": "now",
+      "from": "2001-01-01",
+      "to": "2021-03-19",
+      "expected": 455.89,
+      "actual": 455.89,
+      "mdd": -48.79,
+      "orders": 37,
+      "sha": "fd424789a7547730397e755c417de34caf9cedac"
+    },
+    {
+      "name": "QQQ common",
+      "rule": "P",
+      "mode": "now",
+      "from": "2001-01-01",
+      "to": "2021-03-19",
+      "expected": 616.04,
+      "actual": 616.04,
+      "mdd": -42.18,
+      "orders": 126,
+      "sha": "3c7f40995a6e2b7d6a2cdf5c84f38bd0deb4ed82"
+    },
+    {
+      "name": "QQQ common",
+      "rule": "P",
+      "mode": "5",
+      "from": "2001-01-01",
+      "to": "2021-03-19",
+      "expected": 612.29,
+      "actual": 612.29,
+      "mdd": -41.87,
+      "orders": 54,
+      "sha": "3c7f40995a6e2b7d6a2cdf5c84f38bd0deb4ed82"
+    },
+    {
+      "name": "QQQ common",
+      "rule": "M",
+      "mode": "5",
+      "from": "2001-01-01",
+      "to": "2021-03-19",
+      "expected": 461.04,
+      "actual": 461.04,
+      "mdd": -42.83,
+      "orders": 50,
+      "sha": "3c7f40995a6e2b7d6a2cdf5c84f38bd0deb4ed82"
+    },
+    {
+      "name": "SPY recent",
+      "rule": "P",
+      "mode": "5",
+      "from": "2022-01-01",
+      "to": "2026-08-04",
+      "expected": 50.02,
+      "actual": 50.02,
+      "mdd": -24.24,
+      "orders": 14,
+      "sha": "ed4e54af2c021b7c3923f9cdf877c52821b7b1aa"
+    },
+    {
+      "name": "SPY recent",
+      "rule": "70",
+      "mode": "now",
+      "from": "2022-01-01",
+      "to": "2026-08-04",
+      "expected": 50.21,
+      "actual": 50.21,
+      "mdd": -17.16,
+      "orders": 1,
+      "sha": "ed4e54af2c021b7c3923f9cdf877c52821b7b1aa"
+    },
+    {
+      "name": "QQQ recent",
+      "rule": "P",
+      "mode": "5",
+      "from": "2022-01-01",
+      "to": "2026-08-04",
+      "expected": 84.38,
+      "actual": 84.38,
+      "mdd": -26.63,
+      "orders": 19,
+      "sha": "3c7f40995a6e2b7d6a2cdf5c84f38bd0deb4ed82"
+    }
+  ],
+  "notes": [
+    "Executed exact core functions in JavaScript tool runtime; Node CLI not executed.",
+    "Regression checks reproduce prior results; not independent strategy validation.",
+    "No raw data copied."
+  ]
+}
