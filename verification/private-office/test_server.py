@@ -101,6 +101,21 @@ class HTTPTests(unittest.TestCase):
         self.assertEqual(self.request("POST","/logout",headers={"Cookie":c,"Origin":ORIGIN})[0],303)
         self.assertEqual(self.request("GET","/api/status",headers={"Cookie":c})[0],401)
 
+    def test_live_research_report_auth_and_failure(self):
+        from unittest.mock import patch
+        path="/reports/fundamental/live/005930"
+        api="/api/reports/fundamental/live/005930"
+        with patch("server.research_report",return_value={"state":"WORKER_UNAVAILABLE"}) as mocked:
+            self.assertEqual(self.request("GET",path)[0],303)
+            self.assertEqual(self.request("GET",api)[0],401)
+            mocked.assert_not_called()
+            status,h,_=self.login()
+            cookie={"Cookie":h["Set-Cookie"].split(";")[0]}
+            self.assertEqual(self.request("GET",api,headers=cookie)[0],503)
+            status,h,body=self.request("GET",path,headers=cookie)
+            self.assertEqual(status,200)
+            self.assertIn(b"WORKER_UNAVAILABLE",body)
+
     def test_actual_filing_report_auth_and_scope(self):
         path="/reports/fundamental/005930"
         api="/api/reports/fundamental/005930"
