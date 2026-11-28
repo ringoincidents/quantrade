@@ -9,7 +9,7 @@ function cutoff(vintage){if(!day(vintage))throw Error("invalid vintage date");re
 function urlFor(id,vintage){
  if(!IDS.includes(id)||!day(vintage)||vintage<FIRST[id])throw Error("unsupported vintage");
  const n=periodNumber(vintage.slice(0,7),"M"),u=new URL("https://alfred.stlouisfed.org/graph/alfredgraph.csv");
- for(const [k,v] of Object.entries({id,vintage_date:vintage,revision_date:vintage,cosd:periodLabel(n-24,"M")+"-01",coed:vintage.slice(0,7)+"-01"}))u.searchParams.set(k,v);
+ for(const [k,v] of Object.entries({id,vintage_date:vintage,revision_date:vintage,cosd:periodLabel(n-24,"M")+"-01",coed:periodLabel(n-1,"M")+"-01"}))u.searchParams.set(k,v);
  return u.toString();
 }
 function parseSnapshot(bytes,id,vintage){
