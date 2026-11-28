@@ -136,6 +136,34 @@ class HTTPTests(unittest.TestCase):
         self.assertEqual(self.request("GET","/assets/demo/unknown",headers=c)[0],404)
         self.assertEqual(self.request("POST","/api/demo/portfolio/initial",headers={**c,"Origin":ORIGIN})[0],405)
 
+    def test_f08_demo_auth_and_statuses(self):
+        for path in ("/api/report","/api/demo/report/baseline"):
+            self.assertEqual(self.request("GET",path)[0],401)
+        self.assertEqual(self.request("GET","/reports/demo/baseline")[0],303)
+        status,h,_=self.login()
+        c={"Cookie":h["Set-Cookie"].split(";")[0]}
+        status,h,body=self.request("GET","/api/report",headers=c)
+        self.assertEqual(status,503)
+        self.assertFalse(json.loads(body)["actual_data_connected"])
+        for scenario,expected in [("baseline",["REVIEW","BLOCKED","WAIT"]),
+                                  ("revised",["BLOCKED","WAIT","WAIT"]),
+                                  ("revoked",["BLOCKED","BLOCKED","WAIT"]),
+                                  ("expired",["BLOCKED","BLOCKED","BLOCKED"])]:
+            status,h,body=self.request("GET","/api/demo/report/"+scenario,headers=c)
+            self.assertEqual(status,200)
+            data=json.loads(body)
+            self.assertEqual(data["mode"],"SYNTHETIC_ONLY")
+            self.assertFalse(data["decision_authorized"])
+            self.assertFalse(data["order_authorized"])
+            self.assertEqual([x["status"] for x in data["report"]["rows"]],expected)
+            self.assertEqual(data["workbench_revision"],"f64b61c088a8e17cb04617f95d4f458671bea602")
+            status,h,body=self.request("GET","/reports/demo/"+scenario,headers=c)
+            self.assertEqual(status,200)
+            self.assertIn("합성 데이터 / 실제 매수 신호 아님".encode(),body)
+            self.assertEqual(h["Cache-Control"],"no-store, private")
+        self.assertEqual(self.request("GET","/reports/demo/unknown",headers=c)[0],404)
+        self.assertEqual(self.request("POST","/api/demo/report/baseline",headers={**c,"Origin":ORIGIN})[0],405)
+
     def test_link_check_requires_login(self):
         from unittest.mock import patch
         with patch("server.check_link",return_value={"state":"SYNTHETIC_LINK_VERIFIED","real_data":False}) as check:
