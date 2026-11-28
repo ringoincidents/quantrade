@@ -8,6 +8,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 import duty as core
+import handoff
 
 sys.path.insert(0,str(Path(__file__).resolve().parent/"pinned_sources"))
 import treasury_view as treasury
@@ -123,11 +124,16 @@ def report(db,now):
        "missed_last_24h":missed,"history_gap":bool(gap),"llm_calls":0,
        "decision_requested":bool(missed or gap or any(x["latest_state"]!="COLLECTED" for x in jobs)),
        "trade_authorized":False}
+    handoff.init(db)
+    p["handoff"]=handoff.summary(db)
+    p["decision_requested"]=p["decision_requested"] or p["handoff"]["pending_review_count"]>0
     with db:db.execute("INSERT INTO public_reports VALUES(?,?,?)",(hour,core.canonical(p),core.digest(p)))
     return p
 def tick(db,now,loader=collect,clock=None):
     plan(db,now);recover(db,now);run_ready(db,now,loader,clock)
-    return report(db,int(clock()) if clock else now)
+    finished=int(clock()) if clock else now
+    handoff.tick(db,finished)
+    return report(db,finished)
 def main():
     import time
     p=argparse.ArgumentParser();p.add_argument("--db",required=True)
@@ -144,11 +150,13 @@ def main():
                 with db:
                     for sop in PLAN:db.execute("INSERT INTO public_jobs(sop,due,state) VALUES(?,?,'READY')",(sop,now))
                 run_ready(db,now,clock=time.time)
-                result=report(db,int(time.time()))
+                finished=int(time.time())
+                handoff.tick(db,finished)
+                result=report(db,finished)
             else:result=tick(db,now,clock=time.time)
             # Public reference values only; no raw body, key, account or private state.
             print(core.canonical(result))
-            if a.action=="probe" and any(x["latest_state"]!="COLLECTED" for x in result["jobs"]):
+            if a.action=="probe" and (any(x["latest_state"]!="COLLECTED" for x in result["jobs"]) or result["handoff"]["stage_states"]!={"COMPLETED":6}):
                 return 2
         finally:db.close()
     return 0
