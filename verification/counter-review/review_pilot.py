@@ -3,7 +3,7 @@ import hashlib, json, os, sqlite3, sys, unittest
 from datetime import datetime, timezone
 from urllib.request import Request, build_opener, ProxyHandler, HTTPRedirectHandler
 from urllib.error import HTTPError
-from unittest.mock import Mock
+from unittest.mock import MagicMock as Mock
 from research.decision_review.budget_ledger import init,configure_day,reserve,settle
 from research.decision_review.decision_review import Case
 
