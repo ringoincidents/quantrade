@@ -1,0 +1,105 @@
+import http.client
+import threading
+import unittest
+from urllib.parse import urlencode
+from server import Auth,Server,TTL,MAX_ATTEMPTS
+
+ORIGIN="https://fixture.up.railway.app"
+HOST="fixture.up.railway.app"
+# Explicit synthetic credential, never used as deployed configuration.
+TOKEN="fixture_only_not_a_real_access_key_0000000000"
+
+class AuthTests(unittest.TestCase):
+    def test_locked_invalid_config(self):
+        for a in (Auth("",ORIGIN),Auth(TOKEN,"http://fixture.up.railway.app"),Auth("short",ORIGIN)):
+            self.assertFalse(a.ready)
+            self.assertEqual(a.login(TOKEN),(503,None))
+            self.assertFalse(a.active(TOKEN))
+
+    def test_expiry_logout_and_rate_limit(self):
+        now=[1]
+        a=Auth(TOKEN,ORIGIN,lambda:now[0])
+        status,session=a.login(TOKEN)
+        self.assertEqual(status,303)
+        self.assertTrue(a.active(session))
+        a.logout(session)
+        self.assertFalse(a.active(session))
+        _,session=a.login(TOKEN)
+        now[0]+=TTL
+        self.assertFalse(a.active(session))
+        for _ in range(MAX_ATTEMPTS):
+            self.assertEqual(a.login("wrong")[0],401)
+        self.assertEqual(a.login(TOKEN)[0],429)
+        now[0]+=61
+        self.assertEqual(a.login(TOKEN)[0],303)
+
+class HTTPTests(unittest.TestCase):
+    def setUp(self):
+        self.auth=Auth(TOKEN,ORIGIN)
+        self.server=Server(("127.0.0.1",0),self.auth)
+        self.thread=threading.Thread(target=self.server.serve_forever,daemon=True)
+        self.thread.start()
+    def tearDown(self):
+        self.server.shutdown()
+        self.server.server_close()
+        self.thread.join(2)
+    def request(self,method,path,body=None,headers=None):
+        c=http.client.HTTPConnection("127.0.0.1",self.server.server_port,timeout=3)
+        h={"Host":HOST}
+        h.update(headers or {})
+        try:
+            c.request(method,path,body=body,headers=h)
+            r=c.getresponse()
+            return r.status,dict(r.getheaders()),r.read()
+        finally:
+            c.close()
+    def login(self,token=TOKEN,origin=ORIGIN):
+        return self.request("POST","/login",urlencode({"token":token}),
+                            {"Origin":origin,"Content-Type":"application/x-www-form-urlencoded"})
+    def test_all_data_routes_require_auth(self):
+        for path in ("/","/assets","/reports","/records"):
+            status,h,_=self.request("GET",path)
+            self.assertEqual((status,h["Location"]),(303,"/login"))
+        self.assertEqual(self.request("GET","/api/status")[0],401)
+        status,h,body=self.request("GET","/login")
+        self.assertEqual(status,200)
+        self.assertNotIn(TOKEN.encode(),body)
+        self.assertEqual(h["Cache-Control"],"no-store, private")
+        self.assertEqual(self.request("GET","/",headers={"Host":"evil.example"})[0],403)
+
+    def test_login_session_logout_and_cookie_flags(self):
+        self.assertEqual(self.login("wrong")[0],401)
+        self.assertEqual(self.login(origin="https://evil.example")[0],403)
+        status,h,body=self.login()
+        self.assertEqual(status,303)
+        cookie=h["Set-Cookie"]
+        self.assertTrue(cookie.startswith("__Host-qt_session="))
+        for flag in ("Path=/","Secure","HttpOnly","SameSite=Strict","Max-Age=1800"):
+            self.assertIn(flag,cookie)
+        self.assertNotIn(TOKEN,cookie)
+        c=cookie.split(";")[0]
+        for path in ("/","/assets","/reports","/records","/api/status"):
+            status,h,body=self.request("GET",path,headers={"Cookie":c})
+            self.assertEqual(status,200)
+            self.assertNotIn(TOKEN.encode(),body)
+            self.assertEqual(h["Cache-Control"],"no-store, private")
+        self.assertEqual(self.request("GET","/api/status",headers={"Cookie":c+"; "+c})[0],401)
+        self.assertEqual(self.request("POST","/logout",headers={"Cookie":c,"Origin":"https://evil.example"})[0],403)
+        self.assertEqual(self.request("POST","/logout",headers={"Cookie":c,"Origin":ORIGIN})[0],303)
+        self.assertEqual(self.request("GET","/api/status",headers={"Cookie":c})[0],401)
+
+    def test_missing_configuration_is_fail_closed(self):
+        self.server.auth=Auth("",ORIGIN)
+        self.assertEqual(self.request("GET","/health")[0],200)
+        for path in ("/","/login","/assets","/api/status"):
+            self.assertEqual(self.request("GET",path)[0],503)
+        self.assertEqual(self.login()[0],503)
+
+    def test_no_mutations_or_oversized_login(self):
+        status,h,_=self.login()
+        c=h["Set-Cookie"].split(";")[0]
+        self.assertEqual(self.request("POST","/api/status",headers={"Cookie":c,"Origin":ORIGIN})[0],405)
+        self.assertEqual(self.request("POST","/login","x"*513,{"Origin":ORIGIN,"Content-Type":"application/x-www-form-urlencoded"})[0],400)
+
+if __name__=="__main__":
+    unittest.main()
