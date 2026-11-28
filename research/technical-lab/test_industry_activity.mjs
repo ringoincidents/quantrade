@@ -34,4 +34,23 @@ test("quarterly banking cross-year alignment and negative ROA accepted",()=>{let
 test("period round trip",()=>{for(const [p,f] of [["2026-Q1","Q"],["2026-01","M"],["2026-12","M"]])assert.equal(periodLabel(periodNumber(p,f),f),p);assert.throws(()=>periodNumber("2026-13","M"))});
 test("different source rejected",()=>{let s=series(industry,expansion);s[0].source="OTHER";assert.throws(()=>first(s))});
 test("invalid as-of timestamp rejected",()=>assert.throws(()=>run([],"2026-02-30T12:00:00Z")));
+
+import {mkdtempSync,writeFileSync,readFileSync,rmSync} from "node:fs";
+import {tmpdir} from "node:os";
+import {join} from "node:path";
+import {fileURLToPath} from "node:url";
+import {spawnSync} from "node:child_process";
+import {createHash} from "node:crypto";
+test("CLI hash, blocked missing industries and immutable output",()=>{
+ const d=mkdtempSync(join(tmpdir(),"qt-industry-"));
+ try{
+ const p=join(d,"input.json"),o=join(d,"output.json"),cli=fileURLToPath(new URL("./run_industry_activity.mjs",import.meta.url));
+ const bytes=JSON.stringify({contractVersion:CONTRACT.version,asOf,series:series(industry,expansion)}),sha=createHash("sha256").update(bytes).digest("hex");writeFileSync(p,bytes);
+ const call=h=>spawnSync(process.execPath,[cli,p,h,o],{encoding:"utf8"});
+ assert.notEqual(call("0".repeat(64)).status,0);
+ const good=call(sha);assert.equal(good.status,0,good.stderr);
+ const report=JSON.parse(readFileSync(o,"utf8"));assert.equal(report.inputSha256,sha);assert.equal(report.industries[0].phase,"EXPANSION_PROXY");assert.equal(report.industries.filter(x=>x.status==="BLOCKED").length,4);
+ assert.notEqual(call(sha).status,0);
+ }finally{rmSync(d,{recursive:true,force:true})}
+});
 console.log(JSON.stringify({assertions:count,status:"SYNTHETIC_ONLY"}));
