@@ -22,8 +22,7 @@ def connect(path):
 def append(db,kind,payload):
     raw=json.dumps(payload,sort_keys=True,separators=(",",":"),allow_nan=False)
     key=hashlib.sha256((kind+":"+raw).encode()).hexdigest()
-    with db:
-        db.execute("INSERT OR IGNORE INTO events VALUES(?,?,?)",(key,kind,raw))
+    db.execute("INSERT OR IGNORE INTO events VALUES(?,?,?)",(key,kind,raw))
     return key
 
 def read(db,key,kind):
