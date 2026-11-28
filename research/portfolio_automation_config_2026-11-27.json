@@ -1,0 +1,255 @@
+{
+  "schema_version": "0.1.0-draft",
+  "research_id": "QT-PIO-2026-11-27",
+  "status": "RESEARCH_ONLY",
+  "execution": {
+    "authorized": false,
+    "scheduled_jobs": false,
+    "whole_shares_only": true,
+    "manual_approval_required": true,
+    "private_account_data": true,
+    "block_on_missing_required_data": true
+  },
+  "dependencies": {
+    "data_vault_issue": 137,
+    "data_vault_draft_pr": 138,
+    "market_regime_issue": 135,
+    "bnf25_pr": 133,
+    "pc_storage_deferred": true
+  },
+  "allocation_hypothesis": {
+    "core_market": 0.35,
+    "quality_growth_value": 0.3,
+    "tactical": 0.1,
+    "income": 0.1,
+    "cash_hedge": 0.15,
+    "defensive_cash_range": [
+      0.2,
+      0.25
+    ],
+    "validated": false
+  },
+  "screen_hypothesis": {
+    "kr_market_cap_min_krw": 100000000000,
+    "us_market_cap_min_usd": 300000000,
+    "roic_3y_min": 0.1,
+    "or_roic_gt_wacc": true,
+    "cumulative_fcf_3y_positive": true,
+    "normalized_net_income_positive": true,
+    "net_debt_ebitda_max": 3,
+    "interest_coverage_min": 3,
+    "fcf_yield_min": 0.05,
+    "sector_exceptions_required": true,
+    "liquidity_threshold": null,
+    "validated": false
+  },
+  "valuation": {
+    "entry_margin": [
+      0.15,
+      0.2,
+      0.3
+    ],
+    "dcf_years": 10,
+    "model_types": [
+      "FCFF_WACC",
+      "FCFE_KE",
+      "NORMALIZED_EPS_MULTIPLE",
+      "RESIDUAL_INCOME",
+      "BIOPHARMA_RNPV",
+      "LEASE_COHORT",
+      "ETF_EARNINGS_SCENARIO"
+    ],
+    "assumptions_require_evidence": true,
+    "block_if_discount_le_terminal_growth": true
+  },
+  "features": {
+    "sma_sessions": [
+      20,
+      25,
+      50,
+      60,
+      200
+    ],
+    "rsi": {
+      "period": 14,
+      "default": "WILDER",
+      "legacy": "SIMPLE_AVERAGE_SEPARATE_VERSION"
+    },
+    "macd": [
+      12,
+      26,
+      9
+    ],
+    "bollinger": [
+      20,
+      2
+    ],
+    "atr": {
+      "period": 14,
+      "method": "WILDER"
+    },
+    "volume_ratio_prior_sessions": 20,
+    "cmf_sessions": 20,
+    "return_sessions": [
+      1,
+      5,
+      20,
+      60,
+      120
+    ]
+  },
+  "scores": {
+    "validated": false,
+    "weights": {
+      "value": 25,
+      "quality": 20,
+      "growth": 20,
+      "technical": 15,
+      "macro": 10,
+      "portfolio_fit": 10
+    },
+    "thresholds": {
+      "buy_review": 85,
+      "conditional_review": 75,
+      "observe": 65,
+      "no_new_buy": 50
+    },
+    "missing_required": "UNSCORED",
+    "hard_stop_overrides": true
+  },
+  "experiments": [
+    {
+      "id": "R05A",
+      "status": "CHAT_REPORTED_UNREPRODUCED",
+      "start": "2000-01",
+      "end": "2025-12",
+      "frequency": "monthly",
+      "return_type": "price",
+      "lag_months": 1,
+      "cost_per_traded_notional": 0.001,
+      "cash_return_assumption": 0,
+      "drawdown_thresholds": [
+        -0.08,
+        -0.15
+      ],
+      "weights": {
+        "hold": [
+          1,
+          1,
+          1
+        ],
+        "fixed": [
+          0.85,
+          0.85,
+          0.85
+        ],
+        "contrarian": [
+          0.85,
+          0.95,
+          1
+        ],
+        "defensive": [
+          0.85,
+          0.75,
+          0.6
+        ]
+      }
+    },
+    {
+      "id": "R05B",
+      "status": "EXPLORATORY_UNREPRODUCED",
+      "base": "R05A.contrarian",
+      "series": "BAA10YM",
+      "observation_lag_months": 2,
+      "level_pp": 3.5,
+      "change_3m_pp": 0.5,
+      "override_equity_weight": 0.65,
+      "variants": [
+        "level",
+        "change",
+        "and"
+      ],
+      "oos_validated": false
+    }
+  ],
+  "data": {
+    "require_available_at": true,
+    "require_source_id": true,
+    "require_raw_hash": true,
+    "unknown_availability": "QUARANTINE",
+    "missing": "NULL_WITH_REASON",
+    "private_raw_storage": true
+  },
+  "outcomes": {
+    "horizons_sessions": [
+      1,
+      5,
+      20,
+      60,
+      120
+    ],
+    "include_rejected": true,
+    "metrics": [
+      "total_return",
+      "benchmark_excess",
+      "MAE",
+      "MFE",
+      "max_drawdown"
+    ],
+    "retrospective_notes_not_live_decisions": true
+  },
+  "report": {
+    "numeric_first": true,
+    "refresh_prices_each_exchange_close": true,
+    "refresh_financials_on_new_or_amended_filing": true,
+    "llm_only_material_changes": true,
+    "show_coverage_and_staleness": true
+  },
+  "legacy_watchlist": [
+    "Samsung Fire",
+    "COR",
+    "MWA",
+    "CB",
+    "EOG",
+    "FN",
+    "POWL",
+    "CME",
+    "VLTO",
+    "MNST",
+    "SK Gas",
+    "VST",
+    "LNG",
+    "HD Hyundai Electric",
+    "Hyosung Heavy Industries",
+    "VRT",
+    "VT",
+    "XLV",
+    "XLE",
+    "XLP",
+    "REGN",
+    "PG",
+    "CMCSA",
+    "HMM"
+  ],
+  "new_research_candidates": [
+    "Kia",
+    "Shinhan Financial",
+    "AVUV",
+    "NICE Information Service",
+    "Korea Ratings",
+    "F&F",
+    "ACN",
+    "SEIC",
+    "KT&G",
+    "Visa",
+    "ICE",
+    "TSM",
+    "Glovis",
+    "Coway",
+    "TDC",
+    "GAP",
+    "HRMY",
+    "Cheil Worldwide"
+  ],
+  "note": "Draft schema examples only, not active production settings; no verified ticker mapping or target prices; no override of existing policies."
+}
