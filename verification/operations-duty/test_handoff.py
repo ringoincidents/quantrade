@@ -34,7 +34,7 @@ class Handoff(unittest.TestCase):
         self.assertEqual(h.summary(self.db)["pending_review_count"],1)
         self.assertEqual(self.db.execute("SELECT reason FROM duty_reviews").fetchone()[0],"REVISED")
     def test_input_tamper_blocks(self):
-        pub.tick(self.db,at(7,10),fixture)
+        pub.plan(self.db,at(7,10));pub.run_ready(self.db,at(7,10),fixture)
         with self.db:self.db.execute("UPDATE public_jobs SET digest='bad' WHERE sop='UST_PAR'")
         h.tick(self.db,at(7,10))
         self.assertEqual(h.summary(self.db)["stage_states"],{"BLOCKED":3,"COMPLETED":3})
