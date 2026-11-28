@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 
 MAX_RUNS=2
 COOLDOWN=3600
-STATES=("REQUESTED","ASSIGNED","RUNNING","SUBMITTED","REVIEWING","REVIEW_BLOCKED")
+STATES=("REQUESTED","ASSIGNED","RUNNING","SUBMITTED","REVIEW_REQUESTED","REVIEW_BLOCKED")
 FAILED=("REQUESTED","ASSIGNED","RUNNING","FAILED")
 
 def digest(report):
@@ -38,7 +38,7 @@ class Lifecycle:
                 if r.get("state")!="REPORT_READY":raise ValueError("JOB_BLOCKED")
                 with self.lock:
                     self.report=copy.deepcopy(r)
-                    self.event("SUBMITTED");self.event("REVIEWING")
+                    self.event("SUBMITTED");self.event("REVIEW_REQUESTED")
                     # Transport QA is not independent research. No approval or paid call.
                     self.event("REVIEW_BLOCKED")
             except Exception:
