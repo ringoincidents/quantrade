@@ -31,7 +31,7 @@ def evidence(s):
 def digest(value):
     return hashlib.sha256(json.dumps(value,sort_keys=True,separators=(",",":"),allow_nan=False).encode()).hexdigest()
 
-def select_bars(db,dataset_id,as_of,plan,*,mode="SYNTHETIC"):
+def _select_raw_bars(db,dataset_id,as_of,plan,*,mode="SYNTHETIC",split_transform=False):
     """Return complete declared-window measurements or fail closed.
 
     Plan binds ordered sessions, close instants, venue timezone, and coverage
@@ -42,7 +42,7 @@ def select_bars(db,dataset_id,as_of,plan,*,mode="SYNTHETIC"):
     need(isinstance(plan,dict),"INVALID_PLAN")
     need(plan.get("dataset_id")==dataset_id,"DATASET_PLAN_MISMATCH")
     need(evidence(plan.get("calendar_ref")) and evidence(plan.get("corporate_action_ref")),"EVIDENCE_MISSING")
-    need(plan.get("corporate_action_state")=="NO_ACTIONS_IN_WINDOW","RAW_ACTIONS_UNRESOLVED")
+    need(plan.get("corporate_action_state")==("SPLIT_TRANSFORM_REQUIRED" if split_transform else "NO_ACTIONS_IN_WINDOW"),"RAW_ACTIONS_UNRESOLVED")
     need(plan.get("timezone") in ("America/New_York","Asia/Seoul"),"UNSUPPORTED_TIMEZONE")
     zone=ZoneInfo(plan["timezone"])
     sessions=plan.get("sessions")
@@ -94,6 +94,9 @@ def select_bars(db,dataset_id,as_of,plan,*,mode="SYNTHETIC"):
         bars.append({"session":session,"available_at":published.isoformat(),"captured_at":capture.isoformat(),
                      "open":o,"high":h,"low":l,"close":c,"volume":v,"batch_sha256":sha})
     return meta,now,bars
+
+def select_bars(db,dataset_id,as_of,plan,*,mode="SYNTHETIC"):
+    return _select_raw_bars(db,dataset_id,as_of,plan,mode=mode)
 
 def measure_bars(bars,currency):
     need(bool(bars),"EMPTY_BARS")
