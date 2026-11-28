@@ -68,8 +68,8 @@ def audit(db,now):
     if db.execute("PRAGMA quick_check(1)").fetchone()[0]!="ok":
         finding("SQLITE_INTEGRITY");return finish()
     meta=dict(db.execute("SELECT k,v FROM public_meta"))
-    last=meta.get("last_tick");start=meta.get("coverage_start")
-    if type(last) is not int or type(start) is not int or not 0<=start<=last<=now:
+    last=meta.get("last_tick");start=meta.get("coverage_start");activation=meta.get("audit_activation")
+    if any(type(x) is not int for x in (last,start,activation)) or not 0<=start<=activation<=last<=now:
         finding("COVERAGE_UNVERIFIED");return finish()
     if now-last>HEARTBEAT_LIMIT:finding("SCHEDULER_STALE")
     if "history_gap" in meta:finding("HISTORY_GAP")
@@ -136,10 +136,10 @@ def audit(db,now):
         ON h.sop=j.sop AND h.due=j.due WHERE j.sop IS NULL AND h.due>?""",(lower,)).fetchone()[0]
     for _ in range(min(orphan,1000)):finding("ORPHAN_STAGE")
     # Check hourly report presence only after the hour has had time to execute.
-    first=(lower//3600+1)*3600
+    first=max(activation,lower)//3600*3600
     hours={r["hour"]:r for r in db.execute("SELECT * FROM public_reports WHERE hour>=? ORDER BY hour",(first,))}
     for hour in range(first,now//3600*3600+1,3600):
-        if now-hour>HEARTBEAT_LIMIT and hour not in hours:finding("HOURLY_REPORT_MISSING",due=hour)
+        if now-max(hour,activation)>HEARTBEAT_LIMIT and hour not in hours:finding("HOURLY_REPORT_MISSING",due=hour)
     for hour,r in hours.items():
         checked["hourly_reports"]+=1
         try:
