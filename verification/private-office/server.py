@@ -18,6 +18,7 @@ MAX_SESSIONS = 8
 MAX_ATTEMPTS = 8
 WINDOW = 60
 TOKEN = re.compile(r"[A-Za-z0-9_-]{32,128}")
+ACCESS_KEY = re.compile(r"[!-~]{32,128}")
 ORIGIN = re.compile(r"https://[a-z0-9][a-z0-9.-]*\.up\.railway\.app")
 
 def hash_token(value):
@@ -26,7 +27,10 @@ def hash_token(value):
 class Auth:
     def __init__(self, token, origin, clock=time.monotonic):
         self.origin = origin if ORIGIN.fullmatch(origin or "") else None
-        self.secret = hash_token(token) if TOKEN.fullmatch(token or "") else None
+        self.secret = hash_token(token) if ACCESS_KEY.fullmatch(token or "") else None
+        self.configuration_reason = ("ORIGIN_INVALID" if self.origin is None else
+                                     "ACCESS_KEY_MISSING" if not token else
+                                     "ACCESS_KEY_FORMAT_INVALID" if self.secret is None else "READY")
         self.clock = clock
         self.lock = threading.Lock()
         self.sessions = {}
@@ -50,7 +54,7 @@ class Auth:
             if len(self.attempts)>=MAX_ATTEMPTS:
                 return 429,None
             self.attempts.append(now)
-            candidate = hash_token(supplied) if TOKEN.fullmatch(supplied or "") else bytes(32)
+            candidate = hash_token(supplied) if ACCESS_KEY.fullmatch(supplied or "") else bytes(32)
             if not hmac.compare_digest(candidate,self.secret):
                 return 401,None
             session=secrets.token_urlsafe(32)
@@ -237,5 +241,5 @@ class Server(ThreadingHTTPServer):
 
 if __name__=="__main__":
     auth=Auth(os.environ.get("OFFICE_ACCESS_TOKEN",""),os.environ.get("OFFICE_ORIGIN",""))
-    print(json.dumps({"mode":"AUTH_PILOT","configuration":"READY" if auth.ready else "LOCKED","private_data":"DISCONNECTED"}),flush=True)
+    print(json.dumps({"mode":"AUTH_PILOT","configuration":"READY" if auth.ready else "LOCKED","configuration_reason":auth.configuration_reason,"private_data":"DISCONNECTED"}),flush=True)
     Server(("0.0.0.0",int(os.environ.get("PORT","8080"))),auth).serve_forever()

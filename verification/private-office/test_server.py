@@ -16,6 +16,18 @@ class AuthTests(unittest.TestCase):
             self.assertEqual(a.login(TOKEN),(503,None))
             self.assertFalse(a.active(TOKEN))
 
+    def test_password_manager_punctuation_and_diagnostic(self):
+        key="fixture-only!@#$%^&*()_+{}:<>?0123456789"
+        a=Auth(key,ORIGIN)
+        self.assertTrue(a.ready)
+        self.assertEqual(a.configuration_reason,"READY")
+        self.assertEqual(a.login(key)[0],303)
+        for bad,reason in [("","ACCESS_KEY_MISSING"),("short","ACCESS_KEY_FORMAT_INVALID"),
+                           (key+"\n","ACCESS_KEY_FORMAT_INVALID"),(key+" ","ACCESS_KEY_FORMAT_INVALID")]:
+            self.assertEqual(Auth(bad,ORIGIN).configuration_reason,reason)
+        self.assertEqual(Auth(key,"bad").configuration_reason,"ORIGIN_INVALID")
+        self.assertFalse(Auth(key,"bad").ready)
+
     def test_expiry_logout_and_rate_limit(self):
         now=[1]
         a=Auth(TOKEN,ORIGIN,lambda:now[0])
