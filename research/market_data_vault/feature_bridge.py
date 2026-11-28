@@ -31,7 +31,7 @@ def evidence(s):
 def digest(value):
     return hashlib.sha256(json.dumps(value,sort_keys=True,separators=(",",":"),allow_nan=False).encode()).hexdigest()
 
-def build_bundle(db,dataset_id,as_of,plan,*,mode="SYNTHETIC"):
+def select_bars(db,dataset_id,as_of,plan,*,mode="SYNTHETIC"):
     """Return complete declared-window measurements or fail closed.
 
     Plan binds ordered sessions, close instants, venue timezone, and coverage
@@ -93,6 +93,10 @@ def build_bundle(db,dataset_id,as_of,plan,*,mode="SYNTHETIC"):
              min(o,h,l,c)>0 and v>=0 and l<=min(o,c,h) and h>=max(o,c,l),"INVALID_OHLCV")
         bars.append({"session":session,"available_at":published.isoformat(),"captured_at":capture.isoformat(),
                      "open":o,"high":h,"low":l,"close":c,"volume":v,"batch_sha256":sha})
+    return meta,now,bars
+
+def measure_bars(bars,currency):
+    need(bool(bars),"EMPTY_BARS")
     prices=[b["close"] for b in bars]
     highs=[b["high"] for b in bars];lows=[b["low"] for b in bars]
     measures={}
@@ -101,19 +105,19 @@ def build_bundle(db,dataset_id,as_of,plan,*,mode="SYNTHETIC"):
         need(value is None or math.isfinite(value),"NONFINITE_FEATURE")
         measures[name]={"value":value,"unit":unit,"period":period,"state":"WARMUP" if value is None else "COMPUTED"}
     for period in (5,20,25,50,60,200):
-        a=sma(prices,period);add("SMA:"+str(period),period,a,meta[2])
+        a=sma(prices,period);add("SMA:"+str(period),period,a,currency)
         # Disparity is 100 at equality, not percent distance from average.
         if a[-1] is not None:need(a[-1]>0,"INVALID_AVERAGE")
         add("DISPARITY:"+str(period),period,[None if a[-1] is None else 100*prices[-1]/a[-1]],"INDEX_BASE_100")
-    for period in (12,26):add("EMA:"+str(period),period,ema(prices,period),meta[2])
+    for period in (12,26):add("EMA:"+str(period),period,ema(prices,period),currency)
     add("RSI:WILDER:14",14,rsi_wilder(prices,14),"INDEX_0_100")
-    add("ATR:WILDER:14",14,atr_wilder(highs,lows,prices,14),meta[2])
+    add("ATR:WILDER:14",14,atr_wilder(highs,lows,prices,14),currency)
     for period in (1,5,20,60,120):
         add("PRICE_RETURN:"+str(period),period,[None if len(prices)<=period else prices[-1]/prices[-1-period]-1],"FRACTION")
     m=macd(prices)
-    for k,series in m.items():add("MACD:12:26:9:"+k,26,series,meta[2])
+    for k,series in m.items():add("MACD:12:26:9:"+k,26,series,currency)
     bands=bollinger(prices)
-    for k,series in bands.items():add("BOLLINGER:20:2:"+k,20,series,"FRACTION" if k=="width" else meta[2])
+    for k,series in bands.items():add("BOLLINGER:20:2:"+k,20,series,"FRACTION" if k=="width" else currency)
     volumes=[b["volume"] for b in bars]
     add("VOLUME_RATIO:20",20,volume_ratio(volumes),"RATIO")
     add("CMF:20",20,cmf(highs,lows,prices,volumes),"FRACTION")
@@ -121,6 +125,11 @@ def build_bundle(db,dataset_id,as_of,plan,*,mode="SYNTHETIC"):
     for key,n in (("VOLUME_RATIO:20",21),("CMF:20",20)):
         if len(bars)>=n and measures[key]["value"] is None:
             measures[key]["state"]="UNDEFINED_ZERO_VOLUME"
+    return measures
+
+def build_bundle(db,dataset_id,as_of,plan,*,mode="SYNTHETIC"):
+    meta,now,bars=select_bars(db,dataset_id,as_of,plan,mode=mode)
+    measures=measure_bars(bars,meta[2])
     plan_hash=digest(plan)
     snapshot={"dataset_id":dataset_id,"asset_id":meta[0],"provider":meta[1],"currency":meta[2],"basis":meta[3],
         "as_of":now.isoformat(),"plan_sha256":plan_hash,"bars":bars}
