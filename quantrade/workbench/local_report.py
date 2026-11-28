@@ -111,6 +111,7 @@ def evaluate(doc, *, manual_confirmed=False):
             require(len(a) == 1 and a[0].get("target_hash") == digest(t)
                     and instant(a[0]["approved_at"]) == instant(t["approved_at"])
                     and bool(text(a[0]["operator"])), "APPROVAL_MISMATCH")
+            require(mode != "MANUAL" or a[0]["operator"] != "SYNTHETIC","SYNTHETIC_APPROVAL_IN_MANUAL_RUN")
             require(t["currency"] == currency, "CURRENCY_MISMATCH")
             require(t["price_basis"] == BASIS, "PRICE_BASIS_MISMATCH")
             v, margin = decimal(t["value"]), decimal(t["margin"])
@@ -203,6 +204,7 @@ def save_run(directory, doc, report, started):
     with sqlite3.connect(db) as con:
         con.execute("CREATE TABLE IF NOT EXISTS inputs (kind TEXT, identity TEXT, hash TEXT, body TEXT, PRIMARY KEY(kind,identity))")
         con.execute("CREATE TABLE IF NOT EXISTS runs (id TEXT PRIMARY KEY, input TEXT, report TEXT, started TEXT, finished TEXT)")
+        con.execute("BEGIN IMMEDIATE")
         # A previously observed revocation must never be silently omitted.
         current_revocations = {digest(r) for r in doc.get("revocations", [])}
         target_hashes = {digest(t) for t in doc["targets"]}
@@ -210,6 +212,21 @@ def save_run(directory, doc, report, started):
             r = json.loads(body)
             if r["target_hash"] in target_hashes:
                 require(h in current_revocations,"MISSING_PRIOR_REVOCATION")
+        # A known correction cannot silently be rolled back in a later run.
+        now = instant(doc["as_of"])
+        for identity, body in con.execute("SELECT identity,body FROM inputs WHERE kind=?",("quote",)):
+            if json.loads(identity)[0] != doc["mode"]:
+                continue
+            q = json.loads(body)
+            if q.get("instrument") not in doc["enabled"]:
+                continue
+            expected = doc["expected_sessions"].get(market(q["instrument"]),{})
+            if q.get("session_date") != expected.get("session_date"):
+                continue
+            if q.get("retrieved_at") is None or instant(q["retrieved_at"]) > now:
+                continue
+            if any(x.get("instrument")==q["instrument"] and x.get("session_date")==q["session_date"] for x in doc["quotes"]):
+                require(any(x.get("instrument")==q["instrument"] and x.get("session_date")==q["session_date"] and type(x.get("revision")) is int and x["revision"]>=q["revision"] for x in doc["quotes"]),"MISSING_PRIOR_QUOTE_REVISION")
         # Store distinct versions, reject attempts to mutate a previously recorded input.
         for kind, records, keys in (("target",doc["targets"],("instrument","version")),
                                     ("quote",doc["quotes"],("instrument","session_date","revision")),
