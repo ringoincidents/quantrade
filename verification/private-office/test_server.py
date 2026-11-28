@@ -136,6 +136,38 @@ class HTTPTests(unittest.TestCase):
         self.assertEqual(self.request("GET","/assets/demo/unknown",headers=c)[0],404)
         self.assertEqual(self.request("POST","/api/demo/portfolio/initial",headers={**c,"Origin":ORIGIN})[0],405)
 
+    def test_case_register_auth_and_gates(self):
+        self.assertEqual(self.request("GET","/api/demo/case/baseline")[0],401)
+        self.assertEqual(self.request("GET","/cases/demo/baseline")[0],303)
+        self.assertEqual(self.request("GET","/api/cases")[0],401)
+        status,h,_=self.login()
+        c={"Cookie":h["Set-Cookie"].split(";")[0]}
+        self.assertEqual(self.request("GET","/api/cases",headers=c)[0],503)
+        for name,ready in [("baseline",True),("missing",False),("invalid-domain",False),("counter-gap",True)]:
+            status,h,body=self.request("GET","/api/demo/case/"+name,headers=c)
+            self.assertEqual(status,200)
+            obj=json.loads(body)
+            self.assertEqual(obj["mode"],"SYNTHETIC_ONLY")
+            self.assertEqual(obj["valuation"] is not None,ready)
+            self.assertEqual(obj["method_gate"]["status"],"READY" if ready else "NOT_APPLICABLE")
+            self.assertFalse(obj["decision_authorized"])
+            self.assertFalse(obj["order_authorized"])
+            self.assertFalse(obj["thesis"]["completeness"]["all_theses_evidence_backed"])
+            self.assertEqual(obj["f08_handoff"],"BLOCKED_NO_AUTHENTICATED_APPROVAL")
+            self.assertEqual(obj["policy"]["status"],"DRAFT_NOT_APPROVED")
+            if ready:
+                self.assertEqual(len(obj["illustrative_thresholds"]),3)
+                self.assertTrue(all(not x["approved"] for x in obj["illustrative_thresholds"]))
+            else:
+                self.assertEqual(obj["illustrative_thresholds"],[])
+            if name=="counter-gap":
+                self.assertFalse(obj["thesis"]["completeness"]["all_theses_have_counter_research"])
+            status,h,body=self.request("GET","/cases/demo/"+name,headers=c)
+            self.assertEqual(status,200)
+            self.assertIn("합성 기업 / 실제 투자 기준 아님".encode(),body)
+            self.assertEqual(h["Cache-Control"],"no-store, private")
+        self.assertEqual(self.request("POST","/api/cases",headers={**c,"Origin":ORIGIN})[0],405)
+
     def test_f08_demo_auth_and_statuses(self):
         for path in ("/api/report","/api/demo/report/baseline"):
             self.assertEqual(self.request("GET",path)[0],401)

@@ -12,6 +12,7 @@ from http.cookies import SimpleCookie
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlsplit
 from link_transport import check_link
+from case_demo import SCENARIOS as CASE_SCENARIOS, render as case_render, scenario as case_scenario
 from report_demo import SCENARIOS as REPORT_SCENARIOS, render as report_render, scenario as report_scenario
 from portfolio_demo import SCENARIOS, render as demo_render, scenario as demo_scenario
 
@@ -102,15 +103,19 @@ TABS = {"/":"업무","/assets":"자산","/reports":"보고","/records":"기록"}
 def page(path):
     demo = path.startswith("/assets/demo/")
     report_demo = path.startswith("/reports/demo/")
-    number,title,rows=PAGES["/assets" if demo else "/reports" if report_demo else path]
-    nav="".join('<a href="'+link+'"'+(' aria-current="page"' if (path==link or demo and link=="/assets" or report_demo and link=="/reports") else '')+'>'+name+'</a>' for link,name in TABS.items())
+    case_demo = path.startswith("/cases/demo/")
+    number,title,rows=PAGES["/assets" if demo else "/reports" if report_demo or case_demo else path]
+    nav="".join('<a href="'+link+'"'+(' aria-current="page"' if (path==link or demo and link=="/assets" or (report_demo or case_demo) and link=="/reports") else '')+'>'+name+'</a>' for link,name in TABS.items())
     content="".join('<div class="row"><span>'+a+'</span><strong>'+b+'</strong></div>' for a,b in rows)
     if demo:
         content=demo_render(path.rsplit("/",1)[1])
+    elif case_demo:
+        title="기업가치·운용 기준 원장"
+        content=case_render(path.rsplit("/",1)[1])
     elif report_demo:
         content=report_render(path.rsplit("/",1)[1])
     elif path=="/reports":
-        content+='<p><a href="/reports/demo/baseline">안전마진 감시 / 합성 보고서 열기</a></p>'
+        content+='<p><a href="/reports/demo/baseline">안전마진 감시 / 합성 보고서 열기</a></p><p><a href="/cases/demo/baseline">기업가치·운용 기준 원장 / 합성 사례</a></p>'
     elif path=="/assets":
         content+='<p><a href="/assets/demo/initial">합성 원장 검증 화면 열기</a></p><p><a href="/api/link-check">내부 연결 검증 (상태)</a></p>'
     return document('<div class="shell"><nav class="rail" aria-label="책갈피">'+nav+'</nav><main class="paper">'
@@ -213,6 +218,12 @@ class Handler(BaseHTTPRequestHandler):
             self.send(200,page(self.path))
         elif self.path.startswith("/api/demo/report/") and self.path.rsplit("/",1)[1] in REPORT_SCENARIOS and self.path.count("/")==4:
             self.send(200,json.dumps(report_scenario(self.path.rsplit("/",1)[1]),ensure_ascii=False).encode(),"application/json")
+        elif self.path.startswith("/cases/demo/") and self.path.rsplit("/",1)[1] in CASE_SCENARIOS and self.path.count("/")==3:
+            self.send(200,page(self.path))
+        elif self.path.startswith("/api/demo/case/") and self.path.rsplit("/",1)[1] in CASE_SCENARIOS and self.path.count("/")==4:
+            self.send(200,json.dumps(case_scenario(self.path.rsplit("/",1)[1]),ensure_ascii=False,allow_nan=False).encode(),"application/json")
+        elif self.path=="/api/cases":
+            self.send(503,b'{"state":"NOT_CONNECTED","actual_data_connected":false}',"application/json")
         elif self.path=="/api/report":
             self.send(503,b'{"state":"NOT_CONNECTED","actual_data_connected":false}',"application/json")
         elif self.path=="/api/link-check":
