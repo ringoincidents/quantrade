@@ -1,4 +1,6 @@
 """Public-data-only, disposable read-only preview. No broker or model credentials."""
+import csv
+import io
 import datetime as dt
 import json
 import math
@@ -13,6 +15,7 @@ from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).parent
 TREASURY = "https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml?data=daily_treasury_yield_curve&field_tdr_date_value="
+TREASURY_CSV = "https://home.treasury.gov/resource-center/data-chart-center/interest-rates/daily-treasury-rates.csv/{year}/all?type=daily_treasury_yield_curve&field_tdr_date_value={year}&_format=csv"
 GITHUB = "https://api.github.com/repos/ringoincidents/quantrade"
 MAX_BODY = 2_000_000
 CACHE_SECONDS = 900
@@ -66,6 +69,26 @@ def parse_rates(raw, today):
         raise ValueError("duplicate observations")
     return rows[-2:]
 
+def parse_csv_rates(raw, today):
+    rows = []
+    for item in csv.DictReader(io.StringIO(raw.decode("utf-8-sig"))):
+        date = dt.datetime.strptime(item["Date"], "%m/%d/%Y").date()
+        if date > today:
+            continue
+        vals = [item.get(k) for k in ("2 Yr", "10 Yr", "30 Yr")]
+        if not all(vals):
+            continue
+        rates = [float(v) for v in vals]
+        if not all(math.isfinite(v) and -10 <= v <= 30 for v in rates):
+            raise ValueError("invalid rate")
+        rows.append({"date": date.isoformat(), "rates": dict(zip(("2Y", "10Y", "30Y"), rates))})
+    if not rows:
+        raise ValueError("no observations")
+    rows.sort(key=lambda r: r["date"])
+    if len({r["date"] for r in rows}) != len(rows):
+        raise ValueError("duplicate observations")
+    return rows[-2:]
+
 def issue_state(raw):
     value = json.loads(raw)
     if value.get("number") != 142 or value.get("state") not in ("open", "closed"):
@@ -83,11 +106,18 @@ def observe():
     result = {"checked_at": now(), "market": None, "issue": None, "pr": None,
               "mode": "PUBLIC_PREVIEW", "broker": "HISTORICAL_READ_VERIFIED"}
     try:
-        rows = parse_rates(fetch(TREASURY + str(today.year)), today)
+        try:
+            rows = parse_rates(fetch(TREASURY + str(today.year)), today)
+            source = "TREASURY_XML"
+        except Exception as error:
+            print(json.dumps({"treasury_xml": type(error).__name__}), flush=True)
+            rows = parse_csv_rates(fetch(TREASURY_CSV.format(year=today.year)), today)
+            source = "TREASURY_CSV"
         result["market"] = {"latest": rows[-1], "previous": rows[-2] if len(rows)>1 else None,
-                            "age_days": (today-dt.date.fromisoformat(rows[-1]["date"])).days}
-    except Exception:
-        pass
+                            "age_days": (today-dt.date.fromisoformat(rows[-1]["date"])).days,
+                            "source": source}
+    except Exception as error:
+        print(json.dumps({"treasury_unavailable": type(error).__name__}), flush=True)
     for key, path, parse in [("issue","/issues/142",issue_state),("pr","/pulls/141",pr_state)]:
         try:
             result[key] = parse(fetch(GITHUB + path))

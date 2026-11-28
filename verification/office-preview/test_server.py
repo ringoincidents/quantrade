@@ -1,6 +1,6 @@
 import datetime as dt
 import unittest
-from server import parse_rates, issue_state, pr_state
+from server import parse_rates, parse_csv_rates, issue_state, pr_state
 
 class PreviewTests(unittest.TestCase):
     def test_rates_order_and_future(self):
@@ -10,6 +10,12 @@ class PreviewTests(unittest.TestCase):
         r=parse_rates(data,dt.date(2026,11,27))
         self.assertEqual(r[-1]["rates"]["10Y"],4.2)
         self.assertEqual(r[-2]["date"],"2026-11-26")
+    def test_csv(self):
+        data = b"Date,2 Yr,10 Yr,30 Yr\n11/27/2026,3.5,4.2,4.5\n11/25/2026,3.4,4.1,4.4\n11/30/2026,9,9,9\n"
+        rows=parse_csv_rates(data,dt.date(2026,11,28))
+        self.assertEqual(rows[-1]["date"],"2026-11-27")
+        self.assertEqual(rows[-1]["rates"]["10Y"],4.2)
+        self.assertEqual(rows[-2]["date"],"2026-11-25")
     def test_invalid(self):
         for data in (b"<feed/>",b"<!DOCTYPE x><feed/>"):
             with self.assertRaises(ValueError):
