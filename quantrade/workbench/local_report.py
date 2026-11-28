@@ -74,6 +74,10 @@ def evaluate(doc, *, manual_confirmed=False):
     require(isinstance(doc["expected_sessions"],dict),"INVALID_SESSION_MAP")
     require(all(isinstance(doc[k], list) and all(isinstance(v, dict) for v in doc[k])
                 for k in ("targets", "quotes", "approvals")), "INVALID_COLLECTION")
+    revocations = doc.get("revocations", [])
+    require(isinstance(revocations,list) and all(isinstance(r,dict) for r in revocations),"INVALID_REVOCATIONS")
+    for r in revocations:
+        text(r["ref"]); text(r["operator"]); text(r["target_hash"]); instant(r["revoked_at"])
     rows = []
     for instrument in enabled:
         row = dict(instrument=instrument, status="BLOCKED", reason=None, price=None,
@@ -97,7 +101,8 @@ def evaluate(doc, *, manual_confirmed=False):
                 require(approved < expires, "INVALID_TARGET_INTERVAL")
                 invalid = instant(t["invalidated_at"]) if t.get("invalidated_at") is not None else None
                 require(t["state"] in ("APPROVED", "REVOKED"), "INVALID_TARGET_STATE")
-                if t["state"] == "APPROVED" and approved <= now < expires and (invalid is None or invalid > now):
+                revoked = any(r["target_hash"] == digest(t) and instant(r["revoked_at"]) <= now for r in revocations)
+                if not revoked and t["state"] == "APPROVED" and approved <= now < expires and (invalid is None or invalid > now):
                     active.append(t)
             require(len(active) == 1, "DUPLICATE_APPROVAL" if active else "TARGET_NOT_CURRENT")
             t = active[0]
@@ -161,7 +166,7 @@ def evaluate(doc, *, manual_confirmed=False):
 def demo():
     session = {"session_date":"2026-11-27", "close_at":"2026-11-27T13:00:00-05:00"}
     d = dict(schema=SCHEMA, mode="SYNTHETIC", as_of="2026-11-28T08:00:00+09:00",
-             expected_sessions={"XNYS":session}, enabled=[], targets=[], approvals=[], quotes=[])
+             expected_sessions={"XNYS":session}, enabled=[], targets=[], approvals=[], quotes=[], revocations=[])
     for symbol, price in (("DEMO_A","80"), ("DEMO_B","83.25"), ("DEMO_C",None)):
         i = "XNYS:"+symbol
         t = dict(instrument=i,currency="USD",value="100",margin="0.20",version="v1",
@@ -198,10 +203,18 @@ def save_run(directory, doc, report, started):
     with sqlite3.connect(db) as con:
         con.execute("CREATE TABLE IF NOT EXISTS inputs (kind TEXT, identity TEXT, hash TEXT, body TEXT, PRIMARY KEY(kind,identity))")
         con.execute("CREATE TABLE IF NOT EXISTS runs (id TEXT PRIMARY KEY, input TEXT, report TEXT, started TEXT, finished TEXT)")
+        # A previously observed revocation must never be silently omitted.
+        current_revocations = {digest(r) for r in doc.get("revocations", [])}
+        target_hashes = {digest(t) for t in doc["targets"]}
+        for body, h in con.execute("SELECT body,hash FROM inputs WHERE kind=?",("revocation",)):
+            r = json.loads(body)
+            if r["target_hash"] in target_hashes:
+                require(h in current_revocations,"MISSING_PRIOR_REVOCATION")
         # Store distinct versions, reject attempts to mutate a previously recorded input.
         for kind, records, keys in (("target",doc["targets"],("instrument","version")),
                                     ("quote",doc["quotes"],("instrument","session_date","revision")),
-                                    ("approval",doc["approvals"],("ref",))):
+                                    ("approval",doc["approvals"],("ref",)),
+                                    ("revocation",doc.get("revocations",[]),("ref",))):
             for item in records:
                 if any(k not in item for k in keys):
                     continue
