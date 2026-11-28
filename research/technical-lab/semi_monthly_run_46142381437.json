@@ -1,0 +1,2396 @@
+{
+  "runId": 46142381437,
+  "head": "89f01778eff14c6762fcf63c6a657c030b20b1fe",
+  "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+  "schedule": [
+    "2022-08-31",
+    "2022-09-30",
+    "2022-10-31",
+    "2022-11-30",
+    "2022-12-31",
+    "2023-01-31",
+    "2023-02-28",
+    "2023-03-31",
+    "2023-04-30",
+    "2023-05-31",
+    "2023-06-30",
+    "2023-07-31",
+    "2023-08-31",
+    "2023-09-30",
+    "2023-10-31",
+    "2023-11-30",
+    "2023-12-31",
+    "2024-01-31",
+    "2024-02-29",
+    "2024-03-31",
+    "2024-04-30",
+    "2024-05-31",
+    "2024-06-30",
+    "2024-07-31",
+    "2024-08-31",
+    "2024-09-30",
+    "2024-10-31",
+    "2024-11-30",
+    "2024-12-31",
+    "2025-01-31",
+    "2025-02-28",
+    "2025-03-31",
+    "2025-04-30",
+    "2025-05-31",
+    "2025-06-30",
+    "2025-07-31",
+    "2025-08-31",
+    "2025-09-30",
+    "2025-10-31",
+    "2025-11-30",
+    "2025-12-31",
+    "2026-01-31",
+    "2026-02-28",
+    "2026-03-31",
+    "2026-04-30",
+    "2026-05-31",
+    "2026-06-30",
+    "2026-07-31",
+    "2026-08-31",
+    "2026-09-30",
+    "2026-10-31"
+  ],
+  "phaseCounts": {
+    "MIXED_OR_FLAT": 34,
+    "CONTRACTION_PROXY": 5,
+    "EXPANSION_PROXY": 11,
+    "BLOCKED": 1
+  },
+  "summary": {
+    "counts": {
+      "ABSTAIN": 35,
+      "PAIRED": 13,
+      "MISSING": 2,
+      "CENSORED": 1
+    },
+    "paired": 13,
+    "correct": 6,
+    "baselineCorrect": 6,
+    "byPhase": {
+      "CONTRACTION_PROXY": {
+        "n": 5,
+        "correct": 2,
+        "baselineCorrect": 2,
+        "observedUp": 3,
+        "observedDown": 2,
+        "observedFlat": 0
+      },
+      "EXPANSION_PROXY": {
+        "n": 8,
+        "correct": 4,
+        "baselineCorrect": 4,
+        "observedUp": 4,
+        "observedDown": 4,
+        "observedFlat": 0
+      }
+    }
+  },
+  "quarterSpaced": {
+    "counts": {
+      "ABSTAIN": 12,
+      "PAIRED": 4,
+      "MISSING": 1
+    },
+    "paired": 4,
+    "correct": 2,
+    "baselineCorrect": 2,
+    "byPhase": {
+      "CONTRACTION_PROXY": {
+        "n": 2,
+        "correct": 1,
+        "baselineCorrect": 1,
+        "observedUp": 1,
+        "observedDown": 1,
+        "observedFlat": 0
+      },
+      "EXPANSION_PROXY": {
+        "n": 2,
+        "correct": 1,
+        "baselineCorrect": 1,
+        "observedUp": 1,
+        "observedDown": 1,
+        "observedFlat": 0
+      }
+    }
+  },
+  "rows": [
+    {
+      "vintage": "2022-08-31",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "e7453880a8fc9d44db8174dbd0ea31774fcdf27f9d272e8f755cd82a8545b52a"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "f46e37d9ed7c604f65f6caf9c3a38e03a2afb8fee038c75266d54ae44fb08540"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "MIXED_OR_FLAT",
+        "period": "2022-07",
+        "asOf": "2022-09-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 6.968429734043724,
+            "previousGrowth": 3.3938010029118004,
+            "acceleration": 3.5746287311319236
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": -3.4151999999999987,
+            "previousGrowth": -5.89139999999999,
+            "acceleration": 2.4761999999999915
+          }
+        ]
+      },
+      "outcome": {
+        "status": "ABSTAIN",
+        "reason": "MIXED_OR_UNAVAILABLE"
+      }
+    },
+    {
+      "vintage": "2022-09-30",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "8b952a283939e3758e9c7ffe0e33d02604c10c85ab1d19802d4369411a2217c4"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "aa4463b299af72f7e26e3e33defcfdaa0a5625b597e9c8070c540067d516d2a1"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "MIXED_OR_FLAT",
+        "period": "2022-08",
+        "asOf": "2022-10-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 2.606192504154614,
+            "previousGrowth": 0.7964373577935113,
+            "acceleration": 1.8097551463611028
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": -6.813399999999987,
+            "previousGrowth": -8.243499999999997,
+            "acceleration": 1.4301000000000101
+          }
+        ]
+      },
+      "outcome": {
+        "status": "ABSTAIN",
+        "reason": "MIXED_OR_UNAVAILABLE"
+      }
+    },
+    {
+      "vintage": "2022-10-31",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "014d8ed9ba0dadcf75b42618467a62e25201cf0be5c70bb61f431c66242d1e47"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "149507ca313ea57a5d18f3d6ce5a92c6bc1167e1fe68f49b0aff162be0914a00"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "MIXED_OR_FLAT",
+        "period": "2022-09",
+        "asOf": "2022-11-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 1.7509243242235017,
+            "previousGrowth": 3.0923969221584358,
+            "acceleration": -1.341472597934934
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": -7.44319999999999,
+            "previousGrowth": -6.404700000000005,
+            "acceleration": -1.0384999999999849
+          }
+        ]
+      },
+      "outcome": {
+        "status": "ABSTAIN",
+        "reason": "MIXED_OR_UNAVAILABLE"
+      }
+    },
+    {
+      "vintage": "2022-11-30",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "c6e552bb8235cfd871cb96697e4f22b6764597044cb141a8358ace9502e20f4e"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "2f1112087e948c8439eec38466983d46d8618c98841f1b047705174a774ce7d8"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "CONTRACTION_PROXY",
+        "period": "2022-10",
+        "asOf": "2022-12-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": -3.799252803190867,
+            "previousGrowth": 2.290645825869597,
+            "acceleration": -6.089898629060464
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": -11.737399999999994,
+            "previousGrowth": -7.0726999999999975,
+            "acceleration": -4.664699999999996
+          }
+        ]
+      },
+      "outcome": {
+        "status": "PAIRED",
+        "target": "2023-01",
+        "futureVintage": "2023-02-28",
+        "observed": -1,
+        "predicted": -1,
+        "baseline": -1,
+        "observedGrowthChange": -5.626246839043514,
+        "correct": true,
+        "baselineCorrect": true
+      }
+    },
+    {
+      "vintage": "2022-12-31",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "64b1b4e66de1ad83ec0f5bfc97ca94c6cb89c37de8f6a22f8e7ebe0bde754186"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "767bc5ecdfc85e39c64b8da20e09398d86f08ae2f957b35ff9130e25b1835d20"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "CONTRACTION_PROXY",
+        "period": "2022-11",
+        "asOf": "2023-01-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": -4.547439321428904,
+            "previousGrowth": 0.3581738523288358,
+            "acceleration": -4.9056131737577395
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": -12.267200000000003,
+            "previousGrowth": -8.562999999999988,
+            "acceleration": -3.7042000000000144
+          }
+        ]
+      },
+      "outcome": {
+        "status": "PAIRED",
+        "target": "2023-02",
+        "futureVintage": "2023-03-31",
+        "observed": -1,
+        "predicted": -1,
+        "baseline": -1,
+        "observedGrowthChange": -6.010844445587971,
+        "correct": true,
+        "baselineCorrect": true
+      }
+    },
+    {
+      "vintage": "2023-01-31",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "7641443697fd93df299a454e28df72750aa81b04d1880e0ff3c81b518429021f"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "3e917d6f38960be7e2adb3aa3586054d5b3d8c4bb68daf28881b430e7934be0b"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "CONTRACTION_PROXY",
+        "period": "2022-12",
+        "asOf": "2023-02-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": -8.646876474209197,
+            "previousGrowth": -1.6398999888894483,
+            "acceleration": -7.006976485319749
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": -15.32929999999999,
+            "previousGrowth": -10.078499999999991,
+            "acceleration": -5.250799999999998
+          }
+        ]
+      },
+      "outcome": {
+        "status": "PAIRED",
+        "target": "2023-03",
+        "futureVintage": "2023-04-30",
+        "observed": 1,
+        "predicted": -1,
+        "baseline": -1,
+        "observedGrowthChange": 1.1621830229216474,
+        "correct": false,
+        "baselineCorrect": false
+      }
+    },
+    {
+      "vintage": "2023-02-28",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "2b96862b4eab3ec5d7e4bda8e913a4dda9af1f239ef37dc93ae5c2a6dffe4764"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "d2a21f7723441c2ac08b11551b7241f387f888515b8864a04bd59e9779f0c03a"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "CONTRACTION_PROXY",
+        "period": "2023-01",
+        "asOf": "2023-03-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": -10.976666746329533,
+            "previousGrowth": -5.350419907286019,
+            "acceleration": -5.626246839043514
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": -16.5929,
+            "previousGrowth": -12.9465,
+            "acceleration": -3.6464
+          }
+        ]
+      },
+      "outcome": {
+        "status": "PAIRED",
+        "target": "2023-04",
+        "futureVintage": "2023-05-31",
+        "observed": 1,
+        "predicted": -1,
+        "baseline": -1,
+        "observedGrowthChange": 7.661645619483293,
+        "correct": false,
+        "baselineCorrect": false
+      }
+    },
+    {
+      "vintage": "2023-03-31",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "1001919a406b74f694241b8500f3252d04dbdbd5e017ce224153bb78f0cf548b"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "32203b5a14ef1befe2ea66ff4359010485416d575847ea30f7a8f243d38164ec"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "CONTRACTION_PROXY",
+        "period": "2023-02",
+        "asOf": "2023-04-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": -7.988667392063064,
+            "previousGrowth": -1.977822946475094,
+            "acceleration": -6.010844445587971
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": -12.488700000000009,
+            "previousGrowth": -6.864200000000011,
+            "acceleration": -5.624499999999998
+          }
+        ]
+      },
+      "outcome": {
+        "status": "PAIRED",
+        "target": "2023-05",
+        "futureVintage": "2023-06-30",
+        "observed": 1,
+        "predicted": -1,
+        "baseline": -1,
+        "observedGrowthChange": 6.4224949653505226,
+        "correct": false,
+        "baselineCorrect": false
+      }
+    },
+    {
+      "vintage": "2023-04-30",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "cde06f5081f1ac2127db8f47b96d239469d1894a7e1d861f379e9379f57c846d"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "429e0c1ca2439feff8bd45d00ae9ce5ba7d4b5fcd96cd28949e0df94b03dece7"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "MIXED_OR_FLAT",
+        "period": "2023-03",
+        "asOf": "2023-05-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": -3.1745546485110854,
+            "previousGrowth": -4.336737671432733,
+            "acceleration": 1.1621830229216474
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": -9.0689,
+            "previousGrowth": -8.9679,
+            "acceleration": -0.10099999999999909
+          }
+        ]
+      },
+      "outcome": {
+        "status": "ABSTAIN",
+        "reason": "MIXED_OR_UNAVAILABLE"
+      }
+    },
+    {
+      "vintage": "2023-05-31",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "55591306ee7d86cabdd3f508c3e76d3f0122bed22dedef49c6353d5550b9548b"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "33e261e32ec9ef81f31d19dd38ce39aeaaf26b68dfe655a84b25d719ca65d4bd"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "MIXED_OR_FLAT",
+        "period": "2023-04",
+        "asOf": "2023-06-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 1.8122652508901549,
+            "previousGrowth": -5.849380368593138,
+            "acceleration": 7.661645619483293
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": -5.491900000000001,
+            "previousGrowth": -10.439900000000009,
+            "acceleration": 4.9480000000000075
+          }
+        ]
+      },
+      "outcome": {
+        "status": "ABSTAIN",
+        "reason": "MIXED_OR_UNAVAILABLE"
+      }
+    },
+    {
+      "vintage": "2023-06-30",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "0c2cfdd41e6c54a46f4d2d54f0fe46c3a933eecdcfccd5da5a513be44b6b9ef4"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "1ef884fca44eaa3b32389381529b9b2dfd669f3cc2e7b8665769b75859320f85"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "MIXED_OR_FLAT",
+        "period": "2023-05",
+        "asOf": "2023-07-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 2.096066584558476,
+            "previousGrowth": -4.326428380792047,
+            "acceleration": 6.4224949653505226
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": -5.525600000000011,
+            "previousGrowth": -9.706600000000009,
+            "acceleration": 4.180999999999997
+          }
+        ]
+      },
+      "outcome": {
+        "status": "ABSTAIN",
+        "reason": "MIXED_OR_UNAVAILABLE"
+      }
+    },
+    {
+      "vintage": "2023-07-31",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "82a1293d8450a9c9060ad65d07a4374e5474f70b67fd15c5b15f6293d54388e9"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "511b0e4e1e257db46e917f0bb86b15e247ce8276d752e04b27900948b621d5ab"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "MIXED_OR_FLAT",
+        "period": "2023-06",
+        "asOf": "2023-08-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 5.334973126401654,
+            "previousGrowth": -2.727220147403908,
+            "acceleration": 8.062193273805562
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": -3.5039000000000016,
+            "previousGrowth": -8.734200000000001,
+            "acceleration": 5.2303
+          }
+        ]
+      },
+      "outcome": {
+        "status": "ABSTAIN",
+        "reason": "MIXED_OR_UNAVAILABLE"
+      }
+    },
+    {
+      "vintage": "2023-08-31",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "964516942109af4c38eef91cd2d7e751617a5f83f078505ea5d3577cb91af935"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "12d43b3fe036604010d1be6eefce4dbc4be2fee53dcd931c323a9f615cd301ac"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "MIXED_OR_FLAT",
+        "period": "2023-07",
+        "asOf": "2023-09-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 8.565039313174228,
+            "previousGrowth": 2.4835532321603404,
+            "acceleration": 6.081486081013888
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": -1.4676999999999936,
+            "previousGrowth": -5.0077,
+            "acceleration": 3.5400000000000063
+          }
+        ]
+      },
+      "outcome": {
+        "status": "ABSTAIN",
+        "reason": "MIXED_OR_UNAVAILABLE"
+      }
+    },
+    {
+      "vintage": "2023-09-30",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "ef63ba3fa827a9253f8567a7824c260b1796e381d1fef2b456887a6d8c0c6bec"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "97aff24ba1405868571327917df413b6dfab3fe8972c4163b467fd1a12161b72"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "MIXED_OR_FLAT",
+        "period": "2023-08",
+        "asOf": "2023-10-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 10.536637943960315,
+            "previousGrowth": 6.746917310327083,
+            "acceleration": 3.789720633633232
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": -0.3067999999999955,
+            "previousGrowth": -2.2234000000000123,
+            "acceleration": 1.9166000000000167
+          }
+        ]
+      },
+      "outcome": {
+        "status": "ABSTAIN",
+        "reason": "MIXED_OR_UNAVAILABLE"
+      }
+    },
+    {
+      "vintage": "2023-10-31",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "4c91e63ab95fe9c52efe2e857e15d72b9bed8fbde575be03ca457e25b2f577ac"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "c92ffe0315289b6b70380e35d23e06c4ce23b2b7f5317e56e9b83944f73a2715"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "MIXED_OR_FLAT",
+        "period": "2023-09",
+        "asOf": "2023-11-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 9.777025622754664,
+            "previousGrowth": 7.321363978739437,
+            "acceleration": 2.455661644015227
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": -1.0099000000000018,
+            "previousGrowth": -2.100999999999999,
+            "acceleration": 1.0910999999999973
+          }
+        ]
+      },
+      "outcome": {
+        "status": "ABSTAIN",
+        "reason": "MIXED_OR_UNAVAILABLE"
+      }
+    },
+    {
+      "vintage": "2023-11-30",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "8c52d1801dc4867463fcd48dca62b8833203f50a828878ff648507524f8c10d5"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "72ccc0968a33fc00fd9c7a907b3b3496ee75fbe2d4d61ebe0034f77128e9006a"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "EXPANSION_PROXY",
+        "period": "2023-10",
+        "asOf": "2023-12-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 12.835933047031078,
+            "previousGrowth": 9.754405581056048,
+            "acceleration": 3.0815274659750305
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": 0.9364999999999952,
+            "previousGrowth": -0.6365999999999872,
+            "acceleration": 1.5730999999999824
+          }
+        ]
+      },
+      "outcome": {
+        "status": "PAIRED",
+        "target": "2024-01",
+        "futureVintage": "2024-02-29",
+        "observed": 1,
+        "predicted": 1,
+        "baseline": 1,
+        "observedGrowthChange": 8.996164993382337,
+        "correct": true,
+        "baselineCorrect": true
+      }
+    },
+    {
+      "vintage": "2023-12-31",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "e802a2aac88c0541c84dc4883ee2b69ed05b8958dafd1563090fca3fc48382c0"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "63b89b1ac9d7e92fe01b075e012755abb4fe8c8423e7142fc2b90d5361cd93db"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "EXPANSION_PROXY",
+        "period": "2023-11",
+        "asOf": "2024-01-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 15.346699991246782,
+            "previousGrowth": 11.079590485093016,
+            "acceleration": 4.267109506153766
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": 2.524499999999989,
+            "previousGrowth": 0.06700000000000728,
+            "acceleration": 2.457499999999982
+          }
+        ]
+      },
+      "outcome": {
+        "status": "PAIRED",
+        "target": "2024-02",
+        "futureVintage": "2024-03-31",
+        "observed": 1,
+        "predicted": 1,
+        "baseline": 1,
+        "observedGrowthChange": 3.971129025382524,
+        "correct": true,
+        "baselineCorrect": true
+      }
+    },
+    {
+      "vintage": "2024-01-31",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "641071454d92b18ba62f58c5e498800724bff2244d3816d30f5cfdd044656367"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "904056d95079e28f9ae6ac5047d6e32e11cefa2f1ba552ed156b4066a604838f"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "EXPANSION_PROXY",
+        "period": "2023-12",
+        "asOf": "2024-02-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 19.866908893293722,
+            "previousGrowth": 11.101383993519033,
+            "acceleration": 8.76552489977469
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": 5.320599999999999,
+            "previousGrowth": -0.09770000000000323,
+            "acceleration": 5.418300000000002
+          }
+        ]
+      },
+      "outcome": {
+        "status": "PAIRED",
+        "target": "2024-03",
+        "futureVintage": "2024-04-30",
+        "observed": -1,
+        "predicted": 1,
+        "baseline": 1,
+        "observedGrowthChange": -6.913230706735527,
+        "correct": false,
+        "baselineCorrect": false
+      }
+    },
+    {
+      "vintage": "2024-02-29",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "81d96e5f4843b2d93cb1ca1c1feb566d092bbda7eb933c2df96aabfb845c49cf"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "87b88e7797e7f807618a5dc49cb0acef12458b967873076016383174644fbaad"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "EXPANSION_PROXY",
+        "period": "2024-01",
+        "asOf": "2024-03-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 23.051821060930976,
+            "previousGrowth": 14.05565606754864,
+            "acceleration": 8.996164993382337
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": 6.859399999999994,
+            "previousGrowth": 1.7613999999999947,
+            "acceleration": 5.097999999999999
+          }
+        ]
+      },
+      "outcome": {
+        "status": "PAIRED",
+        "target": "2024-04",
+        "futureVintage": "2024-05-31",
+        "observed": -1,
+        "predicted": 1,
+        "baseline": 1,
+        "observedGrowthChange": -8.640469513524906,
+        "correct": false,
+        "baselineCorrect": false
+      }
+    },
+    {
+      "vintage": "2024-03-31",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "64b1bc6ccc990cc6325658b4145343f035fca36fff3ed769b479be11962e9d1f"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "799b2101bba0cdf9bb49426e9475f218673a6d9297d434c959d42742355127ad"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "EXPANSION_PROXY",
+        "period": "2024-02",
+        "asOf": "2024-04-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 18.495620637157394,
+            "previousGrowth": 14.52449161177487,
+            "acceleration": 3.971129025382524
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": 3.8211000000000013,
+            "previousGrowth": 1.9695999999999998,
+            "acceleration": 1.8515000000000015
+          }
+        ]
+      },
+      "outcome": {
+        "status": "PAIRED",
+        "target": "2024-05",
+        "futureVintage": "2024-06-30",
+        "observed": -1,
+        "predicted": 1,
+        "baseline": 1,
+        "observedGrowthChange": -0.8671703767409111,
+        "correct": false,
+        "baselineCorrect": false
+      }
+    },
+    {
+      "vintage": "2024-04-30",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "dbfeeee63ea1d7fc46ccab1b2d10fcec276cf1d23720daa4fa8b303fa04db559"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "97de9db92ebda9f125a2f36add242eb08bf93be2500f80a7f42bc7d93586a31f"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "MIXED_OR_FLAT",
+        "period": "2024-03",
+        "asOf": "2024-05-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 11.141855529891798,
+            "previousGrowth": 18.055086236627325,
+            "acceleration": -6.913230706735527
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": -1.1647000000000105,
+            "previousGrowth": 4.138499999999993,
+            "acceleration": -5.303200000000004
+          }
+        ]
+      },
+      "outcome": {
+        "status": "ABSTAIN",
+        "reason": "MIXED_OR_UNAVAILABLE"
+      }
+    },
+    {
+      "vintage": "2024-05-31",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "4febd8cba13941d274355a2cc7d94261a897c202b77b6b9ce2f8dbdf9872e9f4"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "0f92e5c1107bbe5bf569a800abf73e37aaa9d1098aafa3d5ac0fd9e4f918531e"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "MIXED_OR_FLAT",
+        "period": "2024-04",
+        "asOf": "2024-06-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 5.979668592388054,
+            "previousGrowth": 14.620138105912961,
+            "acceleration": -8.640469513524906
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": -4.8781999999999925,
+            "previousGrowth": 1.5050999999999988,
+            "acceleration": -6.383299999999991
+          }
+        ]
+      },
+      "outcome": {
+        "status": "ABSTAIN",
+        "reason": "MIXED_OR_UNAVAILABLE"
+      }
+    },
+    {
+      "vintage": "2024-06-30",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "da9aa487a697cb1ab9c8318ab9f7f0e995a54fefdfd665bbec2680450d7ae0c0"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "9408863015b84fc6074ad2a366b6954dfa64f68348c7230bd161068836a57d54"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "MIXED_OR_FLAT",
+        "period": "2024-05",
+        "asOf": "2024-07-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 3.5694237198496515,
+            "previousGrowth": 4.436594096590563,
+            "acceleration": -0.8671703767409111
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": -7.582000000000008,
+            "previousGrowth": -5.929299999999998,
+            "acceleration": -1.65270000000001
+          }
+        ]
+      },
+      "outcome": {
+        "status": "ABSTAIN",
+        "reason": "MIXED_OR_UNAVAILABLE"
+      }
+    },
+    {
+      "vintage": "2024-07-31",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "3b041978d138ec0c16dfb1df18e6340c6a5dcc5b60c9b43d8942e967e6bc0fd7"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "c5518c8a4c63c9ab4bcdd06166b8151ce69c297a798562cb81324ea13e5336b4"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "MIXED_OR_FLAT",
+        "period": "2024-06",
+        "asOf": "2024-08-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 7.558671904330216,
+            "previousGrowth": 4.652237655463631,
+            "acceleration": 2.906434248866585
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": -4.648899999999998,
+            "previousGrowth": -6.080999999999989,
+            "acceleration": 1.4320999999999913
+          }
+        ]
+      },
+      "outcome": {
+        "status": "ABSTAIN",
+        "reason": "MIXED_OR_UNAVAILABLE"
+      }
+    },
+    {
+      "vintage": "2024-08-31",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "cc5d2f032ec31d63f066adcfd1e8c38e5ac596ad2ddebf4f89861b205629f218"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "1b38a62eed4cd7ef4097f1cfdb1b8d6f6c41904e998d2b03df330e74b715471a"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "MIXED_OR_FLAT",
+        "period": "2024-07",
+        "asOf": "2024-09-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 6.329297926049926,
+            "previousGrowth": 6.966649197814601,
+            "acceleration": -0.6373512717646745
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": -5.8034000000000106,
+            "previousGrowth": -4.699699999999993,
+            "acceleration": -1.1037000000000177
+          }
+        ]
+      },
+      "outcome": {
+        "status": "ABSTAIN",
+        "reason": "MIXED_OR_UNAVAILABLE"
+      }
+    },
+    {
+      "vintage": "2024-09-30",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "99662e2c8989e280b2397f47ccc5d9457a2faf5b39f88178dde6a13947fabc32"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "a504a68e54393450fa9689378a5fa4bca97079582402a55f06b8c88c14fb9be6"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "MIXED_OR_FLAT",
+        "period": "2024-08",
+        "asOf": "2024-10-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 9.805378847990198,
+            "previousGrowth": 7.296073135258685,
+            "acceleration": 2.5093057127315133
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": -3.2157000000000124,
+            "previousGrowth": -4.710900000000009,
+            "acceleration": 1.495199999999997
+          }
+        ]
+      },
+      "outcome": {
+        "status": "ABSTAIN",
+        "reason": "MIXED_OR_UNAVAILABLE"
+      }
+    },
+    {
+      "vintage": "2024-10-31",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "188dc49866048da0c7ea42abbe3d1cb6ded3aa19313e0932c5517be80f1f6375"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "a439c5f7c7df83659403edb7a19517f6b0142ec9f1de13cf50ad1b2eb03a1188"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "MIXED_OR_FLAT",
+        "period": "2024-09",
+        "asOf": "2024-11-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 11.124775242020624,
+            "previousGrowth": 6.517091082236792,
+            "acceleration": 4.607684159783831
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": -2.303200000000004,
+            "previousGrowth": -5.4345,
+            "acceleration": 3.131299999999996
+          }
+        ]
+      },
+      "outcome": {
+        "status": "ABSTAIN",
+        "reason": "MIXED_OR_UNAVAILABLE"
+      }
+    },
+    {
+      "vintage": "2024-11-30",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "1ff606dee97a416b58520a5e812add6c4e86dc27a90b74f474454ee26de9a77f"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "1eedeb8c3a21dcd6a3d75cb92b606146826ea6e96254ddc0a00ea39adb445263"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "MIXED_OR_FLAT",
+        "period": "2024-10",
+        "asOf": "2024-12-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 6.816196443717093,
+            "previousGrowth": 5.279247836247936,
+            "acceleration": 1.5369486074691574
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": -5.560099999999991,
+            "previousGrowth": -6.600800000000007,
+            "acceleration": 1.0407000000000153
+          }
+        ]
+      },
+      "outcome": {
+        "status": "ABSTAIN",
+        "reason": "MIXED_OR_UNAVAILABLE"
+      }
+    },
+    {
+      "vintage": "2024-12-31",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "29c93bb577fcbf8e447f8e167bd918f409bb0de6e2d7cea5f8e73f8750b5eafa"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "dd89481fa3c679ad9fd179e7f90bb8732ba4300a2dc827805ad0c30a66a8d806"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "MIXED_OR_FLAT",
+        "period": "2024-11",
+        "asOf": "2025-01-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 8.016452577207268,
+            "previousGrowth": 9.71042127049737,
+            "acceleration": -1.6939686932901026
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": -4.659099999999995,
+            "previousGrowth": -3.2859000000000123,
+            "acceleration": -1.3731999999999829
+          }
+        ]
+      },
+      "outcome": {
+        "status": "ABSTAIN",
+        "reason": "MIXED_OR_UNAVAILABLE"
+      }
+    },
+    {
+      "vintage": "2025-01-31",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "dc414ef4c94f0b3e4e163d3b4cd6d0e17fd618c808d7679aca0b25bfde081c03"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "3a05f59bacc0dc703d62f71f62346b43191d32447fe994a307945548e39674a2"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "MIXED_OR_FLAT",
+        "period": "2024-12",
+        "asOf": "2025-02-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 9.507285676971522,
+            "previousGrowth": 9.48642897189551,
+            "acceleration": 0.020856705076012005
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": -3.541499999999999,
+            "previousGrowth": -3.496600000000001,
+            "acceleration": -0.044899999999998386
+          }
+        ]
+      },
+      "outcome": {
+        "status": "ABSTAIN",
+        "reason": "MIXED_OR_UNAVAILABLE"
+      }
+    },
+    {
+      "vintage": "2025-02-28",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "fc69daf225ca32364339415e02c354c5c17330f4364d4c10971b9abf571e320a"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "8b54dddca945bd50bbfe26c6083b83676981b8caedfc09e42389ae904d56e934"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "MIXED_OR_FLAT",
+        "period": "2025-01",
+        "asOf": "2025-03-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 6.041630794259634,
+            "previousGrowth": 8.46348999958899,
+            "acceleration": -2.4218592053293566
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": -5.854799999999997,
+            "previousGrowth": -4.346999999999994,
+            "acceleration": -1.5078000000000031
+          }
+        ]
+      },
+      "outcome": {
+        "status": "ABSTAIN",
+        "reason": "MIXED_OR_UNAVAILABLE"
+      }
+    },
+    {
+      "vintage": "2025-03-31",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "4733e646d559f04fb13092bb44977d544d69234c27281ca5a55ab29dfc322141"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "a40021cf63f93157012081c0975d9aadda1bd1ac229b0d2cf0e05ac6dfaf708e"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "EXPANSION_PROXY",
+        "period": "2025-02",
+        "asOf": "2025-04-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 14.721377549342375,
+            "previousGrowth": 6.904217166855453,
+            "acceleration": 7.817160382486922
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": 0.47410000000000707,
+            "previousGrowth": -5.470299999999995,
+            "acceleration": 5.944400000000002
+          }
+        ]
+      },
+      "outcome": {
+        "status": "PAIRED",
+        "target": "2025-05",
+        "futureVintage": "2025-06-30",
+        "observed": -1,
+        "predicted": 1,
+        "baseline": 1,
+        "observedGrowthChange": -2.8544517541071457,
+        "correct": false,
+        "baselineCorrect": false
+      }
+    },
+    {
+      "vintage": "2025-04-30",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "25b9d0a23e1a6aa24f8259fed2d88a77d1ba9c7aceabd42a0a4da5ef085cb442"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "e7ac2c9bb8ef246bd48a0adcf923b99e952f7b5482b0aeb9a0e5057a9cc3d0e1"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "MIXED_OR_FLAT",
+        "period": "2025-03",
+        "asOf": "2025-05-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 13.703123590530009,
+            "previousGrowth": 7.2323952728119645,
+            "acceleration": 6.470728317718044
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": -0.11709999999999354,
+            "previousGrowth": -5.187300000000008,
+            "acceleration": 5.070200000000014
+          }
+        ]
+      },
+      "outcome": {
+        "status": "ABSTAIN",
+        "reason": "MIXED_OR_UNAVAILABLE"
+      }
+    },
+    {
+      "vintage": "2025-05-31",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "59a8ca232fe84a93bab5a5c561acd5cd5fd97d28ed312e63ff8b89d6f0544073"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "3393745bdd403186c3c9040f0d758c34c8325e86695b450cf4cd90f70bd77ec8"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "MIXED_OR_FLAT",
+        "period": "2025-04",
+        "asOf": "2025-06-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 9.177967470477032,
+            "previousGrowth": 12.187316308536357,
+            "acceleration": -3.0093488380593243
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": -3.2577,
+            "previousGrowth": -1.4376999999999924,
+            "acceleration": -1.8200000000000074
+          }
+        ]
+      },
+      "outcome": {
+        "status": "ABSTAIN",
+        "reason": "MIXED_OR_UNAVAILABLE"
+      }
+    },
+    {
+      "vintage": "2025-06-30",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "29a76f9419a8e209bd484769737c6623a8ba167b0277318f242de2bdbcc322cd"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "989fe69503e5eaf8b59f646c8526adbd39f57d7b379f872e94dd85583a8d762e"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "MIXED_OR_FLAT",
+        "period": "2025-05",
+        "asOf": "2025-07-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 11.020159920617578,
+            "previousGrowth": 13.874611674724724,
+            "acceleration": -2.8544517541071457
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": -1.7497000000000043,
+            "previousGrowth": -0.12420000000000186,
+            "acceleration": -1.6255000000000024
+          }
+        ]
+      },
+      "outcome": {
+        "status": "ABSTAIN",
+        "reason": "MIXED_OR_UNAVAILABLE"
+      }
+    },
+    {
+      "vintage": "2025-07-31",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "18e6479b324720b6d19bbe9ad8a3f75329208053d5f8f3c3bb0280bdce5f48cc"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "7c622b68a89b295991b679cf6f83fc816c8e3cf920fb8510ed563ec961811aa8"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "EXPANSION_PROXY",
+        "period": "2025-06",
+        "asOf": "2025-08-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 15.298902605817588,
+            "previousGrowth": 12.744255326445364,
+            "acceleration": 2.554647279372224
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": 1.495199999999997,
+            "previousGrowth": -0.7897999999999996,
+            "acceleration": 2.2849999999999966
+          }
+        ]
+      },
+      "outcome": {
+        "status": "MISSING",
+        "reason": "FUTURE_EXACT_PERIOD_MISSING"
+      }
+    },
+    {
+      "vintage": "2025-08-31",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "b6dce106724c48ed8c1402c619b7342e9cf368026772eca4faa8ab01ab2ea221"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "6e47234c2578508f2ad733464b646f08bd39ba2dc5adabb537114e1569b3b3a5"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "EXPANSION_PROXY",
+        "period": "2025-07",
+        "asOf": "2025-09-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 16.235141806386434,
+            "previousGrowth": 11.551616550367804,
+            "acceleration": 4.68352525601863
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": 2.3259000000000043,
+            "previousGrowth": -1.5294999999999987,
+            "acceleration": 3.855400000000003
+          }
+        ]
+      },
+      "outcome": {
+        "status": "MISSING",
+        "reason": "FUTURE_EXACT_PERIOD_MISSING"
+      }
+    },
+    {
+      "vintage": "2025-09-30",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "dfe5ed1b512b09cd7c60f4e5066cd55a4f92b59e1d87f02a27bb2955beece998"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "7c50049cf9bf1716558d7c79712925b8ae35c00f25731241858a9856f20e79af"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "EXPANSION_PROXY",
+        "period": "2025-08",
+        "asOf": "2025-10-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 16.233187717737675,
+            "previousGrowth": 12.149090104400862,
+            "acceleration": 4.084097613336812
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": 2.5287000000000006,
+            "previousGrowth": -0.9275999999999982,
+            "acceleration": 3.456299999999999
+          }
+        ]
+      },
+      "outcome": {
+        "status": "PAIRED",
+        "target": "2025-11",
+        "futureVintage": "2025-12-31",
+        "observed": 1,
+        "predicted": 1,
+        "baseline": 1,
+        "observedGrowthChange": 2.8303231494080983,
+        "correct": true,
+        "baselineCorrect": true
+      }
+    },
+    {
+      "vintage": "2025-10-31",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 23,
+          "missing": 0,
+          "sha256": "a2f5bd51c7f61207eb1b991b227c9299f33d2e741400e3e5c2d189569ed23258"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 23,
+          "missing": 0,
+          "sha256": "326bb0d4bbc5c7d0be590519976cd9879cba4f394ce6b9b09ff3200c4702c06f"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "EXPANSION_PROXY",
+        "period": "2025-08",
+        "asOf": "2025-11-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 16.233187717737675,
+            "previousGrowth": 12.149090104400862,
+            "acceleration": 4.084097613336812
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": 2.5287000000000006,
+            "previousGrowth": -0.9275999999999982,
+            "acceleration": 3.456299999999999
+          }
+        ]
+      },
+      "outcome": {
+        "status": "PAIRED",
+        "target": "2025-11",
+        "futureVintage": "2026-01-31",
+        "observed": 1,
+        "predicted": 1,
+        "baseline": 1,
+        "observedGrowthChange": 2.232395614864636,
+        "correct": true,
+        "baselineCorrect": true
+      }
+    },
+    {
+      "vintage": "2025-11-30",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 22,
+          "missing": 0,
+          "sha256": "7664ec58408b8918f08992f97c24ea39febd132063f3c7061f130e65b3c3b3f5"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 22,
+          "missing": 0,
+          "sha256": "010f9979189d009c43972514f90b2d2c7558810d32f5074640db7861d86a424d"
+        }
+      ],
+      "activity": {
+        "status": "BLOCKED",
+        "reason": "STALE_OR_MISALIGNED_SERIES"
+      },
+      "outcome": {
+        "status": "ABSTAIN",
+        "reason": "STALE_OR_MISALIGNED_SERIES"
+      }
+    },
+    {
+      "vintage": "2025-12-31",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "bb0737756e2740ecea1b0f7677a3190394bff9f69822e3126a0d6a230f9b8598"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "9305a9cdc70b32c0959b3688b5081914ce4e5391adb1f183bae63069e4bcc0b6"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "MIXED_OR_FLAT",
+        "period": "2025-11",
+        "asOf": "2026-01-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 16.4877408245119,
+            "previousGrowth": 13.657417675103801,
+            "acceleration": 2.8303231494080983
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": -2.055800000000005,
+            "previousGrowth": -2.6944000000000017,
+            "acceleration": 0.6385999999999967
+          }
+        ]
+      },
+      "outcome": {
+        "status": "ABSTAIN",
+        "reason": "MIXED_OR_UNAVAILABLE"
+      }
+    },
+    {
+      "vintage": "2026-01-31",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "67801a03b94bc10de4d9395a1a79515bdb27408e14244febc0e9d94a8cdf8e66"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "daeb38be3c2546b9ba74ee800bf96010a79cd047607473884e61aa5afe96df74"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "MIXED_OR_FLAT",
+        "period": "2025-12",
+        "asOf": "2026-02-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 15.504817693165386,
+            "previousGrowth": 13.7281577931901,
+            "acceleration": 1.7766598999752858
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": -2.9662999999999897,
+            "previousGrowth": -3.072900000000004,
+            "acceleration": 0.10660000000001446
+          }
+        ]
+      },
+      "outcome": {
+        "status": "ABSTAIN",
+        "reason": "MIXED_OR_UNAVAILABLE"
+      }
+    },
+    {
+      "vintage": "2026-02-28",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "f8465509afdedf59ae79c6260e50da14695dcf9f224b7a6a969a16d2ccca2e24"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "08a63b5d8f9fd797325ccb5507c43b7d299462589f32fbe599cdc793d5a9d524"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "MIXED_OR_FLAT",
+        "period": "2026-01",
+        "asOf": "2026-03-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 10.843900167770348,
+            "previousGrowth": 14.737496847944854,
+            "acceleration": -3.8935966801745057
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": -6.005799999999994,
+            "previousGrowth": -2.8615000000000066,
+            "acceleration": -3.144299999999987
+          }
+        ]
+      },
+      "outcome": {
+        "status": "ABSTAIN",
+        "reason": "MIXED_OR_UNAVAILABLE"
+      }
+    },
+    {
+      "vintage": "2026-03-31",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "2ed56510894ac462696943b3140311eeacd3bb34e28042267e1d1b5b4610c6be"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "64b56f283ab1031cfad8c91a3aee24c813d78e46de92793176515e9145b1dbb2"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "MIXED_OR_FLAT",
+        "period": "2026-02",
+        "asOf": "2026-04-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 10.302490612921723,
+            "previousGrowth": 14.667015746373814,
+            "acceleration": -4.364525133452091
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": -6.30810000000001,
+            "previousGrowth": -3.218500000000006,
+            "acceleration": -3.0896000000000043
+          }
+        ]
+      },
+      "outcome": {
+        "status": "ABSTAIN",
+        "reason": "MIXED_OR_UNAVAILABLE"
+      }
+    },
+    {
+      "vintage": "2026-04-30",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "cbca6ba9cfd07cccd329dec8269f56466d0a2157625daf32f6b672a5122edbc5"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "a1c17384d07cd8b2f7497b3c2872eb9cc1fa52e32b7e59adabe61bcc97586199"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "MIXED_OR_FLAT",
+        "period": "2026-03",
+        "asOf": "2026-05-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 7.681244704923307,
+            "previousGrowth": 12.838594797889868,
+            "acceleration": -5.157350092966562
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": -7.734499999999997,
+            "previousGrowth": -4.665199999999999,
+            "acceleration": -3.0692999999999984
+          }
+        ]
+      },
+      "outcome": {
+        "status": "ABSTAIN",
+        "reason": "MIXED_OR_UNAVAILABLE"
+      }
+    },
+    {
+      "vintage": "2026-05-31",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "2ea38a65d57b63167fcd53a23171307a13621917d17470a47e47fef4ff129209"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "e7f01995334a656513e6fc8d6b9f63e1a442540ecfe426e23ac1efb21c36f9d7"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "MIXED_OR_FLAT",
+        "period": "2026-04",
+        "asOf": "2026-06-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 9.864319833122837,
+            "previousGrowth": 11.91998390619029,
+            "acceleration": -2.0556640730674527
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": -6.029899999999998,
+            "previousGrowth": -5.291899999999998,
+            "acceleration": -0.7379999999999995
+          }
+        ]
+      },
+      "outcome": {
+        "status": "ABSTAIN",
+        "reason": "MIXED_OR_UNAVAILABLE"
+      }
+    },
+    {
+      "vintage": "2026-06-30",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "2b62c78e5e221edabd1bcba9660dedc7b81b5aebf0bacb4d303423b672b046c7"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "bb9d38f626b0d9f4f254458d8d275e576a71962e4622fd3a9c0459994694bc34"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "MIXED_OR_FLAT",
+        "period": "2026-05",
+        "asOf": "2026-07-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 14.394600389650059,
+            "previousGrowth": 10.272557167870255,
+            "acceleration": 4.122043221779803
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": -2.659800000000004,
+            "previousGrowth": -6.3279,
+            "acceleration": 3.6680999999999955
+          }
+        ]
+      },
+      "outcome": {
+        "status": "ABSTAIN",
+        "reason": "MIXED_OR_UNAVAILABLE"
+      }
+    },
+    {
+      "vintage": "2026-07-31",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "9bb1842210377918ceda8f8642427ae616d24b02620b9331aa4acbef31c536e4"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "99975dfbd7c22118b06165c4b2e7c0b5ee5f9d670c597599677e67da973cf4f0"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "MIXED_OR_FLAT",
+        "period": "2026-06",
+        "asOf": "2026-08-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 11.465238662263166,
+            "previousGrowth": 9.003875572213694,
+            "acceleration": 2.4613630900494723
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": -4.066299999999998,
+            "previousGrowth": -6.872399999999999,
+            "acceleration": 2.8061000000000007
+          }
+        ]
+      },
+      "outcome": {
+        "status": "ABSTAIN",
+        "reason": "MIXED_OR_UNAVAILABLE"
+      }
+    },
+    {
+      "vintage": "2026-08-31",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "3d11b4e8c36b825e2c62c27b716d20aca7da01071b94865422361d27af88e0f6"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "16cfd9151c9edc06ef9feec657a4f9fc6995f56df13207d402cf90016a93e92b"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "MIXED_OR_FLAT",
+        "period": "2026-07",
+        "asOf": "2026-09-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 11.857270679167975,
+            "previousGrowth": 8.739292017178379,
+            "acceleration": 3.1179786619895964
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": -3.4802999999999997,
+            "previousGrowth": -6.768999999999991,
+            "acceleration": 3.2886999999999915
+          }
+        ]
+      },
+      "outcome": {
+        "status": "ABSTAIN",
+        "reason": "MIXED_OR_UNAVAILABLE"
+      }
+    },
+    {
+      "vintage": "2026-09-30",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "8e17fdf2545c97d49752eacb55084b7addbdf1c892581b0e05a05f6b365ef745"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "3f20cd605c163517be797a977e9beab1028f8a7cf42b607b89041f6c5dd11b4e"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "MIXED_OR_FLAT",
+        "period": "2026-08",
+        "asOf": "2026-10-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 12.353469624165925,
+            "previousGrowth": 12.069477452744891,
+            "acceleration": 0.2839921714210334
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": -2.5816000000000088,
+            "previousGrowth": -4.191299999999998,
+            "acceleration": 1.6096999999999895
+          }
+        ]
+      },
+      "outcome": {
+        "status": "ABSTAIN",
+        "reason": "MIXED_OR_UNAVAILABLE"
+      }
+    },
+    {
+      "vintage": "2026-10-31",
+      "sources": [
+        {
+          "id": "IPG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "d2dffe11940cdcac4fa1202ca994780f94c9d45e83f7984148b2dffd284e3619"
+        },
+        {
+          "id": "CAPUTLG3344S",
+          "status": "PASS_SCHEMA",
+          "rows": 24,
+          "missing": 0,
+          "sha256": "35fd04861ffeec2bdbbd06eacded0676a113d06d7f9ef8a02148f5c6115c9531"
+        }
+      ],
+      "activity": {
+        "status": "SOURCE_PREVIEW_NOT_VERIFIED",
+        "phase": "EXPANSION_PROXY",
+        "period": "2026-09",
+        "asOf": "2026-11-02T00:00:00.000Z",
+        "metrics": [
+          {
+            "id": "IPG3344S",
+            "growth": 19.899255735903942,
+            "previousGrowth": 15.374376203086149,
+            "acceleration": 4.524879532817794
+          },
+          {
+            "id": "CAPUTLG3344S",
+            "growth": 2.7871999999999986,
+            "previousGrowth": -1.5357000000000056,
+            "acceleration": 4.322900000000004
+          }
+        ]
+      },
+      "outcome": {
+        "status": "CENSORED",
+        "reason": "FUTURE_VINTAGE_OUTSIDE_SCHEDULE"
+      }
+    }
+  ],
+  "limitations": [
+    "Not independent ground truth, overlaps production input; previously inspected snapshots.",
+    "At classified months baseline is mechanically identical by construction; cannot claim incremental predictive skill.",
+    "No sector stock prices, profit outcomes, authorized raw archive, trading or forecast authority."
+  ]
+}
