@@ -108,8 +108,24 @@ def login_page(message="",ready=True):
 
 PAGES = {"/":("01 / REGISTER","투자 업무 대장",[("인증 세션","활성"),("안전마진 감시","운영 승인 대기"),("실계좌 원장","미연결")]),
          "/assets":("02 / ASSETS","자산 원장",[("평가 자산","—"),("보유 종목","미연결"),("토스 계좌","아직 연결하지 않음")]),
-         "/reports":("03 / REPORTS","투자 보고서",[("안전마진 감시","검증 중"),("시장 데이터","미연결"),("실제 보고서","없음")]),
+         "/reports":("03 / REPORTS","투자 보고서",[("안전마진 감시","검증 중"),("시장 데이터","미연결"),("실제 보고서","삼성전자 2025 연간 / 검증 1건")]),
          "/records":("04 / RECORDS","운영 기록",[("인증 범위","단일 소유자 검증"),("실제 주문","비활성"),("운영 승인","보류")])}
+
+FUNDAMENTAL_REPORT = json.loads("{\"state\":\"DATED_ACTUAL_PUBLIC_FILING_PILOT\",\"asset_id\":\"KRX:005930\",\"issuer\":\"삼성전자\",\"period\":\"2025-12-31\",\"filing_ref\":\"20260310002820\",\"filing_date\":\"2026-03-10\",\"verified_date\":\"2026-11-28\",\"metric_unit\":\"KRW_TRILLION\",\"metrics\":{\"assets\":\"566.942\",\"equity\":\"436.320\",\"liabilities\":\"130.622\",\"net_income\":\"45.207\",\"operating_income\":\"43.601\",\"revenue\":\"333.606\"},\"ratios\":{\"liabilities_to_equity_pct\":\"29.94\",\"net_margin_pct\":\"13.55\",\"operating_margin_pct\":\"13.07\"},\"accounting_identity_check\":\"PASS_WITHIN_1000_KRW\",\"independent_review\":\"PENDING\",\"capture_mode\":\"MANUAL_TRANSFER_FROM_ONE_SHOT_RAILWAY_LOG\",\"raw_retained\":false,\"automatic_refresh\":false,\"valuation_authority\":false,\"portfolio_authority\":false,\"trade_authority\":false,\"source\":\"https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260310002820\",\"code\":\"https://github.com/ringoincidents/quantrade/commit/1fe6c896b8a939b33acd500fbba4d4b549a2e17a\"}")
+
+def fundamental_report_html():
+    r=FUNDAMENTAL_REPORT
+    return ('<p class="notice">실제 공식 공시 / 2025년 연간 연결 기준 / 2026-11-28 검증</p>'
+            '<p>삼성전자 · 005930 · 독립 검토 대기</p><table>'
+            '<tr><th>재무 항목</th><th>조 원</th></tr>'
+            +''.join('<tr><td>'+label+'</td><td>'+r["metrics"][key]+'</td></tr>' for key,label in (("revenue","매출"),("operating_income","영업이익"),("net_income","당기순이익"),("assets","자산"),("liabilities","부채"),("equity","자본")))
+            +'</table><table><tr><th>비율</th><th>%</th></tr>'
+            +''.join('<tr><td>'+label+'</td><td>'+r["ratios"][key]+'</td></tr>' for key,label in (("operating_margin_pct","영업이익률"),("net_margin_pct","순이익률"),("liabilities_to_equity_pct","부채비율")))
+            +'</table><p>회계 등식 검사 통과 (허용오차 1,000원). 자료 수집 시점과 공시일은 다릅니다.</p>'
+            '<p><a href="'+r["source"]+'">DART 공시 원문</a> · <a href="'+r["code"]+'">검증 코드</a></p>'
+            '<p class="notice">일회성 실행 결과를 수동 게시한 보고서입니다. 최신 분기·가격·가치평가·실계좌·자동 수집·독립 검토는 포함되지 않습니다. 매매 판단 권한 없음.</p>')
+
+PAGES["/reports/fundamental/005930"]=("03 / FUNDAMENTAL","기업 재무 검증 보고서",[])
 PAGES["/performance"]=("11 / PERFORMANCE","투자 성과·매매 복기",[])
 PAGES["/cases"]=("05 / CASES","기업가치·운용 기준 원장",[("실제 종목","미연결"),("운용 기준","미승인")])
 PAGES["/risk"]=("06 / RISK","포트폴리오·리스크 원장",[("실제 포트폴리오","미연결"),("실제 위험 한도","미승인")])
@@ -166,7 +182,10 @@ def page(path):
         content=report_render(path.rsplit("/",1)[1])
     elif path=="/cases":
         content+='<p><a href="/cases/demo/baseline">기업가치·운용 기준 / 합성 사례</a></p>'
+    elif path=="/reports/fundamental/005930":
+        content=fundamental_report_html()
     elif path=="/reports":
+        content+='<p><a href="/reports/fundamental/005930">삼성전자 2025 연간 재무 / 실제 공시 검증</a></p>'
         content+='<p><a href="/reports/demo/baseline">안전마진 감시 / 합성 보고서 열기</a></p><p><a href="/cases/demo/baseline">기업가치·운용 기준 원장 / 합성 사례</a></p>'
     elif path=="/performance":
         content=performance_render()
@@ -298,6 +317,8 @@ class Handler(BaseHTTPRequestHandler):
             self.send(200,json.dumps(lab_snapshot(self.path.rsplit("/",1)[1]),allow_nan=False).encode(),"application/json")
         elif self.path=="/api/demo/strategies":
             self.send(200,json.dumps(strategy_snapshot(),ensure_ascii=False,allow_nan=False).encode(),"application/json")
+        elif self.path=="/api/reports/fundamental/005930":
+            self.send(200,json.dumps(FUNDAMENTAL_REPORT,ensure_ascii=False,allow_nan=False).encode(),"application/json")
         elif self.path=="/api/demo/performance":
             self.send(200,json.dumps(performance_snapshot(),ensure_ascii=False,allow_nan=False).encode(),"application/json")
         elif self.path=="/api/performance":
