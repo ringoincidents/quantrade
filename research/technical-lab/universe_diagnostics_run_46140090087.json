@@ -1,0 +1,636 @@
+{
+  "status": "EXPLORATORY_NOT_VALIDATED",
+  "runId": 46140090087,
+  "sourceRun": 46139748823,
+  "auditCounts": {
+    "REVIEW_EXTREME_MOVE": 451,
+    "PRICE_SHAPE_PASS_NOT_G0": 835,
+    "SHORT_HISTORY": 13
+  },
+  "assetCounts": {
+    "REVIEW_EXTREME_MOVE": 451,
+    "NO_DECISION_COVERAGE": 142,
+    "USED_EXPLORATORY": 693,
+    "SHORT_HISTORY": 13
+  },
+  "errors": {},
+  "cohortCounts": {
+    "SECURITY_HOLDOUT": 154,
+    "EXPANSION": 509,
+    "PREVIOUSLY_VIEWED": 30
+  },
+  "primary": [
+    {
+      "cohort": "PREVIOUSLY_VIEWED",
+      "rule": "Y_RECLAIM3",
+      "ret": {
+        "nEvent": 106,
+        "nControl": 84,
+        "pooled": 0.02609428315118035,
+        "yearBalanced": -0.01290290974729864,
+        "years": 17,
+        "yearBlockBootstrap95": [
+          -0.029902999607420606,
+          0.0434473868610563
+        ],
+        "leaveOneAssetOutRange": [
+          0.015643896203690017,
+          0.04446953086619021
+        ]
+      },
+      "market": {
+        "nEvent": 106,
+        "nControl": 84,
+        "pooled": -0.00004968642540031237,
+        "yearBalanced": -0.012902909747298645,
+        "years": 17,
+        "yearBlockBootstrap95": [
+          -0.029902999607420606,
+          0.043447386861056286
+        ],
+        "leaveOneAssetOutRange": [
+          -0.00588321622635617,
+          0.011838423322028552
+        ]
+      },
+      "risk": {
+        "nEvent": 106,
+        "nControl": 84,
+        "pooled": -0.2367475292003594,
+        "yearBalanced": -0.11940943043884221,
+        "years": 17,
+        "yearBlockBootstrap95": [
+          -0.3081232492997198,
+          -0.05788982259570492
+        ],
+        "leaveOneAssetOutRange": [
+          -0.26731198808637374,
+          -0.20536585365853655
+        ]
+      },
+      "nonoverlap": {
+        "ret": 0.02609428315118035,
+        "market": -0.00004968642540031237,
+        "risk": -0.2367475292003594
+      },
+      "regime": [
+        {
+          "regime": "ABOVE_SMA200",
+          "n": 132,
+          "marketExcessDelta": 0.014471908912958586,
+          "riskDelta": -0.19110158134548377
+        },
+        {
+          "regime": "BELOW_SMA200",
+          "n": 58,
+          "marketExcessDelta": -0.03098006882142971,
+          "riskDelta": 0.0356589147286821
+        }
+      ]
+    },
+    {
+      "cohort": "PREVIOUSLY_VIEWED",
+      "rule": "M_COMP_BREAK",
+      "ret": {
+        "nEvent": 138,
+        "nControl": 531,
+        "pooled": 0.001783688138949838,
+        "yearBalanced": -0.015908423698447634,
+        "years": 25,
+        "yearBlockBootstrap95": [
+          -0.04967398955352367,
+          0.010333431906682178
+        ],
+        "leaveOneAssetOutRange": [
+          -0.002193940684475575,
+          0.005504378387184029
+        ]
+      },
+      "market": {
+        "nEvent": 138,
+        "nControl": 531,
+        "pooled": -0.01734523040219734,
+        "yearBalanced": -0.015967140558101355,
+        "years": 25,
+        "yearBlockBootstrap95": [
+          -0.04351303236289157,
+          0.004976092514206747
+        ],
+        "leaveOneAssetOutRange": [
+          -0.020710207227397987,
+          -0.012089251592254801
+        ]
+      },
+      "risk": {
+        "nEvent": 138,
+        "nControl": 531,
+        "pooled": -0.06317039220502746,
+        "yearBalanced": -0.009060766084865559,
+        "years": 25,
+        "yearBlockBootstrap95": [
+          -0.14105806945752225,
+          0.09877738851415863
+        ],
+        "leaveOneAssetOutRange": [
+          -0.08372093023255817,
+          -0.0531623175586024
+        ]
+      },
+      "nonoverlap": {
+        "ret": 0.017971153327708246,
+        "market": 0.0059821478995897,
+        "risk": -0.16921244394618834
+      },
+      "regime": [
+        {
+          "regime": "ABOVE_SMA200",
+          "n": 415,
+          "marketExcessDelta": -0.019194886915024,
+          "riskDelta": 0.02112968231389284
+        },
+        {
+          "regime": "BELOW_SMA200",
+          "n": 254,
+          "marketExcessDelta": -0.006166092603600627,
+          "riskDelta": -0.03654756077663568
+        }
+      ]
+    },
+    {
+      "cohort": "PREVIOUSLY_VIEWED",
+      "rule": "M_SUPPORT100",
+      "ret": {
+        "nEvent": 53,
+        "nControl": 320,
+        "pooled": 0.0015466344808929208,
+        "yearBalanced": -0.006666114220887523,
+        "years": 19,
+        "yearBlockBootstrap95": [
+          -0.05161601313324953,
+          0.036272953395889145
+        ],
+        "leaveOneAssetOutRange": [
+          -0.011921497052158232,
+          0.008522859584301955
+        ]
+      },
+      "market": {
+        "nEvent": 53,
+        "nControl": 320,
+        "pooled": -0.009614367683618199,
+        "yearBalanced": 0.002751322936019023,
+        "years": 19,
+        "yearBlockBootstrap95": [
+          -0.04542997337582989,
+          0.057488834079669225
+        ],
+        "leaveOneAssetOutRange": [
+          -0.020040280798360913,
+          -0.0013173533061360994
+        ]
+      },
+      "risk": {
+        "nEvent": 53,
+        "nControl": 320,
+        "pooled": 0.006073113207547165,
+        "yearBalanced": 0.13107538270595107,
+        "years": 19,
+        "yearBlockBootstrap95": [
+          0.08345124499222775,
+          0.3403792185563688
+        ],
+        "leaveOneAssetOutRange": [
+          -0.01866817014345673,
+          0.0448575469791877
+        ]
+      },
+      "nonoverlap": {
+        "ret": 0.01852873189321049,
+        "market": 0.006964546552679907,
+        "risk": -0.01913875598086129
+      },
+      "regime": [
+        {
+          "regime": "ABOVE_SMA200",
+          "n": 121,
+          "marketExcessDelta": -0.00005565173451448427,
+          "riskDelta": 0.30754716981132074
+        },
+        {
+          "regime": "BELOW_SMA200",
+          "n": 252,
+          "marketExcessDelta": -0.013945971906868897,
+          "riskDelta": -0.1303492375799311
+        }
+      ]
+    },
+    {
+      "cohort": "EXPANSION",
+      "rule": "Y_RECLAIM3",
+      "ret": {
+        "nEvent": 1446,
+        "nControl": 1031,
+        "pooled": -0.0037609509481716687,
+        "yearBalanced": -0.010943180525644051,
+        "years": 26,
+        "yearBlockBootstrap95": [
+          -0.03593933870423208,
+          0.011757157687327388
+        ],
+        "leaveOneAssetOutRange": [
+          -0.005157788505108445,
+          -0.0022294485819067886
+        ]
+      },
+      "market": {
+        "nEvent": 1446,
+        "nControl": 1031,
+        "pooled": -0.009237393402255833,
+        "yearBalanced": -0.010952215177339054,
+        "years": 26,
+        "yearBlockBootstrap95": [
+          -0.03593593263493478,
+          0.011761027260289119
+        ],
+        "leaveOneAssetOutRange": [
+          -0.010360597603213798,
+          -0.00802343186253791
+        ]
+      },
+      "risk": {
+        "nEvent": 1446,
+        "nControl": 1031,
+        "pooled": -0.10210983709701871,
+        "yearBalanced": -0.05698521670212746,
+        "years": 26,
+        "yearBlockBootstrap95": [
+          -0.1101522832099279,
+          -0.020115434154512408
+        ],
+        "leaveOneAssetOutRange": [
+          -0.10480489468816317,
+          -0.0989966509928622
+        ]
+      },
+      "nonoverlap": {
+        "ret": -0.0037609509481716687,
+        "market": -0.009237393402255833,
+        "risk": -0.10210983709701871
+      },
+      "regime": [
+        {
+          "regime": "ABOVE_SMA200",
+          "n": 1840,
+          "marketExcessDelta": -0.007543026064009424,
+          "riskDelta": -0.043221048580448174
+        },
+        {
+          "regime": "BELOW_SMA200",
+          "n": 637,
+          "marketExcessDelta": 0.01727692937892629,
+          "riskDelta": -0.08511277883738289
+        }
+      ]
+    },
+    {
+      "cohort": "EXPANSION",
+      "rule": "M_COMP_BREAK",
+      "ret": {
+        "nEvent": 1271,
+        "nControl": 4512,
+        "pooled": 0.0020970257811054396,
+        "yearBalanced": -0.003844063005276161,
+        "years": 26,
+        "yearBlockBootstrap95": [
+          -0.011330082575367153,
+          0.01055107811188757
+        ],
+        "leaveOneAssetOutRange": [
+          0.0014822564709248628,
+          0.0030601838894951383
+        ]
+      },
+      "market": {
+        "nEvent": 1271,
+        "nControl": 4512,
+        "pooled": 0.008276013266201889,
+        "yearBalanced": 0.008930189313589538,
+        "years": 26,
+        "yearBlockBootstrap95": [
+          0.001919954226183403,
+          0.01980450082389547
+        ],
+        "leaveOneAssetOutRange": [
+          0.007758982306653495,
+          0.008895953406109332
+        ]
+      },
+      "risk": {
+        "nEvent": 1271,
+        "nControl": 4512,
+        "pooled": -0.07874847944601615,
+        "yearBalanced": -0.04912707074770449,
+        "years": 26,
+        "yearBlockBootstrap95": [
+          -0.10110966854401114,
+          -0.01822365755608498
+        ],
+        "leaveOneAssetOutRange": [
+          -0.08197283037821662,
+          -0.07629401482901521
+        ]
+      },
+      "nonoverlap": {
+        "ret": 0.0034277659054308615,
+        "market": 0.011950510499181837,
+        "risk": -0.08136856998275344
+      },
+      "regime": [
+        {
+          "regime": "ABOVE_SMA200",
+          "n": 4052,
+          "marketExcessDelta": 0.008082086536300503,
+          "riskDelta": -0.05167845998889356
+        },
+        {
+          "regime": "BELOW_SMA200",
+          "n": 1731,
+          "marketExcessDelta": 0.022274848470573035,
+          "riskDelta": -0.045864816393731855
+        }
+      ]
+    },
+    {
+      "cohort": "EXPANSION",
+      "rule": "M_SUPPORT100",
+      "ret": {
+        "nEvent": 679,
+        "nControl": 5273,
+        "pooled": 0.013121918540180012,
+        "yearBalanced": -0.0030278888783386794,
+        "years": 25,
+        "yearBlockBootstrap95": [
+          -0.022680512652908248,
+          0.014194526073681556
+        ],
+        "leaveOneAssetOutRange": [
+          0.011365279827717824,
+          0.01435533113807749
+        ]
+      },
+      "market": {
+        "nEvent": 679,
+        "nControl": 5273,
+        "pooled": -0.0037273098775048776,
+        "yearBalanced": -0.007191122865658301,
+        "years": 25,
+        "yearBlockBootstrap95": [
+          -0.024726952752351525,
+          0.012505287095916202
+        ],
+        "leaveOneAssetOutRange": [
+          -0.004825476605552888,
+          -0.002885783426832201
+        ]
+      },
+      "risk": {
+        "nEvent": 679,
+        "nControl": 5273,
+        "pooled": -0.011943468365114562,
+        "yearBalanced": 0.03600156989734135,
+        "years": 25,
+        "yearBlockBootstrap95": [
+          -0.03942279121872765,
+          0.07595841745609828
+        ],
+        "leaveOneAssetOutRange": [
+          -0.014880778018630247,
+          -0.007197171649704237
+        ]
+      },
+      "nonoverlap": {
+        "ret": 0.02065351027046327,
+        "market": 0.0018214493938285194,
+        "risk": -0.01048608907225218
+      },
+      "regime": [
+        {
+          "regime": "ABOVE_SMA200",
+          "n": 2394,
+          "marketExcessDelta": 0.000028279411049507777,
+          "riskDelta": 0.020601196660814725
+        },
+        {
+          "regime": "BELOW_SMA200",
+          "n": 3558,
+          "marketExcessDelta": -0.00734789425748994,
+          "riskDelta": -0.038085590388853285
+        }
+      ]
+    },
+    {
+      "cohort": "SECURITY_HOLDOUT",
+      "rule": "Y_RECLAIM3",
+      "ret": {
+        "nEvent": 417,
+        "nControl": 315,
+        "pooled": 0.00588577251912271,
+        "yearBalanced": -0.023385577865350497,
+        "years": 25,
+        "yearBlockBootstrap95": [
+          -0.05552338131388159,
+          0.00815935496052219
+        ],
+        "leaveOneAssetOutRange": [
+          0.002999402357925417,
+          0.00948645195277501
+        ]
+      },
+      "market": {
+        "nEvent": 417,
+        "nControl": 315,
+        "pooled": 0.001718111340137999,
+        "yearBalanced": -0.0233855778653505,
+        "years": 25,
+        "yearBlockBootstrap95": [
+          -0.05552338131388159,
+          0.008159354960522185
+        ],
+        "leaveOneAssetOutRange": [
+          -0.0008132596820239896,
+          0.0049055825014478124
+        ]
+      },
+      "risk": {
+        "nEvent": 417,
+        "nControl": 315,
+        "pooled": -0.10188420692017813,
+        "yearBalanced": 0.04399496499325876,
+        "years": 25,
+        "yearBlockBootstrap95": [
+          -0.04136565593909717,
+          0.169942761874021
+        ],
+        "leaveOneAssetOutRange": [
+          -0.11008507004838558,
+          -0.09258477557337835
+        ]
+      },
+      "nonoverlap": {
+        "ret": 0.00588577251912271,
+        "market": 0.001718111340137999,
+        "risk": -0.10188420692017813
+      },
+      "regime": [
+        {
+          "regime": "ABOVE_SMA200",
+          "n": 528,
+          "marketExcessDelta": -0.007226693720578661,
+          "riskDelta": -0.023389112678523116
+        },
+        {
+          "regime": "BELOW_SMA200",
+          "n": 204,
+          "marketExcessDelta": 0.0522325795631529,
+          "riskDelta": -0.08528784648187637
+        }
+      ]
+    },
+    {
+      "cohort": "SECURITY_HOLDOUT",
+      "rule": "M_COMP_BREAK",
+      "ret": {
+        "nEvent": 421,
+        "nControl": 1417,
+        "pooled": -0.003089234949759885,
+        "yearBalanced": -0.005253425707877955,
+        "years": 26,
+        "yearBlockBootstrap95": [
+          -0.01729759914364722,
+          0.006205069059977251
+        ],
+        "leaveOneAssetOutRange": [
+          -0.004406949099387662,
+          -0.0010498687935910564
+        ]
+      },
+      "market": {
+        "nEvent": 421,
+        "nControl": 1417,
+        "pooled": 0.008903077532718757,
+        "yearBalanced": 0.015272369073635772,
+        "years": 26,
+        "yearBlockBootstrap95": [
+          -0.0008015968204398186,
+          0.03011913051857816
+        ],
+        "leaveOneAssetOutRange": [
+          0.007555211495774674,
+          0.011278487863240946
+        ]
+      },
+      "risk": {
+        "nEvent": 421,
+        "nControl": 1417,
+        "pooled": -0.018611800716444526,
+        "yearBalanced": -0.01308686241243757,
+        "years": 26,
+        "yearBlockBootstrap95": [
+          -0.08996580668171526,
+          0.060973592898956125
+        ],
+        "leaveOneAssetOutRange": [
+          -0.027775353464828068,
+          -0.013350358674099672
+        ]
+      },
+      "nonoverlap": {
+        "ret": -0.0021873661371164255,
+        "market": 0.01190367492770927,
+        "risk": -0.03574324324324324
+      },
+      "regime": [
+        {
+          "regime": "ABOVE_SMA200",
+          "n": 1386,
+          "marketExcessDelta": 0.0003750799911860451,
+          "riskDelta": 0.017361437215729913
+        },
+        {
+          "regime": "BELOW_SMA200",
+          "n": 452,
+          "marketExcessDelta": 0.0626666949071227,
+          "riskDelta": -0.049062049062049085
+        }
+      ]
+    },
+    {
+      "cohort": "SECURITY_HOLDOUT",
+      "rule": "M_SUPPORT100",
+      "ret": {
+        "nEvent": 206,
+        "nControl": 1444,
+        "pooled": 0.021527507029914888,
+        "yearBalanced": -0.005004286283377066,
+        "years": 25,
+        "yearBlockBootstrap95": [
+          -0.03245189914106392,
+          0.011796238423117188
+        ],
+        "leaveOneAssetOutRange": [
+          0.015438294374594999,
+          0.02866545154228934
+        ]
+      },
+      "market": {
+        "nEvent": 206,
+        "nControl": 1444,
+        "pooled": 0.004189601775034539,
+        "yearBalanced": -0.015085415209980697,
+        "years": 25,
+        "yearBlockBootstrap95": [
+          -0.037154735658126284,
+          0.0032747304247174565
+        ],
+        "leaveOneAssetOutRange": [
+          0.00004063987548285318,
+          0.00939036451040032
+        ]
+      },
+      "risk": {
+        "nEvent": 206,
+        "nControl": 1444,
+        "pooled": -0.038115536669983574,
+        "yearBalanced": -0.006940743424764581,
+        "years": 25,
+        "yearBlockBootstrap95": [
+          -0.0536082158335984,
+          0.08577350888849898
+        ],
+        "leaveOneAssetOutRange": [
+          -0.04682386477641476,
+          -0.02704935763094718
+        ]
+      },
+      "nonoverlap": {
+        "ret": 0.022689924268991333,
+        "market": 0.002780285606210924,
+        "risk": -0.07451710083289026
+      },
+      "regime": [
+        {
+          "regime": "ABOVE_SMA200",
+          "n": 690,
+          "marketExcessDelta": -0.015071265865174533,
+          "riskDelta": -0.027459016393442615
+        },
+        {
+          "regime": "BELOW_SMA200",
+          "n": 960,
+          "marketExcessDelta": 0.014806908908900584,
+          "riskDelta": -0.0512732671006052
+        }
+      ]
+    }
+  ]
+}
