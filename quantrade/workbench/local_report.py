@@ -58,6 +58,7 @@ def require(condition, reason):
         raise ValueError(reason)
 
 def evaluate(doc, *, manual_confirmed=False):
+    require(isinstance(doc,dict), "INVALID_DOCUMENT")
     require(doc["schema"] == SCHEMA, "UNKNOWN_SCHEMA")
     mode = doc["mode"]
     require(mode in ("SYNTHETIC", "MANUAL"), "UNSUPPORTED_MODE")
@@ -126,6 +127,7 @@ def evaluate(doc, *, manual_confirmed=False):
             require(current, "SESSION_MISMATCH")
             require(all(type(q.get("revision")) is int and q["revision"] >= 1 for q in current),
                     "INVALID_REVISION")
+            require(all(instant(q["retrieved_at"]) <= now for q in current), "FUTURE_QUOTE_REVISION")
             latest = max(q["revision"] for q in current)
             qs = [q for q in current if q["revision"] == latest]
             require(len(qs) == 1, "AMBIGUOUS_QUOTE")
@@ -214,6 +216,23 @@ def save_run(directory, doc, report, started):
             r = json.loads(body)
             if r["target_hash"] in target_hashes:
                 require(h in current_revocations,"MISSING_PRIOR_REVOCATION")
+        # Do not silently omit a still-current approved target previously recorded.
+        now = instant(doc["as_of"])
+        for identity, body in con.execute("SELECT identity,body FROM inputs WHERE kind=?",("target",)):
+            if json.loads(identity)[0] != doc["mode"]:
+                continue
+            t = json.loads(body)
+            if t.get("instrument") not in doc["enabled"] or t.get("state") != "APPROVED":
+                continue
+            try:
+                active = instant(t["approved_at"]) <= now < instant(t["expires_at"])
+                invalid = t.get("invalidated_at")
+                active = active and (invalid is None or instant(invalid) > now)
+            except (KeyError, ValueError, TypeError):
+                continue
+            revoked = any(r["target_hash"] == digest(t) and instant(r["revoked_at"]) <= now for r in doc.get("revocations",[]))
+            if active and not revoked:
+                require(digest(t) in target_hashes,"MISSING_PRIOR_ACTIVE_TARGET")
         # A known correction cannot silently be rolled back in a later run.
         now = instant(doc["as_of"])
         for identity, body in con.execute("SELECT identity,body FROM inputs WHERE kind=?",("quote",)):
@@ -273,7 +292,7 @@ def render(report):
     mode = "합성 데이터" if report["mode"]=="SYNTHETIC" else "수동 입력 · 검증되지 않은 시세"
     health = "일부 보류" if report["data_health"]=="INCOMPLETE" else "입력 검사 완료"
     return """<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'"><title>QuanTrade — Field</title><style>
-body{font:14px system-ui,sans-serif;background:#fafafa;color:#222;margin:0 auto;max-width:760px;padding:18px}header{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid #bbb;padding-bottom:12px}h1{font-size:20px;margin:0}h2{font-size:16px;margin:20px 0 8px}p,summary{font-size:12px;color:#555}table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}th,td{text-align:right;padding:9px 3px;border-bottom:1px solid #ddd}th:first-child,td:first-child{text-align:left}thead th{font-size:11px;color:#555}tbody th{font-size:12px;overflow-wrap:anywhere}.REVIEW{font-weight:700;color:#176748}.BLOCKED{color:#a05c00}.WAIT{color:#555}.details td{padding:3px 3px 9px;text-align:left}summary{cursor:pointer}.scroll{overflow-x:auto}@media(max-width:400px){body{padding:12px}th,td{font-size:11px}}</style><header><h1>QuanTrade / Field</h1><span>오프라인</span></header><h2>투자 기회 감시</h2><p>"""+e(mode)+" · "+e(health)+" · "+e(report["as_of"])+"""</p><div class="scroll"><table><thead><tr><th>종목</th><th>종가</th><th>검토가</th><th>괴리율</th><th>상태</th></tr></thead><tbody>"""+''.join(out)+"""</tbody></table></div><p>괴리율 = (종가 − 검토가) / 검토가. 검토는 매수 권고가 아님.</p></html>"""
+body{font:14px system-ui,sans-serif;background:#fafafa;color:#222;margin:0 auto;max-width:760px;padding:18px}header{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid #bbb;padding-bottom:12px}h1{font-size:20px;margin:0}h2{font-size:16px;margin:20px 0 8px}p,summary{font-size:12px;color:#555}table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}th,td{text-align:right;padding:9px 3px;border-bottom:1px solid #ddd}th:first-child,td:first-child{text-align:left}thead th{font-size:11px;color:#555}tbody th{font-size:12px;overflow-wrap:anywhere}.REVIEW{font-weight:700;color:#176748}.BLOCKED{color:#a05c00}.WAIT{color:#555}.details td{padding:3px 3px 9px;text-align:left}summary{cursor:pointer}.scroll{overflow-x:auto}@media(max-width:400px){body{padding:12px}th,td{font-size:11px}}</style><header><h1>QuanTrade / Field</h1><span>오프라인</span></header><h2>투자 기회 감시</h2><p>"""+e(mode)+" · "+e(health)+" · 스냅샷 "+e(report["as_of"])+"""</p><div class="scroll"><table><thead><tr><th>종목</th><th>종가</th><th>검토가</th><th>괴리율</th><th>상태</th></tr></thead><tbody>"""+''.join(out)+"""</tbody></table></div><p>괴리율 = (종가 − 검토가) / 검토가. 검토는 매수 권고가 아님.</p></html>"""
 
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__)
@@ -330,7 +349,7 @@ def main(argv=None):
         atomic_write(directory/(name+".html"),render(report))
         print(directory/(name+".html"))
         return 0
-    except (OSError, ValueError, KeyError, TypeError, sqlite3.Error) as e:
+    except (OSError, ValueError, KeyError, TypeError, InvalidOperation, OverflowError, sqlite3.Error) as e:
         # Do not print private input content.
         reason = str(e) if re.fullmatch(r"[A-Z][A-Z_]+",str(e)) else type(e).__name__
         print("BLOCKED: "+reason)
