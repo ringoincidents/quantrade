@@ -98,14 +98,15 @@ PAGES = {"/":("01 / REGISTER","투자 업무 대장",[("인증 세션","활성")
          "/assets":("02 / ASSETS","자산 원장",[("평가 자산","—"),("보유 종목","미연결"),("토스 계좌","아직 연결하지 않음")]),
          "/reports":("03 / REPORTS","투자 보고서",[("안전마진 감시","검증 중"),("시장 데이터","미연결"),("실제 보고서","없음")]),
          "/records":("04 / RECORDS","운영 기록",[("인증 범위","단일 소유자 검증"),("실제 주문","비활성"),("운영 승인","보류")])}
-TABS = {"/":"업무","/assets":"자산","/reports":"보고","/records":"기록"}
+PAGES["/cases"]=("05 / CASES","기업가치·운용 기준 원장",[("실제 종목","미연결"),("운용 기준","미승인")])
+TABS = {"/":"업무","/assets":"자산","/cases":"종목","/reports":"보고","/records":"기록"}
 
 def page(path):
     demo = path.startswith("/assets/demo/")
     report_demo = path.startswith("/reports/demo/")
     case_demo = path.startswith("/cases/demo/")
-    number,title,rows=PAGES["/assets" if demo else "/reports" if report_demo or case_demo else path]
-    nav="".join('<a href="'+link+'"'+(' aria-current="page"' if (path==link or demo and link=="/assets" or (report_demo or case_demo) and link=="/reports") else '')+'>'+name+'</a>' for link,name in TABS.items())
+    number,title,rows=PAGES["/assets" if demo else "/reports" if report_demo else "/cases" if case_demo else path]
+    nav="".join('<a href="'+link+'"'+(' aria-current="page"' if (path==link or demo and link=="/assets" or report_demo and link=="/reports" or case_demo and link=="/cases") else '')+'>'+name+'</a>' for link,name in TABS.items())
     content="".join('<div class="row"><span>'+a+'</span><strong>'+b+'</strong></div>' for a,b in rows)
     if demo:
         content=demo_render(path.rsplit("/",1)[1])
@@ -114,6 +115,8 @@ def page(path):
         content=case_render(path.rsplit("/",1)[1])
     elif report_demo:
         content=report_render(path.rsplit("/",1)[1])
+    elif path=="/cases":
+        content+='<p><a href="/cases/demo/baseline">기업가치·운용 기준 / 합성 사례</a></p>'
     elif path=="/reports":
         content+='<p><a href="/reports/demo/baseline">안전마진 감시 / 합성 보고서 열기</a></p><p><a href="/cases/demo/baseline">기업가치·운용 기준 원장 / 합성 사례</a></p>'
     elif path=="/assets":

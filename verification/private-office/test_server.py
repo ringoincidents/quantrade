@@ -143,7 +143,11 @@ class HTTPTests(unittest.TestCase):
         status,h,_=self.login()
         c={"Cookie":h["Set-Cookie"].split(";")[0]}
         self.assertEqual(self.request("GET","/api/cases",headers=c)[0],503)
-        for name,ready in [("baseline",True),("missing",False),("invalid-domain",False),("counter-gap",True)]:
+        self.assertEqual(self.request("GET","/cases")[0],303)
+        status,h,body=self.request("GET","/cases",headers=c)
+        self.assertEqual(status,200)
+        self.assertIn(b"/cases/demo/baseline",body)
+        for name,ready in [("baseline",True),("missing",False),("invalid-domain",False),("counter-gap",True),("expired",True)]:
             status,h,body=self.request("GET","/api/demo/case/"+name,headers=c)
             self.assertEqual(status,200)
             obj=json.loads(body)
@@ -160,6 +164,8 @@ class HTTPTests(unittest.TestCase):
                 self.assertTrue(all(not x["approved"] for x in obj["illustrative_thresholds"]))
             else:
                 self.assertEqual(obj["illustrative_thresholds"],[])
+            self.assertEqual(obj["review_window_current"],name!="expired")
+            if name=="expired":self.assertIn("REVIEW_WINDOW_EXPIRED",obj["review_gaps"])
             if name=="counter-gap":
                 self.assertFalse(obj["thesis"]["completeness"]["all_theses_have_counter_research"])
             status,h,body=self.request("GET","/cases/demo/"+name,headers=c)

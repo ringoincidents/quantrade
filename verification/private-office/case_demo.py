@@ -1,5 +1,6 @@
 """Fixed synthetic valuation case. No approval, persisted plan, or actual financial data."""
 from dataclasses import asdict
+from datetime import datetime
 from decimal import Decimal
 from html import escape
 from quantrade.capabilities.cash_flow_valuation import CashFlowDCFInput,CashFlowDCFScenario,evaluate_cash_flow_dcf
@@ -7,8 +8,9 @@ from quantrade.capabilities.valuation_method_applicability import DomainCheck,Va
 from quantrade.capabilities.thesis_contract import (ThesisContractInput,Observation,Assumption,ThesisClaim,CounterClaim,FalsificationCondition,compile_thesis_contract)
 from quantrade.workbench.entry_monitor import entry_price
 REV="7db293770ae662dc07d2aa0a2f15a5277d6fa576"
-SCENARIOS={"baseline","missing","invalid-domain","counter-gap"}
+SCENARIOS={"baseline","missing","invalid-domain","counter-gap","expired"}
 AT="2026-11-28T08:00:00+09:00"
+REVIEW_UNTIL="2026-12-31T00:00:00+09:00"
 def scenario(name):
     if name not in SCENARIOS: raise ValueError("UNKNOWN_SCENARIO")
     case="SYNTHETIC-CASE-01"
@@ -22,6 +24,8 @@ def scenario(name):
         thesis_claims=(ThesisClaim("t1","현금흐름 성장 가설",("o1","a1")),),
         counter_claims=() if name=="counter-gap" else (CounterClaim("c1","t1","마진 하락 위험",("a1",)),),
         falsification_conditions=(FalsificationCondition("f1","t1","두 분기 연속 현금흐름 악화 시 재검토","주당 현금흐름","다음 두 분기"),)))
+    review_as_of="2027-01-01T00:00:00+09:00" if name=="expired" else AT
+    current=datetime.fromisoformat(review_as_of)<datetime.fromisoformat(REVIEW_UNTIL)
     valuation=None
     thresholds=[]
     if gate.status=="READY":
@@ -35,10 +39,10 @@ def scenario(name):
             thresholds.append({"margin_fraction":m,"illustrative_entry":str(entry_price(v,Decimal(m))),"approved":False})
     return {"mode":"SYNTHETIC_ONLY","scenario":name,"case_id":case,"capability_revision":REV,
             "method_gate":asdict(gate),"thesis":asdict(thesis),"valuation":valuation,
-            "illustrative_thresholds":thresholds,"policy":{"status":"DRAFT_NOT_APPROVED",
+            "illustrative_thresholds":thresholds,"review_as_of":review_as_of,"review_until":REVIEW_UNTIL,"review_window_current":current,"policy":{"status":"DRAFT_NOT_APPROVED",
             "entry":"검증된 가치·종가와 승인 필요","stop_loss":"미설정","take_profit":"미설정",
             "position_limit":"미설정","review":"실적 변경 또는 가설 반증 시 재검토"},
-            "f08_handoff":"BLOCKED_NO_AUTHENTICATED_APPROVAL","actual_data_connected":False,
+            "f08_handoff":"BLOCKED_NO_AUTHENTICATED_APPROVAL","review_gaps":["NO_REAL_EVIDENCE","NO_AUTHENTICATED_APPROVAL"]+([] if current else ["REVIEW_WINDOW_EXPIRED"]),"actual_data_connected":False,
             "decision_authorized":False,"order_authorized":False}
 def render(name):
     v=scenario(name); val=v["valuation"]
@@ -46,7 +50,7 @@ def render(name):
         return '<div class="row"><span>'+escape(str(a))+'</span><strong>'+escape(str(b))+'</strong></div>'
     out=['<p class="notice"><strong>합성 기업 / 실제 투자 기준 아님</strong></p>',
          row("사건",v["case_id"]),row("평가 방법","주당 소유자 현금흐름 DCF"),
-         row("방법 적용",v["method_gate"]["status"])]
+         row("방법 적용",v["method_gate"]["status"]),row("평가 기준",AT),row("검토 유효기간",v["review_until"]),row("검토 상태","유효 (가상)" if v["review_window_current"] else "만료 · 이전 산출값 참고 전용")]
     if val:
         out.append('<div class="section">01 / VALUATION</div>')
         for x in val["scenarios"]:
@@ -66,7 +70,7 @@ def render(name):
         out.append(row(title,v["policy"][k]))
     out.append(row("F08 전달","차단 · 실제 승인 없음"))
     out.append('<div class="section">03 / FIXED SCENARIOS</div>')
-    for k,label in [("baseline","가치평가"),("missing","재무자료 부족"),("invalid-domain","할인율 조건 불충족"),("counter-gap","반대 논리 누락")]:
+    for k,label in [("baseline","가치평가"),("missing","재무자료 부족"),("invalid-domain","할인율 조건 불충족"),("counter-gap","반대 논리 누락"),("expired","검토 유효기간 만료")]:
         out.append('<div class="row"><a href="/cases/demo/'+k+'">'+label+'</a>'+("<strong>선택</strong>" if name==k else "")+'</div>')
     out.append('<p class="notice">확률·현금흐름·할인율은 합성 가정이며 실측 예측이나 승인값이 아닙니다. 기존 평가 엔진 '+REV[:12]+' · 주문 및 승인 기능 없음.</p>')
     return "".join(out)
