@@ -1,0 +1,38 @@
+name: Valuation dossier verification
+on:
+  pull_request:
+    branches: [verification/peer-valuation-20261128]
+permissions:
+  contents: read
+jobs:
+  synthetic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Offline valuation regression and complete synthetic case
+        run: |
+          export PYTHONPATH="$PWD"
+          python -m unittest discover -s tests/capabilities -p 'test_valuation*.py' -v
+          python verification/valuation/test_dcf_diagnostics.py -v
+          python verification/valuation/test_method_gate.py -v
+          python verification/valuation/test_fcff_wacc.py -v
+          python verification/valuation/test_peer_valuation.py -v
+          python verification/valuation/test_valuation_dossier.py -v
+          PYTHONPATH="$PWD:$PWD/verification/valuation" python - <<'PY'
+          import json
+          from test_valuation_dossier import fixture
+          from valuation_dossier import evaluate
+          r=evaluate(fixture(),scope="SYNTHETIC_ONLY")
+          b=r["dossier"]
+          print("SYNTHETIC_DOSSIER "+json.dumps({"sha256":r["dossier_sha256"],"state":b["state"],"methods":[{"method":x["method"],"value":x["report"].get("weighted_fair_value_per_share",x["report"].get("weighted_fair_value"))} for x in b["methods"]],"conservative_value":b["crosscheck"]["conservative_fair_value"],"families":b["crosscheck"]["distinct_families"],"approved":b["valuation_target_approved"]},sort_keys=True))
+          with open("synthetic-valuation-dossier.json","w") as f:json.dump(r,f,indent=2,sort_keys=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: synthetic-valuation-dossier
+          path: synthetic-valuation-dossier.json
+          retention-days: 7
