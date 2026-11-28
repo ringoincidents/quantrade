@@ -30,6 +30,8 @@ jobs:
           node research/technical-lab/test_industry_activity.mjs
           node research/technical-lab/test_alfred_semiconductor.mjs
           node research/technical-lab/test_semi_monthly_replay.mjs
+          node research/technical-lab/test_semi_market_outcomes.mjs
+          node research/technical-lab/audit_semi_monthly.mjs research/technical-lab/semi_monthly_run_46142381437.json "$RUNNER_TEMP/semi-audit.json"
       - name: Recompute stored exploratory transfer diagnostics
         run: |
           node research/technical-lab/transfer_diagnostics.mjs research/technical-lab/transfer_batch1.json research/technical-lab/transfer_batch2.json research/technical-lab/transfer_batch3.json "$RUNNER_TEMP/transfer.json"
