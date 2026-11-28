@@ -1,0 +1,19 @@
+name: V5 Workbench isolated tests
+on:
+  pull_request:
+    paths:
+      - "quantrade/workbench/**"
+      - "tests/workbench/**"
+      - ".github/workflows/v5-workbench-tests.yml"
+permissions:
+  contents: read
+jobs:
+  synthetic-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m unittest discover -s tests/workbench -p "test_*.py" -v
+      - run: python -m quantrade.workbench.entry_monitor
