@@ -27,6 +27,7 @@ jobs:
           node research/technical-lab/audit_universe.mjs --self-test
           node research/technical-lab/calendar_event_audit.mjs --self-test
           node research/technical-lab/test_sector_attribution.mjs
+          node research/technical-lab/test_industry_activity.mjs
       - name: Recompute stored exploratory transfer diagnostics
         run: |
           node research/technical-lab/transfer_diagnostics.mjs research/technical-lab/transfer_batch1.json research/technical-lab/transfer_batch2.json research/technical-lab/transfer_batch3.json "$RUNNER_TEMP/transfer.json"
