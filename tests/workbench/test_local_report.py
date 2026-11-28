@@ -97,10 +97,12 @@ class LocalReportTests(unittest.TestCase):
             evaluate(self.d)
         for q in self.d["quotes"]:
             q["source"]="MANUAL_FIXTURE"
-        # Manual runs must not be future-dated on the test runner.
-        from datetime import datetime,timezone
-        if datetime.now(timezone.utc) >= datetime.fromisoformat(self.d["as_of"]):
-            self.assertEqual(self.row(manual_confirmed=True)["status"],"REVIEW")
+        # Move the fictitious dates to a completed historical period, independent of runner clock.
+        self.d=json.loads(json.dumps(self.d).replace("2026-11-","2024-11-").replace("2026-12-","2024-12-"))
+        for i,a in enumerate(self.d["approvals"]):
+            a["operator"]="test-operator"
+            self.reapprove(i)
+        self.assertEqual(self.row(manual_confirmed=True)["status"],"REVIEW")
 
     def test_persist_repeat_and_conflict(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -119,6 +121,15 @@ class LocalReportTests(unittest.TestCase):
             save_run(tmp,self.d,evaluate(self.d),utcnow())
             self.d["revocations"].clear()
             with self.assertRaisesRegex(ValueError,"MISSING_PRIOR_REVOCATION"):
+                save_run(tmp,self.d,evaluate(self.d),utcnow())
+
+    def test_prior_quote_revision_cannot_disappear(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            q=copy.deepcopy(self.d["quotes"][0]);q.update(revision=2,price="81")
+            self.d["quotes"].append(q)
+            save_run(tmp,self.d,evaluate(self.d),utcnow())
+            self.d["quotes"].pop()
+            with self.assertRaisesRegex(ValueError,"MISSING_PRIOR_QUOTE_REVISION"):
                 save_run(tmp,self.d,evaluate(self.d),utcnow())
 
     def test_html_escape_and_cli(self):
