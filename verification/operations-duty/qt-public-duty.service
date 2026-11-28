@@ -1,0 +1,22 @@
+[Unit]
+Description=QuanTrade public reference duty pilot
+After=network-online.target
+Wants=network-online.target
+[Service]
+Type=oneshot
+User=qt-duty
+Group=qt-duty
+StateDirectory=qt-public-duty
+StateDirectoryMode=0700
+WorkingDirectory=/opt/quantrade/verification/operations-duty
+ExecStart=/usr/bin/python3 -B /opt/quantrade/verification/operations-duty/public_duty.py --db /var/lib/qt-public-duty/public.sqlite tick
+UMask=0077
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+MemoryMax=128M
+CPUQuota=20%
+TimeoutStartSec=45
