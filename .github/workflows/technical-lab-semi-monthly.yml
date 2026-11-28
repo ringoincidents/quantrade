@@ -1,0 +1,30 @@
+name: Technical Lab semiconductor monthly vintage replay
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/technical-lab-semi-monthly.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify fixed protocol
+        run: node research/technical-lab/test_semi_monthly_replay.mjs
+      - name: Bounded public-source replay
+        run: |
+          set -o pipefail
+          node research/technical-lab/run_semi_monthly_replay.mjs | tee "$RUNNER_TEMP/semi-monthly.json"
+      - name: Preserve derived report only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: semi-monthly-derived
+          path: ${{ runner.temp }}/semi-monthly.json
+          retention-days: 30
