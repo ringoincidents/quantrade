@@ -132,9 +132,17 @@ def research_report():
 
 def research_report_html():
     r=research_report()
+    w=r.get("workflow")
+    lifecycle=""
+    if w:
+        lifecycle=('<p class="notice">검증용 업무 · '+escape(w["work_id"])+' · '+escape(w["state"])+'</p>'
+                   '<p>담당: '+escape(w["department"])+' / 검토 예정: '+escape(w["review_department"])+'</p>'
+                   '<p>실행 '+str(w["runs"])+' / '+str(w["max_runs"])+'회 (프로세스 기준), 재실행 간격 1시간</p>'
+                   '<ol>'+''.join('<li>'+escape(e["state"])+' · '+escape(e["at"])+'</li>' for e in w["events"])+'</ol>'
+                   '<p class="notice">독립 검토 미실행 / 승인 없음 / 영속 저장 없음 / 매매 권한 없음</p>')
     if r["state"]!="REPORT_READY":
-        return '<p class="notice">자동 연구 보고서 수신 불가: '+escape(r["state"])+'</p><p><a href="/reports/fundamental/005930">이전 날짜의 수동 검증 보고서</a></p>'
-    return ('<p class="notice">서명 검증된 내부 연구 결과 / 2025년 연간 연결재무제표 / 독립 검토 대기</p>'
+        return lifecycle+'<p class="notice">자동 연구 보고서 수신 불가: '+escape(r["state"])+'</p><p><a href="/reports/fundamental/005930">이전 날짜의 수동 검증 보고서</a></p>'
+    return (lifecycle+'<p class="notice">서명 검증된 내부 연구 결과 / 2025년 연간 연결재무제표 / 독립 검토 대기</p>'
             '<p>삼성전자 · 005930 · 수집 시각 '+escape(r["observed_at"])+'</p><table>'
             '<tr><th>재무 항목</th><th>조 원</th></tr>'
             +''.join('<tr><td>'+label+'</td><td>'+escape(r["metrics"][key])+'</td></tr>' for key,label in (("revenue","매출"),("operating_income","영업이익"),("net_income","당기순이익"),("assets","자산"),("liabilities","부채"),("equity","자본")))
