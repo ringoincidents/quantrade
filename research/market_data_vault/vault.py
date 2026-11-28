@@ -6,6 +6,7 @@ Production integration requires separate authority and validation.
 from __future__ import annotations
 
 import csv
+import io
 import hashlib
 import math
 import sqlite3
@@ -65,7 +66,11 @@ def register_dataset(db: sqlite3.Connection, dataset_id: str, asset_id: str,
 
 
 def _read_rows(path: Path):
-    with path.open(encoding="utf-8-sig", newline="") as stream:
+    return read_rows_bytes(path.read_bytes())
+
+
+def read_rows_bytes(raw: bytes):
+    with io.StringIO(raw.decode("utf-8-sig"), newline="") as stream:
         reader = csv.DictReader(stream)
         required = {"session", "open", "high", "low", "close", "volume",
                     "first_available_at_utc"}
@@ -106,8 +111,9 @@ def ingest_csv(db: sqlite3.Connection, path: str | Path, *, dataset_id: str,
     if not source_uri:
         raise ValueError("Source URI is required")
     path = Path(path)
-    raw_hash = hashlib.sha256(path.read_bytes()).hexdigest()
-    rows = _read_rows(path)
+    raw = path.read_bytes()
+    raw_hash = hashlib.sha256(raw).hexdigest()
+    rows = read_rows_bytes(raw)
     now = datetime.now(timezone.utc).isoformat()
     with db:
         if db.execute("SELECT 1 FROM batches WHERE dataset_id=? AND sha256=?",
