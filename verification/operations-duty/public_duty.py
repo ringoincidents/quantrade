@@ -41,6 +41,7 @@ def plan(db,now):
     with db:
         # Migration: old spools cannot prove their original activation time.
         db.execute("INSERT OR IGNORE INTO public_meta VALUES('coverage_start',?)",(lower if not row else now,))
+        db.execute("INSERT OR IGNORE INTO public_meta VALUES('audit_activation',?)",(now,))
         if lower<cutoff:
             db.execute("INSERT OR IGNORE INTO public_meta VALUES('history_gap',?)",(lower,))
             lower=cutoff
