@@ -1,7 +1,11 @@
 name: Vault and Gateway verification
 on:
-  push:
-    branches: [verification/vault-gateway-contract-20261128]
+  pull_request:
+    branches: [research/market-data-vault-p0-20261123]
+    paths:
+      - 'research/decision_review/**'
+      - 'research/market_data_vault/**'
+      - '.github/workflows/vault-gateway-verification.yml'
 permissions:
   contents: read
 jobs:
