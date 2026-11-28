@@ -1,13 +1,13 @@
 name: Technical Lab semiconductor monthly vintage replay
 on:
   pull_request:
-    paths:
-      - '.github/workflows/technical-lab-semi-monthly.yml'
+    types: [labeled]
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
   replay:
+    if: github.event_name == 'workflow_dispatch' || github.event.label.name == 'technical-lab-semi-monthly'
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
