@@ -8,7 +8,7 @@ from __future__ import annotations
 import math
 from collections.abc import Sequence
 
-LIBRARY_VERSION = "market_data_vault.indicators.v0.2"
+LIBRARY_VERSION = "market_data_vault.indicators.v0.3"
 
 
 def _prices(values: Sequence[float]) -> list[float]:
@@ -180,4 +180,47 @@ INDICATOR_CATALOG.update({
     "BOLLINGER:POP_STD:v1":{"formula":"SMA +/- 2 population stdev","input":"close","function":"bollinger"},
     "VOLUME_RATIO:PRIOR_WINDOW:v1":{"formula":"current / preceding mean","input":"volume","function":"volume_ratio"},
     "CMF:FLAT_ZERO:v1":{"formula":"rolling money-flow volume / volume","input":"high,low,close,volume","function":"cmf"},
+})
+
+def ma_geometry(values: Sequence[float], periods=(5,20,60), lookback: int=5) -> dict:
+    """Descriptive moving-average geometry, aligned oldest-to-newest.
+
+    Width = (max SMA - min SMA)/mean SMA; convergence delta = current
+    width minus width lookback bars ago. Negative delta means narrowing,
+    not a predictive signal. Each slope is a fractional change over the
+    same lookback, not an angle. Null until full warmup.
+    """
+    p=_prices(values);lag=_window(lookback)
+    windows=tuple(_window(n) for n in periods)
+    if len(windows)<2 or len(windows)>16 or tuple(sorted(set(windows)))!=windows:
+        raise ValueError("periods must be strictly increasing and unique")
+    lines={n:sma(p,n) for n in windows}
+    width=[None]*len(p);change=[None]*len(p)
+    slopes={n:[None]*len(p) for n in windows}
+    for j in range(len(p)):
+        vals=[lines[n][j] for n in windows]
+        if all(v is not None for v in vals):
+            avg=math.fsum(vals)/len(vals)
+            if not math.isfinite(avg) or avg<=0:
+                raise ValueError("invalid average")
+            width[j]=(max(vals)-min(vals))/avg
+            if j>=lag and width[j-lag] is not None:
+                change[j]=width[j]-width[j-lag]
+        if j>=lag:
+            for n in windows:
+                a,b=lines[n][j],lines[n][j-lag]
+                if a is not None and b is not None:
+                    if b<=0:raise ValueError("invalid previous average")
+                    slopes[n][j]=a/b-1
+    pairs={}
+    for a,b in zip(windows,windows[1:]):
+        # Signed relative distance, not an inferred market label.
+        pairs[f"{a}:{b}"]=[None if x is None or y is None else x/y-1 for x,y in zip(lines[a],lines[b])]
+    for series in [width,change,*slopes.values(),*pairs.values()]:
+        if any(x is not None and not math.isfinite(x) for x in series):
+            raise ValueError("nonfinite geometry")
+    return {"width":width,"width_change":change,"slopes":slopes,"pair_gaps":pairs}
+
+INDICATOR_CATALOG.update({
+    "MA_GEOMETRY:MEAN_NORMALIZED:v1":{"formula":"(max SMA-min SMA)/mean SMA; width change; fractional slopes and signed adjacent gaps","input":"close","function":"ma_geometry"},
 })

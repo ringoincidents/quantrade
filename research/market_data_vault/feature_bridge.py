@@ -7,10 +7,10 @@ import json
 import math
 from datetime import date, datetime
 from zoneinfo import ZoneInfo
-from indicators import LIBRARY_VERSION,sma,ema,rsi_wilder,atr_wilder,macd,bollinger,volume_ratio,cmf
+from indicators import LIBRARY_VERSION,sma,ema,rsi_wilder,atr_wilder,macd,bollinger,volume_ratio,cmf,ma_geometry
 from vault import parse_utc
 
-VERSION="vault_feature_bridge.v2"
+VERSION="vault_feature_bridge.v3"
 MAX_SESSIONS=10000
 MAX_REVISIONS=100000
 
@@ -125,6 +125,16 @@ def measure_bars(bars,currency):
     for key,n in (("VOLUME_RATIO:20",21),("CMF:20",20)):
         if len(bars)>=n and measures[key]["value"] is None:
             measures[key]["state"]="UNDEFINED_ZERO_VOLUME"
+    # Two explicitly provisional groups; not a named strategy or score.
+    for periods in ((5,20,60),(20,60,200)):
+        tag=":".join(map(str,periods))
+        g=ma_geometry(prices,periods,5)
+        add("MA_WIDTH:"+tag,max(periods),g["width"],"FRACTION")
+        add("MA_WIDTH_DELTA_5:"+tag,5,g["width_change"],"FRACTION_DELTA")
+        for n,series in g["slopes"].items():
+            add("MA_SLOPE_5:"+str(n),5,series,"FRACTION")
+        for pair,series in g["pair_gaps"].items():
+            add("MA_PAIR_GAP:"+pair, max(map(int,pair.split(":"))),series,"FRACTION")
     return measures
 
 def build_bundle(db,dataset_id,as_of,plan,*,mode="SYNTHETIC"):
