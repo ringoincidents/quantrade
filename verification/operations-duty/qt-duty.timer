@@ -1,0 +1,9 @@
+[Unit]
+Description=Run QuanTrade duty pilot every minute (five-minute job slots)
+[Timer]
+OnCalendar=*-*-* *:*:00
+AccuracySec=5s
+Persistent=true
+Unit=qt-duty.service
+[Install]
+WantedBy=timers.target
