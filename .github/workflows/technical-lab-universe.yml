@@ -19,7 +19,7 @@ jobs:
         run: |
           git init "$RUNNER_TEMP/plain"
           git -C "$RUNNER_TEMP/plain" remote add origin https://github.com/Sixian-Li/plain-backtest.git
-          git -C "$RUNNER_TEMP/plain" sparse-checkout set data/processed/daily backtest/docs/release
+          git -C "$RUNNER_TEMP/plain" sparse-checkout set data/processed/daily data/processed/calendars backtest/docs/release
           git -C "$RUNNER_TEMP/plain" fetch --depth 1 --filter=blob:none origin 36adf234a7b98e1bb30356350a9274d33e63f835
           git -C "$RUNNER_TEMP/plain" checkout --detach FETCH_HEAD
           test "$(git -C "$RUNNER_TEMP/plain" rev-parse HEAD)" = 36adf234a7b98e1bb30356350a9274d33e63f835
@@ -32,6 +32,9 @@ jobs:
       - name: Replay frozen three events and market benchmark
         run: |
           node --max-old-space-size=6144 research/technical-lab/run_universe.mjs research/technical-lab/source_inventory.json "$RUNNER_TEMP/lab-output/audit.json" "$RUNNER_TEMP/plain" "$RUNNER_TEMP/lab-output/universe.json"
+      - name: Verify reference calendar alignment
+        run: |
+          node research/technical-lab/calendar_event_audit.mjs "$RUNNER_TEMP/lab-output/audit.json" "$RUNNER_TEMP/lab-output/universe.json" "$RUNNER_TEMP/plain/data/processed/calendars/XNYS.csv" "$RUNNER_TEMP/lab-output/calendar-audit.json"
       - name: Preserve research-only evidence
         if: always()
         uses: actions/upload-artifact@v4
