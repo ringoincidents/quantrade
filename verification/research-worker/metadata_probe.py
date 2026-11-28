@@ -5,7 +5,7 @@ import os
 import urllib.error
 import urllib.request
 import unittest
-from unittest.mock import Mock
+from unittest.mock import MagicMock
 
 PROVIDERS = {
     "OPENAI": ("https://api.openai.com/v1/models", "OPENAI_API_KEY", "Authorization", "Bearer ", {}, "data"),
@@ -62,14 +62,14 @@ def main():
 
 class ProbeTests(unittest.TestCase):
     def test_missing_key_no_request(self):
-        opener = Mock()
+        opener = MagicMock()
         self.assertEqual(probe("OPENAI", {}, opener), "MISSING_KEY")
         opener.open.assert_not_called()
 
     def test_all_provider_metadata_requests(self):
         for name, (url, key, header, prefix, extras, field) in PROVIDERS.items():
             with self.subTest(provider=name):
-                opener = Mock()
+                opener = MagicMock()
                 response = opener.open.return_value.__enter__.return_value
                 response.status = 200
                 response.read.return_value = json.dumps({field: [{"id": "test"}]}).encode()
@@ -80,12 +80,12 @@ class ProbeTests(unittest.TestCase):
                 self.assertEqual(req.get_header(header.capitalize()), prefix + "fixture")
 
     def test_http_failure_no_body(self):
-        opener = Mock()
+        opener = MagicMock()
         opener.open.side_effect = urllib.error.HTTPError("https://example.invalid", 401, "secret", {}, None)
         self.assertEqual(probe("OPENAI", {"OPENAI_API_KEY": "fixture"}, opener), "HTTP_401")
 
     def test_bad_schema(self):
-        opener = Mock()
+        opener = MagicMock()
         response = opener.open.return_value.__enter__.return_value
         response.status = 200
         response.read.return_value = b'{"data":[]}'
