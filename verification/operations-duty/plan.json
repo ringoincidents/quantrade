@@ -1,0 +1,116 @@
+{
+  "version": "0.1-PILOT",
+  "timezone": "Asia/Seoul",
+  "authority": "SYNTHETIC_ONLY",
+  "live_execution": false,
+  "owner": "QuanTrade operational duty pilot",
+  "shared_core": "LLM Holdings LLMH-046/047; reuse Mission/Work/Gateway/Authority; no production integration yet",
+  "active": [
+    {
+      "id": "collect",
+      "owner": "Data",
+      "after": null,
+      "period": 300,
+      "mode": "D0",
+      "output": "fixed offline fixture"
+    },
+    {
+      "id": "compare",
+      "owner": "Research",
+      "after": "collect",
+      "period": 300,
+      "mode": "D0",
+      "output": "REVIEW or WAIT only"
+    },
+    {
+      "id": "assure",
+      "owner": "Risk",
+      "after": "compare",
+      "period": 300,
+      "mode": "D0",
+      "output": "deterministic consistency check only"
+    }
+  ],
+  "planned": [
+    {
+      "id": "QT-DAILY-US-CLOSE",
+      "owner": "Data",
+      "trigger": "verified US session finality",
+      "gate": "provider rights/calendar/independent price parity",
+      "enabled": false
+    },
+    {
+      "id": "QT-DAILY-KR-CLOSE",
+      "owner": "Data",
+      "trigger": "verified KR session finality",
+      "gate": "provider rights/calendar/independent price parity",
+      "enabled": false
+    },
+    {
+      "id": "QT-DAILY-RISK",
+      "owner": "Risk",
+      "trigger": "after confirmed market and authorized portfolio snapshot",
+      "gate": "private source + validated policies",
+      "enabled": false
+    },
+    {
+      "id": "QT-DAILY-ENTRY",
+      "owner": "Research",
+      "trigger": "after final close",
+      "gate": "#142 S1 gates and existing alert parity",
+      "enabled": false
+    },
+    {
+      "id": "QT-RELEASE",
+      "owner": "Data",
+      "trigger": "official economic release or filing",
+      "gate": "calendar and provider validation",
+      "enabled": false
+    },
+    {
+      "id": "QT-HOURLY-HQ",
+      "owner": "HQ",
+      "trigger": "hourly durable report before scheduled ChatGPT review",
+      "gate": "authenticated private transport and command authority",
+      "enabled": false
+    },
+    {
+      "id": "QT-WEEKLY-RESEARCH",
+      "owner": "Research",
+      "trigger": "approved weekly research plan / maturity dates",
+      "gate": "data rights, preregistered experiment, independent review",
+      "enabled": false
+    },
+    {
+      "id": "QT-WEEKLY-DEVELOP",
+      "owner": "Technology",
+      "trigger": "approved dependency-ready Work",
+      "gate": "isolated worker and reviewed code execution",
+      "enabled": false
+    },
+    {
+      "id": "QT-MONTHLY-ACCOUNTING",
+      "owner": "Portfolio",
+      "trigger": "month close and complete NAV/flow evidence",
+      "gate": "private ledger and reconciliation",
+      "enabled": false
+    },
+    {
+      "id": "QT-QUARTERLY-PLAN",
+      "owner": "Founder/HQ",
+      "trigger": "quarterly strategic review",
+      "gate": "recorded decision and budget",
+      "enabled": false
+    }
+  ],
+  "llm": {
+    "enabled": false,
+    "reason": "Holdings gateway integration and hard cost limits not verified"
+  },
+  "authority_rules": {
+    "trade": false,
+    "production_deploy": false,
+    "paid_provision": false,
+    "remote_command": false
+  }
+}
