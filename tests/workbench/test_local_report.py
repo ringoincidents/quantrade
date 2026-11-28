@@ -56,7 +56,7 @@ class LocalReportTests(unittest.TestCase):
 
     def test_availability(self):
         self.d["quotes"][0]["retrieved_at"]="2026-11-30T13:10:00-05:00"
-        self.assertEqual(self.row()["reason"],"INVALID_AVAILABILITY")
+        self.assertEqual(self.row()["reason"],"FUTURE_QUOTE_REVISION")
 
     def test_expiry(self):
         self.d["targets"][0]["expires_at"]=self.d["as_of"]
@@ -131,6 +131,24 @@ class LocalReportTests(unittest.TestCase):
             self.d["quotes"].pop()
             with self.assertRaisesRegex(ValueError,"MISSING_PRIOR_QUOTE_REVISION"):
                 save_run(tmp,self.d,evaluate(self.d),utcnow())
+
+    def test_prior_active_target_cannot_disappear(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            save_run(tmp,self.d,evaluate(self.d),utcnow())
+            self.d["targets"].pop(0)
+            with self.assertRaisesRegex(ValueError,"MISSING_PRIOR_ACTIVE_TARGET"):
+                save_run(tmp,self.d,evaluate(self.d),utcnow())
+
+    def test_revoked_target_can_be_replaced(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            save_run(tmp,self.d,evaluate(self.d),utcnow())
+            t=self.d["targets"][0]
+            self.d["revocations"].append(dict(ref="r1",operator="test",target_hash=digest(t),revoked_at=self.d["as_of"]))
+            replacement=copy.deepcopy(t);replacement.update(version="v2",approval_ref="new-approval",value="101")
+            self.d["targets"][0]=replacement
+            self.d["approvals"].append(dict(ref="new-approval",target_hash=digest(replacement),operator="SYNTHETIC",approved_at=replacement["approved_at"]))
+            save_run(tmp,self.d,evaluate(self.d),utcnow())
+            self.assertEqual(self.row()["target_version"],"v2")
 
     def test_html_escape_and_cli(self):
         self.d["quotes"][0]["source"]="<script>alert(1)</script>"
