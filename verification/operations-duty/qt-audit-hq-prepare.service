@@ -1,0 +1,21 @@
+[Unit]
+Description=Prepare QuanTrade audit exceptions for HQ (offline)
+[Service]
+Type=oneshot
+User=qt-duty
+Group=qt-duty
+StateDirectory=qt-audit-hq
+StateDirectoryMode=0700
+WorkingDirectory=/opt/quantrade/verification/operations-duty
+ExecStart=/usr/bin/python3 -B /opt/quantrade/verification/operations-duty/audit_bridge.py --audit-db /var/lib/qt-operations-audit/audit.sqlite --outbox-db /var/lib/qt-audit-hq/outbox.sqlite prepare
+UMask=0077
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadOnlyPaths=/var/lib/qt-operations-audit
+PrivateTmp=true
+PrivateDevices=true
+RestrictAddressFamilies=AF_UNIX
+MemoryMax=128M
+CPUQuota=20%
+TimeoutStartSec=45
