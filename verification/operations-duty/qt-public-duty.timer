@@ -1,0 +1,9 @@
+[Unit]
+Description=Poll due QuanTrade public reference jobs every five minutes
+[Timer]
+OnCalendar=*-*-* *:00/5:00
+AccuracySec=5s
+Persistent=true
+Unit=qt-public-duty.service
+[Install]
+WantedBy=timers.target
