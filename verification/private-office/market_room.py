@@ -30,7 +30,7 @@ OBS=(
  ("CORE_PCE_YOY","근원 PCE 전년비","+3.3%","2026-10","2026-11-25",BEA),
  ("CORE_PCE_MOM","근원 PCE 전월비","+0.3%","2026-10","2026-11-25",BEA),
 )
-MISSING=("미국 2년·10년물 금리","VIX","HY OAS","달러 인덱스","유가","KOSPI / KOSDAQ","S&P 500 / NASDAQ")
+MISSING=("VIX","HY OAS","달러 인덱스","유가","KOSPI / KOSDAQ","S&P 500 / NASDAQ")
 
 def snapshot():
     events=[]
@@ -51,12 +51,12 @@ def snapshot():
         "macro":[{"id":i,"label":label,"value":v,"period":p,"release_date":d,"source":u} for i,label,v,p,d,u in OBS],
         "unconnected_series":list(MISSING),"market_regime":None,"forecast":None,"decision_authorized":False,"order_authorized":False}
 
-def render(refresh=None):
+def render(refresh=None,treasury_html=""):
     v=snapshot()
     def e(x):return escape(str(x),quote=True)
     def row(k,x):return '<div class="row"><span>'+e(k)+'</span><strong>'+e(x)+'</strong></div>'
     def src(url):return '<a href="'+e(url)+'" rel="noreferrer">공식 출처</a>'
-    out=['<p class="notice"><strong>공식 발표·예정 일정 스냅샷</strong> · 확인일 '+CHECKED+' · 자동 갱신 미연결. 일정 변경 가능. 실시간 시세 아님.</p>',
+    out=['<p class="notice"><strong>공식 발표·예정 일정 스냅샷</strong> · 확인일 '+CHECKED+' · 고정 거시 발표값 자동 갱신 미연결. 일정 변경 가능. 실시간 시세 아님.</p>',
          '<div class="section">01 / DECEMBER 2026 · KST</div>',
          '<div class="cal" role="table" aria-label="12월 주요 경제 발표 한국시간">']
     for label in ("월","화","수","목","금","토","일"):out.append('<div class="calhead">'+label+'</div>')
@@ -74,6 +74,7 @@ def render(refresh=None):
     out.append('<div class="section">02 / MACRO · OFFICIAL RELEASES</div>')
     for x in v["macro"]:
         out.append('<div class="row"><span>'+e(x["label"])+'<br><small>'+e(x["period"])+' 기준 · '+e(x["release_date"])+' 발표 · '+src(x["source"])+'</small></span><strong>'+e(x["value"])+'</strong></div>')
+    if treasury_html:out.append(treasury_html)
     out.append('<div class="section">03 / NYSE · SCHEDULED SESSIONS (ET)</div>')
     for x in v["exchange"]["sessions"]:
         state={"REGULAR_SCHEDULED":"정규 일정","EARLY_CLOSE_SCHEDULED":"조기 폐장 일정","CLOSED_SCHEDULED":"휴장 일정"}[x["state"]]

@@ -136,6 +136,22 @@ class HTTPTests(unittest.TestCase):
         self.assertEqual(self.request("GET","/assets/demo/unknown",headers=c)[0],404)
         self.assertEqual(self.request("POST","/api/demo/portfolio/initial",headers={**c,"Origin":ORIGIN})[0],405)
 
+    def test_treasury_reference_route(self):
+        self.assertEqual(self.request("GET","/api/treasury")[0],401)
+        self.assertEqual(self.request("GET","/market/rates")[0],303)
+        _,h,_=self.login();c={"Cookie":h["Set-Cookie"].split(";")[0]}
+        from unittest.mock import patch
+        from treasury_view import Cache
+        from datetime import datetime,timezone
+        cache=Cache(lambda y: (_ for _ in ()).throw(TimeoutError()),now=lambda:datetime(2026,11,28,tzinfo=timezone.utc))
+        with patch("server.TREASURY_CACHE",cache):
+            st,h,b=self.request("GET","/api/treasury",headers=c)
+            self.assertEqual(st,200);self.assertEqual(h["Cache-Control"],"no-store, private")
+            v=json.loads(b);self.assertEqual(v["state"],"REFRESH_FAILED");self.assertTrue(v["historical_only"])
+            self.assertFalse(v["data"]["decision_authorized"])
+            self.assertEqual(self.request("GET","/market/rates",headers=c)[0],200)
+        self.assertEqual(self.request("POST","/api/treasury",headers={**c,"Origin":ORIGIN})[0],405)
+
     def test_new_surfaces_auth_and_boundaries(self):
         for p in ("/lab","/strategies","/inbox"):
             self.assertEqual(self.request("GET",p)[0],303)
