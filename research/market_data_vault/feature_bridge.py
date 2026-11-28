@@ -7,10 +7,10 @@ import json
 import math
 from datetime import date, datetime
 from zoneinfo import ZoneInfo
-from indicators import LIBRARY_VERSION,sma,ema,rsi_wilder,atr_wilder
+from indicators import LIBRARY_VERSION,sma,ema,rsi_wilder,atr_wilder,macd,bollinger,volume_ratio,cmf
 from vault import parse_utc
 
-VERSION="vault_feature_bridge.v1"
+VERSION="vault_feature_bridge.v2"
 MAX_SESSIONS=10000
 MAX_REVISIONS=100000
 
@@ -110,6 +110,17 @@ def build_bundle(db,dataset_id,as_of,plan,*,mode="SYNTHETIC"):
     add("ATR:WILDER:14",14,atr_wilder(highs,lows,prices,14),meta[2])
     for period in (1,5,20,60,120):
         add("PRICE_RETURN:"+str(period),period,[None if len(prices)<=period else prices[-1]/prices[-1-period]-1],"FRACTION")
+    m=macd(prices)
+    for k,series in m.items():add("MACD:12:26:9:"+k,26,series,meta[2])
+    bands=bollinger(prices)
+    for k,series in bands.items():add("BOLLINGER:20:2:"+k,20,series,"FRACTION" if k=="width" else meta[2])
+    volumes=[b["volume"] for b in bars]
+    add("VOLUME_RATIO:20",20,volume_ratio(volumes),"RATIO")
+    add("CMF:20",20,cmf(highs,lows,prices,volumes),"FRACTION")
+    # Distinguish insufficient observations from a zero-volume denominator.
+    for key,n in (("VOLUME_RATIO:20",21),("CMF:20",20)):
+        if len(bars)>=n and measures[key]["value"] is None:
+            measures[key]["state"]="UNDEFINED_ZERO_VOLUME"
     plan_hash=digest(plan)
     snapshot={"dataset_id":dataset_id,"asset_id":meta[0],"provider":meta[1],"currency":meta[2],"basis":meta[3],
         "as_of":now.isoformat(),"plan_sha256":plan_hash,"bars":bars}

@@ -1,0 +1,2 @@
+# Extended indicators v0.2 — 2026-11-28
+Research-only. Existing functions unchanged; adds aligned SMA-seeded MACD, population Bollinger bands, current/prior-window volume ratio, CMF with flat-range zero and zero-volume undefined. Bridge v2 preserves prior features and labels undefined volume separately from warmup. Synthetic only, no signal, no production FeatureProvider change. Multi-timeframe aggregation deferred until a verified complete exchange calendar and final partial-period exclusion are available. No real data, trade, schedule or Railway changes.
