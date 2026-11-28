@@ -1,0 +1,21 @@
+name: Valuation method gate verification
+on:
+  pull_request:
+    branches: [verification/valuation-sensitivity-20261128]
+permissions:
+  contents: read
+jobs:
+  synthetic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Offline valuation regression and context checks
+        run: |
+          export PYTHONPATH="$PWD"
+          python -m unittest discover -s tests/capabilities -p 'test_valuation*.py' -v
+          python verification/valuation/test_dcf_diagnostics.py -v
+          python verification/valuation/test_method_gate.py -v
